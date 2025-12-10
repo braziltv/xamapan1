@@ -117,6 +117,13 @@ const Index = () => {
           </main>
         </TabsContent>
       </Tabs>
+
+      {/* Footer */}
+      <footer className="bg-card border-t border-border py-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Solução criada e cedida gratuitamente por Kalebe Gomes.
+        </p>
+      </footer>
     </div>
   );
 };
