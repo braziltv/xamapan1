@@ -8,12 +8,12 @@ export function useCallPanel() {
   const [history, setHistory] = useState<CallHistory[]>([]);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
-  const speakName = useCallback((name: string, caller: 'triage' | 'doctor') => {
+  const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
     if (!isAudioEnabled) return;
     
-    const location = caller === 'triage' ? 'Triagem' : 'Consultório Médico';
+    const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const utterance = new SpeechSynthesisUtterance(
-      `${name}. Por favor, dirija-se à ${location}.`
+      `${name}. Por favor, dirija-se ao ${location}.`
     );
     utterance.lang = 'pt-BR';
     utterance.rate = 0.85;
@@ -61,7 +61,7 @@ export function useCallPanel() {
     });
   }, [speakName]);
 
-  const callPatientToDoctor = useCallback((patientId: string) => {
+  const callPatientToDoctor = useCallback((patientId: string, destination?: string) => {
     setPatients(prev => {
       const patient = prev.find(p => p.id === patientId);
       if (!patient) return prev;
@@ -82,7 +82,7 @@ export function useCallPanel() {
         calledBy: 'doctor' as const,
       }, ...prevHistory].slice(0, 20));
 
-      speakName(updatedPatient.name, 'doctor');
+      speakName(updatedPatient.name, 'doctor', destination);
 
       return prev.map(p => p.id === patientId ? updatedPatient : p);
     });
@@ -112,9 +112,9 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, speakName]);
 
-  const recallDoctor = useCallback(() => {
+  const recallDoctor = useCallback((destination?: string) => {
     if (currentDoctorCall) {
-      speakName(currentDoctorCall.name, 'doctor');
+      speakName(currentDoctorCall.name, 'doctor', destination);
     }
   }, [currentDoctorCall, speakName]);
 
