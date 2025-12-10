@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,28 +61,42 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        health: {
+          blue: "hsl(var(--health-blue))",
+          "blue-dark": "hsl(var(--health-blue-dark))",
+          green: "hsl(var(--health-green))",
+          "green-light": "hsl(var(--health-green-light))",
+          amber: "hsl(var(--health-amber))",
+          "amber-light": "hsl(var(--health-amber-light))",
+          red: "hsl(var(--health-red))",
+        },
+        panel: {
+          bg: "hsl(var(--panel-bg))",
+          card: "hsl(var(--panel-card))",
+          highlight: "hsl(var(--panel-highlight))",
+          success: "hsl(var(--panel-success))",
+          waiting: "hsl(var(--panel-waiting))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'health': 'var(--shadow-md)',
+        'health-lg': 'var(--shadow-lg)',
+        'health-xl': 'var(--shadow-xl)',
+        'glow': 'var(--shadow-glow)',
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
