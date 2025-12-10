@@ -30,10 +30,10 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio }: PanelHeaderProps)
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">
-                Pronto Atendimento Pedro José de Menezes
+                Software de Chamada De Pacientes
               </h1>
               <p className="text-xs text-muted-foreground">
-                Painel de Chamadas
+                Pronto Atendimento Pedro José de Menezes
               </p>
             </div>
           </div>
