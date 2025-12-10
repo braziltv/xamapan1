@@ -16,8 +16,23 @@ export function useCallPanel() {
       `${name}. Por favor, dirija-se ao ${location}.`
     );
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
+    utterance.rate = 0.9;
+    utterance.pitch = 0.85;
+    
+    // Busca uma voz masculina em português
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(voice => 
+      voice.lang.includes('pt') && 
+      (voice.name.toLowerCase().includes('male') || 
+       voice.name.toLowerCase().includes('daniel') ||
+       voice.name.toLowerCase().includes('luciano') ||
+       voice.name.toLowerCase().includes('ricardo') ||
+       voice.name.includes('Google português do Brasil'))
+    ) || voices.find(voice => voice.lang.includes('pt'));
+    
+    if (maleVoice) {
+      utterance.voice = maleVoice;
+    }
     
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
