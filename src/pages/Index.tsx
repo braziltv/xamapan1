@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
@@ -5,10 +6,17 @@ import { TriagePanel } from '@/components/TriagePanel';
 import { DoctorPanel } from '@/components/DoctorPanel';
 import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
+import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3 } from 'lucide-react';
 
 const Index = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    setIsLoggedIn(loggedIn);
+  }, []);
   const {
     patients,
     waitingForTriage,
@@ -27,6 +35,10 @@ const Index = () => {
     recallTriage,
     recallDoctor,
   } = useCallPanel();
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
