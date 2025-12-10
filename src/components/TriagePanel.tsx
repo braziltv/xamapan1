@@ -21,6 +21,7 @@ interface TriagePanelProps {
 }
 
 const SALAS = [
+  { id: 'triagem', name: 'Triagem' },
   { id: 'eletro', name: 'Sala de Eletrocardiograma' },
   { id: 'curativo', name: 'Sala de Curativos' },
   { id: 'raiox', name: 'Sala do Raio X' },
