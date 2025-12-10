@@ -12,10 +12,13 @@ import { Monitor, UserPlus, Activity, Stethoscope, BarChart3 } from 'lucide-reac
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [unitName, setUnitName] = useState("");
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const storedUnitName = localStorage.getItem("selectedUnitName") || "";
     setIsLoggedIn(loggedIn);
+    setUnitName(storedUnitName);
   }, []);
   const {
     patients,
@@ -38,11 +41,19 @@ const Index = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("selectedUnitId");
+    localStorage.removeItem("selectedUnitName");
     setIsLoggedIn(false);
+    setUnitName("");
+  };
+
+  const handleLogin = (unitId: string, unitNameParam: string) => {
+    setIsLoggedIn(true);
+    setUnitName(unitNameParam);
   };
 
   if (!isLoggedIn) {
-    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
   return (
@@ -52,6 +63,7 @@ const Index = () => {
           isAudioEnabled={isAudioEnabled}
           onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
           onLogout={handleLogout}
+          unitName={unitName}
         />
 
         {/* Tab Navigation */}

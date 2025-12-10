@@ -8,9 +8,10 @@ interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
   onLogout: () => void;
+  unitName: string;
 }
 
-export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout }: PanelHeaderProps) {
+export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout }: PanelHe
                 Software de Chamada De Pacientes
               </h1>
               <p className="text-xs text-muted-foreground">
-                Pronto Atendimento Pedro José de Menezes
+                {unitName}
               </p>
             </div>
           </div>
