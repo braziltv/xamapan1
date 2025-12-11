@@ -37,6 +37,7 @@ const Index = () => {
     finishConsultation,
     recallTriage,
     recallDoctor,
+    directPatient,
   } = useCallPanel();
 
   const handleLogout = () => {
@@ -123,6 +124,7 @@ const Index = () => {
               onCallPatient={callPatientToTriage}
               onFinishTriage={finishTriage}
               onRecall={recallTriage}
+              onDirectPatient={directPatient}
             />
           </main>
         </TabsContent>

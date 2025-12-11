@@ -10,7 +10,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useCallback } from 'react';
 
 interface TriagePanelProps {
   waitingPatients: Patient[];
@@ -18,6 +17,7 @@ interface TriagePanelProps {
   onCallPatient: (id: string) => void;
   onFinishTriage: (id: string) => void;
   onRecall: () => void;
+  onDirectPatient: (patientName: string, destination: string) => void;
 }
 
 const SALAS = [
@@ -38,19 +38,9 @@ export function TriagePanel({
   currentCall, 
   onCallPatient, 
   onFinishTriage,
-  onRecall 
+  onRecall,
+  onDirectPatient
 }: TriagePanelProps) {
-  const speakDirection = useCallback((patientName: string, location: string) => {
-    const utterance = new SpeechSynthesisUtterance(
-      `${patientName}. Por favor, dirija-se à ${location}.`
-    );
-    utterance.lang = 'pt-BR';
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-    
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -91,7 +81,7 @@ export function TriagePanel({
                     {SALAS.map((sala) => (
                       <DropdownMenuItem
                         key={sala.id}
-                        onClick={() => speakDirection(currentCall.name, sala.name)}
+                        onClick={() => onDirectPatient(currentCall.name, sala.name)}
                         className="cursor-pointer"
                       >
                         {sala.name}
@@ -114,7 +104,7 @@ export function TriagePanel({
                     {CONSULTORIOS.map((cons) => (
                       <DropdownMenuItem
                         key={cons.id}
-                        onClick={() => speakDirection(currentCall.name, cons.name)}
+                        onClick={() => onDirectPatient(currentCall.name, cons.name)}
                         className="cursor-pointer"
                       >
                         {cons.name}
@@ -181,7 +171,7 @@ export function TriagePanel({
                       {SALAS.map((sala) => (
                         <DropdownMenuItem
                           key={sala.id}
-                          onClick={() => speakDirection(patient.name, sala.name)}
+                          onClick={() => onDirectPatient(patient.name, sala.name)}
                           className="cursor-pointer"
                         >
                           {sala.name}
@@ -204,7 +194,7 @@ export function TriagePanel({
                       {CONSULTORIOS.map((cons) => (
                         <DropdownMenuItem
                           key={cons.id}
-                          onClick={() => speakDirection(patient.name, cons.name)}
+                          onClick={() => onDirectPatient(patient.name, cons.name)}
                           className="cursor-pointer"
                         >
                           {cons.name}

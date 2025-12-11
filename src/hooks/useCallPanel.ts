@@ -93,23 +93,14 @@ export function useCallPanel() {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
   }, [history]);
 
+  // Audio is ONLY played on the PublicDisplay (TV screen)
+  // This function is kept for compatibility but doesn't play audio locally
   const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    if (!isAudioEnabled) return;
-    
-    const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const utterance = new SpeechSynthesisUtterance(
-      `${name}. Por favor, dirija-se ao ${location}.`
-    );
-    utterance.lang = 'pt-BR';
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-    
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }, [isAudioEnabled]);
+    // Audio removed from here - only the PublicDisplay plays audio
+  }, []);
 
-  const triggerCallEvent = useCallback((patient: Patient, caller: 'triage' | 'doctor', destination?: string) => {
-    // Save call event to trigger audio on other tabs/devices
+  const triggerCallEvent = useCallback((patient: Patient | { name: string }, caller: 'triage' | 'doctor', destination?: string) => {
+    // Save call event to trigger audio on the TV/PublicDisplay ONLY
     const callEvent = {
       patient,
       caller,
@@ -118,6 +109,11 @@ export function useCallPanel() {
     };
     localStorage.setItem(STORAGE_KEYS.LAST_CALL_TIMESTAMP, JSON.stringify(callEvent));
   }, []);
+
+  const directPatient = useCallback((patientName: string, destination: string) => {
+    // Trigger audio event for the TV to play
+    triggerCallEvent({ name: patientName }, 'triage', destination);
+  }, [triggerCallEvent]);
 
   const addPatient = useCallback((name: string) => {
     const newPatient: Patient = {
@@ -245,5 +241,6 @@ export function useCallPanel() {
     finishConsultation,
     recallTriage,
     recallDoctor,
+    directPatient,
   };
 }
