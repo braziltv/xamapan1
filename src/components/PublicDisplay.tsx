@@ -234,149 +234,133 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-950 via-fuchsia-900 to-rose-900 p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-yellow-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between mb-8">
-        <div className="flex items-center gap-6">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-fuchsia-500/50 animate-pulse">
-            <Volume2 className="w-12 h-12 text-white drop-shadow-lg" />
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 mb-4 md:mb-6">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+            <Volume2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <div>
-            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-yellow-300 drop-shadow-lg">
-              PAINEL DE CHAMADAS
+          <div className="text-center md:text-left">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-white">
+              Painel de Chamadas
             </h1>
-            <p className="text-white/80 text-2xl font-medium mt-1">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-400 text-sm md:text-lg lg:text-xl">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="text-right bg-white/10 backdrop-blur-xl rounded-3xl px-8 py-4 border border-white/20 shadow-xl">
-          <p className="text-7xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-fuchsia-300">
+        <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-4 py-2 md:px-6 md:py-3 border border-slate-700">
+          <p className="text-3xl md:text-5xl lg:text-6xl font-mono font-bold text-white">
             {format(currentTime, 'HH:mm')}
           </p>
-          <p className="text-white/70 text-xl font-medium">
+          <p className="text-slate-400 text-sm md:text-lg">
             {format(currentTime, "dd 'de' MMMM", { locale: ptBR })}
           </p>
         </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-3 gap-8 h-[calc(100vh-220px)]">
+      {/* Main Content - Responsive Grid */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-auto lg:h-[calc(100vh-180px)]">
         {/* Current Calls - Main Area */}
-        <div className="col-span-2 grid grid-rows-2 gap-8">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4 md:gap-6">
           {/* Triage Call */}
-          <div className="rounded-[2rem] overflow-hidden backdrop-blur-xl bg-gradient-to-br from-cyan-500/30 to-blue-600/30 border-2 border-cyan-400/50 shadow-2xl shadow-cyan-500/30">
-            <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 p-6">
-              <p className="text-white text-3xl font-black flex items-center gap-4 drop-shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Activity className="w-8 h-8" />
-                </div>
-                🏥 TRIAGEM
+          <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 overflow-hidden backdrop-blur-sm">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-3 md:p-4 lg:p-5">
+              <p className="text-white text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2 md:gap-3">
+                <Activity className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8" />
+                TRIAGEM
               </p>
             </div>
-            <div className="p-10 flex items-center justify-center h-[calc(100%-96px)]">
+            <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[120px] md:min-h-[150px] lg:min-h-[200px]">
               {currentTriageCall ? (
-                <div className="text-center">
-                  <h2 className="text-8xl font-black text-white tracking-wide drop-shadow-2xl animate-pulse">
+                <div className="text-center animate-pulse">
+                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white tracking-wide">
                     {currentTriageCall.name}
                   </h2>
-                  <div className="mt-6 inline-block bg-gradient-to-r from-cyan-400 to-blue-500 px-8 py-3 rounded-full">
-                    <p className="text-2xl text-white font-bold">
-                      👉 Dirija-se à {currentTriageCall.destination || 'Triagem'}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-4xl text-white/50 font-medium">
-                    ⏳ Aguardando próxima chamada...
+                  <p className="text-lg md:text-2xl lg:text-3xl text-blue-400 mt-2 md:mt-4 font-medium">
+                    Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
+              ) : (
+                <p className="text-lg md:text-2xl lg:text-3xl text-slate-500">
+                  Aguardando próxima chamada...
+                </p>
               )}
             </div>
           </div>
 
           {/* Doctor Call */}
-          <div className="rounded-[2rem] overflow-hidden backdrop-blur-xl bg-gradient-to-br from-emerald-500/30 to-teal-600/30 border-2 border-emerald-400/50 shadow-2xl shadow-emerald-500/30">
-            <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 p-6">
-              <p className="text-white text-3xl font-black flex items-center gap-4 drop-shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Stethoscope className="w-8 h-8" />
-                </div>
-                👨‍⚕️ CONSULTÓRIO MÉDICO
+          <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 overflow-hidden backdrop-blur-sm">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 p-3 md:p-4 lg:p-5">
+              <p className="text-white text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2 md:gap-3">
+                <Stethoscope className="w-5 h-5 md:w-6 md:h-6 lg:w-8 lg:h-8" />
+                CONSULTÓRIO MÉDICO
               </p>
             </div>
-            <div className="p-10 flex items-center justify-center h-[calc(100%-96px)]">
+            <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[120px] md:min-h-[150px] lg:min-h-[200px]">
               {currentDoctorCall ? (
-                <div className="text-center">
-                  <h2 className="text-8xl font-black text-white tracking-wide drop-shadow-2xl animate-pulse">
+                <div className="text-center animate-pulse">
+                  <h2 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white tracking-wide">
                     {currentDoctorCall.name}
                   </h2>
-                  <div className="mt-6 inline-block bg-gradient-to-r from-emerald-400 to-teal-500 px-8 py-3 rounded-full">
-                    <p className="text-2xl text-white font-bold">
-                      👉 Dirija-se ao {currentDoctorCall.destination || 'Consultório'}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-4xl text-white/50 font-medium">
-                    ⏳ Aguardando próxima chamada...
+                  <p className="text-lg md:text-2xl lg:text-3xl text-emerald-400 mt-2 md:mt-4 font-medium">
+                    Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
+              ) : (
+                <p className="text-lg md:text-2xl lg:text-3xl text-slate-500">
+                  Aguardando próxima chamada...
+                </p>
               )}
             </div>
           </div>
         </div>
 
         {/* History Panel */}
-        <div className="rounded-[2rem] backdrop-blur-xl bg-gradient-to-br from-fuchsia-500/20 to-purple-600/20 border-2 border-fuchsia-400/40 p-6 overflow-hidden shadow-2xl shadow-fuchsia-500/20">
-          <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center">
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            📋 Últimas Chamadas
+        <div className="bg-slate-800/50 rounded-2xl md:rounded-3xl border border-slate-700 p-4 md:p-6 overflow-hidden backdrop-blur-sm">
+          <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
+            <Clock className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-primary" />
+            Últimas Chamadas
           </h3>
-          <div className="space-y-4 overflow-y-auto h-[calc(100%-80px)] pr-2">
+          <div className="space-y-3 md:space-y-4 overflow-y-auto max-h-[300px] lg:max-h-[calc(100%-80px)]">
             {historyItems.length === 0 ? (
-              <p className="text-white/40 text-center py-8 text-xl">
+              <p className="text-slate-500 text-center py-6 md:py-8 text-base md:text-xl">
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-4 rounded-2xl backdrop-blur-sm transition-all duration-300 ${
+                  className={`p-3 md:p-4 lg:p-5 rounded-xl md:rounded-2xl ${
                     index === 0 
-                      ? 'bg-gradient-to-r from-yellow-500/40 to-orange-500/40 border-2 border-yellow-400/60 shadow-lg shadow-yellow-500/30 scale-105' 
-                      : 'bg-white/10 border border-white/20 hover:bg-white/20'
-                  }`}
+                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
+                      : 'bg-slate-700/50'
+                  } transition-all`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
-                      item.type === 'triage' 
-                        ? 'bg-gradient-to-br from-cyan-400 to-blue-600' 
-                        : 'bg-gradient-to-br from-emerald-400 to-teal-600'
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-6 h-6 text-white" />
+                        <Activity className="w-4 h-4 md:w-6 md:h-6 text-white" />
                       ) : (
-                        <Stethoscope className="w-6 h-6 text-white" />
+                        <Stethoscope className="w-4 h-4 md:w-6 md:h-6 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white text-lg truncate">
+                      <p className="font-semibold text-white text-base md:text-lg lg:text-xl truncate">
                         {item.name}
                       </p>
-                      <p className="text-sm text-white/60">
-                        {item.type === 'triage' ? '🏥 Triagem' : '👨‍⚕️ Médico'}
+                      <p className="text-sm md:text-base lg:text-lg text-slate-400">
+                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-lg text-white/80 font-mono font-bold bg-white/10 px-3 py-1 rounded-lg">
+                    <span className="text-sm md:text-base lg:text-lg text-slate-400 font-mono shrink-0">
                       {format(item.time, 'HH:mm')}
                     </span>
                   </div>
