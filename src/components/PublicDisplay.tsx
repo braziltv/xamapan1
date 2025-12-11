@@ -2,7 +2,14 @@ import { Patient, CallHistory as CallHistoryType } from '@/types/patient';
 import { Volume2, Clock, Stethoscope, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+
+const STORAGE_KEYS = {
+  CURRENT_TRIAGE: 'callPanel_currentTriage',
+  CURRENT_DOCTOR: 'callPanel_currentDoctor',
+  HISTORY: 'callPanel_history',
+  LAST_CALL_TIMESTAMP: 'callPanel_lastCallTimestamp',
+};
 
 interface PublicDisplayProps {
   currentTriageCall: Patient | null;
@@ -10,13 +17,112 @@ interface PublicDisplayProps {
   history: CallHistoryType[];
 }
 
-export function PublicDisplay({ currentTriageCall, currentDoctorCall, history }: PublicDisplayProps) {
+export function PublicDisplay({ currentTriageCall: propTriageCall, currentDoctorCall: propDoctorCall, history: propHistory }: PublicDisplayProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTriageCall, setCurrentTriageCall] = useState<Patient | null>(propTriageCall);
+  const [currentDoctorCall, setCurrentDoctorCall] = useState<Patient | null>(propDoctorCall);
+  const [history, setHistory] = useState<CallHistoryType[]>(propHistory);
+  const lastProcessedTimestamp = useRef<number>(0);
+
+  const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
+    const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
+    const utterance = new SpeechSynthesisUtterance(
+      `${name}. Por favor, dirija-se ao ${location}.`
+    );
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+    
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const loadFromStorage = useCallback(() => {
+    // Load current calls
+    const triageData = localStorage.getItem(STORAGE_KEYS.CURRENT_TRIAGE);
+    if (triageData) {
+      try {
+        const parsed = JSON.parse(triageData);
+        if (parsed) {
+          setCurrentTriageCall({
+            ...parsed,
+            createdAt: new Date(parsed.createdAt),
+            calledAt: parsed.calledAt ? new Date(parsed.calledAt) : undefined,
+          });
+        } else {
+          setCurrentTriageCall(null);
+        }
+      } catch { /* ignore */ }
+    }
+
+    const doctorData = localStorage.getItem(STORAGE_KEYS.CURRENT_DOCTOR);
+    if (doctorData) {
+      try {
+        const parsed = JSON.parse(doctorData);
+        if (parsed) {
+          setCurrentDoctorCall({
+            ...parsed,
+            createdAt: new Date(parsed.createdAt),
+            calledAt: parsed.calledAt ? new Date(parsed.calledAt) : undefined,
+          });
+        } else {
+          setCurrentDoctorCall(null);
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Load history
+    const historyData = localStorage.getItem(STORAGE_KEYS.HISTORY);
+    if (historyData) {
+      try {
+        const parsed = JSON.parse(historyData);
+        setHistory(parsed.map((h: any) => ({
+          ...h,
+          calledAt: new Date(h.calledAt),
+          patient: {
+            ...h.patient,
+            createdAt: new Date(h.patient.createdAt),
+            calledAt: h.patient.calledAt ? new Date(h.patient.calledAt) : undefined,
+          },
+        })));
+      } catch { /* ignore */ }
+    }
+
+    // Check for new call events to trigger audio
+    const callEventData = localStorage.getItem(STORAGE_KEYS.LAST_CALL_TIMESTAMP);
+    if (callEventData) {
+      try {
+        const callEvent = JSON.parse(callEventData);
+        if (callEvent.timestamp > lastProcessedTimestamp.current) {
+          lastProcessedTimestamp.current = callEvent.timestamp;
+          speakName(callEvent.patient.name, callEvent.caller, callEvent.destination);
+        }
+      } catch { /* ignore */ }
+    }
+  }, [speakName]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Poll localStorage for updates (for cross-device sync)
+  useEffect(() => {
+    loadFromStorage();
+    const pollInterval = setInterval(loadFromStorage, 1000);
+    return () => clearInterval(pollInterval);
+  }, [loadFromStorage]);
+
+  // Listen for storage events (for same-device cross-tab sync)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && Object.values(STORAGE_KEYS).includes(e.key)) {
+        loadFromStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadFromStorage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
