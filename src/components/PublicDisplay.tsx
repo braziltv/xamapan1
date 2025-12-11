@@ -432,6 +432,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
       )}
+
+      {/* Credits */}
+      <div className="relative z-10 mt-4 text-center">
+        <p className="text-slate-400 text-sm md:text-base">
+          Solução criada e cedida gratuitamente por Kalebe Gomes.
+        </p>
+      </div>
     </div>
   );
 }
