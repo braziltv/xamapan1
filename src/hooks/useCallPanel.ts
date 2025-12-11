@@ -15,6 +15,12 @@ export function useCallPanel() {
     return localStorage.getItem('selectedUnitName') || '';
   });
 
+  // Re-check localStorage on every render to catch updates
+  const currentUnitName = localStorage.getItem('selectedUnitName') || '';
+  if (currentUnitName && currentUnitName !== unitName) {
+    setUnitName(currentUnitName);
+  }
+
   const { createCall, completeCall } = useSupabaseSync(unitName);
 
   const [patients, setPatients] = useState<Patient[]>(() => {
