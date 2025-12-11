@@ -17,7 +17,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
-  const unitName = localStorage.getItem('selectedUnitName') || '';
+  const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+
+  // Re-check localStorage periodically for unit name
+  useEffect(() => {
+    const checkUnitName = () => {
+      const current = localStorage.getItem('selectedUnitName') || '';
+      if (current !== unitName) {
+        setUnitName(current);
+      }
+    };
+    const interval = setInterval(checkUnitName, 1000);
+    return () => clearInterval(interval);
+  }, [unitName]);
 
   const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
@@ -34,36 +46,45 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Load initial data from Supabase
   useEffect(() => {
-    if (!unitName) return;
-
     const loadData = async () => {
-      // Fetch active calls
-      const { data: calls } = await supabase
+      // Fetch active calls - filter by unit if set, otherwise get all
+      let callsQuery = supabase
         .from('patient_calls')
         .select('*')
-        .eq('unit_name', unitName)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
+
+      if (unitName) {
+        callsQuery = callsQuery.eq('unit_name', unitName);
+      } else {
+        // If no unit selected, get calls with non-empty unit_name
+        callsQuery = callsQuery.neq('unit_name', '');
+      }
+
+      const { data: calls } = await callsQuery;
 
       if (calls) {
         const triage = calls.find(c => c.call_type === 'triage');
         const doctor = calls.find(c => c.call_type === 'doctor');
         
-        if (triage) {
-          setCurrentTriageCall({ name: triage.patient_name, destination: triage.destination || undefined });
-        }
-        if (doctor) {
-          setCurrentDoctorCall({ name: doctor.patient_name, destination: doctor.destination || undefined });
-        }
+        setCurrentTriageCall(triage ? { name: triage.patient_name, destination: triage.destination || undefined } : null);
+        setCurrentDoctorCall(doctor ? { name: doctor.patient_name, destination: doctor.destination || undefined } : null);
       }
 
-      // Fetch history
-      const { data: history } = await supabase
+      // Fetch history - same filtering logic
+      let historyQuery = supabase
         .from('call_history')
         .select('*')
-        .eq('unit_name', unitName)
         .order('created_at', { ascending: false })
         .limit(20);
+
+      if (unitName) {
+        historyQuery = historyQuery.eq('unit_name', unitName);
+      } else {
+        historyQuery = historyQuery.neq('unit_name', '');
+      }
+
+      const { data: history } = await historyQuery;
 
       if (history) {
         setHistoryItems(history.map(h => ({
@@ -80,8 +101,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Subscribe to realtime updates
   useEffect(() => {
-    if (!unitName) return;
-
     const channel = supabase
       .channel('public-display-calls')
       .on(
@@ -94,7 +113,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         (payload) => {
           const call = payload.new as any;
           
-          if (call.unit_name !== unitName) return;
+          // Skip empty unit_name calls
+          if (!call.unit_name) return;
+          // If we have a unit filter, only accept matching calls
+          if (unitName && call.unit_name !== unitName) return;
           if (processedCallsRef.current.has(call.id)) return;
           processedCallsRef.current.add(call.id);
 
@@ -120,7 +142,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         (payload) => {
           const call = payload.new as any;
           
-          if (call.unit_name !== unitName) return;
+          if (!call.unit_name) return;
+          if (unitName && call.unit_name !== unitName) return;
 
           if (call.status === 'completed') {
             if (call.call_type === 'triage') {
@@ -141,7 +164,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         (payload) => {
           const historyItem = payload.new as any;
           
-          if (historyItem.unit_name !== unitName) return;
+          if (!historyItem.unit_name) return;
+          if (unitName && historyItem.unit_name !== unitName) return;
 
           setHistoryItems(prev => [{
             id: historyItem.id,
