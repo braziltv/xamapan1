@@ -31,7 +31,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [unitName]);
 
-  const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
+  // Play notification sound effect
+  const playNotificationSound = useCallback(() => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create a pleasant chime sound
+    const playTone = (frequency: number, startTime: number, duration: number) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+      gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + startTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
+      
+      oscillator.start(audioContext.currentTime + startTime);
+      oscillator.stop(audioContext.currentTime + startTime + duration);
+    };
+    
+    // Play a three-tone chime (ascending)
+    playTone(523.25, 0, 0.3);      // C5
+    playTone(659.25, 0.15, 0.3);   // E5
+    playTone(783.99, 0.3, 0.4);    // G5
+    
+    // Return promise that resolves after the chime
+    return new Promise<void>(resolve => setTimeout(resolve, 800));
+  }, []);
+
+  const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
+    // Play notification sound first
+    await playNotificationSound();
+    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const utterance = new SpeechSynthesisUtterance(
       `${name}. Por favor, dirija-se ao ${location}.`
@@ -52,7 +87,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [playNotificationSound]);
 
   // Load initial data from Supabase
   useEffect(() => {
