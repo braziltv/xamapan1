@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
+import { useSupabaseSync } from './useSupabaseSync';
 
 const STORAGE_KEYS = {
   PATIENTS: 'callPanel_patients',
@@ -10,6 +11,12 @@ const STORAGE_KEYS = {
 };
 
 export function useCallPanel() {
+  const [unitName, setUnitName] = useState(() => {
+    return localStorage.getItem('unitName') || '';
+  });
+
+  const { createCall, completeCall } = useSupabaseSync(unitName);
+
   const [patients, setPatients] = useState<Patient[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PATIENTS);
     if (saved) {
@@ -76,6 +83,22 @@ export function useCallPanel() {
 
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
+  // Listen for unit name changes
+  useEffect(() => {
+    const handleStorage = () => {
+      const newUnitName = localStorage.getItem('unitName') || '';
+      if (newUnitName !== unitName) {
+        setUnitName(newUnitName);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 1000);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, [unitName]);
+
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
@@ -93,14 +116,7 @@ export function useCallPanel() {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
   }, [history]);
 
-  // Audio is ONLY played on the PublicDisplay (TV screen)
-  // This function is kept for compatibility but doesn't play audio locally
-  const speakName = useCallback((name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    // Audio removed from here - only the PublicDisplay plays audio
-  }, []);
-
   const triggerCallEvent = useCallback((patient: Patient | { name: string }, caller: 'triage' | 'doctor', destination?: string) => {
-    // Save call event to trigger audio on the TV/PublicDisplay ONLY
     const callEvent = {
       patient,
       caller,
@@ -111,9 +127,9 @@ export function useCallPanel() {
   }, []);
 
   const directPatient = useCallback((patientName: string, destination: string) => {
-    // Trigger audio event for the TV to play
+    createCall(patientName, 'triage', destination);
     triggerCallEvent({ name: patientName }, 'triage', destination);
-  }, [triggerCallEvent]);
+  }, [createCall, triggerCallEvent]);
 
   const addPatient = useCallback((name: string) => {
     const newPatient: Patient = {
@@ -147,12 +163,13 @@ export function useCallPanel() {
         calledBy: 'triage' as const,
       }, ...prevHistory].slice(0, 20));
 
-      speakName(updatedPatient.name, 'triage');
+      // Sync to Supabase
+      createCall(updatedPatient.name, 'triage');
       triggerCallEvent(updatedPatient, 'triage');
 
       return prev.map(p => p.id === patientId ? updatedPatient : p);
     });
-  }, [speakName, triggerCallEvent]);
+  }, [createCall, triggerCallEvent]);
 
   const callPatientToDoctor = useCallback((patientId: string, destination?: string) => {
     setPatients(prev => {
@@ -175,12 +192,13 @@ export function useCallPanel() {
         calledBy: 'doctor' as const,
       }, ...prevHistory].slice(0, 20));
 
-      speakName(updatedPatient.name, 'doctor', destination);
+      // Sync to Supabase
+      createCall(updatedPatient.name, 'doctor', destination);
       triggerCallEvent(updatedPatient, 'doctor', destination);
 
       return prev.map(p => p.id === patientId ? updatedPatient : p);
     });
-  }, [speakName, triggerCallEvent]);
+  }, [createCall, triggerCallEvent]);
 
   const finishTriage = useCallback((patientId: string) => {
     setPatients(prev => prev.map(p => 
@@ -188,8 +206,9 @@ export function useCallPanel() {
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
+      completeCall('triage');
     }
-  }, [currentTriageCall]);
+  }, [currentTriageCall, completeCall]);
 
   const finishConsultation = useCallback((patientId: string) => {
     setPatients(prev => prev.map(p => 
@@ -197,22 +216,23 @@ export function useCallPanel() {
     ));
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
+      completeCall('doctor');
     }
-  }, [currentDoctorCall]);
+  }, [currentDoctorCall, completeCall]);
 
   const recallTriage = useCallback(() => {
     if (currentTriageCall) {
-      speakName(currentTriageCall.name, 'triage');
+      createCall(currentTriageCall.name, 'triage');
       triggerCallEvent(currentTriageCall, 'triage');
     }
-  }, [currentTriageCall, speakName, triggerCallEvent]);
+  }, [currentTriageCall, createCall, triggerCallEvent]);
 
   const recallDoctor = useCallback((destination?: string) => {
     if (currentDoctorCall) {
-      speakName(currentDoctorCall.name, 'doctor', destination);
+      createCall(currentDoctorCall.name, 'doctor', destination);
       triggerCallEvent(currentDoctorCall, 'doctor', destination);
     }
-  }, [currentDoctorCall, speakName, triggerCallEvent]);
+  }, [currentDoctorCall, createCall, triggerCallEvent]);
 
   const removePatient = useCallback((patientId: string) => {
     setPatients(prev => prev.filter(p => p.id !== patientId));

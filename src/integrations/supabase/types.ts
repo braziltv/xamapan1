@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      call_history: {
+        Row: {
+          call_type: string
+          created_at: string
+          destination: string | null
+          id: string
+          patient_name: string
+          unit_name: string
+        }
+        Insert: {
+          call_type: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          patient_name: string
+          unit_name: string
+        }
+        Update: {
+          call_type?: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          patient_name?: string
+          unit_name?: string
+        }
+        Relationships: []
+      }
+      patient_calls: {
+        Row: {
+          call_type: string
+          completed_at: string | null
+          created_at: string
+          destination: string | null
+          id: string
+          patient_name: string
+          status: string
+          unit_name: string
+        }
+        Insert: {
+          call_type: string
+          completed_at?: string | null
+          created_at?: string
+          destination?: string | null
+          id?: string
+          patient_name: string
+          status?: string
+          unit_name: string
+        }
+        Update: {
+          call_type?: string
+          completed_at?: string | null
+          created_at?: string
+          destination?: string | null
+          id?: string
+          patient_name?: string
+          status?: string
+          unit_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
