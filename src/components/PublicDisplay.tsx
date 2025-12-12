@@ -136,8 +136,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
 
     fetchNews();
-    // Update every 30 minutes
-    const interval = setInterval(fetchNews, 30 * 60 * 1000);
+    // Update every 1 hour
+    const interval = setInterval(fetchNews, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
