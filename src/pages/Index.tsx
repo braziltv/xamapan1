@@ -50,7 +50,6 @@ const Index = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [activeTab]);
-
   const {
     patients,
     waitingForTriage,
@@ -105,8 +104,8 @@ const Index = () => {
   }
 
   return (
-    <div ref={mainContainerRef} className="min-h-screen bg-background gradient-mesh">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen flex flex-col">
+    <div ref={mainContainerRef} className="min-h-screen bg-background">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen">
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
           onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
@@ -115,50 +114,35 @@ const Index = () => {
         />
 
         {/* Tab Navigation */}
-        <div className="bg-card/80 backdrop-blur-xl border-b border-border/50 sticky top-[72px] z-40">
+        <div className="bg-card border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TabsList className="h-14 bg-transparent gap-1 flex-wrap">
-              <TabsTrigger 
-                value="cadastro" 
-                className="gap-2 px-4 h-10 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all hover:bg-muted"
-              >
+            <TabsList className="h-12 bg-transparent flex-wrap">
+              <TabsTrigger value="cadastro" className="gap-2 data-[state=active]:bg-primary/10">
                 <UserPlus className="w-4 h-4" />
-                <span className="font-semibold">Cadastro</span>
+                Cadastro
               </TabsTrigger>
-              <TabsTrigger 
-                value="display" 
-                className="gap-2 px-4 h-10 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all hover:bg-muted"
-              >
+              <TabsTrigger value="display" className="gap-2 data-[state=active]:bg-primary/10">
                 <Monitor className="w-4 h-4" />
-                <span className="font-semibold">Atendimento ao Público</span>
+                Atendimento ao Público
               </TabsTrigger>
-              <TabsTrigger 
-                value="triagem" 
-                className="gap-2 px-4 h-10 rounded-xl data-[state=active]:bg-health-blue data-[state=active]:text-white data-[state=active]:shadow-lg transition-all hover:bg-muted"
-              >
+              <TabsTrigger value="triagem" className="gap-2 data-[state=active]:bg-primary/10">
                 <Activity className="w-4 h-4" />
-                <span className="font-semibold">Triagem</span>
+                Triagem
               </TabsTrigger>
-              <TabsTrigger 
-                value="medico" 
-                className="gap-2 px-4 h-10 rounded-xl data-[state=active]:bg-health-purple data-[state=active]:text-white data-[state=active]:shadow-lg transition-all hover:bg-muted"
-              >
+              <TabsTrigger value="medico" className="gap-2 data-[state=active]:bg-primary/10">
                 <Stethoscope className="w-4 h-4" />
-                <span className="font-semibold">Médico</span>
+                Médico
               </TabsTrigger>
-              <TabsTrigger 
-                value="estatisticas" 
-                className="gap-2 px-4 h-10 rounded-xl data-[state=active]:bg-health-teal data-[state=active]:text-white data-[state=active]:shadow-lg transition-all hover:bg-muted"
-              >
+              <TabsTrigger value="estatisticas" className="gap-2 data-[state=active]:bg-primary/10">
                 <BarChart3 className="w-4 h-4" />
-                <span className="font-semibold">Estatísticas</span>
+                Estatísticas
               </TabsTrigger>
             </TabsList>
           </div>
         </div>
 
         {/* Cadastro */}
-        <TabsContent value="cadastro" className="mt-0 flex-1">
+        <TabsContent value="cadastro" className="mt-0">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <PatientRegistration
               patients={patients}
@@ -173,7 +157,7 @@ const Index = () => {
         </TabsContent>
 
         {/* Triagem */}
-        <TabsContent value="triagem" className="mt-0 flex-1">
+        <TabsContent value="triagem" className="mt-0">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <TriagePanel
               waitingPatients={waitingForTriage}
@@ -189,7 +173,7 @@ const Index = () => {
         </TabsContent>
 
         {/* Médico */}
-        <TabsContent value="medico" className="mt-0 flex-1">
+        <TabsContent value="medico" className="mt-0">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <DoctorPanel
               waitingPatients={waitingForDoctor}
@@ -203,19 +187,19 @@ const Index = () => {
         </TabsContent>
 
         {/* Estatísticas */}
-        <TabsContent value="estatisticas" className="mt-0 flex-1">
+        <TabsContent value="estatisticas" className="mt-0">
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <StatisticsPanel patients={patients} history={history} />
           </main>
         </TabsContent>
-
-        {/* Footer */}
-        <footer className="bg-card/80 backdrop-blur-xl border-t border-border/50 py-4 text-center mt-auto">
-          <p className="text-sm text-muted-foreground">
-            Solução criada por <span className="font-semibold text-primary">Kalebe Gomes</span>
-          </p>
-        </footer>
       </Tabs>
+
+      {/* Footer */}
+      <footer className="bg-card border-t border-border py-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Solução criada por Kalebe Gomes
+        </p>
+      </footer>
     </div>
   );
 };
