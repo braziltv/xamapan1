@@ -127,6 +127,12 @@ export function WeatherWidget() {
           <Droplets className="w-4 h-4 text-cyan-300" />
           <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
         </div>
+
+        {/* Divider */}
+        <div className="w-px h-5 bg-white/20" />
+
+        {/* City */}
+        <span className="text-white/80 text-xs font-medium">Paineiras-MG</span>
       </div>
     </div>
   );
