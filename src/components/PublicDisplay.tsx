@@ -32,36 +32,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       try {
         const allNews: NewsItem[] = [];
         
-        // Fetch G1 Brasil news
-        const brasilResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/dynamo/rss2.xml'));
-        const brasilText = await brasilResponse.text();
-        const brasilParser = new DOMParser();
-        const brasilXml = brasilParser.parseFromString(brasilText, 'text/xml');
-        const brasilItems = brasilXml.querySelectorAll('item');
-        brasilItems.forEach((item, index) => {
-          if (index < 10) {
-            const title = item.querySelector('title')?.textContent || '';
-            const link = item.querySelector('link')?.textContent || '';
-            allNews.push({ title, link, source: 'Brasil' });
-          }
-        });
+        // RSS feeds for Brazil and MG news
+        const feeds = [
+          { url: 'https://g1.globo.com/rss/g1/', source: 'Brasil' },
+          { url: 'https://g1.globo.com/rss/g1/mg/', source: 'MG' },
+        ];
 
-        // Fetch G1 Minas Gerais news
-        try {
-          const mgResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/rss/g1/mg/minas-gerais/'));
-          const mgText = await mgResponse.text();
-          const mgParser = new DOMParser();
-          const mgXml = mgParser.parseFromString(mgText, 'text/xml');
-          const mgItems = mgXml.querySelectorAll('item');
-          mgItems.forEach((item, index) => {
-            if (index < 10) {
-              const title = item.querySelector('title')?.textContent || '';
-              const link = item.querySelector('link')?.textContent || '';
-              allNews.push({ title, link, source: 'MG' });
+        for (const feed of feeds) {
+          try {
+            const response = await fetch(
+              `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`
+            );
+            if (response.ok) {
+              const text = await response.text();
+              const parser = new DOMParser();
+              const xml = parser.parseFromString(text, 'text/xml');
+              const items = xml.querySelectorAll('item');
+              items.forEach((item, index) => {
+                if (index < 8) {
+                  const title = item.querySelector('title')?.textContent || '';
+                  if (title) {
+                    allNews.push({ title, link: '', source: feed.source });
+                  }
+                }
+              });
             }
-          });
-        } catch (mgError) {
-          console.error('Error fetching MG news:', mgError);
+          } catch (feedError) {
+            console.error(`Error fetching ${feed.source} news:`, feedError);
+          }
+        }
+
+        // If no news fetched, add fallback
+        if (allNews.length === 0) {
+          allNews.push({ title: 'Carregando notícias...', link: '', source: 'Info' });
         }
 
         // Shuffle news to mix sources
@@ -73,7 +76,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 5 * 60 * 1000); // Refresh every 5 minutes
+    const interval = setInterval(fetchNews, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
