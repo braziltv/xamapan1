@@ -41,7 +41,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       try {
         const allNews: NewsItem[] = [];
         
-        // Rotate through feeds - fetch from current index and next 2
+        // Rotate through feeds - fetch from current index and next ones
         const feedsToFetch = [
           feeds[currentFeedIndex % feeds.length],
           feeds[(currentFeedIndex + 1) % feeds.length],
@@ -52,40 +52,69 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Move to next feed for next update cycle
         currentFeedIndex = (currentFeedIndex + 1) % feeds.length;
 
+        // Try multiple CORS proxies
+        const corsProxies = [
+          (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+          (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+          (url: string) => `https://cors-anywhere.herokuapp.com/${url}`,
+        ];
+
         for (const feed of feedsToFetch) {
-          try {
-            const response = await fetch(
-              `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`
-            );
-            if (response.ok) {
-              const text = await response.text();
-              const parser = new DOMParser();
-              const xml = parser.parseFromString(text, 'text/xml');
-              const items = xml.querySelectorAll('item');
-              items.forEach((item, index) => {
-                if (index < 6) {
-                  const title = item.querySelector('title')?.textContent || '';
-                  if (title) {
-                    allNews.push({ title, link: '', source: feed.source });
-                  }
-                }
+          let fetched = false;
+          for (const getProxyUrl of corsProxies) {
+            if (fetched) break;
+            try {
+              const response = await fetch(getProxyUrl(feed.url), {
+                headers: {
+                  'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+                },
               });
+              if (response.ok) {
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                if (items.length > 0) {
+                  fetched = true;
+                  items.forEach((item, index) => {
+                    if (index < 6) {
+                      const title = item.querySelector('title')?.textContent || '';
+                      if (title) {
+                        allNews.push({ title, link: '', source: feed.source });
+                      }
+                    }
+                  });
+                }
+              }
+            } catch (feedError) {
+              console.log(`Proxy failed for ${feed.source}, trying next...`);
             }
-          } catch (feedError) {
-            console.error(`Error fetching ${feed.source} news:`, feedError);
           }
         }
 
-        // If no news fetched, add fallback
+        // If no news fetched, show static fallback news
         if (allNews.length === 0) {
-          allNews.push({ title: 'Carregando notícias...', link: '', source: 'Info' });
+          const fallbackNews: NewsItem[] = [
+            { title: 'Mantenha-se hidratado: beba pelo menos 2 litros de água por dia', link: '', source: 'Saúde' },
+            { title: 'Vacinas salvam vidas - mantenha sua carteira de vacinação em dia', link: '', source: 'Saúde' },
+            { title: 'Pratique exercícios físicos regularmente para uma vida mais saudável', link: '', source: 'Saúde' },
+            { title: 'Lave as mãos com frequência para prevenir doenças', link: '', source: 'Saúde' },
+            { title: 'Durma bem: adultos precisam de 7 a 9 horas de sono por noite', link: '', source: 'Saúde' },
+            { title: 'Alimentação balanceada é essencial para a saúde', link: '', source: 'Saúde' },
+          ];
+          setNewsItems(fallbackNews);
+        } else {
+          // Shuffle news to mix sources
+          const shuffled = allNews.sort(() => Math.random() - 0.5);
+          setNewsItems(shuffled);
         }
-
-        // Shuffle news to mix sources
-        const shuffled = allNews.sort(() => Math.random() - 0.5);
-        setNewsItems(shuffled);
       } catch (error) {
         console.error('Error fetching news:', error);
+        // Fallback to health tips
+        setNewsItems([
+          { title: 'Cuide da sua saúde: faça check-ups regulares', link: '', source: 'Saúde' },
+          { title: 'Mantenha-se hidratado durante todo o dia', link: '', source: 'Saúde' },
+        ]);
       }
     };
 
