@@ -80,7 +80,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           <div className="mx-auto mb-4">
             <img src={xamaPanLogo} alt="Xama Pan Logo" className="w-32 h-32 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold">APP de Chamada de Pacientes</CardTitle>
+          <CardTitle className="text-2xl font-bold">APP CHAMADA DE PACIENTES POR VOZ</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
