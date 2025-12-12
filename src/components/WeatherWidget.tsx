@@ -54,7 +54,19 @@ export function WeatherWidget() {
         const data = await response.json();
         
         const current = data.current_condition[0];
-        const todayForecast = data.weather[0];
+        const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+        const forecast = data.weather.slice(0, 2).map((day: any, index: number) => {
+          const date = new Date(day.date);
+          return {
+            date: day.date,
+            dayName: index === 0 ? 'Hoje' : days[date.getDay()],
+            maxTemp: parseInt(day.maxtempC),
+            minTemp: parseInt(day.mintempC),
+            humidity: parseInt(day.hourly[4]?.humidity || day.hourly[0]?.humidity),
+            description: day.hourly[4]?.lang_pt?.[0]?.value || day.hourly[0]?.weatherDesc[0]?.value || '',
+          };
+        });
 
         setWeather({
           current: {
@@ -62,15 +74,8 @@ export function WeatherWidget() {
             humidity: parseInt(current.humidity),
             description: current.lang_pt?.[0]?.value || current.weatherDesc[0]?.value || '',
           },
-          forecast: [{
-            date: todayForecast.date,
-            dayName: 'Hoje',
-            maxTemp: parseInt(todayForecast.maxtempC),
-            minTemp: parseInt(todayForecast.mintempC),
-            humidity: parseInt(todayForecast.hourly[4]?.humidity || todayForecast.hourly[0]?.humidity),
-            description: todayForecast.hourly[4]?.lang_pt?.[0]?.value || todayForecast.hourly[0]?.weatherDesc[0]?.value || '',
-          }],
-          city: 'Paineiras-MG',
+          forecast,
+          city: 'Paineiras',
         });
         setError(null);
       } catch (err) {
@@ -113,15 +118,12 @@ export function WeatherWidget() {
       <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">Previsão do tempo</span>
       <div className="bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 shadow-lg">
         <div className="flex items-center gap-3">
-          {/* Weather Icon */}
+          {/* Current Weather */}
           {getWeatherIcon(weather.current.description, 'sm')}
-          
-          {/* Temperature */}
           <span className="text-white font-bold text-lg leading-none">
             {weather.current.temp}°C
           </span>
 
-          {/* Divider */}
           <div className="w-px h-5 bg-white/20" />
 
           {/* Humidity */}
@@ -130,7 +132,18 @@ export function WeatherWidget() {
             <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
           </div>
 
-          {/* Divider */}
+          <div className="w-px h-5 bg-white/20" />
+
+          {/* 2-day forecast */}
+          <div className="flex items-center gap-2">
+            {weather.forecast.map((day, index) => (
+              <div key={index} className="flex items-center gap-1">
+                <span className="text-white/70 text-xs">{day.dayName}</span>
+                <span className="text-white text-xs font-medium">{day.maxTemp}°/{day.minTemp}°</span>
+              </div>
+            ))}
+          </div>
+
           <div className="w-px h-5 bg-white/20" />
 
           {/* City */}
