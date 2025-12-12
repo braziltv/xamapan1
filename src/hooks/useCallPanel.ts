@@ -259,19 +259,37 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, currentDoctorCall, completeCall]);
 
-  // Forward to triage without voice call
-  const forwardToTriage = useCallback((patientId: string) => {
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'in-triage' as const, calledAt: new Date() } : p
-    ));
-  }, []);
+  // Forward to triage with voice call on TV
+  const forwardToTriage = useCallback((patientId: string, destination?: string) => {
+    setPatients(prev => {
+      const patient = prev.find(p => p.id === patientId);
+      if (!patient) return prev;
 
-  // Forward to doctor without voice call (skip triage)
+      // Create call to show on TV
+      createCall(patient.name, 'triage', destination || 'Triagem');
+      triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
+
+      return prev.map(p => 
+        p.id === patientId ? { ...p, status: 'in-triage' as const, calledAt: new Date() } : p
+      );
+    });
+  }, [createCall, triggerCallEvent]);
+
+  // Forward to doctor with voice call on TV
   const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
-    setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
-    ));
-  }, []);
+    setPatients(prev => {
+      const patient = prev.find(p => p.id === patientId);
+      if (!patient) return prev;
+
+      // Create call to show on TV
+      createCall(patient.name, 'doctor', destination || 'Consultório Médico');
+      triggerCallEvent({ name: patient.name }, 'doctor', destination || 'Consultório Médico');
+
+      return prev.map(p => 
+        p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
+      );
+    });
+  }, [createCall, triggerCallEvent]);
 
   const waitingForTriage = patients.filter(p => p.status === 'waiting')
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
