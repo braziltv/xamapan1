@@ -668,29 +668,25 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
 
     setDeleting(true);
     try {
-      // Apagar registros do histórico de chamadas
+      // Apagar TODOS os registros do histórico de chamadas
       const { error: historyError } = await supabase
         .from('call_history')
         .delete()
-        .gte('created_at', startOfDay(parseISO(dateFrom)).toISOString())
-        .lte('created_at', endOfDay(parseISO(dateTo)).toISOString())
-        .eq('unit_name', currentUnitName);
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todos os registros
 
       if (historyError) throw historyError;
 
-      // Apagar registros das estatísticas diárias
+      // Apagar TODOS os registros das estatísticas diárias
       const { error: statsError } = await supabase
         .from('statistics_daily')
         .delete()
-        .gte('date', dateFrom)
-        .lte('date', dateTo)
-        .eq('unit_name', currentUnitName);
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todos os registros
 
       if (statsError) throw statsError;
 
       toast({
         title: "Registros apagados",
-        description: "Todos os registros do período selecionado foram removidos com sucesso.",
+        description: "Todos os registros foram removidos com sucesso.",
       });
 
       setDeleteDialogOpen(false);
@@ -719,10 +715,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               Apagar Registros
             </DialogTitle>
             <DialogDescription>
-              Esta ação irá apagar permanentemente todos os registros do período de{' '}
-              <strong>{format(parseISO(dateFrom), 'dd/MM/yyyy')}</strong> a{' '}
-              <strong>{format(parseISO(dateTo), 'dd/MM/yyyy')}</strong> da unidade{' '}
-              <strong>{currentUnitName}</strong>.
+              Esta ação irá apagar permanentemente <strong>TODOS</strong> os registros de estatísticas 
+              e histórico de chamadas de <strong>todas as unidades</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
