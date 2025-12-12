@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { WeatherWidget } from './WeatherWidget';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -13,6 +14,7 @@ interface PublicDisplayProps {
 interface NewsItem {
   title: string;
   link: string;
+  source: string;
 }
 
 export function PublicDisplay(_props: PublicDisplayProps) {
@@ -24,24 +26,47 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
-  // Fetch G1 news RSS
+  // Fetch news from multiple sources (MG and Brazil)
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/dynamo/rss2.xml'));
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'text/xml');
-        const items = xml.querySelectorAll('item');
-        const news: NewsItem[] = [];
-        items.forEach((item, index) => {
-          if (index < 15) {
+        const allNews: NewsItem[] = [];
+        
+        // Fetch G1 Brasil news
+        const brasilResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/dynamo/rss2.xml'));
+        const brasilText = await brasilResponse.text();
+        const brasilParser = new DOMParser();
+        const brasilXml = brasilParser.parseFromString(brasilText, 'text/xml');
+        const brasilItems = brasilXml.querySelectorAll('item');
+        brasilItems.forEach((item, index) => {
+          if (index < 10) {
             const title = item.querySelector('title')?.textContent || '';
             const link = item.querySelector('link')?.textContent || '';
-            news.push({ title, link });
+            allNews.push({ title, link, source: 'Brasil' });
           }
         });
-        setNewsItems(news);
+
+        // Fetch G1 Minas Gerais news
+        try {
+          const mgResponse = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://g1.globo.com/rss/g1/mg/minas-gerais/'));
+          const mgText = await mgResponse.text();
+          const mgParser = new DOMParser();
+          const mgXml = mgParser.parseFromString(mgText, 'text/xml');
+          const mgItems = mgXml.querySelectorAll('item');
+          mgItems.forEach((item, index) => {
+            if (index < 10) {
+              const title = item.querySelector('title')?.textContent || '';
+              const link = item.querySelector('link')?.textContent || '';
+              allNews.push({ title, link, source: 'MG' });
+            }
+          });
+        } catch (mgError) {
+          console.error('Error fetching MG news:', mgError);
+        }
+
+        // Shuffle news to mix sources
+        const shuffled = allNews.sort(() => Math.random() - 0.5);
+        setNewsItems(shuffled);
       } catch (error) {
         console.error('Error fetching news:', error);
       }
@@ -287,16 +312,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <p className="text-slate-400 text-sm md:text-lg lg:text-xl">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-6 py-3 md:px-10 md:py-5 border border-slate-700">
-          <p className="text-5xl md:text-7xl lg:text-9xl font-mono font-bold text-white leading-none">
-            {format(currentTime, 'HH:mm')}
-          </p>
-          <p className="text-xl md:text-3xl lg:text-4xl text-yellow-400 font-bold mt-2">
-            {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
-          </p>
-          <p className="text-lg md:text-2xl lg:text-3xl text-slate-300 font-medium">
-            {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-          </p>
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          {/* Weather Widget */}
+          <WeatherWidget />
+          
+          {/* Clock */}
+          <div className="text-center md:text-right bg-slate-800/50 rounded-xl md:rounded-2xl px-6 py-3 md:px-8 md:py-4 border border-slate-700">
+            <p className="text-4xl md:text-6xl lg:text-7xl font-mono font-bold text-white leading-none">
+              {format(currentTime, 'HH:mm')}
+            </p>
+            <p className="text-lg md:text-2xl lg:text-3xl text-yellow-400 font-bold mt-1">
+              {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
+            </p>
+            <p className="text-sm md:text-xl lg:text-2xl text-slate-300 font-medium">
+              {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -419,12 +450,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="animate-marquee whitespace-nowrap">
                 {newsItems.map((item, index) => (
                   <span key={index} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
-                    • {item.title}
+                    <span className={`px-1.5 py-0.5 rounded text-xs md:text-sm font-bold mr-2 ${
+                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 'bg-green-500 text-green-900'
+                    }`}>
+                      {item.source}
+                    </span>
+                    {item.title}
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
                   <span key={`dup-${index}`} className="text-white text-sm md:text-lg lg:text-xl mx-4 md:mx-8">
-                    • {item.title}
+                    <span className={`px-1.5 py-0.5 rounded text-xs md:text-sm font-bold mr-2 ${
+                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 'bg-green-500 text-green-900'
+                    }`}>
+                      {item.source}
+                    </span>
+                    {item.title}
                   </span>
                 ))}
               </div>
