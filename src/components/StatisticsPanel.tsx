@@ -412,7 +412,30 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     });
   };
 
-  // Função para adicionar rodapé em todas as páginas
+  // Função para adicionar cabeçalho elegante
+  const addHeader = (doc: jsPDF, title: string) => {
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Faixa de cabeçalho com gradiente simulado
+    doc.setFillColor(30, 64, 175); // Azul escuro
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    // Linha decorativa
+    doc.setFillColor(59, 130, 246); // Azul claro
+    doc.rect(0, 35, pageWidth, 3, 'F');
+    
+    // Título principal
+    doc.setFontSize(20);
+    doc.setTextColor(255, 255, 255);
+    doc.text(title, pageWidth / 2, 18, { align: 'center' });
+    
+    // Subtítulo
+    doc.setFontSize(10);
+    doc.setTextColor(200, 220, 255);
+    doc.text('Software de Chamada de Pacientes', pageWidth / 2, 28, { align: 'center' });
+  };
+
+  // Função para adicionar rodapé elegante em todas as páginas
   const addFooter = (doc: jsPDF) => {
     const pageCount = doc.getNumberOfPages();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -420,11 +443,54 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
+      
+      // Linha decorativa superior do rodapé
+      doc.setDrawColor(59, 130, 246);
+      doc.setLineWidth(0.5);
+      doc.line(14, pageHeight - 25, pageWidth - 14, pageHeight - 25);
+      
+      // Ícone decorativo (círculo)
+      doc.setFillColor(59, 130, 246);
+      doc.circle(pageWidth / 2, pageHeight - 18, 3, 'F');
+      
+      // Créditos elegantes
+      doc.setFontSize(9);
+      doc.setTextColor(30, 64, 175);
+      doc.text('Solução criada e cedida gratuitamente por', pageWidth / 2, pageHeight - 13, { align: 'center' });
+      
+      doc.setFontSize(11);
+      doc.setTextColor(30, 64, 175);
+      doc.text('Kalebe Gomes', pageWidth / 2, pageHeight - 7, { align: 'center' });
+      
+      // Número da página
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
-      doc.text('Solução criada e cedida gratuitamente por Kalebe Gomes', pageWidth / 2, pageHeight - 10, { align: 'center' });
-      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 14, pageHeight - 18, { align: 'right' });
+      
+      // Data de geração
+      doc.setFontSize(7);
+      doc.text(format(new Date(), "dd/MM/yyyy HH:mm"), 14, pageHeight - 18);
     }
+  };
+
+  // Função para desenhar seção com título estilizado
+  const drawSectionTitle = (doc: jsPDF, title: string, y: number) => {
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Fundo da seção
+    doc.setFillColor(245, 247, 250);
+    doc.roundedRect(14, y - 5, pageWidth - 28, 12, 2, 2, 'F');
+    
+    // Barra lateral decorativa
+    doc.setFillColor(59, 130, 246);
+    doc.rect(14, y - 5, 3, 12, 'F');
+    
+    // Texto do título
+    doc.setFontSize(12);
+    doc.setTextColor(30, 64, 175);
+    doc.text(title, 22, y + 3);
+    
+    return y + 15;
   };
 
   // Exportar PDF
@@ -432,68 +498,103 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Título
-    doc.setFontSize(18);
-    doc.text('Relatório de Estatísticas', pageWidth / 2, 20, { align: 'center' });
+    // Cabeçalho elegante
+    addHeader(doc, 'Relatório de Estatísticas');
     
     // Informações do período
-    doc.setFontSize(12);
-    doc.text(`Unidade: ${compareMode ? selectedUnits.join(', ') : (currentUnitName || 'Todas')}`, 14, 35);
-    doc.text(`Período: ${format(parseISO(dateFrom), 'dd/MM/yyyy')} a ${format(parseISO(dateTo), 'dd/MM/yyyy')}`, 14, 42);
-    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 14, 49);
+    let currentY = 50;
     
-    // Resumo em cards
-    doc.setFontSize(14);
-    doc.text('Resumo do Período', 14, 62);
+    doc.setFillColor(250, 251, 252);
+    doc.roundedRect(14, currentY - 5, pageWidth - 28, 25, 3, 3, 'F');
+    doc.setDrawColor(229, 231, 235);
+    doc.roundedRect(14, currentY - 5, pageWidth - 28, 25, 3, 3, 'S');
     
-    // Cards de resumo
-    const cardY = 68;
-    const cardWidth = 55;
-    const cardHeight = 20;
-    
-    // Card Total
-    doc.setFillColor(240, 240, 240);
-    doc.roundedRect(14, cardY, cardWidth, cardHeight, 3, 3, 'F');
-    doc.setFontSize(8);
+    doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text('Total de Chamadas', 14 + cardWidth/2, cardY + 7, { align: 'center' });
-    doc.setFontSize(14);
+    doc.text('Unidade:', 20, currentY + 3);
     doc.setTextColor(0, 0, 0);
-    doc.text(totalCalls.toString(), 14 + cardWidth/2, cardY + 16, { align: 'center' });
+    doc.text(compareMode ? 'Múltiplas Unidades' : (currentUnitName || 'Todas'), 45, currentY + 3);
+    
+    doc.setTextColor(100, 100, 100);
+    doc.text('Período:', 20, currentY + 12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${format(parseISO(dateFrom), 'dd/MM/yyyy')} a ${format(parseISO(dateTo), 'dd/MM/yyyy')}`, 45, currentY + 12);
+    
+    // Seção de Resumo
+    currentY = drawSectionTitle(doc, 'Resumo do Período', currentY + 35);
+    
+    // Cards de resumo mais elegantes
+    const cardWidth = 55;
+    const cardHeight = 28;
+    const cardStartX = 14;
+    
+    // Card Total - Gradiente simulado
+    doc.setFillColor(239, 246, 255);
+    doc.roundedRect(cardStartX, currentY, cardWidth, cardHeight, 4, 4, 'F');
+    doc.setDrawColor(59, 130, 246);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(cardStartX, currentY, cardWidth, cardHeight, 4, 4, 'S');
+    doc.setFillColor(59, 130, 246);
+    doc.rect(cardStartX, currentY, 4, cardHeight, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('TOTAL DE CHAMADAS', cardStartX + 10, currentY + 8);
+    doc.setFontSize(18);
+    doc.setTextColor(30, 64, 175);
+    doc.text(totalCalls.toString(), cardStartX + 10, currentY + 22);
     
     // Card Triagem
-    doc.setFillColor(219, 234, 254);
-    doc.roundedRect(14 + cardWidth + 5, cardY, cardWidth, cardHeight, 3, 3, 'F');
+    const card2X = cardStartX + cardWidth + 8;
+    doc.setFillColor(236, 254, 255);
+    doc.roundedRect(card2X, currentY, cardWidth, cardHeight, 4, 4, 'F');
+    doc.setDrawColor(6, 182, 212);
+    doc.roundedRect(card2X, currentY, cardWidth, cardHeight, 4, 4, 'S');
+    doc.setFillColor(6, 182, 212);
+    doc.rect(card2X, currentY, 4, cardHeight, 'F');
     doc.setFontSize(8);
-    doc.setTextColor(59, 130, 246);
-    doc.text('Chamadas Triagem', 14 + cardWidth + 5 + cardWidth/2, cardY + 7, { align: 'center' });
-    doc.setFontSize(14);
-    doc.text(triageCalls.toString(), 14 + cardWidth + 5 + cardWidth/2, cardY + 16, { align: 'center' });
+    doc.setTextColor(100, 116, 139);
+    doc.text('TRIAGEM', card2X + 10, currentY + 8);
+    doc.setFontSize(18);
+    doc.setTextColor(8, 145, 178);
+    doc.text(triageCalls.toString(), card2X + 10, currentY + 22);
     
     // Card Médico
-    doc.setFillColor(220, 252, 231);
-    doc.roundedRect(14 + (cardWidth + 5) * 2, cardY, cardWidth, cardHeight, 3, 3, 'F');
+    const card3X = card2X + cardWidth + 8;
+    doc.setFillColor(236, 253, 245);
+    doc.roundedRect(card3X, currentY, cardWidth, cardHeight, 4, 4, 'F');
+    doc.setDrawColor(16, 185, 129);
+    doc.roundedRect(card3X, currentY, cardWidth, cardHeight, 4, 4, 'S');
+    doc.setFillColor(16, 185, 129);
+    doc.rect(card3X, currentY, 4, cardHeight, 'F');
     doc.setFontSize(8);
-    doc.setTextColor(34, 197, 94);
-    doc.text('Chamadas Médico', 14 + (cardWidth + 5) * 2 + cardWidth/2, cardY + 7, { align: 'center' });
-    doc.setFontSize(14);
-    doc.text(doctorCalls.toString(), 14 + (cardWidth + 5) * 2 + cardWidth/2, cardY + 16, { align: 'center' });
+    doc.setTextColor(100, 116, 139);
+    doc.text('MÉDICO', card3X + 10, currentY + 8);
+    doc.setFontSize(18);
+    doc.setTextColor(5, 150, 105);
+    doc.text(doctorCalls.toString(), card3X + 10, currentY + 22);
+    
+    currentY += cardHeight + 15;
+    
+    // Seção de Gráficos
+    currentY = drawSectionTitle(doc, 'Análise Gráfica', currentY);
     
     // Gráfico de Atendimentos por Hora
     const hourlyChartData = hourlyData.map(h => ({ label: h.hour.substring(0, 2), value: h.atendimentos }));
-    drawBarChart(doc, hourlyChartData, 14, 100, 120, 55, 'Atendimentos por Hora');
+    drawBarChart(doc, hourlyChartData, 14, currentY, 115, 50, 'Atendimentos por Hora');
     
     // Gráfico de Pizza - Distribuição por Tipo
-    drawPieChart(doc, typeData, 165, 130, 20, 'Distribuição por Tipo');
+    drawPieChart(doc, typeData, 165, currentY + 25, 18, 'Distribuição por Tipo');
     
-    // Gráfico de Atendimentos por Dia (últimos 7 dias)
+    currentY += 60;
+    
+    // Gráfico de Atendimentos por Dia
     const recentDailyData = dailyData.slice(-7).map(d => ({ label: d.date.substring(0, 5), value: d.atendimentos }));
-    drawBarChart(doc, recentDailyData, 14, 165, 180, 45, 'Atendimentos por Dia (Últimos 7 dias)');
+    drawBarChart(doc, recentDailyData, 14, currentY, pageWidth - 28, 40, 'Atendimentos por Dia (Últimos 7 dias)');
     
-    // Tabela de histórico
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Histórico de Chamadas (Últimas 50)', 14, 220);
+    currentY += 50;
+    
+    // Seção de Histórico
+    currentY = drawSectionTitle(doc, 'Histórico de Chamadas', currentY);
     
     const tableData = filteredHistory.slice(0, 50).map(item => [
       item.patient_name,
@@ -503,16 +604,31 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     ]);
     
     autoTable(doc, {
-      startY: 225,
+      startY: currentY,
       head: [['Paciente', 'Tipo', 'Destino', 'Data/Hora']],
       body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 8 },
-      margin: { left: 14, right: 14, bottom: 20 },
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [30, 64, 175],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
+      styles: { 
+        fontSize: 8,
+        cellPadding: 3,
+      },
+      columnStyles: {
+        0: { cellWidth: 60 },
+        1: { cellWidth: 25, halign: 'center' },
+        2: { cellWidth: 45 },
+        3: { cellWidth: 35, halign: 'center' },
+      },
+      margin: { left: 14, right: 14, bottom: 35 },
     });
     
-    // Adicionar rodapé em todas as páginas
+    // Adicionar rodapé elegante em todas as páginas
     addFooter(doc);
     
     // Salvar
