@@ -259,6 +259,20 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, currentDoctorCall, completeCall]);
 
+  // Forward to triage without voice call
+  const forwardToTriage = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'in-triage' as const, calledAt: new Date() } : p
+    ));
+  }, []);
+
+  // Forward to doctor without voice call (skip triage)
+  const forwardToDoctor = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date() } : p
+    ));
+  }, []);
+
   const waitingForTriage = patients.filter(p => p.status === 'waiting')
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
@@ -284,5 +298,7 @@ export function useCallPanel() {
     recallDoctor,
     directPatient,
     finishWithoutCall,
+    forwardToTriage,
+    forwardToDoctor,
   };
 }
