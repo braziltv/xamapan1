@@ -8,7 +8,7 @@ import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3 } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -124,12 +124,20 @@ const Index = () => {
   // TV Mode - show only PublicDisplay without any navigation
   if (isTvMode) {
     return (
-      <div ref={mainContainerRef} className="min-h-screen bg-background">
+      <div ref={mainContainerRef} className="min-h-screen bg-background relative">
         <PublicDisplay 
           currentTriageCall={currentTriageCall} 
           currentDoctorCall={currentDoctorCall}
           history={history} 
         />
+        {/* Discreet logout button for TV mode */}
+        <button
+          onClick={handleLogout}
+          className="absolute bottom-2 right-2 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white/70 transition-all opacity-30 hover:opacity-100 z-50"
+          title="Sair do modo TV"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
       </div>
     );
   }
