@@ -90,6 +90,19 @@ const Index = () => {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
+  // If in display mode, show only the PublicDisplay in fullscreen
+  if (activeTab === "display") {
+    return (
+      <div ref={mainContainerRef} className="min-h-screen bg-background">
+        <PublicDisplay 
+          currentTriageCall={currentTriageCall} 
+          currentDoctorCall={currentDoctorCall}
+          history={history} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div ref={mainContainerRef} className="min-h-screen bg-background">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen">
@@ -141,15 +154,6 @@ const Index = () => {
               onForwardToDoctor={forwardToDoctor}
             />
           </main>
-        </TabsContent>
-
-        {/* Public Display */}
-        <TabsContent value="display" className="mt-0">
-          <PublicDisplay 
-            currentTriageCall={currentTriageCall} 
-            currentDoctorCall={currentDoctorCall}
-            history={history} 
-          />
         </TabsContent>
 
         {/* Triagem */}
