@@ -22,8 +22,11 @@ import {
   Filter,
   Calendar,
   RefreshCw,
-  Database
+  Database,
+  Building2,
+  BarChart3
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   ChartContainer,
   ChartTooltip,
@@ -55,19 +58,32 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [aggregatedStats, setAggregatedStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [storageInfo, setStorageInfo] = useState({ detailed: 0, aggregated: 0 });
-  const [unitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+  const [currentUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+  
+  // Lista de unidades disponíveis
+  const HEALTH_UNITS = [
+    { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
+    { id: "psf-aguinalda", name: "PSF Aguinalda Angélica" },
+    { id: "ubs-maria-alves", name: "UBS Maria Alves de Mendonça" },
+  ];
   
   // Filtros
   const [dateFrom, setDateFrom] = useState(() => format(subDays(new Date(), 30), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [callTypeFilter, setCallTypeFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedUnits, setSelectedUnits] = useState<string[]>([currentUnitName]);
+  const [comparisonData, setComparisonData] = useState<{unit: string, shortName: string, total: number, triage: number, doctor: number}[]>([]);
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
     setLoading(true);
     try {
-      // Carregar dados detalhados (últimos 7 dias)
+      // Determinar unidades a buscar
+      const unitsToFetch = compareMode && selectedUnits.length > 0 ? selectedUnits : [currentUnitName];
+      
+      // Carregar dados detalhados
       let query = supabase
         .from('call_history')
         .select('*')
@@ -75,8 +91,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         .lte('created_at', endOfDay(parseISO(dateTo)).toISOString())
         .order('created_at', { ascending: false });
 
-      if (unitName) {
-        query = query.eq('unit_name', unitName);
+      if (!compareMode && currentUnitName) {
+        query = query.eq('unit_name', currentUnitName);
+      } else if (compareMode && selectedUnits.length > 0) {
+        query = query.in('unit_name', selectedUnits);
       }
 
       if (callTypeFilter !== 'all') {
@@ -89,17 +107,39 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         console.error('Erro ao carregar histórico:', error);
       } else {
         setDbHistory(data || []);
+        
+        // Calcular dados de comparação por unidade
+        if (compareMode && data) {
+          const comparison = unitsToFetch.map(unitName => {
+            const unitData = data.filter(d => d.unit_name === unitName);
+            const unit = HEALTH_UNITS.find(u => u.name === unitName);
+            return {
+              unit: unitName,
+              shortName: unit ? unit.name.split(' ')[0] : unitName.substring(0, 10),
+              total: unitData.length,
+              triage: unitData.filter(d => d.call_type === 'triage').length,
+              doctor: unitData.filter(d => d.call_type === 'doctor').length,
+            };
+          });
+          setComparisonData(comparison);
+        }
       }
 
       // Carregar dados agregados (para datas mais antigas)
-      const { data: aggData } = await supabase
+      let aggQuery = supabase
         .from('statistics_daily')
         .select('*')
         .gte('date', dateFrom)
         .lte('date', dateTo)
-        .eq('unit_name', unitName || '')
         .order('date', { ascending: false });
+      
+      if (!compareMode && currentUnitName) {
+        aggQuery = aggQuery.eq('unit_name', currentUnitName);
+      } else if (compareMode && selectedUnits.length > 0) {
+        aggQuery = aggQuery.in('unit_name', selectedUnits);
+      }
 
+      const { data: aggData } = await aggQuery;
       setAggregatedStats(aggData || []);
 
       // Contar registros para info de armazenamento
@@ -120,7 +160,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo, unitName, callTypeFilter]);
+  }, [dateFrom, dateTo, currentUnitName, callTypeFilter, compareMode, selectedUnits, HEALTH_UNITS]);
 
   useEffect(() => {
     loadDbHistory();
@@ -320,7 +360,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     
     // Informações do período
     doc.setFontSize(12);
-    doc.text(`Unidade: ${unitName || 'Todas'}`, 14, 35);
+    doc.text(`Unidade: ${compareMode ? selectedUnits.join(', ') : (currentUnitName || 'Todas')}`, 14, 35);
     doc.text(`Período: ${format(parseISO(dateFrom), 'dd/MM/yyyy')} a ${format(parseISO(dateTo), 'dd/MM/yyyy')}`, 14, 42);
     doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 14, 49);
     
@@ -444,7 +484,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             Filtros
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dateFrom" className="flex items-center gap-1">
@@ -497,8 +537,110 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               </Button>
             </div>
           </div>
+          
+          {/* Modo de Comparação */}
+          <div className="border-t pt-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Checkbox 
+                id="compareMode" 
+                checked={compareMode}
+                onCheckedChange={(checked) => {
+                  setCompareMode(checked === true);
+                  if (checked) {
+                    setSelectedUnits(HEALTH_UNITS.map(u => u.name));
+                  } else {
+                    setSelectedUnits([currentUnitName]);
+                  }
+                }}
+              />
+              <Label htmlFor="compareMode" className="flex items-center gap-2 cursor-pointer">
+                <Building2 className="w-4 h-4" />
+                Comparar rendimento entre unidades
+              </Label>
+            </div>
+            
+            {compareMode && (
+              <div className="flex flex-wrap gap-4 ml-6">
+                {HEALTH_UNITS.map((unit) => (
+                  <div key={unit.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={unit.id}
+                      checked={selectedUnits.includes(unit.name)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedUnits([...selectedUnits, unit.name]);
+                        } else {
+                          setSelectedUnits(selectedUnits.filter(u => u !== unit.name));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={unit.id} className="text-sm cursor-pointer">
+                      {unit.name.split(' ').slice(0, 2).join(' ')}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
+
+      {/* Gráfico de Comparação entre Unidades */}
+      {compareMode && comparisonData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Comparação entre Unidades
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72">
+              <ChartContainer config={chartConfig}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={comparisonData} layout="vertical">
+                    <XAxis type="number" />
+                    <YAxis 
+                      dataKey="shortName" 
+                      type="category" 
+                      width={80}
+                      tick={{ fontSize: 11 }}
+                    />
+                    <ChartTooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-background border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium text-sm mb-1">{data.unit}</p>
+                              <p className="text-sm text-blue-600">Triagem: {data.triage}</p>
+                              <p className="text-sm text-green-600">Médico: {data.doctor}</p>
+                              <p className="text-sm font-medium mt-1">Total: {data.total}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="triage" stackId="a" fill="hsl(217, 91%, 60%)" name="Triagem" />
+                    <Bar dataKey="doctor" stackId="a" fill="hsl(142, 71%, 45%)" name="Médico" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </div>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-blue-500" />
+                <span className="text-sm">Triagem</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-green-500" />
+                <span className="text-sm">Médico</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Cards de Resumo - Período */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
