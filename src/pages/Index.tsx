@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
@@ -13,6 +13,8 @@ import { Monitor, UserPlus, Activity, Stethoscope, BarChart3 } from 'lucide-reac
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unitName, setUnitName] = useState("");
+  const [activeTab, setActiveTab] = useState("cadastro");
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -20,6 +22,34 @@ const Index = () => {
     setIsLoggedIn(loggedIn);
     setUnitName(storedUnitName);
   }, []);
+
+  // Handle tab change and fullscreen for public display
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    if (value === "display") {
+      // Enter fullscreen when switching to public display
+      mainContainerRef.current?.requestFullscreen().catch((err) => {
+        console.error('Error attempting to enable fullscreen:', err);
+      });
+    } else {
+      // Exit fullscreen when switching to other tabs
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error);
+      }
+    }
+  };
+
+  // Listen for fullscreen exit (ESC key) and switch tab
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && activeTab === "display") {
+        setActiveTab("cadastro");
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [activeTab]);
   const {
     patients,
     waitingForTriage,
@@ -61,8 +91,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Tabs defaultValue="cadastro" className="min-h-screen">
+    <div ref={mainContainerRef} className="min-h-screen bg-background">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen">
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
           onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}

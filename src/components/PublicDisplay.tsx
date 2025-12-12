@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Maximize, Minimize, Monitor } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -27,15 +27,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showFullscreenButton, setShowFullscreenButton] = useState(true);
-  const [autoHideEnabled, setAutoHideEnabled] = useState(() => {
-    return localStorage.getItem('tvModeAutoHide') === 'true';
-  });
-  const [autoHideCountdown, setAutoHideCountdown] = useState(30);
   const containerRef = useRef<HTMLDivElement>(null);
-  const hideButtonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const autoHideIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -400,168 +392,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Fullscreen toggle
-  const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen().then(() => {
-        setIsFullscreen(true);
-      }).catch((err) => {
-        console.error('Error attempting to enable fullscreen:', err);
-      });
-    } else {
-      document.exitFullscreen().then(() => {
-        setIsFullscreen(false);
-      });
-    }
-  }, []);
-
-  // Listen for fullscreen changes (e.g., ESC key)
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isNowFullscreen = !!document.fullscreenElement;
-      setIsFullscreen(isNowFullscreen);
-      
-      if (isNowFullscreen) {
-        // Start 60 second timer to hide button
-        setShowFullscreenButton(true);
-        hideButtonTimeoutRef.current = setTimeout(() => {
-          setShowFullscreenButton(false);
-        }, 60000);
-      } else {
-        // Show button when exiting fullscreen
-        setShowFullscreenButton(true);
-        if (hideButtonTimeoutRef.current) {
-          clearTimeout(hideButtonTimeoutRef.current);
-        }
-      }
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      if (hideButtonTimeoutRef.current) {
-        clearTimeout(hideButtonTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Show button on mouse move in fullscreen, then hide after 5 seconds of inactivity
-  useEffect(() => {
-    if (!isFullscreen) return;
-
-    let inactivityTimeout: NodeJS.Timeout;
-
-    const handleMouseMove = () => {
-      setShowFullscreenButton(true);
-      
-      // Clear existing timeout
-      if (hideButtonTimeoutRef.current) {
-        clearTimeout(hideButtonTimeoutRef.current);
-      }
-      clearTimeout(inactivityTimeout);
-      
-      // Hide after 5 seconds of no movement
-      inactivityTimeout = setTimeout(() => {
-        setShowFullscreenButton(false);
-      }, 5000);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(inactivityTimeout);
-    };
-  }, [isFullscreen]);
-
-  // Keyboard shortcut F11 for fullscreen
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F11') {
-        e.preventDefault();
-        toggleFullscreen();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleFullscreen]);
-
-  // Auto-hide countdown when enabled
-  useEffect(() => {
-    if (autoHideEnabled && !isFullscreen) {
-      setAutoHideCountdown(30);
-      
-      autoHideIntervalRef.current = setInterval(() => {
-        setAutoHideCountdown(prev => {
-          if (prev <= 1) {
-            // Time's up - enter fullscreen and hide button
-            containerRef.current?.requestFullscreen().catch(console.error);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      return () => {
-        if (autoHideIntervalRef.current) {
-          clearInterval(autoHideIntervalRef.current);
-        }
-      };
-    } else {
-      if (autoHideIntervalRef.current) {
-        clearInterval(autoHideIntervalRef.current);
-      }
-      setAutoHideCountdown(30);
-    }
-  }, [autoHideEnabled, isFullscreen]);
-
-  // Toggle auto-hide mode
-  const toggleAutoHide = useCallback(() => {
-    const newValue = !autoHideEnabled;
-    setAutoHideEnabled(newValue);
-    localStorage.setItem('tvModeAutoHide', String(newValue));
-  }, [autoHideEnabled]);
-
   return (
     <div 
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8 relative overflow-hidden"
     >
-      {/* Fullscreen Controls */}
-      <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 transition-all duration-300 ${
-        showFullscreenButton ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
-      }`}>
-        {/* Auto-hide toggle for TV mode */}
-        {!isFullscreen && (
-          <div 
-            onClick={toggleAutoHide}
-            className={`flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700 text-white px-4 py-3 rounded-2xl border cursor-pointer transition-all ${
-              autoHideEnabled ? 'border-green-500 bg-green-900/50' : 'border-slate-500'
-            }`}
-            title="Modo TV: entra em tela cheia automaticamente"
-          >
-            <Monitor className="w-5 h-5" />
-            <span className="text-sm font-medium">Modo TV</span>
-            {autoHideEnabled && (
-              <span className="bg-green-500 text-green-900 text-xs font-bold px-2 py-1 rounded-full">
-                {autoHideCountdown}s
-              </span>
-            )}
-          </div>
-        )}
-        
-        {/* Fullscreen button */}
-        <button
-          onClick={toggleFullscreen}
-          className="bg-slate-800/90 hover:bg-slate-700 text-white p-4 rounded-2xl border border-slate-500 shadow-2xl transition-all hover:scale-110"
-          title={isFullscreen ? 'Sair do modo tela cheia (ESC ou F11)' : 'Entrar em tela cheia (F11)'}
-        >
-          {isFullscreen ? (
-            <Minimize className="w-8 h-8" />
-          ) : (
-            <Maximize className="w-8 h-8" />
-          )}
-        </button>
-      </div>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
