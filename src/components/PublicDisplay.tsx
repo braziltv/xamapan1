@@ -546,13 +546,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <Newspaper className="w-8 h-8 md:w-12 md:h-12 text-white" />
               <div className="flex flex-col">
                 <span className="text-white font-bold text-xl md:text-3xl lg:text-4xl">NOTÍCIAS</span>
-                {lastNewsUpdate && (
-                  <span className="text-red-200 text-xs md:text-sm">
-                    Atualizado: {format(lastNewsUpdate, 'HH:mm', { locale: ptBR })}
-                  </span>
-                )}
-                <span className="text-red-300 text-xs md:text-sm">
-                  Próxima: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                <span className="text-red-200 text-xs md:text-sm">
+                  Próxima atualização: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </div>
