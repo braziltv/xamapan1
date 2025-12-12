@@ -29,27 +29,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Fetch news from multiple sources
   useEffect(() => {
     const feeds = [
-      // Geral
+      // G1 - Geral
       { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'Brasil' },
-      // Editorias
       { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'Brasil' },
       { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'Saúde' },
       { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'Economia' },
       { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'Educação' },
       { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'Mundo' },
       { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'Tech' },
-      { url: 'https://g1.globo.com/dynamo/politica/mensalao/rss2.xml', source: 'Política' },
+      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'Política' },
       { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'Pop' },
       { url: 'https://g1.globo.com/dynamo/natureza/rss2.xml', source: 'Natureza' },
       { url: 'https://g1.globo.com/dynamo/carros/rss2.xml', source: 'Carros' },
       { url: 'https://g1.globo.com/dynamo/concursos-e-emprego/rss2.xml', source: 'Emprego' },
       { url: 'https://g1.globo.com/dynamo/turismo-e-viagem/rss2.xml', source: 'Turismo' },
-      // Minas Gerais
+      { url: 'https://g1.globo.com/dynamo/agro/rss2.xml', source: 'Agro' },
+      // G1 - Minas Gerais
       { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'MG' },
       { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'MG' },
       { url: 'https://g1.globo.com/dynamo/mg/grande-minas/rss2.xml', source: 'MG' },
       { url: 'https://g1.globo.com/dynamo/mg/sul-de-minas/rss2.xml', source: 'MG' },
       { url: 'https://g1.globo.com/dynamo/minas-gerais/triangulo-mineiro/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/mg/zona-da-mata/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/mg/vales-de-minas-gerais/rss2.xml', source: 'MG' },
+      // UOL
+      { url: 'https://rss.uol.com.br/feed/noticias.xml', source: 'UOL' },
+      { url: 'https://rss.uol.com.br/feed/economia.xml', source: 'UOL' },
+      { url: 'https://rss.uol.com.br/feed/esporte.xml', source: 'Esporte' },
+      { url: 'https://rss.uol.com.br/feed/tecnologia.xml', source: 'Tech' },
+      // Folha
+      { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
+      { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
+      { url: 'https://feeds.folha.uol.com.br/mercado/rss091.xml', source: 'Folha' },
+      { url: 'https://feeds.folha.uol.com.br/mundo/rss091.xml', source: 'Folha' },
+      { url: 'https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml', source: 'Saúde' },
+      // Estadão
+      { url: 'https://www.estadao.com.br/pf/api/v1/rss/site/estadao/?outputType=xml', source: 'Estadão' },
+      // CNN Brasil
+      { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
+      // R7
+      { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
+      // Band
+      { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
     ];
     
     let currentFeedIndex = 0;
