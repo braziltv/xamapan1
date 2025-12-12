@@ -215,5 +215,5 @@
 
 .animate-marquee {
   display: inline-flex;
-  animation: marquee 240s linear infinite;
+  animation: marquee 1200s linear infinite;
 }
