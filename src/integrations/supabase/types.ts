@@ -74,12 +74,58 @@ export type Database = {
         }
         Relationships: []
       }
+      statistics_daily: {
+        Row: {
+          calls_by_destination: Json | null
+          calls_by_hour: Json | null
+          created_at: string
+          date: string
+          doctor_calls: number
+          id: string
+          total_calls: number
+          triage_calls: number
+          unit_name: string
+          updated_at: string
+        }
+        Insert: {
+          calls_by_destination?: Json | null
+          calls_by_hour?: Json | null
+          created_at?: string
+          date: string
+          doctor_calls?: number
+          id?: string
+          total_calls?: number
+          triage_calls?: number
+          unit_name: string
+          updated_at?: string
+        }
+        Update: {
+          calls_by_destination?: Json | null
+          calls_by_hour?: Json | null
+          created_at?: string
+          date?: string
+          doctor_calls?: number
+          id?: string
+          total_calls?: number
+          triage_calls?: number
+          unit_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      aggregate_daily_statistics: {
+        Args: { target_date: string; target_unit: string }
+        Returns: undefined
+      }
+      compact_old_statistics: {
+        Args: { days_to_keep?: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

@@ -21,7 +21,9 @@ import {
   FileDown,
   Filter,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  Trash2,
+  Database
 } from 'lucide-react';
 import {
   ChartContainer,
@@ -51,7 +53,10 @@ interface DbCallHistory {
 
 export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [dbHistory, setDbHistory] = useState<DbCallHistory[]>([]);
+  const [aggregatedStats, setAggregatedStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [compacting, setCompacting] = useState(false);
+  const [storageInfo, setStorageInfo] = useState({ detailed: 0, aggregated: 0 });
   const [unitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   
   // Filtros
@@ -60,10 +65,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [callTypeFilter, setCallTypeFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Carregar dados do banco
+  // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
     setLoading(true);
     try {
+      // Carregar dados detalhados (últimos 7 dias)
       let query = supabase
         .from('call_history')
         .select('*')
@@ -86,12 +92,62 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       } else {
         setDbHistory(data || []);
       }
+
+      // Carregar dados agregados (para datas mais antigas)
+      const { data: aggData } = await supabase
+        .from('statistics_daily')
+        .select('*')
+        .gte('date', dateFrom)
+        .lte('date', dateTo)
+        .eq('unit_name', unitName || '')
+        .order('date', { ascending: false });
+
+      setAggregatedStats(aggData || []);
+
+      // Contar registros para info de armazenamento
+      const { count: detailedCount } = await supabase
+        .from('call_history')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: aggCount } = await supabase
+        .from('statistics_daily')
+        .select('*', { count: 'exact', head: true });
+
+      setStorageInfo({
+        detailed: detailedCount || 0,
+        aggregated: aggCount || 0
+      });
     } catch (err) {
       console.error('Erro:', err);
     } finally {
       setLoading(false);
     }
   }, [dateFrom, dateTo, unitName, callTypeFilter]);
+
+  // Compactar dados antigos
+  const compactData = async () => {
+    if (!confirm('Isso vai agregar e remover registros detalhados com mais de 7 dias. Continuar?')) {
+      return;
+    }
+    
+    setCompacting(true);
+    try {
+      const { data, error } = await supabase.rpc('compact_old_statistics', { days_to_keep: 7 });
+      
+      if (error) {
+        console.error('Erro ao compactar:', error);
+        alert('Erro ao compactar dados: ' + error.message);
+      } else {
+        alert(`Compactação concluída! ${data} registros removidos.`);
+        loadDbHistory();
+      }
+    } catch (err) {
+      console.error('Erro:', err);
+      alert('Erro ao compactar dados');
+    } finally {
+      setCompacting(false);
+    }
+  };
 
   useEffect(() => {
     loadDbHistory();
@@ -216,11 +272,45 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-foreground">Estatísticas</h2>
-        <Button onClick={exportToPDF} className="gap-2">
-          <FileDown className="w-4 h-4" />
-          Exportar PDF
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={exportToPDF} className="gap-2">
+            <FileDown className="w-4 h-4" />
+            Exportar PDF
+          </Button>
+          <Button 
+            onClick={compactData} 
+            variant="outline" 
+            className="gap-2"
+            disabled={compacting}
+          >
+            <Trash2 className={`w-4 h-4 ${compacting ? 'animate-spin' : ''}`} />
+            Compactar Dados
+          </Button>
+        </div>
       </div>
+
+      {/* Info de armazenamento */}
+      <Card className="bg-muted/30">
+        <CardContent className="py-3">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Armazenamento:</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{storageInfo.detailed}</span>
+              <span className="text-muted-foreground">registros detalhados</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{storageInfo.aggregated}</span>
+              <span className="text-muted-foreground">dias agregados</span>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              (Compactar remove detalhes &gt;7 dias, mantendo resumos)
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filtros */}
       <Card>
