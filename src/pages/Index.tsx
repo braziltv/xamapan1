@@ -38,6 +38,7 @@ const Index = () => {
     recallTriage,
     recallDoctor,
     directPatient,
+    finishWithoutCall,
   } = useCallPanel();
 
   const handleLogout = () => {
@@ -102,6 +103,8 @@ const Index = () => {
               patients={patients}
               onAddPatient={addPatient}
               onRemovePatient={removePatient}
+              onDirectPatient={directPatient}
+              onFinishWithoutCall={finishWithoutCall}
             />
           </main>
         </TabsContent>
@@ -125,6 +128,7 @@ const Index = () => {
               onFinishTriage={finishTriage}
               onRecall={recallTriage}
               onDirectPatient={directPatient}
+              onFinishWithoutCall={finishWithoutCall}
             />
           </main>
         </TabsContent>
@@ -138,6 +142,7 @@ const Index = () => {
               onCallPatient={callPatientToDoctor}
               onFinishConsultation={finishConsultation}
               onRecall={recallDoctor}
+              onFinishWithoutCall={finishWithoutCall}
             />
           </main>
         </TabsContent>

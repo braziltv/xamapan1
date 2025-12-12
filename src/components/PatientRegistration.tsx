@@ -1,18 +1,47 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Users } from 'lucide-react';
+import { UserPlus, Trash2, Users, Volume2, Phone, CheckCircle } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 interface PatientRegistrationProps {
   patients: Patient[];
   onAddPatient: (name: string) => void;
   onRemovePatient: (id: string) => void;
+  onDirectPatient: (patientName: string, destination: string) => void;
+  onFinishWithoutCall: (id: string) => void;
 }
 
-export function PatientRegistration({ patients, onAddPatient, onRemovePatient }: PatientRegistrationProps) {
+const SALAS = [
+  { id: 'triagem', name: 'Triagem' },
+  { id: 'eletro', name: 'Sala de Eletrocardiograma' },
+  { id: 'curativo', name: 'Sala de Curativos' },
+  { id: 'raiox', name: 'Sala do Raio X' },
+  { id: 'enfermaria', name: 'Enfermaria' },
+];
+
+const CONSULTORIOS = [
+  { id: 'cons1', name: 'Consultório 1' },
+  { id: 'cons2', name: 'Consultório 2' },
+];
+
+export function PatientRegistration({ 
+  patients, 
+  onAddPatient, 
+  onRemovePatient,
+  onDirectPatient,
+  onFinishWithoutCall
+}: PatientRegistrationProps) {
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -90,14 +119,73 @@ export function PatientRegistration({ patients, onAddPatient, onRemovePatient }:
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onRemovePatient(patient.id)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {/* Menu Salas */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="gap-1">
+                        <Volume2 className="w-4 h-4" />
+                        Sala
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-card border border-border z-50">
+                      <DropdownMenuLabel>Direcionar para Sala</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {SALAS.map((sala) => (
+                        <DropdownMenuItem
+                          key={sala.id}
+                          onClick={() => onDirectPatient(patient.name, sala.name)}
+                          className="cursor-pointer"
+                        >
+                          {sala.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Menu Consultórios */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="gap-1">
+                        <Volume2 className="w-4 h-4" />
+                        Consultório
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-card border border-border z-50">
+                      <DropdownMenuLabel>Direcionar para Consultório</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {CONSULTORIOS.map((cons) => (
+                        <DropdownMenuItem
+                          key={cons.id}
+                          onClick={() => onDirectPatient(patient.name, cons.name)}
+                          className="cursor-pointer"
+                        >
+                          {cons.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Finalizar sem chamar */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onFinishWithoutCall(patient.id)}
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Finalizar
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onRemovePatient(patient.id)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

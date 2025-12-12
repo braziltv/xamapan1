@@ -244,6 +244,21 @@ export function useCallPanel() {
     setPatients(prev => prev.filter(p => p.id !== patientId));
   }, []);
 
+  const finishWithoutCall = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'attended' as const } : p
+    ));
+    // Clear current calls if this patient was being called
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage');
+    }
+    if (currentDoctorCall?.id === patientId) {
+      setCurrentDoctorCall(null);
+      completeCall('doctor');
+    }
+  }, [currentTriageCall, currentDoctorCall, completeCall]);
+
   const waitingForTriage = patients.filter(p => p.status === 'waiting')
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
@@ -268,5 +283,6 @@ export function useCallPanel() {
     recallTriage,
     recallDoctor,
     directPatient,
+    finishWithoutCall,
   };
 }

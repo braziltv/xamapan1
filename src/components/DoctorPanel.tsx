@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Stethoscope } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import {
@@ -17,6 +17,7 @@ interface DoctorPanelProps {
   onCallPatient: (id: string, destination?: string) => void;
   onFinishConsultation: (id: string) => void;
   onRecall: (destination?: string) => void;
+  onFinishWithoutCall: (id: string) => void;
 }
 
 export function DoctorPanel({ 
@@ -24,7 +25,8 @@ export function DoctorPanel({
   currentCall, 
   onCallPatient, 
   onFinishConsultation,
-  onRecall 
+  onRecall,
+  onFinishWithoutCall
 }: DoctorPanelProps) {
   const [selectedConsultorio, setSelectedConsultorio] = useState<string>('consultorio-1');
   const [currentConsultorio, setCurrentConsultorio] = useState<string>('Consultório 1');
@@ -130,6 +132,17 @@ export function DoctorPanel({
                     </p>
                   </div>
                 </div>
+                {/* Finalizar sem chamar */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onFinishWithoutCall(patient.id)}
+                  className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Finalizar
+                </Button>
+
                 <Button
                   onClick={() => handleCallPatient(patient.id)}
                   size="sm"

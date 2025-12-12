@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2 } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import {
@@ -18,6 +18,7 @@ interface TriagePanelProps {
   onFinishTriage: (id: string) => void;
   onRecall: () => void;
   onDirectPatient: (patientName: string, destination: string) => void;
+  onFinishWithoutCall: (id: string) => void;
 }
 
 const SALAS = [
@@ -39,7 +40,8 @@ export function TriagePanel({
   onCallPatient, 
   onFinishTriage,
   onRecall,
-  onDirectPatient
+  onDirectPatient,
+  onFinishWithoutCall
 }: TriagePanelProps) {
 
   return (
@@ -202,6 +204,17 @@ export function TriagePanel({
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+                  {/* Finalizar sem chamar */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onFinishWithoutCall(patient.id)}
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Finalizar
+                  </Button>
 
                   <Button
                     onClick={() => onCallPatient(patient.id)}
