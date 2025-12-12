@@ -29,10 +29,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Fetch news from multiple sources
   useEffect(() => {
     const feeds = [
+      // Geral
       { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'Brasil' },
+      // Editorias
+      { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'Brasil' },
       { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'Saúde' },
+      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'Economia' },
+      { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'Educação' },
       { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'Mundo' },
+      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'Tech' },
+      { url: 'https://g1.globo.com/dynamo/politica/mensalao/rss2.xml', source: 'Política' },
+      { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'Pop' },
+      { url: 'https://g1.globo.com/dynamo/natureza/rss2.xml', source: 'Natureza' },
+      { url: 'https://g1.globo.com/dynamo/carros/rss2.xml', source: 'Carros' },
+      { url: 'https://g1.globo.com/dynamo/concursos-e-emprego/rss2.xml', source: 'Emprego' },
+      { url: 'https://g1.globo.com/dynamo/turismo-e-viagem/rss2.xml', source: 'Turismo' },
+      // Minas Gerais
+      { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'MG' },
       { url: 'https://g1.globo.com/dynamo/mg/centro-oeste/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/mg/grande-minas/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/mg/sul-de-minas/rss2.xml', source: 'MG' },
+      { url: 'https://g1.globo.com/dynamo/minas-gerais/triangulo-mineiro/rss2.xml', source: 'MG' },
     ];
     
     let currentFeedIndex = 0;
@@ -489,18 +506,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {newsItems.length > 0 && (
         <div className="relative z-10 mt-4 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-xl md:rounded-2xl overflow-hidden border border-red-500/50">
           <div className="flex items-center">
-            <div className="bg-red-800 px-4 py-3 md:px-6 md:py-4 flex items-center gap-2 shrink-0 z-10">
-              <Newspaper className="w-5 h-5 md:w-7 md:h-7 text-white" />
-              <span className="text-white font-bold text-base md:text-xl lg:text-2xl">NOTÍCIAS</span>
+            <div className="bg-red-800 px-5 py-4 md:px-8 md:py-6 flex items-center gap-3 shrink-0 z-10">
+              <Newspaper className="w-6 h-6 md:w-10 md:h-10 text-white" />
+              <span className="text-white font-bold text-lg md:text-2xl lg:text-3xl">NOTÍCIAS</span>
             </div>
-            <div className="flex-1 overflow-hidden py-3 md:py-4">
+            <div className="flex-1 overflow-hidden py-4 md:py-6">
               <div className="animate-marquee whitespace-nowrap">
                 {newsItems.map((item, index) => (
-                  <span key={index} className="text-white text-base md:text-xl lg:text-2xl mx-6 md:mx-10">
-                    <span className={`px-2 py-1 rounded text-sm md:text-base font-bold mr-3 ${
+                  <span key={index} className="text-white text-lg md:text-2xl lg:text-3xl mx-8 md:mx-12">
+                    <span className={`px-3 py-1.5 rounded text-base md:text-lg font-bold mr-4 ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                      item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
+                      item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
+                      item.source === 'Política' ? 'bg-red-400 text-red-900' :
+                      item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
+                      item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
+                      item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
+                      item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
+                      item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
+                      item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
                       'bg-green-500 text-green-900'
                     }`}>
                       {item.source}
@@ -509,11 +535,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-white text-base md:text-xl lg:text-2xl mx-6 md:mx-10">
-                    <span className={`px-2 py-1 rounded text-sm md:text-base font-bold mr-3 ${
+                  <span key={`dup-${index}`} className="text-white text-lg md:text-2xl lg:text-3xl mx-8 md:mx-12">
+                    <span className={`px-3 py-1.5 rounded text-base md:text-lg font-bold mr-4 ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                      item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
+                      item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
+                      item.source === 'Política' ? 'bg-red-400 text-red-900' :
+                      item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
+                      item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
+                      item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
+                      item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
+                      item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
+                      item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
                       'bg-green-500 text-green-900'
                     }`}>
                       {item.source}
