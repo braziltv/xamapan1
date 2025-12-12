@@ -17,6 +17,8 @@ import {
   Activity, 
   Stethoscope, 
   TrendingUp,
+  TrendingDown,
+  Minus,
   CheckCircle,
   FileDown,
   Filter,
@@ -36,7 +38,7 @@ import {
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subDays, startOfDay, endOfDay, parseISO } from 'date-fns';
+import { format, subDays, startOfDay, endOfDay, parseISO, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -77,6 +79,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [compareMode, setCompareMode] = useState(false);
   const [selectedUnits, setSelectedUnits] = useState<string[]>([currentUnitName]);
   const [comparisonData, setComparisonData] = useState<{unit: string, shortName: string, total: number, triage: number, doctor: number}[]>([]);
+  const [previousPeriodData, setPreviousPeriodData] = useState<{total: number, triage: number, doctor: number}>({ total: 0, triage: 0, doctor: 0 });
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -127,6 +130,40 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         }
       }
 
+      // Calcular período anterior para tendências
+      const fromDate = parseISO(dateFrom);
+      const toDate = parseISO(dateTo);
+      const periodDays = differenceInDays(toDate, fromDate) + 1;
+      const previousFrom = format(subDays(fromDate, periodDays), 'yyyy-MM-dd');
+      const previousTo = format(subDays(fromDate, 1), 'yyyy-MM-dd');
+
+      // Carregar dados do período anterior
+      let prevQuery = supabase
+        .from('call_history')
+        .select('*')
+        .gte('created_at', startOfDay(parseISO(previousFrom)).toISOString())
+        .lte('created_at', endOfDay(parseISO(previousTo)).toISOString());
+
+      if (!compareMode && currentUnitName) {
+        prevQuery = prevQuery.eq('unit_name', currentUnitName);
+      } else if (compareMode && selectedUnits.length > 0) {
+        prevQuery = prevQuery.in('unit_name', selectedUnits);
+      }
+
+      if (callTypeFilter !== 'all') {
+        prevQuery = prevQuery.eq('call_type', callTypeFilter);
+      }
+
+      const { data: prevData } = await prevQuery;
+      
+      if (prevData) {
+        setPreviousPeriodData({
+          total: prevData.length,
+          triage: prevData.filter(d => d.call_type === 'triage').length,
+          doctor: prevData.filter(d => d.call_type === 'doctor').length,
+        });
+      }
+
       // Carregar dados agregados (para datas mais antigas)
       let aggQuery = supabase
         .from('statistics_daily')
@@ -163,6 +200,45 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       setLoading(false);
     }
   }, [dateFrom, dateTo, currentUnitName, callTypeFilter, compareMode, selectedUnits, HEALTH_UNITS]);
+
+  // Função para calcular tendência
+  const calculateTrend = (current: number, previous: number) => {
+    if (previous === 0) return { percentage: current > 0 ? 100 : 0, direction: current > 0 ? 'up' : 'neutral' as const };
+    const diff = ((current - previous) / previous) * 100;
+    return {
+      percentage: Math.abs(Math.round(diff)),
+      direction: diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral' as const
+    };
+  };
+
+  // Componente de indicador de tendência
+  const TrendIndicator = ({ current, previous, label }: { current: number; previous: number; label: string }) => {
+    const trend = calculateTrend(current, previous);
+    
+    return (
+      <div className="flex items-center gap-1 text-xs">
+        {trend.direction === 'up' && (
+          <>
+            <TrendingUp className="w-3 h-3 text-green-500" />
+            <span className="text-green-600">+{trend.percentage}%</span>
+          </>
+        )}
+        {trend.direction === 'down' && (
+          <>
+            <TrendingDown className="w-3 h-3 text-red-500" />
+            <span className="text-red-600">-{trend.percentage}%</span>
+          </>
+        )}
+        {trend.direction === 'neutral' && (
+          <>
+            <Minus className="w-3 h-3 text-muted-foreground" />
+            <span className="text-muted-foreground">0%</span>
+          </>
+        )}
+        <span className="text-muted-foreground ml-1">vs período anterior</span>
+      </div>
+    );
+  };
 
   useEffect(() => {
     loadDbHistory();
@@ -751,6 +827,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <p className="text-xs text-muted-foreground mt-1">
               {format(parseISO(dateFrom), 'dd/MM')} - {format(parseISO(dateTo), 'dd/MM')}
             </p>
+            <div className="mt-2">
+              <TrendIndicator current={totalCalls} previous={previousPeriodData.total} label="total" />
+            </div>
           </CardContent>
         </Card>
 
@@ -764,6 +843,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <p className="text-xs text-muted-foreground mt-1">
               {totalCalls > 0 ? Math.round((triageCalls / totalCalls) * 100) : 0}% do total
             </p>
+            <div className="mt-2">
+              <TrendIndicator current={triageCalls} previous={previousPeriodData.triage} label="triagem" />
+            </div>
           </CardContent>
         </Card>
 
@@ -777,6 +859,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <p className="text-xs text-muted-foreground mt-1">
               {totalCalls > 0 ? Math.round((doctorCalls / totalCalls) * 100) : 0}% do total
             </p>
+            <div className="mt-2">
+              <TrendIndicator current={doctorCalls} previous={previousPeriodData.doctor} label="médico" />
+            </div>
           </CardContent>
         </Card>
       </div>
