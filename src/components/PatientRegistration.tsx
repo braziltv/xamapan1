@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Users, Volume2, Phone, CheckCircle } from 'lucide-react';
+import { UserPlus, Trash2, Users, Volume2, CheckCircle, ArrowRight, Activity, Stethoscope } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -20,6 +20,8 @@ interface PatientRegistrationProps {
   onRemovePatient: (id: string) => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
+  onForwardToTriage: (id: string) => void;
+  onForwardToDoctor: (id: string) => void;
 }
 
 const SALAS = [
@@ -40,7 +42,9 @@ export function PatientRegistration({
   onAddPatient, 
   onRemovePatient,
   onDirectPatient,
-  onFinishWithoutCall
+  onFinishWithoutCall,
+  onForwardToTriage,
+  onForwardToDoctor
 }: PatientRegistrationProps) {
   const [name, setName] = useState('');
 
@@ -119,7 +123,31 @@ export function PatientRegistration({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
+                  {patient.status === 'waiting' && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onForwardToTriage(patient.id)}
+                        className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Activity className="w-4 h-4" />
+                        Triagem
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onForwardToDoctor(patient.id)}
+                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                      >
+                        <Stethoscope className="w-4 h-4" />
+                        Médico
+                      </Button>
+                    </>
+                  )}
+
                   {/* Menu Salas */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
