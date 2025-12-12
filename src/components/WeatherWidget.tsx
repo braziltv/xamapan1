@@ -109,46 +109,23 @@ export function WeatherWidget() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 shadow-xl">
-      <div className="flex items-center gap-4">
+    <div className="bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 shadow-lg">
+      <div className="flex items-center gap-3">
         {/* Weather Icon */}
-        <div className="flex items-center justify-center">
-          {getWeatherIcon(weather.current.description)}
-        </div>
+        {getWeatherIcon(weather.current.description, 'sm')}
         
-        {/* Current Temperature */}
-        <div className="flex flex-col">
-          <span className="text-white font-bold text-2xl md:text-3xl leading-none drop-shadow-lg">
-            {weather.current.temp}°C
-          </span>
-          <span className="text-white/70 text-xs md:text-sm">{weather.city}</span>
-        </div>
+        {/* Temperature */}
+        <span className="text-white font-bold text-lg leading-none">
+          {weather.current.temp}°C
+        </span>
 
         {/* Divider */}
-        <div className="w-px h-10 bg-white/20" />
-
-        {/* Min/Max */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-orange-300" />
-            <span className="text-white font-semibold text-sm md:text-base">{weather.forecast[0].maxTemp}°</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-blue-300" />
-            <span className="text-white/80 text-sm md:text-base">{weather.forecast[0].minTemp}°</span>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="w-px h-10 bg-white/20" />
+        <div className="w-px h-5 bg-white/20" />
 
         {/* Humidity */}
-        <div className="flex items-center gap-2">
-          <Droplets className="w-5 h-5 text-cyan-300" />
-          <div className="flex flex-col">
-            <span className="text-white font-semibold text-lg md:text-xl">{weather.current.humidity}%</span>
-            <span className="text-white/60 text-[10px] md:text-xs">Umidade</span>
-          </div>
+        <div className="flex items-center gap-1">
+          <Droplets className="w-4 h-4 text-cyan-300" />
+          <span className="text-white font-medium text-sm">{weather.current.humidity}%</span>
         </div>
       </div>
     </div>
