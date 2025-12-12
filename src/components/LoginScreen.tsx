@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
   { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
@@ -76,8 +77,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-2">
-            <LogIn className="w-8 h-8 text-primary-foreground" />
+          <div className="mx-auto mb-4">
+            <img src={xamaPanLogo} alt="Xama Pan Logo" className="w-32 h-32 object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold">Software de Chamada De Pacientes</CardTitle>
         </CardHeader>
