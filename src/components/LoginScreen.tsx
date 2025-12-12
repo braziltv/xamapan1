@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft } from "lucide-react";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -23,31 +23,23 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
+  const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // TV user - show unit selection screen
+    if (username === "tv" && password === "tv") {
+      setShowTvUnitSelection(true);
+      return;
+    }
     
     if (!selectedUnit) {
       toast({
         title: "Selecione uma unidade",
         description: "Por favor, selecione a unidade de saúde.",
         variant: "destructive",
-      });
-      return;
-    }
-    
-    // TV user - dedicated for TV displays
-    if (username === "tv" && password === "tv") {
-      const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("selectedUnitId", selectedUnit);
-      localStorage.setItem("selectedUnitName", unit?.name || "");
-      localStorage.setItem("isTvMode", "true");
-      onLogin(selectedUnit, unit?.name || "", true);
-      toast({
-        title: "Modo TV ativado!",
-        description: `Conectado - ${unit?.name}`,
       });
       return;
     }
@@ -72,6 +64,92 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       });
     }
   };
+
+  const handleTvUnitConfirm = () => {
+    if (!selectedUnit) {
+      toast({
+        title: "Selecione uma unidade",
+        description: "Por favor, selecione a unidade de saúde para exibir na TV.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("selectedUnitId", selectedUnit);
+    localStorage.setItem("selectedUnitName", unit?.name || "");
+    localStorage.setItem("isTvMode", "true");
+    onLogin(selectedUnit, unit?.name || "", true);
+    toast({
+      title: "Modo TV ativado!",
+      description: `Conectado - ${unit?.name}`,
+    });
+  };
+
+  const handleBackToLogin = () => {
+    setShowTvUnitSelection(false);
+    setUsername("");
+    setPassword("");
+    setSelectedUnit("");
+  };
+
+  // TV Unit Selection Screen
+  if (showTvUnitSelection) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader className="text-center space-y-2">
+            <div className="mx-auto mb-4 flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
+              <Tv className="w-10 h-10 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Modo TV</CardTitle>
+            <p className="text-muted-foreground">
+              Selecione a unidade de saúde que será exibida na TV
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="tv-unit">Qual unidade exibir na TV?</Label>
+              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                <SelectTrigger className="h-12 text-base">
+                  <SelectValue placeholder="Selecione a unidade" />
+                </SelectTrigger>
+                <SelectContent className="bg-background">
+                  {HEALTH_UNITS.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id} className="py-3">
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleBackToLogin}
+                className="flex-1"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Button 
+                onClick={handleTvUnitConfirm}
+                className="flex-1"
+              >
+                Confirmar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <footer className="fixed bottom-6 left-0 right-0 text-center">
+          <p className="text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
+            Solução criada e cedida gratuitamente por Kalebe Gomes.
+          </p>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
