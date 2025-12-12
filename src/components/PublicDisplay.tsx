@@ -222,6 +222,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
 
+  // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
+  const getBestVoice = useCallback(() => {
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    
+    // Priority order for more natural voices (Google and Microsoft neural voices are best)
+    const voicePriorities = [
+      // Google voices (most natural)
+      'Google português do Brasil',
+      'Google Brazilian Portuguese',
+      // Microsoft neural voices (very natural)
+      'Microsoft Francisca Online',
+      'Microsoft Thalita Online', 
+      'Microsoft Antonio Online',
+      // Other quality voices
+      'Luciana',
+      'Vitória',
+      'Maria',
+      'Fernanda',
+      'Helena',
+      // Fallback female indicators
+      'female',
+      'feminino'
+    ];
+    
+    for (const priority of voicePriorities) {
+      const found = ptVoices.find(v => 
+        v.name.toLowerCase().includes(priority.toLowerCase())
+      );
+      if (found) return found;
+    }
+    
+    // Return any Portuguese Brazilian voice as fallback
+    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+  }, []);
+
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     // Play notification sound first
     await playNotificationSound();
@@ -231,22 +267,34 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       `${name}. Por favor, dirija-se ao ${location}.`
     );
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.85;
-    utterance.pitch = 1.2;
     
-    // Try to select a female voice
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v => 
-      v.lang.includes('pt') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('feminino') || v.name.includes('Luciana') || v.name.includes('Vitória') || v.name.includes('Maria'))
-    ) || voices.find(v => v.lang.includes('pt-BR'));
+    // Get the best voice available
+    const bestVoice = getBestVoice();
     
-    if (femaleVoice) {
-      utterance.voice = femaleVoice;
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      // Adjust rate and pitch based on voice type for more natural sound
+      if (bestVoice.name.toLowerCase().includes('google')) {
+        // Google voices sound better with these settings
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
+        // Microsoft neural voices
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+      } else {
+        // Default settings for other voices
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+      }
+    } else {
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
     }
     
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
-  }, [playNotificationSound]);
+  }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
   useEffect(() => {
