@@ -138,7 +138,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         </CardContent>
       </Card>
       <footer className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
+        <p className="text-base font-medium text-foreground/80">
           Solução criada e cedida gratuitamente por Kalebe Gomes.
         </p>
       </footer>
