@@ -62,6 +62,19 @@ const Index = () => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [activeTab, isTvMode]);
 
+  // Auto fullscreen for TV mode
+  useEffect(() => {
+    if (isTvMode && isLoggedIn && mainContainerRef.current) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        mainContainerRef.current?.requestFullscreen().catch((err) => {
+          console.log('Fullscreen request failed (user interaction may be required):', err);
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isTvMode, isLoggedIn]);
+
   const {
     patients,
     waitingForTriage,
