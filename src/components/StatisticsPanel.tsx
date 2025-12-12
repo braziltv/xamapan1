@@ -99,6 +99,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [deletePassword, setDeletePassword] = useState('');
   const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteScope, setDeleteScope] = useState<'all' | 'unit'>('all');
+  const [deleteUnitName, setDeleteUnitName] = useState(currentUnitName);
   const { toast } = useToast();
 
   // Carregar dados do banco (detalhados + agregados)
@@ -668,29 +670,52 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
 
     setDeleting(true);
     try {
-      // Apagar TODOS os registros do histórico de chamadas
-      const { error: historyError } = await supabase
-        .from('call_history')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todos os registros
+      if (deleteScope === 'all') {
+        // Apagar TODOS os registros do histórico de chamadas
+        const { error: historyError } = await supabase
+          .from('call_history')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      if (historyError) throw historyError;
+        if (historyError) throw historyError;
 
-      // Apagar TODOS os registros das estatísticas diárias
-      const { error: statsError } = await supabase
-        .from('statistics_daily')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta todos os registros
+        // Apagar TODOS os registros das estatísticas diárias
+        const { error: statsError } = await supabase
+          .from('statistics_daily')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      if (statsError) throw statsError;
+        if (statsError) throw statsError;
 
-      toast({
-        title: "Registros apagados",
-        description: "Todos os registros foram removidos com sucesso.",
-      });
+        toast({
+          title: "Registros apagados",
+          description: "Todos os registros de todas as unidades foram removidos.",
+        });
+      } else {
+        // Apagar apenas registros da unidade selecionada
+        const { error: historyError } = await supabase
+          .from('call_history')
+          .delete()
+          .eq('unit_name', deleteUnitName);
+
+        if (historyError) throw historyError;
+
+        const { error: statsError } = await supabase
+          .from('statistics_daily')
+          .delete()
+          .eq('unit_name', deleteUnitName);
+
+        if (statsError) throw statsError;
+
+        toast({
+          title: "Registros apagados",
+          description: `Registros da unidade "${deleteUnitName}" foram removidos.`,
+        });
+      }
 
       setDeleteDialogOpen(false);
       setDeletePassword('');
+      setDeleteScope('all');
       loadDbHistory();
     } catch (error) {
       console.error('Erro ao apagar registros:', error);
@@ -715,11 +740,62 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               Apagar Registros
             </DialogTitle>
             <DialogDescription>
-              Esta ação irá apagar permanentemente <strong>TODOS</strong> os registros de estatísticas 
-              e histórico de chamadas de <strong>todas as unidades</strong>.
+              Escolha o escopo da exclusão e confirme com a senha de administrador.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* Seleção de escopo */}
+            <div className="space-y-3">
+              <Label>Escopo da exclusão:</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    id="delete-all"
+                    name="deleteScope"
+                    checked={deleteScope === 'all'}
+                    onChange={() => setDeleteScope('all')}
+                    className="w-4 h-4 text-destructive"
+                  />
+                  <Label htmlFor="delete-all" className="cursor-pointer font-normal">
+                    Apagar <strong>todos</strong> os registros de <strong>todas as unidades</strong>
+                  </Label>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    id="delete-unit"
+                    name="deleteScope"
+                    checked={deleteScope === 'unit'}
+                    onChange={() => setDeleteScope('unit')}
+                    className="w-4 h-4 text-destructive"
+                  />
+                  <Label htmlFor="delete-unit" className="cursor-pointer font-normal">
+                    Apagar apenas de uma unidade específica
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            {/* Seleção de unidade */}
+            {deleteScope === 'unit' && (
+              <div className="space-y-2 ml-7">
+                <Label>Selecione a unidade:</Label>
+                <Select value={deleteUnitName} onValueChange={setDeleteUnitName}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {HEALTH_UNITS.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.name}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
               <p className="text-sm text-destructive font-medium">
                 ⚠️ Atenção: Esta ação não pode ser desfeita!
