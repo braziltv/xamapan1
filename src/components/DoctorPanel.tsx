@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, Clock } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import {
@@ -47,17 +47,17 @@ export function DoctorPanel({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Consultório Selection */}
-      <div className="bg-card rounded-xl p-4 shadow-health border border-border">
-        <label className="block text-sm font-medium text-foreground mb-2">
+      <div className="card-elevated rounded-2xl p-5">
+        <label className="block text-sm font-semibold text-foreground mb-3">
           Selecionar Consultório
         </label>
         <Select value={selectedConsultorio} onValueChange={setSelectedConsultorio}>
-          <SelectTrigger className="w-full bg-background">
+          <SelectTrigger className="w-full h-12 bg-muted/50 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20">
             <SelectValue placeholder="Selecione o consultório" />
           </SelectTrigger>
-          <SelectContent className="bg-background border border-border">
+          <SelectContent className="bg-card border border-border shadow-xl">
             {consultorios.map((consultorio) => (
               <SelectItem key={consultorio.value} value={consultorio.value}>
                 {consultorio.label}
@@ -68,89 +68,96 @@ export function DoctorPanel({
       </div>
 
       {/* Current Call */}
-      <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Stethoscope className="w-5 h-5" />
-            Chamada Atual - {currentConsultorio}
-          </h2>
+      <div className="card-elevated rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-health-purple to-health-purple/80 p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <Stethoscope className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-white">
+              Chamada Atual - {currentConsultorio}
+            </h2>
+          </div>
         </div>
         <div className="p-6">
           {currentCall ? (
-            <div className="text-center">
-              <p className="text-4xl font-bold text-foreground mb-4">
+            <div className="text-center animate-scale-in">
+              <p className="text-4xl font-extrabold text-foreground mb-2">
                 {currentCall.name}
               </p>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4" />
                 Chamado às {format(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
               </p>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={handleRecall} variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
+              <div className="flex gap-3 justify-center">
+                <Button onClick={handleRecall} variant="outline" className="gap-2 hover:bg-muted">
+                  <Phone className="w-4 h-4" />
                   Chamar Novamente
                 </Button>
-                <Button onClick={() => onFinishConsultation(currentCall.id)} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-2" />
+                <Button onClick={() => onFinishConsultation(currentCall.id)} className="gap-2 gradient-success hover:opacity-90 shadow-lg">
+                  <Check className="w-4 h-4" />
                   Finalizar Consulta
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum paciente em consulta
-            </p>
+            <div className="text-center py-8">
+              <div className="icon-container-muted w-16 h-16 mx-auto mb-4">
+                <Stethoscope className="w-8 h-8" />
+              </div>
+              <p className="text-muted-foreground font-medium">Nenhum paciente em consulta</p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Waiting Queue */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
-          Aguardando Consulta ({waitingPatients.length})
-        </h2>
+      <div className="card-elevated rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-health-purple-light rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-health-purple" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Aguardando Consulta</h2>
+            <p className="text-sm text-muted-foreground">{waitingPatients.length} paciente{waitingPatients.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
         
         {waitingPatients.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            Nenhum paciente aguardando consulta
-          </p>
+          <div className="text-center py-8">
+            <div className="icon-container-muted w-16 h-16 mx-auto mb-4">
+              <Users className="w-8 h-8" />
+            </div>
+            <p className="text-muted-foreground font-medium">Nenhum paciente aguardando consulta</p>
+          </div>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
             {waitingPatients.map((patient, index) => (
-              <div
-                key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Triagem finalizada às {format(patient.calledAt || patient.createdAt, 'HH:mm')}
-                    </p>
+              <div key={patient.id} className="card-interactive rounded-xl p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-health-purple-light flex items-center justify-center text-health-purple font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{patient.name}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Triagem às {format(patient.calledAt || patient.createdAt, 'HH:mm')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => onFinishWithoutCall(patient.id)} className="gap-1.5 border-health-green/30 text-health-green hover:bg-health-green-light">
+                      <CheckCircle className="w-4 h-4" />
+                      Finalizar
+                    </Button>
+                    <Button onClick={() => handleCallPatient(patient.id)} size="sm" className="gap-1.5 bg-health-purple hover:bg-health-purple/90 shadow-lg">
+                      <Phone className="w-4 h-4" />
+                      Chamar
+                    </Button>
                   </div>
                 </div>
-                {/* Finalizar sem chamar */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onFinishWithoutCall(patient.id)}
-                  className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Finalizar
-                </Button>
-
-                <Button
-                  onClick={() => handleCallPatient(patient.id)}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Chamar
-                </Button>
               </div>
             ))}
           </div>

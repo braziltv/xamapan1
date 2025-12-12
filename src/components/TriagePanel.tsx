@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle, Stethoscope } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle, Stethoscope, Clock, Activity } from 'lucide-react';
 import { Patient } from '@/types/patient';
 import { format } from 'date-fns';
 import {
@@ -47,215 +47,172 @@ export function TriagePanel({
 }: TriagePanelProps) {
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Current Call */}
-      <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <PhoneCall className="w-5 h-5" />
-            Chamada Atual - Triagem
-          </h2>
+      <div className="card-elevated rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-health-blue to-health-blue-dark p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <PhoneCall className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-white">
+              Chamada Atual - Triagem
+            </h2>
+          </div>
         </div>
         <div className="p-6">
           {currentCall ? (
-            <div className="text-center">
-              <p className="text-4xl font-bold text-foreground mb-4">
+            <div className="text-center animate-scale-in">
+              <p className="text-4xl font-extrabold text-foreground mb-2">
                 {currentCall.name}
               </p>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4" />
                 Chamado às {format(currentCall.calledAt!, 'HH:mm')}
               </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Button onClick={onRecall} variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
+              <div className="flex gap-3 justify-center flex-wrap">
+                <Button onClick={onRecall} variant="outline" className="gap-2 hover:bg-muted">
+                  <Phone className="w-4 h-4" />
                   Chamar Novamente
                 </Button>
                 
-                {/* Menu Salas */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2 hover:bg-muted">
                       <Volume2 className="w-4 h-4" />
-                      Direcionar para Sala
+                      Sala
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-card border border-border z-50">
-                    <DropdownMenuLabel>Escolha a Sala</DropdownMenuLabel>
+                  <DropdownMenuContent className="bg-card border border-border shadow-xl z-50">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Escolha a Sala</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {SALAS.map((sala) => (
-                      <DropdownMenuItem
-                        key={sala.id}
-                        onClick={() => onDirectPatient(currentCall.name, sala.name)}
-                        className="cursor-pointer"
-                      >
+                      <DropdownMenuItem key={sala.id} onClick={() => onDirectPatient(currentCall.name, sala.name)} className="cursor-pointer">
                         {sala.name}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Menu Consultórios */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2 hover:bg-muted">
                       <Volume2 className="w-4 h-4" />
-                      Direcionar para Consultório
+                      Consultório
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-card border border-border z-50">
-                    <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
+                  <DropdownMenuContent className="bg-card border border-border shadow-xl z-50">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Escolha o Consultório</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {CONSULTORIOS.map((cons) => (
-                      <DropdownMenuItem
-                        key={cons.id}
-                        onClick={() => onDirectPatient(currentCall.name, cons.name)}
-                        className="cursor-pointer"
-                      >
+                      <DropdownMenuItem key={cons.id} onClick={() => onDirectPatient(currentCall.name, cons.name)} className="cursor-pointer">
                         {cons.name}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button onClick={() => onFinishTriage(currentCall.id)} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-2" />
+                <Button onClick={() => onFinishTriage(currentCall.id)} className="gap-2 gradient-success hover:opacity-90 shadow-lg">
+                  <Check className="w-4 h-4" />
                   Finalizar Triagem
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum paciente sendo atendido
-            </p>
+            <div className="text-center py-8">
+              <div className="icon-container-muted w-16 h-16 mx-auto mb-4">
+                <Activity className="w-8 h-8" />
+              </div>
+              <p className="text-muted-foreground font-medium">Nenhum paciente sendo atendido</p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Waiting Queue */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
-          Fila de Espera ({waitingPatients.length})
-        </h2>
+      <div className="card-elevated rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-health-blue-light rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-health-blue" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Fila de Espera</h2>
+            <p className="text-sm text-muted-foreground">{waitingPatients.length} paciente{waitingPatients.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
         
         {waitingPatients.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            Nenhum paciente aguardando triagem
-          </p>
+          <div className="text-center py-8">
+            <div className="icon-container-muted w-16 h-16 mx-auto mb-4">
+              <Users className="w-8 h-8" />
+            </div>
+            <p className="text-muted-foreground font-medium">Nenhum paciente aguardando triagem</p>
+          </div>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
             {waitingPatients.map((patient, index) => (
-              <div
-                key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Chegou às {format(patient.createdAt, 'HH:mm')}
-                    </p>
+              <div key={patient.id} className="card-interactive rounded-xl p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-health-blue-light flex items-center justify-center text-health-blue font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{patient.name}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Chegou às {format(patient.createdAt, 'HH:mm')}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Menu Salas na fila */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Sala
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Direcionar para Sala</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {SALAS.map((sala) => (
-                        <DropdownMenuItem
-                          key={sala.id}
-                          onClick={() => onDirectPatient(patient.name, sala.name)}
-                          className="cursor-pointer"
-                        >
-                          {sala.name}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-muted">
+                          <Volume2 className="w-4 h-4" />
+                          Sala
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-card border border-border shadow-xl z-50">
+                        <DropdownMenuLabel className="text-xs text-muted-foreground">Direcionar para Sala</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {SALAS.map((sala) => (
+                          <DropdownMenuItem key={sala.id} onClick={() => onDirectPatient(patient.name, sala.name)} className="cursor-pointer">
+                            {sala.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-1.5 border-health-purple/30 text-health-purple hover:bg-health-purple-light">
+                          <Stethoscope className="w-4 h-4" />
+                          Médico
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-card border border-border shadow-xl z-50">
+                        <DropdownMenuLabel className="text-xs text-muted-foreground">Escolha o Consultório</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 1')} className="cursor-pointer">
+                          Consultório Médico 1
                         </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  {/* Menu Consultórios na fila */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Consultório
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Direcionar para Consultório</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {CONSULTORIOS.map((cons) => (
-                        <DropdownMenuItem
-                          key={cons.id}
-                          onClick={() => onDirectPatient(patient.name, cons.name)}
-                          className="cursor-pointer"
-                        >
-                          {cons.name}
+                        <DropdownMenuItem onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 2')} className="cursor-pointer">
+                          Consultório Médico 2
                         </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
-                  {/* Encaminhar para médico sem chamada */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                      >
-                        <Stethoscope className="w-4 h-4" />
-                        Médico
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 1')}
-                        className="cursor-pointer"
-                      >
-                        Consultório Médico 1
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 2')}
-                        className="cursor-pointer"
-                      >
-                        Consultório Médico 2
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    <Button variant="outline" size="sm" onClick={() => onFinishWithoutCall(patient.id)} className="gap-1.5 border-health-green/30 text-health-green hover:bg-health-green-light">
+                      <CheckCircle className="w-4 h-4" />
+                      Finalizar
+                    </Button>
 
-                  {/* Finalizar sem chamar */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onFinishWithoutCall(patient.id)}
-                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Finalizar
-                  </Button>
-
-                  <Button
-                    onClick={() => onCallPatient(patient.id)}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Chamar
-                  </Button>
+                    <Button onClick={() => onCallPatient(patient.id)} size="sm" className="gap-1.5 bg-health-blue hover:bg-health-blue-dark shadow-lg">
+                      <Phone className="w-4 h-4" />
+                      Chamar
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
