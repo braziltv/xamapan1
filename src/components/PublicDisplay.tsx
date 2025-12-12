@@ -26,6 +26,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
+  const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -159,9 +160,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
 
     fetchNews();
+    setNewsCountdown(5 * 60); // Reset countdown
     // Update every 5 minutes
-    const interval = setInterval(fetchNews, 5 * 60 * 1000);
+    const interval = setInterval(() => {
+      fetchNews();
+      setNewsCountdown(5 * 60); // Reset countdown after fetch
+    }, 5 * 60 * 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Countdown timer for next news update
+  useEffect(() => {
+    const countdownInterval = setInterval(() => {
+      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
+    }, 1000);
+    return () => clearInterval(countdownInterval);
   }, []);
 
   // Re-check localStorage periodically for unit name
@@ -538,6 +551,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     Atualizado: {format(lastNewsUpdate, 'HH:mm', { locale: ptBR })}
                   </span>
                 )}
+                <span className="text-red-300 text-xs md:text-sm">
+                  Próxima: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                </span>
               </div>
             </div>
             <div className="flex-1 overflow-hidden py-5 md:py-8">
