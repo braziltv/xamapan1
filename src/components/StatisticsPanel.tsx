@@ -126,14 +126,14 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
 
   // Compactar dados antigos
   const compactData = async () => {
-    if (!confirm('Isso vai agregar e remover registros detalhados com mais de 7 dias. Continuar?')) {
+    if (!confirm('Isso irá compactar dados antigos (mais de 30 dias) em resumos diários. Deseja continuar?')) {
       return;
     }
     
     setCompacting(true);
     try {
-      const { data, error } = await supabase.rpc('compact_old_statistics', { days_to_keep: 7 });
-      
+      const { data, error } = await supabase.rpc('compact_old_statistics', { days_to_keep: 30 });
+
       if (error) {
         console.error('Erro ao compactar:', error);
         alert('Erro ao compactar dados: ' + error.message);

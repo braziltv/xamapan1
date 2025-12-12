@@ -1,1 +1,4 @@
 project_id = "zxgmmdbffzmaxwfgdwlu"
+
+[functions.compact-statistics]
+verify_jwt = false
