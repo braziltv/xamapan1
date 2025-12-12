@@ -439,25 +439,66 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, []);
 
+  // Show button on mouse move in fullscreen, then hide after 5 seconds of inactivity
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    let inactivityTimeout: NodeJS.Timeout;
+
+    const handleMouseMove = () => {
+      setShowFullscreenButton(true);
+      
+      // Clear existing timeout
+      if (hideButtonTimeoutRef.current) {
+        clearTimeout(hideButtonTimeoutRef.current);
+      }
+      clearTimeout(inactivityTimeout);
+      
+      // Hide after 5 seconds of no movement
+      inactivityTimeout = setTimeout(() => {
+        setShowFullscreenButton(false);
+      }, 5000);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(inactivityTimeout);
+    };
+  }, [isFullscreen]);
+
+  // Keyboard shortcut F11 for fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [toggleFullscreen]);
+
   return (
     <div 
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 lg:p-8 relative overflow-hidden"
     >
       {/* Fullscreen Toggle Button */}
-      {showFullscreenButton && (
-        <button
-          onClick={toggleFullscreen}
-          className="fixed top-4 right-4 z-50 bg-slate-800/80 hover:bg-slate-700 text-white p-3 rounded-xl border border-slate-600 shadow-lg transition-all hover:scale-105"
-          title={isFullscreen ? 'Sair do modo tela cheia' : 'Entrar em tela cheia'}
-        >
-          {isFullscreen ? (
-            <Minimize className="w-6 h-6" />
-          ) : (
-            <Maximize className="w-6 h-6" />
-          )}
-        </button>
-      )}
+      <button
+        onClick={toggleFullscreen}
+        className={`fixed top-4 right-4 z-50 bg-slate-800/90 hover:bg-slate-700 text-white p-4 rounded-2xl border border-slate-500 shadow-2xl transition-all duration-300 hover:scale-110 ${
+          showFullscreenButton ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
+        }`}
+        title={isFullscreen ? 'Sair do modo tela cheia (ESC ou F11)' : 'Entrar em tela cheia (F11)'}
+      >
+        {isFullscreen ? (
+          <Minimize className="w-8 h-8" />
+        ) : (
+          <Maximize className="w-8 h-8" />
+        )}
+      </button>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
