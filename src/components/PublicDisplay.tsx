@@ -227,25 +227,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const voices = window.speechSynthesis.getVoices();
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
     
-    // Priority order for female Portuguese voices (natural sounding)
+    // Priority order: Microsoft Francisca first, then fallbacks
     const voicePriorities = [
-      // Google female voices (most natural)
+      // Microsoft Francisca - user selected voice
+      'Microsoft Francisca Online',
+      'Microsoft Francisca',
+      'Francisca',
+      // Fallback voices
       'Google português do Brasil',
       'Google Brazilian Portuguese',
-      // Microsoft female neural voices (very natural)
-      'Microsoft Francisca Online',
       'Microsoft Thalita Online',
-      // Other female quality voices
       'Luciana',
       'Vitória',
       'Maria',
       'Fernanda',
-      'Helena',
-      'Raquel',
-      // Female indicators
-      'female',
-      'feminino',
-      'feminina'
+      'Helena'
     ];
     
     for (const priority of voicePriorities) {
