@@ -395,7 +395,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className="h-screen w-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 md:p-4 lg:p-6 relative overflow-hidden flex flex-col"
+      className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 md:p-4 lg:p-6 relative overflow-y-auto"
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -435,19 +435,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       </div>
 
-      {/* Main Content - Flex grow to fill space */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 min-h-0">
+      {/* Main Content - Auto height grid */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         {/* Current Calls - Main Area */}
-        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-2 sm:gap-3 md:gap-4 min-h-0">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3 md:gap-4">
           {/* Triage Call */}
-          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2">
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
                 TRIAGEM
               </p>
             </div>
-            <div className="flex-1 p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-0">
+            <div className="p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-[100px] sm:min-h-[120px] md:min-h-[140px] lg:min-h-[160px]">
               {currentTriageCall ? (
                 <div className="text-center animate-pulse">
                   <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-wide">
@@ -466,14 +466,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+          <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm">
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
                 CONSULTÓRIO MÉDICO
               </p>
             </div>
-            <div className="flex-1 p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-0">
+            <div className="p-3 sm:p-4 md:p-6 flex items-center justify-center min-h-[100px] sm:min-h-[120px] md:min-h-[140px] lg:min-h-[160px]">
               {currentDoctorCall ? (
                 <div className="text-center animate-pulse">
                   <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-wide">
@@ -493,12 +493,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* History Panel */}
-        <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 p-2 sm:p-3 md:p-4 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
-          <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 flex items-center gap-2 shrink-0">
+        <div className="bg-slate-800/50 rounded-xl md:rounded-2xl border border-slate-700 p-2 sm:p-3 md:p-4 backdrop-blur-sm">
+          <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary" />
             Últimas Chamadas
           </h3>
-          <div className="flex-1 space-y-2 sm:space-y-3 overflow-y-auto min-h-0">
+          <div className="space-y-2 sm:space-y-3 max-h-[200px] sm:max-h-[250px] md:max-h-[300px] lg:max-h-[400px] overflow-y-auto">
             {historyItems.length === 0 ? (
               <p className="text-slate-500 text-center py-4 text-sm sm:text-base md:text-lg">
                 Nenhuma chamada ainda
