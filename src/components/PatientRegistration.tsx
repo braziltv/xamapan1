@@ -20,8 +20,8 @@ interface PatientRegistrationProps {
   onRemovePatient: (id: string) => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
-  onForwardToTriage: (id: string) => void;
-  onForwardToDoctor: (id: string) => void;
+  onForwardToTriage: (id: string, destination?: string) => void;
+  onForwardToDoctor: (id: string, destination?: string) => void;
 }
 
 const SALAS = [
@@ -35,6 +35,11 @@ const SALAS = [
 const CONSULTORIOS = [
   { id: 'cons1', name: 'Consultório 1' },
   { id: 'cons2', name: 'Consultório 2' },
+];
+
+const CONSULTORIOS_MEDICO = [
+  { id: 'med1', name: 'Consultório Médico 1' },
+  { id: 'med2', name: 'Consultório Médico 2' },
 ];
 
 export function PatientRegistration({ 
@@ -127,24 +132,59 @@ export function PatientRegistration({
                   {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
                   {patient.status === 'waiting' && (
                     <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onForwardToTriage(patient.id)}
-                        className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      >
-                        <Activity className="w-4 h-4" />
-                        Triagem
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onForwardToDoctor(patient.id)}
-                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                      >
-                        <Stethoscope className="w-4 h-4" />
-                        Médico
-                      </Button>
+                      {/* Menu Triagem */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Activity className="w-4 h-4" />
+                            Triagem
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-card border border-border z-50">
+                          <DropdownMenuLabel>Direcionar para</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {SALAS.map((sala) => (
+                            <DropdownMenuItem
+                              key={sala.id}
+                              onClick={() => onForwardToTriage(patient.id, sala.name)}
+                              className="cursor-pointer"
+                            >
+                              {sala.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Menu Médico */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                          >
+                            <Stethoscope className="w-4 h-4" />
+                            Médico
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-card border border-border z-50">
+                          <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {CONSULTORIOS_MEDICO.map((cons) => (
+                            <DropdownMenuItem
+                              key={cons.id}
+                              onClick={() => onForwardToDoctor(patient.id, cons.name)}
+                              className="cursor-pointer"
+                            >
+                              {cons.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </>
                   )}
 
