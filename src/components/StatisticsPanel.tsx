@@ -24,7 +24,9 @@ import {
   RefreshCw,
   Database,
   Building2,
-  BarChart3
+  BarChart3,
+  Trophy,
+  Medal
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -587,59 +589,154 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
 
       {/* Gráfico de Comparação entre Unidades */}
       {compareMode && comparisonData.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Comparação entre Unidades
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={comparisonData} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis 
-                      dataKey="shortName" 
-                      type="category" 
-                      width={80}
-                      tick={{ fontSize: 11 }}
-                    />
-                    <ChartTooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-background border rounded-lg p-3 shadow-lg">
-                              <p className="font-medium text-sm mb-1">{data.unit}</p>
-                              <p className="text-sm text-blue-600">Triagem: {data.triage}</p>
-                              <p className="text-sm text-green-600">Médico: {data.doctor}</p>
-                              <p className="text-sm font-medium mt-1">Total: {data.total}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Gráfico */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Comparação entre Unidades
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                <ChartContainer config={chartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={comparisonData} layout="vertical">
+                      <XAxis type="number" />
+                      <YAxis 
+                        dataKey="shortName" 
+                        type="category" 
+                        width={80}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <ChartTooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-background border rounded-lg p-3 shadow-lg">
+                                <p className="font-medium text-sm mb-1">{data.unit}</p>
+                                <p className="text-sm text-blue-600">Triagem: {data.triage}</p>
+                                <p className="text-sm text-green-600">Médico: {data.doctor}</p>
+                                <p className="text-sm font-medium mt-1">Total: {data.total}</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="triage" stackId="a" fill="hsl(217, 91%, 60%)" name="Triagem" />
+                      <Bar dataKey="doctor" stackId="a" fill="hsl(142, 71%, 45%)" name="Médico" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+              <div className="flex justify-center gap-6 mt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-blue-500" />
+                  <span className="text-sm">Triagem</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-green-500" />
+                  <span className="text-sm">Médico</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ranking de Produtividade */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                Ranking de Produtividade
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[...comparisonData]
+                  .sort((a, b) => b.total - a.total)
+                  .map((unit, index) => {
+                    const maxTotal = Math.max(...comparisonData.map(u => u.total), 1);
+                    const percentage = (unit.total / maxTotal) * 100;
+                    const getMedalColor = (pos: number) => {
+                      if (pos === 0) return 'text-yellow-500';
+                      if (pos === 1) return 'text-gray-400';
+                      if (pos === 2) return 'text-amber-700';
+                      return 'text-muted-foreground';
+                    };
+                    const getBgColor = (pos: number) => {
+                      if (pos === 0) return 'bg-yellow-500/10 border-yellow-500/30';
+                      if (pos === 1) return 'bg-gray-500/10 border-gray-500/30';
+                      if (pos === 2) return 'bg-amber-700/10 border-amber-700/30';
+                      return 'bg-muted/30 border-muted';
+                    };
+                    
+                    return (
+                      <div 
+                        key={unit.unit} 
+                        className={`p-3 rounded-lg border ${getBgColor(index)} transition-all hover:scale-[1.02]`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-8 h-8">
+                            {index < 3 ? (
+                              <Medal className={`w-6 h-6 ${getMedalColor(index)}`} />
+                            ) : (
+                              <span className="text-lg font-bold text-muted-foreground">{index + 1}º</span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{unit.unit}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                              <span className="text-xs text-muted-foreground w-12 text-right">
+                                {Math.round(percentage)}%
+                              </span>
                             </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar dataKey="triage" stackId="a" fill="hsl(217, 91%, 60%)" name="Triagem" />
-                    <Bar dataKey="doctor" stackId="a" fill="hsl(142, 71%, 45%)" name="Médico" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            <div className="flex justify-center gap-6 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-blue-500" />
-                <span className="text-sm">Triagem</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold">{unit.total}</p>
+                            <p className="text-xs text-muted-foreground">atendimentos</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 mt-2 ml-11 text-xs">
+                          <span className="text-blue-600">Triagem: {unit.triage}</span>
+                          <span className="text-green-600">Médico: {unit.doctor}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-green-500" />
-                <span className="text-sm">Médico</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              
+              {comparisonData.length > 0 && (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Total Geral</p>
+                      <p className="text-lg font-bold">{comparisonData.reduce((sum, u) => sum + u.total, 0)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Média</p>
+                      <p className="text-lg font-bold">
+                        {Math.round(comparisonData.reduce((sum, u) => sum + u.total, 0) / comparisonData.length)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Unidades</p>
+                      <p className="text-lg font-bold">{comparisonData.length}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Cards de Resumo - Período */}
