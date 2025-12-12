@@ -25,6 +25,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const processedCallsRef = useRef<Set<string>>(new Set());
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -145,6 +146,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Shuffle news to mix sources
           const shuffled = allNews.sort(() => Math.random() - 0.5);
           setNewsItems(shuffled);
+          setLastNewsUpdate(new Date());
         }
       } catch (error) {
         console.error('Error fetching news:', error);
@@ -529,7 +531,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="flex items-center">
             <div className="bg-red-800 px-6 py-5 md:px-10 md:py-8 flex items-center gap-3 shrink-0 z-10">
               <Newspaper className="w-8 h-8 md:w-12 md:h-12 text-white" />
-              <span className="text-white font-bold text-xl md:text-3xl lg:text-4xl">NOTÍCIAS</span>
+              <div className="flex flex-col">
+                <span className="text-white font-bold text-xl md:text-3xl lg:text-4xl">NOTÍCIAS</span>
+                {lastNewsUpdate && (
+                  <span className="text-red-200 text-xs md:text-sm">
+                    Atualizado: {format(lastNewsUpdate, 'HH:mm', { locale: ptBR })}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex-1 overflow-hidden py-5 md:py-8">
               <div className="animate-marquee whitespace-nowrap inline-flex">
