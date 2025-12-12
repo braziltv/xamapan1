@@ -101,6 +101,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteScope, setDeleteScope] = useState<'all' | 'unit'>('all');
   const [deleteUnitName, setDeleteUnitName] = useState(currentUnitName);
+  
+  // Estado para modal de comparação
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false);
+  const [comparePassword, setComparePassword] = useState('');
+  const [showComparePassword, setShowComparePassword] = useState(false);
+  
   const { toast } = useToast();
 
   // Carregar dados do banco (detalhados + agregados)
@@ -729,8 +735,101 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
+  // Função para verificar senha de comparação
+  const handleComparePassword = () => {
+    if (comparePassword !== 'Paineiras@1') {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha informada está incorreta.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setCompareMode(true);
+    setSelectedUnits(HEALTH_UNITS.map(u => u.name));
+    setCompareDialogOpen(false);
+    setComparePassword('');
+    toast({
+      title: "Modo comparação ativado",
+      description: "Agora você pode comparar o rendimento entre as unidades.",
+    });
+  };
+
+  // Função para tentar ativar modo comparação
+  const handleToggleCompareMode = (checked: boolean) => {
+    if (checked) {
+      setCompareDialogOpen(true);
+    } else {
+      setCompareMode(false);
+      setSelectedUnits([currentUnitName]);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Modal de senha para comparação */}
+      <Dialog open={compareDialogOpen} onOpenChange={(open) => {
+        setCompareDialogOpen(open);
+        if (!open) setComparePassword('');
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Comparar Unidades
+            </DialogTitle>
+            <DialogDescription>
+              Digite a senha de administrador para acessar a comparação entre unidades.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="compare-password">Senha:</Label>
+              <div className="relative">
+                <Input
+                  id="compare-password"
+                  type={showComparePassword ? 'text' : 'password'}
+                  value={comparePassword}
+                  onChange={(e) => setComparePassword(e.target.value)}
+                  placeholder="Digite a senha"
+                  className="pr-10"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleComparePassword();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowComparePassword(!showComparePassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showComparePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCompareDialogOpen(false);
+                setComparePassword('');
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleComparePassword}
+              disabled={!comparePassword}
+              className="gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Acessar Comparação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de confirmação para apagar */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -963,18 +1062,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               <Checkbox 
                 id="compareMode" 
                 checked={compareMode}
-                onCheckedChange={(checked) => {
-                  setCompareMode(checked === true);
-                  if (checked) {
-                    setSelectedUnits(HEALTH_UNITS.map(u => u.name));
-                  } else {
-                    setSelectedUnits([currentUnitName]);
-                  }
-                }}
+                onCheckedChange={(checked) => handleToggleCompareMode(checked === true)}
               />
               <Label htmlFor="compareMode" className="flex items-center gap-2 cursor-pointer">
                 <Building2 className="w-4 h-4" />
                 Comparar rendimento entre unidades
+                {!compareMode && <span className="text-xs text-muted-foreground">(requer senha)</span>}
               </Label>
             </div>
             
