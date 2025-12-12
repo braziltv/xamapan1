@@ -14,7 +14,7 @@ const HEALTH_UNITS = [
 ];
 
 interface LoginScreenProps {
-  onLogin: (unitId: string, unitName: string) => void;
+  onLogin: (unitId: string, unitName: string, isTvMode?: boolean) => void;
 }
 
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
@@ -36,12 +36,29 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
     
+    // TV user - dedicated for TV displays
+    if (username === "tv" && password === "tv") {
+      const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("selectedUnitId", selectedUnit);
+      localStorage.setItem("selectedUnitName", unit?.name || "");
+      localStorage.setItem("isTvMode", "true");
+      onLogin(selectedUnit, unit?.name || "", true);
+      toast({
+        title: "Modo TV ativado!",
+        description: `Conectado - ${unit?.name}`,
+      });
+      return;
+    }
+    
+    // Regular user
     if (username === "saude" && password === "saude@1") {
       const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("selectedUnitId", selectedUnit);
       localStorage.setItem("selectedUnitName", unit?.name || "");
-      onLogin(selectedUnit, unit?.name || "");
+      localStorage.setItem("isTvMode", "false");
+      onLogin(selectedUnit, unit?.name || "", false);
       toast({
         title: "Login realizado com sucesso!",
         description: `Bem-vindo ao sistema - ${unit?.name}`,

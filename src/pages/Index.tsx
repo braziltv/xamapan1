@@ -14,17 +14,28 @@ const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unitName, setUnitName] = useState("");
   const [activeTab, setActiveTab] = useState("cadastro");
+  const [isTvMode, setIsTvMode] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     const storedUnitName = localStorage.getItem("selectedUnitName") || "";
+    const tvMode = localStorage.getItem("isTvMode") === "true";
     setIsLoggedIn(loggedIn);
     setUnitName(storedUnitName);
+    setIsTvMode(tvMode);
+    
+    // If TV mode, set display tab
+    if (tvMode && loggedIn) {
+      setActiveTab("display");
+    }
   }, []);
 
   // Handle tab change and fullscreen for public display
   const handleTabChange = (value: string) => {
+    // TV mode can only view display
+    if (isTvMode) return;
+    
     setActiveTab(value);
     
     if (value === "display") {
@@ -40,16 +51,17 @@ const Index = () => {
     }
   };
 
-  // Listen for fullscreen exit (ESC key) and switch tab
+  // Listen for fullscreen exit (ESC key) and switch tab (only for non-TV mode)
   useEffect(() => {
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && activeTab === "display") {
+      if (!document.fullscreenElement && activeTab === "display" && !isTvMode) {
         setActiveTab("cadastro");
       }
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [activeTab]);
+  }, [activeTab, isTvMode]);
+
   const {
     patients,
     waitingForTriage,
@@ -77,20 +89,39 @@ const Index = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("selectedUnitId");
     localStorage.removeItem("selectedUnitName");
+    localStorage.removeItem("isTvMode");
     setIsLoggedIn(false);
     setUnitName("");
+    setIsTvMode(false);
   };
 
-  const handleLogin = (unitId: string, unitNameParam: string) => {
+  const handleLogin = (unitId: string, unitNameParam: string, tvMode?: boolean) => {
     setIsLoggedIn(true);
     setUnitName(unitNameParam);
+    setIsTvMode(tvMode || false);
+    if (tvMode) {
+      setActiveTab("display");
+    }
   };
 
   if (!isLoggedIn) {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
-  // If in display mode, show only the PublicDisplay in fullscreen
+  // TV Mode - show only PublicDisplay without any navigation
+  if (isTvMode) {
+    return (
+      <div ref={mainContainerRef} className="min-h-screen bg-background">
+        <PublicDisplay 
+          currentTriageCall={currentTriageCall} 
+          currentDoctorCall={currentDoctorCall}
+          history={history} 
+        />
+      </div>
+    );
+  }
+
+  // If in display mode (non-TV), show only the PublicDisplay in fullscreen
   if (activeTab === "display") {
     return (
       <div ref={mainContainerRef} className="min-h-screen bg-background">
