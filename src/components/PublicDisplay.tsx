@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, VolumeX } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -222,50 +222,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
 
-  // State to track if voices are loaded
-  const [voicesLoaded, setVoicesLoaded] = useState(false);
-  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
-
-  // Load voices - they may not be immediately available
-  useEffect(() => {
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        voicesRef.current = voices;
-        setVoicesLoaded(true);
-        console.log('TTS voices loaded:', voices.length, 'voices available');
-        // Log all Portuguese voices for debugging
-        const ptVoices = voices.filter(v => v.lang.includes('pt'));
-        console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
-      }
-    };
-
-    // Try to load immediately
-    loadVoices();
-
-    // Also listen for the voiceschanged event (required by some browsers)
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    // Chrome bug workaround: keep speechSynthesis alive
-    const keepAlive = setInterval(() => {
-      if (window.speechSynthesis.speaking === false) {
-        window.speechSynthesis.cancel();
-      }
-    }, 5000);
-
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      clearInterval(keepAlive);
-    };
-  }, []);
-
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
     const voices = window.speechSynthesis.getVoices();
-    console.log('Available voices:', voices.length);
-    
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
-    console.log('Portuguese voices:', ptVoices.length);
     
     // Priority order for more natural voices (Google and Microsoft neural voices are best)
     const voicePriorities = [
@@ -291,88 +251,50 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const found = ptVoices.find(v => 
         v.name.toLowerCase().includes(priority.toLowerCase())
       );
-      if (found) {
-        console.log('Selected voice:', found.name);
-        return found;
-      }
+      if (found) return found;
     }
     
     // Return any Portuguese Brazilian voice as fallback
-    const fallback = ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
-    console.log('Fallback voice:', fallback?.name || 'none');
-    return fallback;
+    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    console.log('speakName called:', name, caller, destination);
-    
     // Play notification sound first
     await playNotificationSound();
     
-    // Wait a bit for the sound to finish
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const text = `${name}. Por favor, dirija-se ao ${location}.`;
-    console.log('TTS text:', text);
+    const utterance = new SpeechSynthesisUtterance(
+      `${name}. Por favor, dirija-se ao ${location}.`
+    );
+    utterance.lang = 'pt-BR';
     
-    // Function to actually speak
-    const doSpeak = () => {
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'pt-BR';
-      
-      // Get the best voice available - use cached voices if available
-      const voices = voicesRef.current.length > 0 ? voicesRef.current : window.speechSynthesis.getVoices();
-      const ptVoices = voices.filter(v => v.lang.includes('pt'));
-      
-      // Find best Portuguese voice
-      let bestVoice: SpeechSynthesisVoice | null = null;
-      const priorities = ['Google', 'Microsoft', 'Luciana', 'Maria', 'Francisca'];
-      for (const p of priorities) {
-        bestVoice = ptVoices.find(v => v.name.includes(p)) || null;
-        if (bestVoice) break;
-      }
-      if (!bestVoice) bestVoice = ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
-      
-      if (bestVoice) {
-        utterance.voice = bestVoice;
-        console.log('Using voice:', bestVoice.name);
+    // Get the best voice available
+    const bestVoice = getBestVoice();
+    
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      // Adjust rate and pitch based on voice type for more natural sound
+      if (bestVoice.name.toLowerCase().includes('google')) {
+        // Google voices sound better with these settings
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
+        // Microsoft neural voices
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
       } else {
-        console.log('No Portuguese voice found, using browser default');
+        // Default settings for other voices
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
       }
-      
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      // Add event listeners for debugging
-      utterance.onstart = () => console.log('TTS started speaking');
-      utterance.onend = () => console.log('TTS finished speaking');
-      utterance.onerror = (e) => console.error('TTS error:', e.error, e);
-      
-      window.speechSynthesis.speak(utterance);
-      console.log('TTS speak() called');
-    };
-    
-    // Chrome bug: speechSynthesis can get stuck, need to resume it
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
+    } else {
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
     }
     
-    // Try speaking immediately
-    doSpeak();
-    
-    // Chrome workaround: if not speaking after 100ms, try again
-    setTimeout(() => {
-      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
-        console.log('TTS not started, retrying...');
-        doSpeak();
-      }
-    }, 200);
-  }, [playNotificationSound]);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
   useEffect(() => {
@@ -548,20 +470,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Weather Widget */}
           <WeatherWidget />
           
-          {/* Clock - Modern design with seconds */}
-          <div className="text-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-                {format(currentTime, 'HH:mm')}
-              </span>
-              <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-cyan-400 leading-none animate-pulse" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-                :{format(currentTime, 'ss')}
-              </span>
-            </div>
-            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-yellow-400 font-bold mt-1 tracking-wide">
+          {/* Clock */}
+          <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
+            <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
+              {format(currentTime, 'HH:mm')}
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-yellow-400 font-bold">
               {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
             </p>
-            <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-slate-300/90 font-medium">
+            <p className="text-xs sm:text-sm lg:text-base text-slate-300 font-medium">
               {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
@@ -740,23 +657,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Credits and Test Audio Button - Minimal */}
-      <div className="relative z-10 mt-1 flex items-center justify-center gap-4 shrink-0">
+      {/* Credits - Minimal */}
+      <div className="relative z-10 mt-1 text-center shrink-0">
         <p className="text-slate-500 text-[9px] sm:text-[10px] lg:text-xs">
           Solução criada por Kalebe Gomes
         </p>
-        <button
-          onClick={() => speakName('Teste de Áudio', 'triage', 'Triagem')}
-          className="flex items-center gap-1 px-2 py-1 text-[9px] sm:text-[10px] lg:text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-lg border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200"
-          title="Testar áudio TTS"
-        >
-          {voicesLoaded ? (
-            <Volume2 className="w-3 h-3" />
-          ) : (
-            <VolumeX className="w-3 h-3 text-orange-400" />
-          )}
-          <span>Testar Áudio</span>
-        </button>
       </div>
     </div>
   );
