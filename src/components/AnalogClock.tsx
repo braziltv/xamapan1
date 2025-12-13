@@ -28,7 +28,7 @@ export function AnalogClock({ size = 80 }: AnalogClockProps) {
   const hourMarkers = Array.from({ length: 12 }, (_, i) => {
     const angle = (i * 30 - 90) * (Math.PI / 180);
     const isMainHour = i % 3 === 0;
-    const innerRadius = isMainHour ? radius - 8 : radius - 5;
+    const innerRadius = isMainHour ? radius - 12 : radius - 5;
     const outerRadius = radius - 2;
     return {
       x1: center + Math.cos(angle) * innerRadius,
@@ -36,6 +36,22 @@ export function AnalogClock({ size = 80 }: AnalogClockProps) {
       x2: center + Math.cos(angle) * outerRadius,
       y2: center + Math.sin(angle) * outerRadius,
       isMain: isMainHour,
+    };
+  });
+
+  // Main hour numbers (12, 3, 6, 9)
+  const mainHours = [
+    { num: '12', angle: -90 },
+    { num: '3', angle: 0 },
+    { num: '6', angle: 90 },
+    { num: '9', angle: 180 },
+  ].map(({ num, angle }) => {
+    const rad = angle * (Math.PI / 180);
+    const numberRadius = radius - 18;
+    return {
+      num,
+      x: center + Math.cos(rad) * numberRadius,
+      y: center + Math.sin(rad) * numberRadius,
     };
   });
 
@@ -73,18 +89,35 @@ export function AnalogClock({ size = 80 }: AnalogClockProps) {
           fill="url(#clockFace)"
         />
 
-        {/* Hour markers */}
-        {hourMarkers.map((marker, i) => (
+        {/* Hour markers (only non-main hours) */}
+        {hourMarkers.filter(m => !m.isMain).map((marker, i) => (
           <line
             key={i}
             x1={marker.x1}
             y1={marker.y1}
             x2={marker.x2}
             y2={marker.y2}
-            stroke={marker.isMain ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.4)"}
-            strokeWidth={marker.isMain ? 2 : 1}
+            stroke="rgba(255, 255, 255, 0.4)"
+            strokeWidth={1}
             strokeLinecap="round"
           />
+        ))}
+
+        {/* Main hour numbers */}
+        {mainHours.map(({ num, x, y }) => (
+          <text
+            key={num}
+            x={x}
+            y={y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="rgba(255, 255, 255, 0.9)"
+            fontSize={size * 0.13}
+            fontWeight="bold"
+            fontFamily="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+          >
+            {num}
+          </text>
         ))}
 
         {/* Hour hand */}
