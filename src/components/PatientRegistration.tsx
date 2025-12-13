@@ -72,7 +72,7 @@ export function PatientRegistration({
           <UserPlus className="w-5 h-5 text-primary" />
           Cadastrar Paciente
         </h2>
-        <form onSubmit={handleSubmit} className="flex gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Input
             type="text"
             placeholder="Nome completo do paciente"
@@ -80,7 +80,7 @@ export function PatientRegistration({
             onChange={(e) => setName(e.target.value)}
             className="flex-1"
           />
-          <Button type="submit" disabled={!name.trim()}>
+          <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
             <UserPlus className="w-4 h-4 mr-2" />
             Cadastrar
           </Button>
@@ -103,9 +103,9 @@ export function PatientRegistration({
             {activePatients.map((patient, index) => (
               <div
                 key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-2"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                   <span className="text-lg font-mono font-bold text-primary w-8">
                     {index + 1}
                   </span>
@@ -128,7 +128,7 @@ export function PatientRegistration({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end mt-2 sm:mt-0">
                   {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
                   {patient.status === 'waiting' && (
                     <>

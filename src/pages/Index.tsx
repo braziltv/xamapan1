@@ -153,24 +153,28 @@ const Index = () => {
         />
 
         {/* Tab Navigation */}
-        <div className="bg-card border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TabsList className="h-12 bg-transparent flex-wrap">
-              <TabsTrigger value="cadastro" className="gap-2 data-[state=active]:bg-primary/10">
-                <UserPlus className="w-4 h-4" />
-                Cadastro
+        <div className="bg-card border-b border-border overflow-x-auto">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <TabsList className="h-auto min-h-[48px] bg-transparent flex flex-wrap gap-1 py-2">
+              <TabsTrigger value="cadastro" className="gap-1 sm:gap-2 data-[state=active]:bg-primary/10 text-xs sm:text-sm px-2 sm:px-4">
+                <UserPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Cadastro</span>
+                <span className="xs:hidden">Cad.</span>
               </TabsTrigger>
-              <TabsTrigger value="triagem" className="gap-2 data-[state=active]:bg-primary/10">
-                <Activity className="w-4 h-4" />
-                Triagem
+              <TabsTrigger value="triagem" className="gap-1 sm:gap-2 data-[state=active]:bg-primary/10 text-xs sm:text-sm px-2 sm:px-4">
+                <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Triagem</span>
+                <span className="xs:hidden">Tri.</span>
               </TabsTrigger>
-              <TabsTrigger value="medico" className="gap-2 data-[state=active]:bg-primary/10">
-                <Stethoscope className="w-4 h-4" />
-                Médico
+              <TabsTrigger value="medico" className="gap-1 sm:gap-2 data-[state=active]:bg-primary/10 text-xs sm:text-sm px-2 sm:px-4">
+                <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Médico</span>
+                <span className="xs:hidden">Méd.</span>
               </TabsTrigger>
-              <TabsTrigger value="estatisticas" className="gap-2 data-[state=active]:bg-primary/10">
-                <BarChart3 className="w-4 h-4" />
-                Estatísticas
+              <TabsTrigger value="estatisticas" className="gap-1 sm:gap-2 data-[state=active]:bg-primary/10 text-xs sm:text-sm px-2 sm:px-4">
+                <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Estatísticas</span>
+                <span className="xs:hidden">Est.</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -178,7 +182,7 @@ const Index = () => {
 
         {/* Cadastro */}
         <TabsContent value="cadastro" className="mt-0">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
             <PatientRegistration
               patients={patients}
               onAddPatient={addPatient}
@@ -193,7 +197,7 @@ const Index = () => {
 
         {/* Triagem */}
         <TabsContent value="triagem" className="mt-0">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
             <TriagePanel
               waitingPatients={waitingForTriage}
               currentCall={currentTriageCall}
@@ -209,7 +213,7 @@ const Index = () => {
 
         {/* Médico */}
         <TabsContent value="medico" className="mt-0">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
             <DoctorPanel
               waitingPatients={waitingForDoctor}
               currentCall={currentDoctorCall}
@@ -223,7 +227,7 @@ const Index = () => {
 
         {/* Estatísticas */}
         <TabsContent value="estatisticas" className="mt-0">
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
             <StatisticsPanel patients={patients} history={history} />
           </main>
         </TabsContent>

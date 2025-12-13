@@ -84,13 +84,13 @@ export function DoctorPanel({
               <p className="text-muted-foreground mb-6">
                 Chamado às {format(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
               </p>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={handleRecall} variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
+              <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
+                <Button onClick={handleRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Chamar Novamente
                 </Button>
-                <Button onClick={() => onFinishConsultation(currentCall.id)} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-2" />
+                <Button onClick={() => onFinishConsultation(currentCall.id)} className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm" size="sm">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Finalizar Consulta
                 </Button>
               </div>
@@ -119,38 +119,40 @@ export function DoctorPanel({
             {waitingPatients.map((patient, index) => (
               <div
                 key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-2"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
                     {index + 1}
                   </span>
                   <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-semibold text-foreground text-sm sm:text-base">{patient.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Triagem finalizada às {format(patient.calledAt || patient.createdAt, 'HH:mm')}
                     </p>
                   </div>
                 </div>
-                {/* Finalizar sem chamar */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onFinishWithoutCall(patient.id)}
-                  className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Finalizar
-                </Button>
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
+                  {/* Finalizar sem chamar */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onFinishWithoutCall(patient.id)}
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm"
+                  >
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Finalizar</span>
+                  </Button>
 
-                <Button
-                  onClick={() => handleCallPatient(patient.id)}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Chamar
-                </Button>
+                  <Button
+                    onClick={() => handleCallPatient(patient.id)}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
+                  >
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    Chamar
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

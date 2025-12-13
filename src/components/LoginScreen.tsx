@@ -115,19 +115,24 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   // IP Address Component
   const IpAddressDisplay = () => (
-    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2 border border-border/50">
-      <div className="flex items-center gap-1.5">
-        {loadingIp ? (
-          <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-        ) : (
-          <Globe className="w-4 h-4 text-primary" />
-        )}
-        <span className="font-medium">IP:</span>
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-2 border border-border/50">
+        <div className="flex items-center gap-1.5">
+          {loadingIp ? (
+            <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          ) : (
+            <Globe className="w-4 h-4 text-primary" />
+          )}
+          <span className="font-medium">IP:</span>
+        </div>
+        <span className="font-mono text-foreground">
+          {loadingIp ? 'Obtendo...' : userIp}
+        </span>
+        <Wifi className="w-3 h-3 text-green-500 ml-1" />
       </div>
-      <span className="font-mono text-foreground">
-        {loadingIp ? 'Obtendo...' : userIp}
-      </span>
-      <Wifi className="w-3 h-3 text-green-500 ml-1" />
+      <p className="text-xs text-muted-foreground/70 text-center">
+        Registrado para prevenir acessos indevidos
+      </p>
     </div>
   );
 
