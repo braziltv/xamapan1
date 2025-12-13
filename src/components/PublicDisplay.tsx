@@ -28,14 +28,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  
-  // Visual effect states
-  const [showFlash, setShowFlash] = useState(false);
-  const [triageCallKey, setTriageCallKey] = useState(0);
-  const [doctorCallKey, setDoctorCallKey] = useState(0);
-  const [flashColor, setFlashColor] = useState('white');
-  const [audioEnabled, setAudioEnabled] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -200,22 +192,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Play notification sound effect based on destination
   const playNotificationSound = useCallback((destination?: string) => {
-    if (!audioEnabled) {
-      console.log('Áudio ainda não habilitado pelo usuário, pulando som de notificação.');
-      return Promise.resolve();
-    }
-
-    if (!audioContextRef.current) {
-      const Ctor = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
-      audioContextRef.current = new Ctor();
-    }
-
-    const audioContext = audioContextRef.current;
-    if (!audioContext) return Promise.resolve();
-
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     // Create a pleasant chime sound
     const playTone = (frequency: number, startTime: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.4) => {
@@ -228,13 +205,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       oscillator.frequency.value = frequency;
       oscillator.type = type;
       
-      const startAt = audioContext.currentTime + startTime;
-      gainNode.gain.setValueAtTime(0, startAt);
-      gainNode.gain.linearRampToValueAtTime(volume, startAt + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, startAt + duration);
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
       
-      oscillator.start(startAt);
-      oscillator.stop(startAt + duration);
+      oscillator.start(audioContext.currentTime + startTime);
+      oscillator.stop(audioContext.currentTime + startTime + duration);
     };
     
     const dest = destination?.toLowerCase() || '';
@@ -296,7 +272,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     // Return promise that resolves after the chime
     return new Promise<void>(resolve => setTimeout(resolve, 800));
-  }, [audioEnabled]);
+  }, []);
 
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
@@ -338,39 +314,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Play notification sound first (with destination-specific sound)
     await playNotificationSound(destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico'));
     
-    // Small delay to ensure audio context is ready
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    
-    // Ensure voices are loaded
-    const getVoicesWithRetry = (): Promise<SpeechSynthesisVoice[]> => {
-      return new Promise((resolve) => {
-        let voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          resolve(voices);
-          return;
-        }
-        
-        // Wait for voices to load
-        const handleVoicesChanged = () => {
-          voices = window.speechSynthesis.getVoices();
-          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
-          resolve(voices);
-        };
-        
-        window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
-        
-        // Fallback timeout
-        setTimeout(() => {
-          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
-          resolve(window.speechSynthesis.getVoices());
-        }, 1000);
-      });
-    };
-    
-    await getVoicesWithRetry();
-    
     const utterance = new SpeechSynthesisUtterance(
       `${name}. Por favor, dirija-se ao ${location}.`
     );
@@ -383,12 +327,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       utterance.voice = bestVoice;
       // Adjust rate and pitch based on voice type for more natural sound
       if (bestVoice.name.toLowerCase().includes('google')) {
+        // Google voices sound better with these settings
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
       } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
+        // Microsoft neural voices
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
       } else {
+        // Default settings for other voices
         utterance.rate = 0.85;
         utterance.pitch = 1.1;
       }
@@ -397,15 +344,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       utterance.pitch = 1.1;
     }
     
-    // Cancel any pending speech and speak
     window.speechSynthesis.cancel();
-    
-    // Small delay after cancel to ensure it's ready
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
     window.speechSynthesis.speak(utterance);
-    
-    console.log('Speaking:', `${name}. Por favor, dirija-se ao ${location}.`);
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
@@ -486,17 +426,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           processedCallsRef.current.add(call.id);
 
           if (call.status === 'active') {
-            // Trigger visual effects
-            setFlashColor(call.call_type === 'triage' ? '#3b82f6' : '#10b981');
-            setShowFlash(true);
-            setTimeout(() => setShowFlash(false), 1000);
-            
             if (call.call_type === 'triage') {
               setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
-              setTriageCallKey(prev => prev + 1);
             } else {
               setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
-              setDoctorCallKey(prev => prev + 1);
             }
             
             // Play audio announcement
@@ -565,26 +498,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
-      onClick={() => {
-        if (!audioEnabled) {
-          setAudioEnabled(true);
-        }
-        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume();
-        }
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.resume();
-        }
-      }}
     >
-      {/* Flash overlay effect when patient is called */}
-      {showFlash && (
-        <div 
-          className="absolute inset-0 z-50 pointer-events-none animate-call-flash"
-          style={{ backgroundColor: flashColor }}
-        />
-      )}
-      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
@@ -593,13 +507,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* Header - Compact */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
-        {!audioEnabled && (
-          <div className="absolute inset-x-0 -top-10 flex justify-center z-20">
-            <div className="bg-yellow-500 text-slate-900 px-4 py-2 rounded-full text-sm font-semibold shadow-lg animate-bounce">
-              Clique uma vez na tela para ativar o som das chamadas
-            </div>
-          </div>
-        )}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
             <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
@@ -642,13 +549,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         {/* Current Calls - Side by side on landscape */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {/* Triage Call */}
-          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl border-2 overflow-hidden backdrop-blur-sm flex flex-col relative ${
-            currentTriageCall ? 'border-blue-500 animate-border-pulse' : 'border-slate-700'
-          }`}>
-            {/* Attention ring effect */}
-            {currentTriageCall && (
-              <div className="absolute inset-0 rounded-xl lg:rounded-2xl border-4 border-blue-400 animate-attention-ring pointer-events-none" />
-            )}
+          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
@@ -657,11 +558,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div key={triageCallKey} className="text-center">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide animate-name-entrance">
+                <div className="text-center animate-pulse">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium animate-pulse">
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
@@ -674,13 +575,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl border-2 overflow-hidden backdrop-blur-sm flex flex-col relative ${
-            currentDoctorCall ? 'border-emerald-500 animate-border-pulse' : 'border-slate-700'
-          }`}>
-            {/* Attention ring effect */}
-            {currentDoctorCall && (
-              <div className="absolute inset-0 rounded-xl lg:rounded-2xl border-4 border-emerald-400 animate-attention-ring pointer-events-none" />
-            )}
+          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 lg:px-4 lg:py-3 shrink-0">
               <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl font-bold flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
@@ -689,11 +584,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div key={doctorCallKey} className="text-center">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide animate-name-entrance">
+                <div className="text-center animate-pulse">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium animate-pulse">
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
