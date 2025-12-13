@@ -4,6 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
+import { AnalogClock } from './AnalogClock';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -470,22 +471,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Weather Widget */}
           <WeatherWidget />
           
-          {/* Clock - Modern design with seconds */}
-          <div className="text-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-                {format(currentTime, 'HH:mm')}
-              </span>
-              <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-cyan-400 leading-none animate-pulse" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-                :{format(currentTime, 'ss')}
-              </span>
+          {/* Clock - Analog + Digital */}
+          <div className="flex flex-col items-center gap-2 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
+            {/* Analog Clock */}
+            <AnalogClock size={70} />
+            
+            {/* Digital Clock */}
+            <div className="text-center">
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+                  {format(currentTime, 'HH:mm')}
+                </span>
+                <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-semibold text-cyan-400 leading-none animate-pulse" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+                  :{format(currentTime, 'ss')}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-yellow-400 font-bold mt-1 tracking-wide">
+                {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
+              </p>
+              <p className="text-[10px] sm:text-xs lg:text-sm xl:text-base text-slate-300/90 font-medium">
+                {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </p>
             </div>
-            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-yellow-400 font-bold mt-1 tracking-wide">
-              {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
-            </p>
-            <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-slate-300/90 font-medium">
-              {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
           </div>
         </div>
       </div>
