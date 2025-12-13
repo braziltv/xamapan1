@@ -135,19 +135,21 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   if (showTvUnitSelection) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary/10 to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Background decorations */}
+        {/* Background decorations with animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-[pulse_5s_ease-in-out_infinite_0.5s]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl animate-[pulse_6s_ease-in-out_infinite_1s]" />
         </div>
 
-        <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card/95 backdrop-blur-xl relative z-10">
+        <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card/95 backdrop-blur-xl relative z-10 animate-[fadeInUp_0.6s_ease-out]">
           <CardHeader className="text-center space-y-4 pb-2">
-            <div className="mx-auto flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-xl shadow-primary/30">
+            <div 
+              className="mx-auto flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-xl shadow-primary/30 animate-[scaleIn_0.5s_ease-out_0.2s_both]"
+            >
               <Tv className="w-12 h-12 text-primary-foreground" />
             </div>
-            <div>
+            <div className="animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Modo TV
               </CardTitle>
@@ -157,7 +159,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6 pt-4">
-            <div className="space-y-3">
+            <div className="space-y-3 animate-[fadeInUp_0.5s_ease-out_0.4s_both]">
               <Label htmlFor="tv-unit" className="text-base font-medium flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-primary" />
                 Qual unidade exibir na TV?
@@ -176,31 +178,31 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               </Select>
             </div>
             
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-2 animate-[fadeInUp_0.5s_ease-out_0.5s_both]">
               <Button 
                 variant="outline" 
                 onClick={handleBackToLogin}
-                className="flex-1 h-12 text-base border-2 hover:bg-muted"
+                className="flex-1 h-12 text-base border-2 hover:bg-muted transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Voltar
               </Button>
               <Button 
                 onClick={handleTvUnitConfirm}
-                className="flex-1 h-12 text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20"
+                className="flex-1 h-12 text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 Confirmar
               </Button>
             </div>
 
             {/* IP Address */}
-            <div className="pt-2">
+            <div className="pt-2 animate-[fadeInUp_0.5s_ease-out_0.6s_both]">
               <IpAddressDisplay />
             </div>
           </CardContent>
         </Card>
 
-        <footer className="fixed bottom-6 left-0 right-0 text-center z-10">
+        <footer className="fixed bottom-6 left-0 right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.7s_both]">
           <p className="text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-8 py-3 rounded-full shadow-lg border border-border/50">
             Solução criada e cedida gratuitamente por Kalebe Gomes.
           </p>
@@ -211,27 +213,27 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary/10 to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decorations */}
+      {/* Background decorations with animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-[pulse_5s_ease-in-out_infinite_0.5s]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl animate-[pulse_6s_ease-in-out_infinite_1s]" />
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
 
-      <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card/95 backdrop-blur-xl relative z-10">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-card/95 backdrop-blur-xl relative z-10 animate-[fadeInUp_0.6s_ease-out]">
         <CardHeader className="text-center space-y-4 pb-2">
-          {/* Logo with glow effect */}
-          <div className="mx-auto relative">
-            <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl scale-110" />
+          {/* Logo with glow effect and animation */}
+          <div className="mx-auto relative animate-[scaleIn_0.5s_ease-out_0.2s_both]">
+            <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl scale-110 animate-[pulse_3s_ease-in-out_infinite]" />
             <img 
               src={xamaPanLogo} 
               alt="Xama Pan Logo" 
               className="w-36 h-36 object-contain relative z-10 rounded-2xl shadow-xl" 
             />
           </div>
-          <div>
+          <div className="animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
             <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent leading-tight">
               CHAMADA DE PACIENTES POR VOZ
             </CardTitle>
@@ -243,13 +245,13 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         <CardContent className="pt-2">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Unit Selection */}
-            <div className="space-y-2">
+            <div className="space-y-2 animate-[fadeInUp_0.4s_ease-out_0.35s_both]">
               <Label htmlFor="unit" className="text-base font-medium flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-primary" />
                 Unidade de Saúde
               </Label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger className="h-12 text-base border-2 hover:border-primary/50 transition-colors">
+                <SelectTrigger className="h-12 text-base border-2 hover:border-primary/50 transition-all hover:shadow-md">
                   <SelectValue placeholder="Selecione a unidade" />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-2">
@@ -263,7 +265,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             </div>
 
             {/* Username */}
-            <div className="space-y-2">
+            <div className="space-y-2 animate-[fadeInUp_0.4s_ease-out_0.45s_both]">
               <Label htmlFor="username" className="text-base font-medium flex items-center gap-2">
                 <User className="w-4 h-4 text-primary" />
                 Usuário
@@ -275,12 +277,12 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Digite seu usuário"
                 required
-                className="h-12 text-base border-2 hover:border-primary/50 focus:border-primary transition-colors"
+                className="h-12 text-base border-2 hover:border-primary/50 focus:border-primary transition-all hover:shadow-md"
               />
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
+            <div className="space-y-2 animate-[fadeInUp_0.4s_ease-out_0.55s_both]">
               <Label htmlFor="password" className="text-base font-medium flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" />
                 Senha
@@ -293,7 +295,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Digite sua senha"
                   required
-                  className="h-12 text-base pr-12 border-2 hover:border-primary/50 focus:border-primary transition-colors"
+                  className="h-12 text-base pr-12 border-2 hover:border-primary/50 focus:border-primary transition-all hover:shadow-md"
                 />
                 <button
                   type="button"
@@ -306,23 +308,25 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             </div>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
-            >
-              Entrar
-            </Button>
+            <div className="animate-[fadeInUp_0.4s_ease-out_0.65s_both]">
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Entrar
+              </Button>
+            </div>
           </form>
 
           {/* IP Address Display */}
-          <div className="mt-6">
+          <div className="mt-6 animate-[fadeInUp_0.4s_ease-out_0.75s_both]">
             <IpAddressDisplay />
           </div>
         </CardContent>
       </Card>
 
-      {/* Footer with increased size (25%) */}
-      <footer className="fixed bottom-6 left-0 right-0 text-center z-10">
+      {/* Footer with increased size (25%) and animation */}
+      <footer className="fixed bottom-6 left-0 right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.85s_both]">
         <p className="text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-8 py-3 rounded-full shadow-lg border border-border/50">
           Solução criada e cedida gratuitamente por Kalebe Gomes.
         </p>
