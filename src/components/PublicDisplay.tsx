@@ -320,7 +320,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Play notification sound first (with destination-specific sound)
     await playNotificationSound(destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico'));
     
+    // Small delay to ensure audio context is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
+    
+    // Ensure voices are loaded
+    const getVoicesWithRetry = (): Promise<SpeechSynthesisVoice[]> => {
+      return new Promise((resolve) => {
+        let voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          resolve(voices);
+          return;
+        }
+        
+        // Wait for voices to load
+        const handleVoicesChanged = () => {
+          voices = window.speechSynthesis.getVoices();
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+          resolve(voices);
+        };
+        
+        window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+        
+        // Fallback timeout
+        setTimeout(() => {
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+          resolve(window.speechSynthesis.getVoices());
+        }, 1000);
+      });
+    };
+    
+    await getVoicesWithRetry();
+    
     const utterance = new SpeechSynthesisUtterance(
       `${name}. Por favor, dirija-se ao ${location}.`
     );
@@ -333,15 +365,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       utterance.voice = bestVoice;
       // Adjust rate and pitch based on voice type for more natural sound
       if (bestVoice.name.toLowerCase().includes('google')) {
-        // Google voices sound better with these settings
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
       } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
-        // Microsoft neural voices
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
       } else {
-        // Default settings for other voices
         utterance.rate = 0.85;
         utterance.pitch = 1.1;
       }
@@ -350,8 +379,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       utterance.pitch = 1.1;
     }
     
+    // Cancel any pending speech and speak
     window.speechSynthesis.cancel();
+    
+    // Small delay after cancel to ensure it's ready
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     window.speechSynthesis.speak(utterance);
+    
+    console.log('Speaking:', `${name}. Por favor, dirija-se ao ${location}.`);
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
