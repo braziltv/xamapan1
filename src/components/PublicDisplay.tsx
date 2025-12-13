@@ -251,96 +251,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Escolhe a melhor voz em português, priorizando vozes locais (mais estáveis/offline)
+  // Escolhe voz local em português (evita vozes Google que dependem de internet)
   const getBestVoice = useCallback(() => {
-    if (!('speechSynthesis' in window)) return null;
-
-    const voices = window.speechSynthesis.getVoices();
-    const ptVoices = voices.filter(v => v.lang.toLowerCase().startsWith('pt'));
+    const voices = window.speechSynthesis?.getVoices() || [];
+    const ptVoices = voices.filter(v => v.lang.startsWith('pt'));
     
-    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
-    console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
-
-    if (ptVoices.length === 0) return null;
-
-    // Evita priorizar vozes "Google" que dependem de rede
-    const localPreferred = ptVoices.filter(v =>
-      !v.name.toLowerCase().includes('google') &&
+    // Filtra vozes locais (sem Google/online)
+    const localVoices = ptVoices.filter(v => 
+      !v.name.toLowerCase().includes('google') && 
       !v.name.toLowerCase().includes('online')
     );
-
-    const ordered = (localPreferred.length > 0 ? localPreferred : ptVoices);
-
-    const priorityNames = [
-      'luciana', 'vitória', 'vitoria', 'maria', 'fernanda', 'helena',
-    ];
-
-    for (const p of priorityNames) {
-      const found = ordered.find(v => v.name.toLowerCase().includes(p));
-      if (found) return found;
-    }
-
-    // Senão, devolve a primeira voz em pt-BR ou qualquer pt
-    return (
-      ordered.find(v => v.lang.toLowerCase() === 'pt-br') ||
-      ordered[0]
-    );
+    
+    const pool = localVoices.length > 0 ? localVoices : ptVoices;
+    return pool.find(v => v.lang === 'pt-BR') || pool[0] || null;
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    console.log('🔊 speakName called for:', name, caller, destination);
-
-    if (!('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis API não suportada neste navegador.');
-      await playNotificationSound();
-      return;
-    }
-    
-    // Toca primeiro o aviso sonoro
+    // 1. Toca som de notificação
     await playNotificationSound();
-    console.log('✅ Notification sound played');
 
-    // Garante que o mecanismo de voz esteja pronto
-    try {
-      window.speechSynthesis.cancel();
-      // Alguns navegadores precisam do resume antes de falar novamente
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
-    } catch (e) {
-      console.warn('Erro ao preparar speechSynthesis:', e);
-    }
+    if (!('speechSynthesis' in window)) return;
 
+    // 2. Cancela fala pendente
+    window.speechSynthesis.cancel();
+
+    // 3. Monta texto e utterance
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const text = `${name}. Por favor, dirija-se ao ${location}.`;
-    
-    console.log('📢 Speaking:', text);
-    
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(`${name}. Por favor, dirija-se ao ${location}.`);
     utterance.lang = 'pt-BR';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
 
-    const bestVoice = getBestVoice();
-    console.log('🎤 Selected voice:', bestVoice?.name || 'default');
+    const voice = getBestVoice();
+    if (voice) utterance.voice = voice;
 
-    if (bestVoice) {
-      utterance.voice = bestVoice;
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-    } else {
-      utterance.rate = 0.95;
-      utterance.pitch = 1.0;
-    }
-    
-    utterance.onstart = () => console.log('🎙️ Speech started');
-    utterance.onend = () => console.log('🎙️ Speech ended');
-    utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
-
-    try {
-      window.speechSynthesis.speak(utterance);
-      console.log('✅ Speech queued');
-    } catch (e) {
-      console.error('Erro ao chamar speak:', e);
-    }
+    // 4. Fala
+    window.speechSynthesis.speak(utterance);
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
