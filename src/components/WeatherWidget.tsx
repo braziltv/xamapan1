@@ -40,6 +40,8 @@ export function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [minutesAgo, setMinutesAgo] = useState(0);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -77,6 +79,8 @@ export function WeatherWidget() {
           forecast,
           city: 'Paineiras',
         });
+        setLastUpdate(new Date());
+        setMinutesAgo(0);
         setError(null);
       } catch (err) {
         console.error('Weather fetch error:', err);
@@ -90,6 +94,21 @@ export function WeatherWidget() {
     const interval = setInterval(fetchWeather, 60 * 60 * 1000); // Atualiza a cada 60 minutos
     return () => clearInterval(interval);
   }, []);
+
+  // Atualiza o contador de minutos a cada minuto
+  useEffect(() => {
+    if (!lastUpdate) return;
+    
+    const updateMinutesAgo = () => {
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60));
+      setMinutesAgo(diff);
+    };
+
+    updateMinutesAgo();
+    const interval = setInterval(updateMinutesAgo, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [lastUpdate]);
 
   if (loading) {
     return (
@@ -145,6 +164,10 @@ export function WeatherWidget() {
           </div>
         </div>
       </div>
+      {/* Indicador de última atualização */}
+      <span className="text-white/40 text-[9px] font-medium">
+        {minutesAgo === 0 ? 'Atualizado agora' : `Atualizado há ${minutesAgo} min`}
+      </span>
     </div>
   );
 }
