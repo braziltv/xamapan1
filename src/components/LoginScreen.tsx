@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,21 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
+  const [userIp, setUserIp] = useState<string>("Carregando...");
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchIp = async () => {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        setUserIp(data.ip);
+      } catch (error) {
+        setUserIp("Não disponível");
+      }
+    };
+    fetchIp();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +227,15 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base mt-2">
               Entrar
             </Button>
+            
+            <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-1">
+              <p className="text-xs sm:text-sm font-mono text-muted-foreground">
+                IP: <span className="text-foreground font-semibold">{userIp}</span>
+              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70">
+                Registrado para prevenir acessos indevidos
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
