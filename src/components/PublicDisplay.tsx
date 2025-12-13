@@ -224,14 +224,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // State to track if voices are loaded
   const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 
   // Load voices - they may not be immediately available
   useEffect(() => {
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
+        voicesRef.current = voices;
         setVoicesLoaded(true);
         console.log('TTS voices loaded:', voices.length, 'voices available');
+        // Log all Portuguese voices for debugging
+        const ptVoices = voices.filter(v => v.lang.includes('pt'));
+        console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
       }
     };
 
@@ -241,8 +246,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Also listen for the voiceschanged event (required by some browsers)
     window.speechSynthesis.onvoiceschanged = loadVoices;
 
+    // Chrome bug workaround: keep speechSynthesis alive
+    const keepAlive = setInterval(() => {
+      if (window.speechSynthesis.speaking === false) {
+        window.speechSynthesis.cancel();
+      }
+    }, 5000);
+
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
+      clearInterval(keepAlive);
     };
   }, []);
 
@@ -297,60 +310,69 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     await playNotificationSound();
     
     // Wait a bit for the sound to finish
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 400));
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     console.log('TTS text:', text);
     
-    // Cancel any ongoing speech and reset
-    window.speechSynthesis.cancel();
-    
-    // Chrome bug workaround: speechSynthesis can get stuck, need to "wake it up"
-    const dummyUtterance = new SpeechSynthesisUtterance('');
-    window.speechSynthesis.speak(dummyUtterance);
-    window.speechSynthesis.cancel();
-    
-    // Small delay after reset
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    
-    // Get the best voice available
-    const bestVoice = getBestVoice();
-    
-    if (bestVoice) {
-      utterance.voice = bestVoice;
-      console.log('Using voice:', bestVoice.name);
-      // Adjust rate and pitch based on voice type for more natural sound
-      if (bestVoice.name.toLowerCase().includes('google')) {
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
-        utterance.rate = 0.95;
-        utterance.pitch = 1.0;
-      } else {
-        utterance.rate = 0.85;
-        utterance.pitch = 1.1;
+    // Function to actually speak
+    const doSpeak = () => {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      
+      // Get the best voice available - use cached voices if available
+      const voices = voicesRef.current.length > 0 ? voicesRef.current : window.speechSynthesis.getVoices();
+      const ptVoices = voices.filter(v => v.lang.includes('pt'));
+      
+      // Find best Portuguese voice
+      let bestVoice: SpeechSynthesisVoice | null = null;
+      const priorities = ['Google', 'Microsoft', 'Luciana', 'Maria', 'Francisca'];
+      for (const p of priorities) {
+        bestVoice = ptVoices.find(v => v.name.includes(p)) || null;
+        if (bestVoice) break;
       }
-    } else {
-      console.log('No Portuguese voice found, using default');
-      utterance.rate = 0.85;
-      utterance.pitch = 1.1;
+      if (!bestVoice) bestVoice = ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+      
+      if (bestVoice) {
+        utterance.voice = bestVoice;
+        console.log('Using voice:', bestVoice.name);
+      } else {
+        console.log('No Portuguese voice found, using browser default');
+      }
+      
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      // Add event listeners for debugging
+      utterance.onstart = () => console.log('TTS started speaking');
+      utterance.onend = () => console.log('TTS finished speaking');
+      utterance.onerror = (e) => console.error('TTS error:', e.error, e);
+      
+      window.speechSynthesis.speak(utterance);
+      console.log('TTS speak() called');
+    };
+    
+    // Chrome bug: speechSynthesis can get stuck, need to resume it
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
     }
     
-    // Add event listeners for debugging
-    utterance.onstart = () => console.log('TTS started speaking');
-    utterance.onend = () => console.log('TTS finished speaking');
-    utterance.onerror = (e) => console.error('TTS error:', e.error);
+    // Try speaking immediately
+    doSpeak();
     
-    // Use a small timeout to ensure the browser is ready
+    // Chrome workaround: if not speaking after 100ms, try again
     setTimeout(() => {
-      window.speechSynthesis.speak(utterance);
-      console.log('TTS speak() called, pending:', window.speechSynthesis.pending, 'speaking:', window.speechSynthesis.speaking);
-    }, 50);
-  }, [playNotificationSound, getBestVoice]);
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        console.log('TTS not started, retrying...');
+        doSpeak();
+      }
+    }, 200);
+  }, [playNotificationSound]);
 
   // Load initial data from Supabase
   useEffect(() => {
