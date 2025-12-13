@@ -4,7 +4,6 @@ import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
-import { AnalogClock } from './AnalogClock';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -471,12 +470,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Weather Widget */}
           <WeatherWidget />
           
-          {/* Clock - Analog + Digital */}
-          <div className="flex flex-col items-center gap-2 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
-            {/* Analog Clock */}
-            <AnalogClock size={70} />
-            
-            {/* Digital Clock */}
+          {/* Clock - Digital */}
+          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
             <div className="text-center">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
