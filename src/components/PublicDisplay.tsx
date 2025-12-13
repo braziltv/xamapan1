@@ -524,15 +524,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* Botão discreto para ativar a voz (necessário para políticas de autoplay do navegador) */}
+      {/* Overlay grande para ativar áudio - desaparece após clicar */}
       {!speechActivated && (
-        <div className="absolute z-20 bottom-3 right-3 sm:bottom-4 sm:right-4">
-          <button
-            onClick={handleActivateSpeech}
-            className="px-3 py-2 sm:px-4 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-500/40 border border-white/10 animate-fade-in"
-          >
-            Ativar áudio das chamadas
-          </button>
+        <div className="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center animate-fade-in">
+          <div className="text-center space-y-6 px-4">
+            <Volume2 className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 text-emerald-400 mx-auto animate-pulse" />
+            <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white">
+              Ativar Chamadas por Voz
+            </h2>
+            <p className="text-base sm:text-lg lg:text-xl text-slate-300 max-w-md mx-auto">
+              Clique no botão abaixo para habilitar os avisos sonoros e de voz neste painel.
+            </p>
+            <button
+              onClick={handleActivateSpeech}
+              className="mt-4 px-8 py-4 sm:px-12 sm:py-5 lg:px-16 lg:py-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white text-xl sm:text-2xl lg:text-3xl font-bold shadow-2xl shadow-emerald-500/50 border-2 border-white/20 transition-all hover:scale-105 active:scale-95"
+            >
+              🔊 Ativar Áudio
+            </button>
+          </div>
         </div>
       )}
 
