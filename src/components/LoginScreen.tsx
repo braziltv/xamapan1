@@ -207,8 +207,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           </CardContent>
         </Card>
 
-        <footer className="fixed bottom-6 left-0 right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.7s_both]">
-          <p className="text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-8 py-3 rounded-full shadow-lg border border-border/50">
+        <footer className="relative mt-8 sm:fixed sm:bottom-6 sm:left-0 sm:right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.7s_both] pb-4 sm:pb-0">
+          <p className="text-base sm:text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-4 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg border border-border/50">
             Solução criada e cedida gratuitamente por Kalebe Gomes.
           </p>
         </footer>
@@ -330,9 +330,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         </CardContent>
       </Card>
 
-      {/* Footer with increased size (25%) and animation */}
-      <footer className="fixed bottom-6 left-0 right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.85s_both]">
-        <p className="text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-8 py-3 rounded-full shadow-lg border border-border/50">
+      {/* Footer with increased size (25%) and animation - responsive positioning */}
+      <footer className="relative mt-8 sm:fixed sm:bottom-6 sm:left-0 sm:right-0 text-center z-10 animate-[fadeInUp_0.6s_ease-out_0.85s_both] pb-4 sm:pb-0">
+        <p className="text-base sm:text-xl font-semibold text-foreground/90 bg-card/80 backdrop-blur-md inline-block px-4 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg border border-border/50">
           Solução criada e cedida gratuitamente por Kalebe Gomes.
         </p>
       </footer>
