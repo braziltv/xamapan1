@@ -55,6 +55,7 @@ import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
+import { PatientHistorySearch } from './PatientHistorySearch';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -1429,6 +1430,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Patient History Search */}
+      <PatientHistorySearch />
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Gráfico de Tipos */}
