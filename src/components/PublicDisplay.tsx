@@ -223,28 +223,76 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
+    console.log('speakName called with:', { name, caller, destination });
+    
     // Play notification sound first
     await playNotificationSound();
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const utterance = new SpeechSynthesisUtterance(
-      `${name}. Por favor, dirija-se ao ${location}.`
-    );
+    const text = `${name}. Por favor, dirija-se ao ${location}.`;
+    console.log('TTS text:', text);
+    
+    // Ensure voices are loaded
+    const getVoices = (): Promise<SpeechSynthesisVoice[]> => {
+      return new Promise((resolve) => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          resolve(voices);
+          return;
+        }
+        
+        // Wait for voices to load
+        const handleVoicesChanged = () => {
+          const loadedVoices = window.speechSynthesis.getVoices();
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+          resolve(loadedVoices);
+        };
+        
+        window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+        
+        // Timeout fallback
+        setTimeout(() => {
+          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+          resolve(window.speechSynthesis.getVoices());
+        }, 1000);
+      });
+    };
+    
+    const voices = await getVoices();
+    console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+    
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     utterance.rate = 0.85;
     utterance.pitch = 1.2;
     
-    // Try to select a female voice
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v => 
-      v.lang.includes('pt') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('feminino') || v.name.includes('Luciana') || v.name.includes('Vitória') || v.name.includes('Maria'))
-    ) || voices.find(v => v.lang.includes('pt-BR'));
+    // Try to select the best Portuguese voice
+    const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    console.log('Portuguese voices:', ptVoices.map(v => v.name));
     
-    if (femaleVoice) {
-      utterance.voice = femaleVoice;
+    // Prefer Google or Microsoft neural voices
+    const preferredVoice = ptVoices.find(v => 
+      v.name.includes('Google') || 
+      v.name.includes('Microsoft') ||
+      v.name.includes('Luciana') || 
+      v.name.includes('Vitória') || 
+      v.name.includes('Maria') ||
+      v.name.toLowerCase().includes('female') || 
+      v.name.toLowerCase().includes('feminino')
+    ) || ptVoices[0] || voices[0];
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+      console.log('Selected voice:', preferredVoice.name);
     }
     
+    // Cancel any ongoing speech and speak
     window.speechSynthesis.cancel();
+    
+    utterance.onerror = (e) => console.error('TTS error:', e);
+    utterance.onstart = () => console.log('TTS started');
+    utterance.onend = () => console.log('TTS ended');
+    
     window.speechSynthesis.speak(utterance);
   }, [playNotificationSound]);
 
