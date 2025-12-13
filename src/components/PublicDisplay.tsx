@@ -28,7 +28,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
 
   // Fetch news from multiple sources
@@ -210,8 +210,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     utterance.volume = 0;
     window.speechSynthesis.speak(utterance);
     
+    localStorage.setItem('audioUnlocked', 'true');
     setAudioUnlocked(true);
-    console.log('Audio unlocked');
+    console.log('Audio unlocked and saved to localStorage');
   }, [audioUnlocked]);
 
   // Play notification sound effect
