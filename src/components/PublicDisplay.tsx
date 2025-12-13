@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, VolumeX } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -707,11 +707,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Credits - Minimal */}
-      <div className="relative z-10 mt-1 text-center shrink-0">
+      {/* Credits and Test Audio Button - Minimal */}
+      <div className="relative z-10 mt-1 flex items-center justify-center gap-4 shrink-0">
         <p className="text-slate-500 text-[9px] sm:text-[10px] lg:text-xs">
           Solução criada por Kalebe Gomes
         </p>
+        <button
+          onClick={() => speakName('Teste de Áudio', 'triage', 'Triagem')}
+          className="flex items-center gap-1 px-2 py-1 text-[9px] sm:text-[10px] lg:text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-lg border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200"
+          title="Testar áudio TTS"
+        >
+          {voicesLoaded ? (
+            <Volume2 className="w-3 h-3" />
+          ) : (
+            <VolumeX className="w-3 h-3 text-orange-400" />
+          )}
+          <span>Testar Áudio</span>
+        </button>
       </div>
     </div>
   );
