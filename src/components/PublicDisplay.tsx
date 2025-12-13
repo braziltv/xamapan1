@@ -222,10 +222,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
 
+  // Ensure voices are loaded
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setVoicesLoaded(true);
+      }
+    };
+
+    loadVoices();
+    
+    // Chrome needs this event
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // Force reload voices periodically as fallback
+    const interval = setInterval(loadVoices, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
     const voices = window.speechSynthesis.getVoices();
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    
+    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
     
     // Priority order for more natural voices (Google and Microsoft neural voices are best)
     const voicePriorities = [
@@ -259,31 +285,40 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    // Play notification sound first
+    console.log('🔊 speakName called for:', name, caller, destination);
+    
+    // Always play notification sound first
     await playNotificationSound();
+    console.log('✅ Notification sound played');
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    // Wait a bit for voices to be ready
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const utterance = new SpeechSynthesisUtterance(
-      `${name}. Por favor, dirija-se ao ${location}.`
-    );
+    const text = `${name}. Por favor, dirija-se ao ${location}.`;
+    
+    console.log('📢 Speaking:', text);
+    
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     
     // Get the best voice available
     const bestVoice = getBestVoice();
+    console.log('🎤 Selected voice:', bestVoice?.name || 'default');
     
     if (bestVoice) {
       utterance.voice = bestVoice;
       // Adjust rate and pitch based on voice type for more natural sound
       if (bestVoice.name.toLowerCase().includes('google')) {
-        // Google voices sound better with these settings
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
       } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
-        // Microsoft neural voices
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
       } else {
-        // Default settings for other voices
         utterance.rate = 0.85;
         utterance.pitch = 1.1;
       }
@@ -292,8 +327,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       utterance.pitch = 1.1;
     }
     
-    window.speechSynthesis.cancel();
+    // Add event listeners for debugging
+    utterance.onstart = () => console.log('🎙️ Speech started');
+    utterance.onend = () => console.log('🎙️ Speech ended');
+    utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
+    
     window.speechSynthesis.speak(utterance);
+    console.log('✅ Speech queued');
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
