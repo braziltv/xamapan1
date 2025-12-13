@@ -28,6 +28,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isNewTriageCall, setIsNewTriageCall] = useState(false);
+  const [isNewDoctorCall, setIsNewDoctorCall] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -416,8 +418,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           if (call.status === 'active') {
             if (call.call_type === 'triage') {
               setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
+              setIsNewTriageCall(true);
+              setTimeout(() => setIsNewTriageCall(false), 10000); // Animation lasts 10 seconds
             } else {
               setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
+              setIsNewDoctorCall(true);
+              setTimeout(() => setIsNewDoctorCall(false), 10000); // Animation lasts 10 seconds
             }
             
             // Play audio announcement
@@ -544,11 +550,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div className={`text-center ${isNewTriageCall ? 'animate-call-attention' : ''}`}>
+                  <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-wide ${
+                    isNewTriageCall 
+                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      : 'text-white'
+                  }`}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
+                  <p className={`text-base sm:text-lg lg:text-xl xl:text-2xl mt-1 sm:mt-2 font-medium ${
+                    isNewTriageCall ? 'text-yellow-200 animate-pulse' : 'text-blue-400'
+                  }`}>
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
@@ -570,11 +582,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center animate-pulse">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
+                <div className={`text-center ${isNewDoctorCall ? 'animate-call-attention' : ''}`}>
+                  <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-wide ${
+                    isNewDoctorCall 
+                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
+                      : 'text-white'
+                  }`}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
+                  <p className={`text-base sm:text-lg lg:text-xl xl:text-2xl mt-1 sm:mt-2 font-medium ${
+                    isNewDoctorCall ? 'text-yellow-200 animate-pulse' : 'text-emerald-400'
+                  }`}>
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>

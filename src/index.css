@@ -217,3 +217,36 @@
   display: inline-flex;
   animation: marquee 1200s linear infinite;
 }
+
+/* Call attention animation for patient names */
+@keyframes call-attention {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+  20%, 40%, 60%, 80% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(253, 224, 71, 0.4), 0 0 40px rgba(253, 224, 71, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(253, 224, 71, 0.8), 0 0 80px rgba(253, 224, 71, 0.4);
+  }
+}
+
+.animate-call-attention {
+  animation: call-attention 2s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
