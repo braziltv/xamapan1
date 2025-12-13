@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Tv, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft, ShieldCheck } from "lucide-react";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -228,11 +228,14 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               Entrar
             </Button>
             
-            <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-1">
-              <p className="text-xs sm:text-sm font-mono text-muted-foreground">
-                IP: <span className="text-foreground font-semibold">{userIp}</span>
-              </p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground/70">
+            <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-2 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
+              <div className="flex items-center justify-center gap-2">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-scale-in" style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }} />
+                <p className="text-xs sm:text-sm font-mono text-muted-foreground">
+                  IP: <span className="text-foreground font-semibold">{userIp}</span>
+                </p>
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'backwards' }}>
                 Registrado para prevenir acessos indevidos
               </p>
             </div>
