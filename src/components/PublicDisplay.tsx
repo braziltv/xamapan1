@@ -291,22 +291,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('🔊 speakName called for:', name, caller, destination);
 
-    if (!('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis API não suportada neste navegador.');
-      await playNotificationSound();
-      return;
-    }
-    
     // Toca primeiro o aviso sonoro
     await playNotificationSound();
     console.log('✅ Notification sound played');
 
-    // Cancela qualquer fala pendente antes de iniciar a nova
+    if (!('speechSynthesis' in window)) {
+      console.warn('SpeechSynthesis API não suportada neste navegador.');
+      return;
+    }
+
+    // Aguarda um pouco para o som terminar antes de falar
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Cancela qualquer fala pendente e garante que o sintetizador está ativo
     try {
       window.speechSynthesis.cancel();
     } catch (e) {
       console.warn('Erro ao cancelar speechSynthesis:', e);
     }
+
+    // Pequeno delay após cancel para evitar conflitos
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
@@ -333,6 +338,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
 
     try {
+      // Garante que o sintetizador não está pausado
+      window.speechSynthesis.resume();
       window.speechSynthesis.speak(utterance);
       console.log('✅ Speech queued');
     } catch (e) {
