@@ -368,7 +368,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .from('call_history')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(8);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
@@ -466,7 +466,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             type: historyItem.call_type,
             time: new Date(historyItem.created_at),
             destination: historyItem.destination || undefined,
-          }, ...prev].slice(0, 20));
+          }, ...prev].slice(0, 8));
         }
       )
       .subscribe();
