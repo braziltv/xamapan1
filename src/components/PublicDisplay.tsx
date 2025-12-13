@@ -30,6 +30,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNewTriageCall, setIsNewTriageCall] = useState(false);
   const [isNewDoctorCall, setIsNewDoctorCall] = useState(false);
+  const [speechActivated, setSpeechActivated] = useState(() => {
+    // se já foi ativado nesta aba, mantém
+    return window.sessionStorage.getItem('speechActivated') === 'true';
+  });
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -505,11 +509,53 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(timer);
   }, []);
 
+  const handleActivateSpeech = useCallback(() => {
+    console.log('🟢 Ativando áudio do painel público');
+    if (!('speechSynthesis' in window)) {
+      console.warn('SpeechSynthesis API não suportada neste navegador.');
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+
+      const testUtterance = new SpeechSynthesisUtterance(
+        'Sistema de chamadas por voz ativado.'
+      );
+      testUtterance.lang = 'pt-BR';
+      testUtterance.onend = () => {
+        console.log('✅ Teste de voz concluído');
+      };
+      testUtterance.onerror = (event) => {
+        console.error('❌ Erro no teste de voz:', event.error);
+      };
+
+      window.speechSynthesis.speak(testUtterance);
+      window.sessionStorage.setItem('speechActivated', 'true');
+      setSpeechActivated(true);
+    } catch (e) {
+      console.error('Erro ao ativar áudio de voz:', e);
+    }
+  }, []);
+
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
+      {/* Botão discreto para ativar a voz (necessário para políticas de autoplay do navegador) */}
+      {!speechActivated && (
+        <div className="absolute z-20 bottom-3 right-3 sm:bottom-4 sm:right-4">
+          <button
+            onClick={handleActivateSpeech}
+            className="px-3 py-2 sm:px-4 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-500/40 border border-white/10 animate-fade-in"
+          >
+            Ativar áudio das chamadas
+          </button>
+        </div>
+      )}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
@@ -552,7 +598,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
       </div>
-
+      
       {/* Main Content - Landscape optimized: horizontal layout on wide screens */}
       <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 min-h-0">
         {/* Current Calls - Side by side on landscape */}
