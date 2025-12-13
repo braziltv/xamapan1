@@ -511,9 +511,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Audio Status Indicator */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
+            <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+            <span className="text-xs sm:text-sm font-medium text-emerald-400">Áudio Ativo</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          </div>
+
           {/* Weather Widget */}
           <WeatherWidget />
-          
           {/* Clock */}
           <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
             <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
