@@ -28,12 +28,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isNewTriageCall, setIsNewTriageCall] = useState(false);
-  const [isNewDoctorCall, setIsNewDoctorCall] = useState(false);
-  const [speechActivated, setSpeechActivated] = useState(() => {
-    // se já foi ativado nesta aba, mantém
-    return window.sessionStorage.getItem('speechActivated') === 'true';
-  });
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -251,42 +245,95 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Escolhe voz local em português (evita vozes Google que dependem de internet)
+  // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
-    const voices = window.speechSynthesis?.getVoices() || [];
-    const ptVoices = voices.filter(v => v.lang.startsWith('pt'));
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoices = voices.filter(v => v.lang.includes('pt'));
     
-    // Filtra vozes locais (sem Google/online)
-    const localVoices = ptVoices.filter(v => 
-      !v.name.toLowerCase().includes('google') && 
-      !v.name.toLowerCase().includes('online')
-    );
+    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
     
-    const pool = localVoices.length > 0 ? localVoices : ptVoices;
-    return pool.find(v => v.lang === 'pt-BR') || pool[0] || null;
+    // Priority order for more natural voices (Google and Microsoft neural voices are best)
+    const voicePriorities = [
+      // Google voices (most natural)
+      'Google português do Brasil',
+      'Google Brazilian Portuguese',
+      // Microsoft neural voices (very natural)
+      'Microsoft Francisca Online',
+      'Microsoft Thalita Online', 
+      'Microsoft Antonio Online',
+      // Other quality voices
+      'Luciana',
+      'Vitória',
+      'Maria',
+      'Fernanda',
+      'Helena',
+      // Fallback female indicators
+      'female',
+      'feminino'
+    ];
+    
+    for (const priority of voicePriorities) {
+      const found = ptVoices.find(v => 
+        v.name.toLowerCase().includes(priority.toLowerCase())
+      );
+      if (found) return found;
+    }
+    
+    // Return any Portuguese Brazilian voice as fallback
+    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    // 1. Toca som de notificação
+    console.log('🔊 speakName called for:', name, caller, destination);
+    
+    // Always play notification sound first
     await playNotificationSound();
-
-    if (!('speechSynthesis' in window)) return;
-
-    // 2. Cancela fala pendente
+    console.log('✅ Notification sound played');
+    
+    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
-
-    // 3. Monta texto e utterance
+    
+    // Wait a bit for voices to be ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const utterance = new SpeechSynthesisUtterance(`${name}. Por favor, dirija-se ao ${location}.`);
+    const text = `${name}. Por favor, dirija-se ao ${location}.`;
+    
+    console.log('📢 Speaking:', text);
+    
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.9;
-    utterance.pitch = 1.0;
-
-    const voice = getBestVoice();
-    if (voice) utterance.voice = voice;
-
-    // 4. Fala
+    
+    // Get the best voice available
+    const bestVoice = getBestVoice();
+    console.log('🎤 Selected voice:', bestVoice?.name || 'default');
+    
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      // Adjust rate and pitch based on voice type for more natural sound
+      if (bestVoice.name.toLowerCase().includes('google')) {
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+      } else {
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+      }
+    } else {
+      utterance.rate = 0.85;
+      utterance.pitch = 1.1;
+    }
+    
+    // Add event listeners for debugging
+    utterance.onstart = () => console.log('🎙️ Speech started');
+    utterance.onend = () => console.log('🎙️ Speech ended');
+    utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
+    
     window.speechSynthesis.speak(utterance);
+    console.log('✅ Speech queued');
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
@@ -369,12 +416,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           if (call.status === 'active') {
             if (call.call_type === 'triage') {
               setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
-              setIsNewTriageCall(true);
-              setTimeout(() => setIsNewTriageCall(false), 10000); // Animation lasts 10 seconds
             } else {
               setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
-              setIsNewDoctorCall(true);
-              setTimeout(() => setIsNewDoctorCall(false), 10000); // Animation lasts 10 seconds
             }
             
             // Play audio announcement
@@ -439,53 +482,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleActivateSpeech = useCallback(() => {
-    console.log('🟢 Ativando áudio do painel público');
-    if (!('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis API não suportada neste navegador.');
-      return;
-    }
-
-    try {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
-
-      const testUtterance = new SpeechSynthesisUtterance(
-        'Sistema de chamadas por voz ativado.'
-      );
-      testUtterance.lang = 'pt-BR';
-      testUtterance.onend = () => {
-        console.log('✅ Teste de voz concluído');
-      };
-      testUtterance.onerror = (event) => {
-        console.error('❌ Erro no teste de voz:', event.error);
-      };
-
-      window.speechSynthesis.speak(testUtterance);
-      window.sessionStorage.setItem('speechActivated', 'true');
-      setSpeechActivated(true);
-    } catch (e) {
-      console.error('Erro ao ativar áudio de voz:', e);
-    }
-  }, []);
-
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* Botão discreto para ativar a voz (necessário para políticas de autoplay do navegador) */}
-      {!speechActivated && (
-        <div className="absolute z-20 bottom-3 right-3 sm:bottom-4 sm:right-4">
-          <button
-            onClick={handleActivateSpeech}
-            className="px-3 py-2 sm:px-4 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-500/40 border border-white/10 animate-fade-in"
-          >
-            Ativar áudio das chamadas
-          </button>
-        </div>
-      )}
-
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
@@ -528,7 +529,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Main Content - Landscape optimized: horizontal layout on wide screens */}
       <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 min-h-0">
         {/* Current Calls - Side by side on landscape */}
@@ -543,17 +544,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className={`text-center ${isNewTriageCall ? 'animate-call-attention' : ''}`}>
-                  <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-wide ${
-                    isNewTriageCall 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
-                      : 'text-white'
-                  }`}>
+                <div className="text-center animate-pulse">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
                     {currentTriageCall.name}
                   </h2>
-                  <p className={`text-base sm:text-lg lg:text-xl xl:text-2xl mt-1 sm:mt-2 font-medium ${
-                    isNewTriageCall ? 'text-yellow-200 animate-pulse' : 'text-blue-400'
-                  }`}>
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-blue-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
@@ -575,17 +570,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-3 sm:p-4 lg:p-6 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className={`text-center ${isNewDoctorCall ? 'animate-call-attention' : ''}`}>
-                  <h2 className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold tracking-wide ${
-                    isNewDoctorCall 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
-                      : 'text-white'
-                  }`}>
+                <div className="text-center animate-pulse">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white tracking-wide">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className={`text-base sm:text-lg lg:text-xl xl:text-2xl mt-1 sm:mt-2 font-medium ${
-                    isNewDoctorCall ? 'text-yellow-200 animate-pulse' : 'text-emerald-400'
-                  }`}>
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-1 sm:mt-2 font-medium">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
