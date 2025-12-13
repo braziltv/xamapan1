@@ -31,6 +31,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
 
+  // Format destination text with proper prepositions
+  const formatDestinationText = (destination: string): string => {
+    const destinationMap: Record<string, string> = {
+      'Triagem': 'à Sala de Triagem',
+      'Sala de Eletrocardiograma': 'à Sala de Eletrocardiograma',
+      'Sala de Curativos': 'à Sala de Curativos',
+      'Sala do Raio X': 'à Sala do Raio X',
+      'Enfermaria': 'à Enfermaria',
+      'Consultório 1': 'ao Consultório 1',
+      'Consultório 2': 'ao Consultório 2',
+      'Consultório Médico 1': 'ao Consultório Médico 1',
+      'Consultório Médico 2': 'ao Consultório Médico 2',
+      'Consultório': 'ao Consultório',
+    };
+    return destinationMap[destination] || `à ${destination}`;
+  };
+
   // Fetch news from multiple sources
   useEffect(() => {
     const feeds = [
@@ -548,7 +565,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     {currentTriageCall.name}
                   </h2>
                   <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 font-semibold">
-                    Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
+                    Por favor, dirija-se {formatDestinationText(currentTriageCall.destination || 'Triagem')}
                   </p>
                 </div>
               ) : (
@@ -574,7 +591,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     {currentDoctorCall.name}
                   </h2>
                   <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 font-semibold">
-                    Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
+                    Por favor, dirija-se {formatDestinationText(currentDoctorCall.destination || 'Consultório')}
                   </p>
                 </div>
               ) : (
