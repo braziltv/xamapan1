@@ -1,9 +1,9 @@
-import { Volume2, VolumeX, Activity, LogOut } from 'lucide-react';
+import { Volume2, VolumeX, Activity, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
-
+import { SettingsDialog } from './SettingsDialog';
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -74,6 +74,16 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                 </>
               )}
             </Button>
+
+            {/* Settings */}
+            <SettingsDialog 
+              trigger={
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Config</span>
+                </Button>
+              }
+            />
 
             {/* Status indicator */}
             <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 rounded-full">
