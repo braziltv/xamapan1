@@ -28,6 +28,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const containerRef = useRef<HTMLDivElement>(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -190,9 +192,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [unitName]);
 
+  // Unlock audio on first user interaction
+  const unlockAudio = useCallback(() => {
+    if (audioUnlocked) return;
+    
+    // Create and play a silent audio context to unlock audio
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = audioContext;
+    
+    // Resume audio context if suspended
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    
+    // Also unlock speech synthesis
+    const utterance = new SpeechSynthesisUtterance('');
+    utterance.volume = 0;
+    window.speechSynthesis.speak(utterance);
+    
+    setAudioUnlocked(true);
+    console.log('Audio unlocked');
+  }, [audioUnlocked]);
+
   // Play notification sound effect
   const playNotificationSound = useCallback(() => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Resume if suspended
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
     
     // Create a pleasant chime sound
     const playTone = (frequency: number, startTime: number, duration: number) => {
@@ -439,6 +468,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Show unlock overlay if audio not yet unlocked
+  if (!audioUnlocked) {
+    return (
+      <div 
+        onClick={unlockAudio}
+        className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer"
+      >
+        <div className="text-center space-y-6 animate-pulse">
+          <Volume2 className="w-24 h-24 text-primary mx-auto" />
+          <h1 className="text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
+          <p className="text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
