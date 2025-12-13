@@ -251,70 +251,62 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
+  // Escolhe a melhor voz em português, priorizando vozes locais (mais estáveis/offline)
   const getBestVoice = useCallback(() => {
+    if (!('speechSynthesis' in window)) return null;
+
     const voices = window.speechSynthesis.getVoices();
-    const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    const ptVoices = voices.filter(v => v.lang.toLowerCase().startsWith('pt'));
     
     console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
     console.log('Portuguese voices:', ptVoices.map(v => `${v.name} (${v.lang})`));
-    
-    // Priority order for more natural voices (Google and Microsoft neural voices are best)
-    const voicePriorities = [
-      // Google voices (most natural)
-      'Google português do Brasil',
-      'Google Brazilian Portuguese',
-      // Microsoft neural voices (very natural)
-      'Microsoft Francisca Online',
-      'Microsoft Thalita Online', 
-      'Microsoft Antonio Online',
-      // Other quality voices
-      'Luciana',
-      'Vitória',
-      'Maria',
-      'Fernanda',
-      'Helena',
-      // Fallback female indicators
-      'female',
-      'feminino'
+
+    if (ptVoices.length === 0) return null;
+
+    // Evita priorizar vozes "Google" que dependem de rede
+    const localPreferred = ptVoices.filter(v =>
+      !v.name.toLowerCase().includes('google') &&
+      !v.name.toLowerCase().includes('online')
+    );
+
+    const ordered = (localPreferred.length > 0 ? localPreferred : ptVoices);
+
+    const priorityNames = [
+      'luciana', 'vitória', 'vitoria', 'maria', 'fernanda', 'helena',
     ];
-    
-    for (const priority of voicePriorities) {
-      const found = ptVoices.find(v => 
-        v.name.toLowerCase().includes(priority.toLowerCase())
-      );
+
+    for (const p of priorityNames) {
+      const found = ordered.find(v => v.name.toLowerCase().includes(p));
       if (found) return found;
     }
-    
-    // Return any Portuguese Brazilian voice as fallback
-    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+
+    // Senão, devolve a primeira voz em pt-BR ou qualquer pt
+    return (
+      ordered.find(v => v.lang.toLowerCase() === 'pt-br') ||
+      ordered[0]
+    );
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('🔊 speakName called for:', name, caller, destination);
-    
-    // Sempre garantir que a engine não está travada/pausada
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-      } catch (e) {
-        console.warn('Erro ao resetar speechSynthesis:', e);
-      }
-    }
 
-    // Toca primeiro o aviso sonoro
-    await playNotificationSound();
-    console.log('✅ Notification sound played');
-    
     if (!('speechSynthesis' in window)) {
       console.warn('SpeechSynthesis API não suportada neste navegador.');
+      await playNotificationSound();
       return;
     }
     
-    // Pequeno atraso para garantir que o áudio do aviso finalize
-    await new Promise(resolve => setTimeout(resolve, 150));
-    
+    // Toca primeiro o aviso sonoro
+    await playNotificationSound();
+    console.log('✅ Notification sound played');
+
+    // Cancela qualquer fala pendente antes de iniciar a nova
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {
+      console.warn('Erro ao cancelar speechSynthesis:', e);
+    }
+
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     
@@ -322,41 +314,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    
-    // Seleciona melhor voz disponível
+
     const bestVoice = getBestVoice();
     console.log('🎤 Selected voice:', bestVoice?.name || 'default');
-    
+
     if (bestVoice) {
       utterance.voice = bestVoice;
-      if (bestVoice.name.toLowerCase().includes('google')) {
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-      } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
-        utterance.rate = 0.95;
-        utterance.pitch = 1.0;
-      } else {
-        utterance.rate = 0.9;
-        utterance.pitch = 1.05;
-      }
-    } else {
       utterance.rate = 0.9;
-      utterance.pitch = 1.05;
+      utterance.pitch = 1.0;
+    } else {
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
     }
     
     utterance.onstart = () => console.log('🎙️ Speech started');
     utterance.onend = () => console.log('🎙️ Speech ended');
     utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
-    
-    // Chrome/Edge às vezes precisam de um resume logo antes de falar
-    try {
-      window.speechSynthesis.resume();
-    } catch (e) {
-      console.warn('Erro ao chamar resume antes do speak:', e);
-    }
 
-    window.speechSynthesis.speak(utterance);
-    console.log('✅ Speech queued');
+    try {
+      window.speechSynthesis.speak(utterance);
+      console.log('✅ Speech queued');
+    } catch (e) {
+      console.error('Erro ao chamar speak:', e);
+    }
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
