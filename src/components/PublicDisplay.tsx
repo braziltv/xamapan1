@@ -289,12 +289,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('🔊 speakName called for:', name, caller, destination);
     
-    // Cancel any ongoing speech BEFORE starting new sequence
+    // Sempre garantir que a engine não está travada/pausada
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      } catch (e) {
+        console.warn('Erro ao resetar speechSynthesis:', e);
+      }
     }
 
-    // Always play notification sound first
+    // Toca primeiro o aviso sonoro
     await playNotificationSound();
     console.log('✅ Notification sound played');
     
@@ -314,13 +319,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
     
-    // Get the best voice available
+    // Seleciona melhor voz disponível
     const bestVoice = getBestVoice();
     console.log('🎤 Selected voice:', bestVoice?.name || 'default');
     
     if (bestVoice) {
       utterance.voice = bestVoice;
-      // Adjust rate and pitch based on voice type for more natural sound
       if (bestVoice.name.toLowerCase().includes('google')) {
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
@@ -328,19 +332,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
       } else {
-        utterance.rate = 0.85;
-        utterance.pitch = 1.1;
+        utterance.rate = 0.9;
+        utterance.pitch = 1.05;
       }
     } else {
-      utterance.rate = 0.85;
-      utterance.pitch = 1.1;
+      utterance.rate = 0.9;
+      utterance.pitch = 1.05;
     }
     
-    // Add event listeners for debugging
     utterance.onstart = () => console.log('🎙️ Speech started');
     utterance.onend = () => console.log('🎙️ Speech ended');
     utterance.onerror = (event) => console.error('❌ Speech error:', event.error);
     
+    // Chrome/Edge às vezes precisam de um resume logo antes de falar
+    try {
+      window.speechSynthesis.resume();
+    } catch (e) {
+      console.warn('Erro ao chamar resume antes do speak:', e);
+    }
+
     window.speechSynthesis.speak(utterance);
     console.log('✅ Speech queued');
   }, [playNotificationSound, getBestVoice]);
