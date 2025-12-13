@@ -569,6 +569,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
+      {/* Indicador discreto de áudio ativo */}
+      {speechActivated && (
+        <div className="absolute z-20 top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-sm">
+          <Volume2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+          <span className="text-[10px] sm:text-xs text-emerald-300 font-medium">Áudio ativo</span>
+        </div>
+      )}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
