@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Tv, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft, ShieldCheck } from "lucide-react";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -24,7 +24,21 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
+  const [userIp, setUserIp] = useState<string>("Carregando...");
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchIp = async () => {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        setUserIp(data.ip);
+      } catch (error) {
+        setUserIp("Não disponível");
+      }
+    };
+    fetchIp();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,53 +111,53 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   // TV Unit Selection Screen
   if (showTvUnitSelection) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-xl">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto mb-4 flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
-              <Tv className="w-10 h-10 text-primary" />
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-2 sm:p-4 md:p-6">
+        <Card className="w-full max-w-[95%] sm:max-w-md shadow-xl mx-auto">
+          <CardHeader className="text-center space-y-2 p-4 sm:p-6">
+            <div className="mx-auto mb-2 sm:mb-4 flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary/10">
+              <Tv className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold">Modo TV</CardTitle>
-            <p className="text-muted-foreground">
+            <CardTitle className="text-xl sm:text-2xl font-bold">Modo TV</CardTitle>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Selecione a unidade de saúde que será exibida na TV
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
             <div className="space-y-2">
-              <Label htmlFor="tv-unit">Qual unidade exibir na TV?</Label>
+              <Label htmlFor="tv-unit" className="text-sm sm:text-base">Qual unidade exibir na TV?</Label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger className="h-12 text-base">
+                <SelectTrigger className="h-10 sm:h-12 text-sm sm:text-base">
                   <SelectValue placeholder="Selecione a unidade" />
                 </SelectTrigger>
                 <SelectContent className="bg-background">
                   {HEALTH_UNITS.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id} className="py-3">
+                    <SelectItem key={unit.id} value={unit.id} className="py-2 sm:py-3 text-sm sm:text-base">
                       {unit.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button 
                 variant="outline" 
                 onClick={handleBackToLogin}
-                className="flex-1"
+                className="flex-1 h-10 sm:h-11 text-sm sm:text-base"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
               <Button 
                 onClick={handleTvUnitConfirm}
-                className="flex-1"
+                className="flex-1 h-10 sm:h-11 text-sm sm:text-base"
               >
                 Confirmar
               </Button>
             </div>
           </CardContent>
         </Card>
-        <footer className="fixed bottom-6 left-0 right-0 text-center">
-          <p className="text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
+        <footer className="fixed bottom-2 sm:bottom-4 md:bottom-6 left-0 right-0 text-center px-2">
+          <p className="text-xs sm:text-sm md:text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-full shadow-sm">
             Solução criada e cedida gratuitamente por Kalebe Gomes.
           </p>
         </footer>
@@ -152,33 +166,33 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto mb-4">
-            <img src={xamaPanLogo} alt="Xama Pan Logo" className="w-32 h-32 object-contain" />
+    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-2 sm:p-4 md:p-6">
+      <Card className="w-full max-w-[95%] sm:max-w-md shadow-xl mx-auto">
+        <CardHeader className="text-center space-y-2 p-4 sm:p-6">
+          <div className="mx-auto mb-2 sm:mb-4">
+            <img src={xamaPanLogo} alt="Xama Pan Logo" className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold">CHAMADA DE PACIENTES POR VOZ</CardTitle>
+          <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold leading-tight">CHAMADA DE PACIENTES POR VOZ</CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unidade de Saúde</Label>
+        <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="unit" className="text-sm sm:text-base">Unidade de Saúde</Label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger>
+                <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
                   <SelectValue placeholder="Selecione a unidade" />
                 </SelectTrigger>
                 <SelectContent className="bg-background">
                   {HEALTH_UNITS.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
+                    <SelectItem key={unit.id} value={unit.id} className="text-sm sm:text-base py-2 sm:py-2.5">
                       {unit.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Usuário</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="username" className="text-sm sm:text-base">Usuário</Label>
               <Input
                 id="username"
                 type="text"
@@ -186,10 +200,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Digite seu usuário"
                 required
+                className="h-10 sm:h-11 text-sm sm:text-base"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="password" className="text-sm sm:text-base">Senha</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -198,7 +213,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Digite sua senha"
                   required
-                  className="pr-10"
+                  className="pr-10 h-10 sm:h-11 text-sm sm:text-base"
                 />
                 <button
                   type="button"
@@ -209,14 +224,26 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base mt-2">
               Entrar
             </Button>
+            
+            <div className="mt-4 pt-4 border-t border-border/50 text-center space-y-2 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'backwards' }}>
+              <div className="flex items-center justify-center gap-2">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-scale-in" style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }} />
+                <p className="text-xs sm:text-sm font-mono text-muted-foreground">
+                  IP: <span className="text-foreground font-semibold">{userIp}</span>
+                </p>
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground/70 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'backwards' }}>
+                Registrado para prevenir acessos indevidos
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
-      <footer className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-6 py-2 rounded-full shadow-sm">
+      <footer className="fixed bottom-2 sm:bottom-4 md:bottom-6 left-0 right-0 text-center px-2">
+        <p className="text-xs sm:text-sm md:text-base font-medium text-foreground/80 bg-background/60 backdrop-blur-sm inline-block px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-full shadow-sm">
           Solução criada e cedida gratuitamente por Kalebe Gomes.
         </p>
       </footer>
