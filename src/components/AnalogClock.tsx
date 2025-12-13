@@ -39,6 +39,18 @@ export function AnalogClock({ size = 80 }: AnalogClockProps) {
     };
   });
 
+  // Generate hour numbers
+  const hourNumbers = Array.from({ length: 12 }, (_, i) => {
+    const hour = i === 0 ? 12 : i;
+    const angle = (i * 30 - 90) * (Math.PI / 180);
+    const numberRadius = radius - 16;
+    return {
+      x: center + Math.cos(angle) * numberRadius,
+      y: center + Math.sin(angle) * numberRadius,
+      hour,
+    };
+  });
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="drop-shadow-lg">
@@ -85,6 +97,23 @@ export function AnalogClock({ size = 80 }: AnalogClockProps) {
             strokeWidth={marker.isMain ? 2 : 1}
             strokeLinecap="round"
           />
+        ))}
+
+        {/* Hour numbers */}
+        {hourNumbers.map((num) => (
+          <text
+            key={num.hour}
+            x={num.x}
+            y={num.y}
+            fill="rgba(255, 255, 255, 0.9)"
+            fontSize={size / 8}
+            fontWeight="600"
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            {num.hour}
+          </text>
         ))}
 
         {/* Hour hand */}
