@@ -297,11 +297,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     await playNotificationSound();
     
     // Wait a bit for the sound to finish
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     console.log('TTS text:', text);
+    
+    // Cancel any ongoing speech and reset
+    window.speechSynthesis.cancel();
+    
+    // Chrome bug workaround: speechSynthesis can get stuck, need to "wake it up"
+    const dummyUtterance = new SpeechSynthesisUtterance('');
+    window.speechSynthesis.speak(dummyUtterance);
+    window.speechSynthesis.cancel();
+    
+    // Small delay after reset
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
@@ -311,17 +322,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     if (bestVoice) {
       utterance.voice = bestVoice;
+      console.log('Using voice:', bestVoice.name);
       // Adjust rate and pitch based on voice type for more natural sound
       if (bestVoice.name.toLowerCase().includes('google')) {
-        // Google voices sound better with these settings
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
       } else if (bestVoice.name.toLowerCase().includes('microsoft')) {
-        // Microsoft neural voices
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
       } else {
-        // Default settings for other voices
         utterance.rate = 0.85;
         utterance.pitch = 1.1;
       }
@@ -334,11 +343,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Add event listeners for debugging
     utterance.onstart = () => console.log('TTS started speaking');
     utterance.onend = () => console.log('TTS finished speaking');
-    utterance.onerror = (e) => console.error('TTS error:', e);
+    utterance.onerror = (e) => console.error('TTS error:', e.error);
     
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-    console.log('TTS speak() called');
+    // Use a small timeout to ensure the browser is ready
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+      console.log('TTS speak() called, pending:', window.speechSynthesis.pending, 'speaking:', window.speechSynthesis.speaking);
+    }, 50);
   }, [playNotificationSound, getBestVoice]);
 
   // Load initial data from Supabase
