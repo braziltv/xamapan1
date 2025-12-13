@@ -4,6 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
+import { AnalogClock } from './AnalogClock';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -222,34 +223,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
 
-  // State to store loaded voices
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  // Load voices when available (they load asynchronously)
-  useEffect(() => {
-    const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-      console.log('Loaded voices:', availableVoices.length, availableVoices.map(v => v.name));
-      if (availableVoices.length > 0) {
-        setVoices(availableVoices);
-      }
-    };
-
-    // Load immediately if available
-    loadVoices();
-
-    // Also listen for voiceschanged event (Chrome fires this when voices are ready)
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, []);
-
   // Get the best available Portuguese voice (prioritize Google/Microsoft neural voices)
   const getBestVoice = useCallback(() => {
+    const voices = window.speechSynthesis.getVoices();
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
-    console.log('Portuguese voices found:', ptVoices.length, ptVoices.map(v => v.name));
     
     // Priority order for more natural voices (Google and Microsoft neural voices are best)
     const voicePriorities = [
@@ -275,29 +252,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const found = ptVoices.find(v => 
         v.name.toLowerCase().includes(priority.toLowerCase())
       );
-      if (found) {
-        console.log('Selected voice:', found.name);
-        return found;
-      }
+      if (found) return found;
     }
     
     // Return any Portuguese Brazilian voice as fallback
-    const fallback = ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
-    console.log('Fallback voice:', fallback?.name || 'none');
-    return fallback;
-  }, [voices]);
+    return ptVoices.find(v => v.lang === 'pt-BR') || ptVoices[0] || null;
+  }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    console.log('speakName called:', name, caller, destination);
-    
     // Play notification sound first
     await playNotificationSound();
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-    const text = `${name}. Por favor, dirija-se ao ${location}.`;
-    console.log('Speaking text:', text);
-    
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(
+      `${name}. Por favor, dirija-se ao ${location}.`
+    );
     utterance.lang = 'pt-BR';
     
     // Get the best voice available
@@ -320,15 +289,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         utterance.pitch = 1.1;
       }
     } else {
-      console.log('No voice found, using default settings');
       utterance.rate = 0.85;
       utterance.pitch = 1.1;
     }
-    
-    // Add event listeners for debugging
-    utterance.onstart = () => console.log('Speech started');
-    utterance.onend = () => console.log('Speech ended');
-    utterance.onerror = (e) => console.error('Speech error:', e);
     
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
@@ -508,8 +471,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Weather Widget */}
           <WeatherWidget />
           
-          {/* Clock - Digital */}
-          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
+          {/* Clock - Analog + Digital */}
+          <div className="flex flex-col items-center gap-2 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
+            {/* Analog Clock */}
+            <AnalogClock size={70} />
+            
+            {/* Digital Clock */}
             <div className="text-center">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
