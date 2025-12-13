@@ -470,15 +470,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Weather Widget */}
           <WeatherWidget />
           
-          {/* Clock */}
-          <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
-            <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
-              {format(currentTime, 'HH:mm')}
-            </p>
-            <p className="text-sm sm:text-base lg:text-lg text-yellow-400 font-bold">
+          {/* Clock - Modern design with seconds */}
+          <div className="text-center bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl px-4 py-3 sm:px-6 lg:px-8 lg:py-4 border border-slate-600/50 shadow-2xl shadow-black/20 backdrop-blur-md">
+            <div className="flex items-baseline justify-center gap-1">
+              <span className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-none tracking-tight" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+                {format(currentTime, 'HH:mm')}
+              </span>
+              <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold text-cyan-400 leading-none animate-pulse" style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+                :{format(currentTime, 'ss')}
+              </span>
+            </div>
+            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-yellow-400 font-bold mt-1 tracking-wide">
               {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
             </p>
-            <p className="text-xs sm:text-sm lg:text-base text-slate-300 font-medium">
+            <p className="text-xs sm:text-sm lg:text-base xl:text-lg text-slate-300/90 font-medium">
               {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
