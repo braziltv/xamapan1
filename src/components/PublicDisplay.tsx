@@ -190,12 +190,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [unitName]);
 
-  // Play notification sound effect based on destination
-  const playNotificationSound = useCallback((destination?: string) => {
+  // Play notification sound effect
+  const playNotificationSound = useCallback(() => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     // Create a pleasant chime sound
-    const playTone = (frequency: number, startTime: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.4) => {
+    const playTone = (frequency: number, startTime: number, duration: number) => {
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
@@ -203,72 +203,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       gainNode.connect(audioContext.destination);
       
       oscillator.frequency.value = frequency;
-      oscillator.type = type;
+      oscillator.type = 'sine';
       
       gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + 0.02);
+      gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + startTime + 0.02);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
       
       oscillator.start(audioContext.currentTime + startTime);
       oscillator.stop(audioContext.currentTime + startTime + duration);
     };
     
-    const dest = destination?.toLowerCase() || '';
-    
-    // Different notification sounds for each destination
-    if (dest.includes('triagem')) {
-      // Triagem: 3-tone ascending chime (C-E-G) - welcoming
-      playTone(523.25, 0, 0.3);      // C5
-      playTone(659.25, 0.15, 0.3);   // E5
-      playTone(783.99, 0.3, 0.4);    // G5
-    } else if (dest.includes('enfermaria')) {
-      // Enfermaria: 4-tone gentle melody (E-G-B-E) - calming
-      playTone(329.63, 0, 0.25);     // E4
-      playTone(392.00, 0.12, 0.25);  // G4
-      playTone(493.88, 0.24, 0.25);  // B4
-      playTone(659.25, 0.36, 0.35);  // E5
-    } else if (dest.includes('eletrocardiograma') || dest.includes('ecg')) {
-      // ECG: Electronic pulse pattern - medical feel
-      playTone(440, 0, 0.15, 'square', 0.3);
-      playTone(440, 0.2, 0.15, 'square', 0.3);
-      playTone(880, 0.4, 0.25, 'sine', 0.35);
-    } else if (dest.includes('curativo')) {
-      // Curativos: Soft 2-tone (A-D) - gentle
-      playTone(440, 0, 0.35);        // A4
-      playTone(587.33, 0.2, 0.4);    // D5
-    } else if (dest.includes('raio') || dest.includes('rx')) {
-      // Raio X: Tech-style tones (beep pattern)
-      playTone(800, 0, 0.12, 'sine', 0.35);
-      playTone(600, 0.15, 0.12, 'sine', 0.35);
-      playTone(1000, 0.3, 0.2, 'sine', 0.4);
-    } else if (dest.includes('consultório 1') || dest.includes('consultorio 1')) {
-      // Consultório 1: Warm 3-tone (F-A-C) - professional
-      playTone(349.23, 0, 0.25);     // F4
-      playTone(440, 0.15, 0.25);     // A4
-      playTone(523.25, 0.3, 0.35);   // C5
-    } else if (dest.includes('consultório 2') || dest.includes('consultorio 2')) {
-      // Consultório 2: Different 3-tone (G-B-D) - distinct
-      playTone(392.00, 0, 0.25);     // G4
-      playTone(493.88, 0.15, 0.25);  // B4
-      playTone(587.33, 0.3, 0.35);   // D5
-    } else if (dest.includes('consultório médico 1') || dest.includes('consultorio medico 1')) {
-      // Médico 1: Authoritative 4-tone (C-E-G-C) - major chord arpeggio
-      playTone(261.63, 0, 0.2);      // C4
-      playTone(329.63, 0.12, 0.2);   // E4
-      playTone(392.00, 0.24, 0.2);   // G4
-      playTone(523.25, 0.36, 0.3);   // C5
-    } else if (dest.includes('consultório médico 2') || dest.includes('consultorio medico 2')) {
-      // Médico 2: Different 4-tone (D-F#-A-D) - major chord arpeggio
-      playTone(293.66, 0, 0.2);      // D4
-      playTone(369.99, 0.12, 0.2);   // F#4
-      playTone(440, 0.24, 0.2);      // A4
-      playTone(587.33, 0.36, 0.3);   // D5
-    } else {
-      // Default: Standard 3-tone chime (C-E-G)
-      playTone(523.25, 0, 0.3);      // C5
-      playTone(659.25, 0.15, 0.3);   // E5
-      playTone(783.99, 0.3, 0.4);    // G5
-    }
+    // Play a three-tone chime (ascending)
+    playTone(523.25, 0, 0.3);      // C5
+    playTone(659.25, 0.15, 0.3);   // E5
+    playTone(783.99, 0.3, 0.4);    // G5
     
     // Return promise that resolves after the chime
     return new Promise<void>(resolve => setTimeout(resolve, 800));
@@ -311,8 +259,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-    // Play notification sound first (with destination-specific sound)
-    await playNotificationSound(destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico'));
+    // Play notification sound first
+    await playNotificationSound();
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const utterance = new SpeechSynthesisUtterance(
