@@ -289,15 +289,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('🔊 speakName called for:', name, caller, destination);
     
+    // Cancel any ongoing speech BEFORE starting new sequence
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
     // Always play notification sound first
     await playNotificationSound();
     console.log('✅ Notification sound played');
     
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+    if (!('speechSynthesis' in window)) {
+      console.warn('SpeechSynthesis API não suportada neste navegador.');
+      return;
+    }
     
-    // Wait a bit for voices to be ready
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Pequeno atraso para garantir que o áudio do aviso finalize
+    await new Promise(resolve => setTimeout(resolve, 150));
     
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
