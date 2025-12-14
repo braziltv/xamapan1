@@ -47,14 +47,14 @@ export function DoctorPanel({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Consultório Selection */}
-      <div className="bg-card rounded-xl p-4 shadow-health border border-border">
-        <label className="block text-sm font-medium text-foreground mb-2">
+      <div className="bg-card rounded-xl p-3 sm:p-4 shadow-health border border-border">
+        <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
           Selecionar Consultório
         </label>
         <Select value={selectedConsultorio} onValueChange={setSelectedConsultorio}>
-          <SelectTrigger className="w-full bg-background">
+          <SelectTrigger className="w-full bg-background text-sm sm:text-base">
             <SelectValue placeholder="Selecione o consultório" />
           </SelectTrigger>
           <SelectContent className="bg-background border border-border">
@@ -69,34 +69,34 @@ export function DoctorPanel({
 
       {/* Current Call */}
       <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Stethoscope className="w-5 h-5" />
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-3 sm:p-4">
+          <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5" />
             Chamada Atual - {currentConsultorio}
           </h2>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {currentCall ? (
             <div className="text-center">
-              <p className="text-4xl font-bold text-foreground mb-4">
+              <p className="text-2xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4 break-words">
                 {currentCall.name}
               </p>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                 Chamado às {format(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
               </p>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={handleRecall} variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Chamar Novamente
+              <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
+                <Button onClick={handleRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
-                <Button onClick={() => onFinishConsultation(currentCall.id)} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-2" />
-                  Finalizar Consulta
+                <Button onClick={() => onFinishConsultation(currentCall.id)} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Finalizar</span> Consulta
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base">
               Nenhum paciente em consulta
             </p>
           )}
@@ -104,53 +104,55 @@ export function DoctorPanel({
       </div>
 
       {/* Waiting Queue */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
+      <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Aguardando Consulta ({waitingPatients.length})
         </h2>
         
         {waitingPatients.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
+          <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
             Nenhum paciente aguardando consulta
           </p>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="space-y-2 max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {waitingPatients.map((patient, index) => (
               <div
                 key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
                     {index + 1}
                   </span>
-                  <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Triagem finalizada às {format(patient.calledAt || patient.createdAt, 'HH:mm')}
                     </p>
                   </div>
                 </div>
-                {/* Finalizar sem chamar */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onFinishWithoutCall(patient.id)}
-                  className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Finalizar
-                </Button>
+                <div className="flex items-center gap-1.5 sm:gap-2 justify-end ml-9 sm:ml-0">
+                  {/* Finalizar sem chamar */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onFinishWithoutCall(patient.id)}
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                  >
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Finalizar</span>
+                  </Button>
 
-                <Button
-                  onClick={() => handleCallPatient(patient.id)}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Chamar
-                </Button>
+                  <Button
+                    onClick={() => handleCallPatient(patient.id)}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                  >
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    Chamar
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

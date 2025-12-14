@@ -47,36 +47,36 @@ export function TriagePanel({
 }: TriagePanelProps) {
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Current Call */}
       <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <PhoneCall className="w-5 h-5" />
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 sm:p-4">
+          <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5" />
             Chamada Atual - Triagem
           </h2>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {currentCall ? (
             <div className="text-center">
-              <p className="text-4xl font-bold text-foreground mb-4">
+              <p className="text-2xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4 break-words">
                 {currentCall.name}
               </p>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                 Chamado às {format(currentCall.calledAt!, 'HH:mm')}
               </p>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Button onClick={onRecall} variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Chamar Novamente
+              <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
+                <Button onClick={onRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
                 
                 {/* Menu Salas */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Volume2 className="w-4 h-4" />
-                      Direcionar para Sala
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                      <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Direcionar para</span> Sala
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-card border border-border z-50">
@@ -97,9 +97,9 @@ export function TriagePanel({
                 {/* Menu Consultórios */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Volume2 className="w-4 h-4" />
-                      Direcionar para Consultório
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+                      <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Direcionar para</span> Consultório
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-card border border-border z-50">
@@ -117,14 +117,14 @@ export function TriagePanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button onClick={() => onFinishTriage(currentCall.id)} className="bg-green-600 hover:bg-green-700">
-                  <Check className="w-4 h-4 mr-2" />
-                  Finalizar Triagem
+                <Button onClick={() => onFinishTriage(currentCall.id)} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Finalizar</span> Triagem
                 </Button>
               </div>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base">
               Nenhum paciente sendo atendido
             </p>
           )}
@@ -132,41 +132,41 @@ export function TriagePanel({
       </div>
 
       {/* Waiting Queue */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
+      <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Fila de Espera ({waitingPatients.length})
         </h2>
         
         {waitingPatients.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
+          <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
             Nenhum paciente aguardando triagem
           </p>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="space-y-2 max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
             {waitingPatients.map((patient, index) => (
               <div
                 key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
                     {index + 1}
                   </span>
-                  <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Chegou às {format(patient.createdAt, 'HH:mm')}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
                   {/* Menu Salas na fila */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Sala
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
+                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Sala</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-card border border-border z-50">
@@ -187,9 +187,9 @@ export function TriagePanel({
                   {/* Menu Consultórios na fila */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Consultório
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
+                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Consultório</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-card border border-border z-50">
@@ -213,10 +213,10 @@ export function TriagePanel({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                       >
-                        <Stethoscope className="w-4 h-4" />
-                        Médico
+                        <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Médico</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-card border border-border z-50">
@@ -242,18 +242,18 @@ export function TriagePanel({
                     variant="outline"
                     size="sm"
                     onClick={() => onFinishWithoutCall(patient.id)}
-                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                   >
-                    <CheckCircle className="w-4 h-4" />
-                    Finalizar
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Finalizar</span>
                   </Button>
 
                   <Button
                     onClick={() => onCallPatient(patient.id)}
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                   >
-                    <Phone className="w-4 h-4 mr-2" />
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Chamar
                   </Button>
                 </div>
