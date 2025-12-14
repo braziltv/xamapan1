@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useTheme } from "next-themes";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -29,6 +30,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // Update clock every second
   useEffect(() => {
@@ -172,7 +174,22 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-2 sm:p-4 overflow-auto">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-2 sm:p-4 overflow-auto relative">
+      {/* Theme Toggle Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80"
+        title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+      >
+        {theme === 'dark' ? (
+          <Sun className="w-5 h-5 text-yellow-500" />
+        ) : (
+          <Moon className="w-5 h-5 text-primary" />
+        )}
+      </Button>
+
       <Card className="w-full max-w-[95vw] sm:max-w-md shadow-xl my-auto">
         <CardHeader className="text-center space-y-2 p-4 sm:p-6">
           <div className="mx-auto mb-2 sm:mb-4">
