@@ -65,22 +65,22 @@ export function PatientRegistration({
   const activePatients = patients.filter(p => p.status !== 'attended');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Registration Form */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <UserPlus className="w-5 h-5 text-primary" />
+      <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+          <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Cadastrar Paciente
         </h2>
-        <form onSubmit={handleSubmit} className="flex gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Input
             type="text"
             placeholder="Nome completo do paciente"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1"
+            className="flex-1 text-base"
           />
-          <Button type="submit" disabled={!name.trim()}>
+          <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
             <UserPlus className="w-4 h-4 mr-2" />
             Cadastrar
           </Button>
@@ -88,30 +88,30 @@ export function PatientRegistration({
       </div>
 
       {/* Patient List */}
-      <div className="bg-card rounded-xl p-6 shadow-health border border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
+      <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Pacientes Cadastrados ({activePatients.length})
         </h2>
         
         {activePatients.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
+          <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
             Nenhum paciente cadastrado
           </p>
         ) : (
-          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+          <div className="space-y-2 max-h-[60vh] sm:max-h-[500px] overflow-y-auto">
             {activePatients.map((patient, index) => (
               <div
                 key={patient.id}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-mono font-bold text-primary w-8">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
                     {index + 1}
                   </span>
-                  <div>
-                    <p className="font-semibold text-foreground">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Cadastrado às {format(patient.createdAt, 'HH:mm')}
                       {' • '}
                       <span className={`font-medium ${
@@ -128,7 +128,7 @@ export function PatientRegistration({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
                   {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
                   {patient.status === 'waiting' && (
                     <>
@@ -138,10 +138,10 @@ export function PatientRegistration({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                           >
-                            <Activity className="w-4 h-4" />
-                            Triagem
+                            <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden xs:inline">Triagem</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-card border border-border z-50">
@@ -165,10 +165,10 @@ export function PatientRegistration({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                            className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                           >
-                            <Stethoscope className="w-4 h-4" />
-                            Médico
+                            <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden xs:inline">Médico</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-card border border-border z-50">
@@ -191,9 +191,9 @@ export function PatientRegistration({
                   {/* Menu Salas */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Sala
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
+                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Sala</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-card border border-border z-50">
@@ -214,9 +214,9 @@ export function PatientRegistration({
                   {/* Menu Consultórios */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Volume2 className="w-4 h-4" />
-                        Consultório
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
+                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Consultório</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-card border border-border z-50">
@@ -239,19 +239,19 @@ export function PatientRegistration({
                     variant="outline"
                     size="sm"
                     onClick={() => onFinishWithoutCall(patient.id)}
-                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                   >
-                    <CheckCircle className="w-4 h-4" />
-                    Finalizar
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Finalizar</span>
                   </Button>
 
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => onRemovePatient(patient.id)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 sm:h-9 sm:w-9"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               </div>
