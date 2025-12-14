@@ -475,12 +475,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return (
       <div 
         onClick={unlockAudio}
-        className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer"
+        className="h-[100dvh] w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer p-4"
       >
-        <div className="text-center space-y-6 animate-pulse">
-          <Volume2 className="w-24 h-24 text-primary mx-auto" />
-          <h1 className="text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
-          <p className="text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
+        <div className="text-center space-y-4 sm:space-y-6 animate-pulse max-w-[90vw]">
+          <Volume2 className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 text-primary mx-auto" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
+          <p className="text-base sm:text-lg lg:text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
         </div>
       </div>
     );
@@ -489,40 +489,40 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
+      className="h-[100dvh] w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-[clamp(0.5rem,1.5vw,1rem)] relative overflow-hidden flex flex-col"
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-[5%] left-[5%] w-[20vw] h-[20vw] max-w-96 max-h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-[5%] right-[5%] w-[18vw] h-[18vw] max-w-80 max-h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
-      {/* Header - Compact */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
+      {/* Header - Compact and responsive */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-[clamp(0.25rem,1vw,0.75rem)] mb-[clamp(0.25rem,1vh,0.5rem)] shrink-0">
+        <div className="flex items-center gap-[clamp(0.25rem,1vw,0.75rem)]">
+          <div className="w-[clamp(2rem,4vw,3.5rem)] h-[clamp(2rem,4vw,3.5rem)] rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+            <Volume2 className="w-[clamp(1rem,2vw,1.75rem)] h-[clamp(1rem,2vw,1.75rem)] text-white" />
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white leading-tight">
+          <div className="min-w-0">
+            <h1 className="text-[clamp(0.875rem,2.5vw,1.875rem)] font-bold text-white leading-tight truncate">
               Painel de Chamadas
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm lg:text-base leading-tight">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-400 text-[clamp(0.625rem,1.5vw,1rem)] leading-tight truncate max-w-[40vw]">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-[clamp(0.25rem,1vw,0.75rem)]">
           {/* Weather Widget */}
           <WeatherWidget />
           
           {/* Clock */}
-          <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
-            <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
+          <div className="text-center bg-slate-800/50 rounded-xl px-[clamp(0.5rem,2vw,1.5rem)] py-[clamp(0.25rem,1vh,0.75rem)] border border-slate-700">
+            <p className="text-[clamp(1.25rem,4vw,3rem)] font-mono font-bold text-white leading-none">
               {format(currentTime, 'HH:mm')}
             </p>
-            <p className="text-sm sm:text-base lg:text-lg text-yellow-400 font-bold">
+            <p className="text-[clamp(0.625rem,1.5vw,1.125rem)] text-yellow-400 font-bold leading-tight">
               {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
             </p>
-            <p className="text-xs sm:text-sm lg:text-base text-slate-300 font-medium">
+            <p className="text-[clamp(0.5rem,1.2vw,1rem)] text-slate-300 font-medium leading-tight">
               {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
@@ -530,29 +530,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Main Content - Landscape optimized: horizontal layout on wide screens */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 min-h-0">
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-[clamp(0.25rem,1vw,0.75rem)] min-h-0">
         {/* Current Calls - Side by side on landscape */}
-        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-[clamp(0.25rem,1vw,0.75rem)]">
           {/* Triage Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
-              <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
-                <Activity className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-[clamp(0.75rem,2vw,1.5rem)] py-[clamp(0.5rem,1.5vh,1rem)] shrink-0">
+              <p className="text-white text-[clamp(0.875rem,2.5vw,1.875rem)] font-bold flex items-center gap-[clamp(0.5rem,1vw,0.75rem)]">
+                <Activity className="w-[clamp(1.25rem,3vw,3rem)] h-[clamp(1.25rem,3vw,3rem)]" />
                 TRIAGEM
               </p>
             </div>
-            <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
+            <div className="p-[clamp(0.5rem,2vw,2rem)] flex items-center justify-center flex-1 min-h-0">
               {currentTriageCall ? (
                 <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
+                  <h2 className="text-[clamp(1.5rem,8vw,6rem)] font-black text-white tracking-wide leading-[1.1] break-words px-[clamp(0.25rem,1vw,0.5rem)]">
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 font-semibold">
+                  <p className="text-[clamp(0.875rem,2.5vw,2rem)] text-blue-400 mt-[clamp(0.5rem,1vh,1rem)] font-semibold leading-tight">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg sm:text-xl lg:text-2xl text-slate-500">
+                <p className="text-[clamp(0.875rem,2vw,1.5rem)] text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -560,25 +560,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
-              <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
-                <Stethoscope className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col min-h-0">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-[clamp(0.75rem,2vw,1.5rem)] py-[clamp(0.5rem,1.5vh,1rem)] shrink-0">
+              <p className="text-white text-[clamp(0.875rem,2.5vw,1.875rem)] font-bold flex items-center gap-[clamp(0.5rem,1vw,0.75rem)]">
+                <Stethoscope className="w-[clamp(1.25rem,3vw,3rem)] h-[clamp(1.25rem,3vw,3rem)]" />
                 CONSULTÓRIO MÉDICO
               </p>
             </div>
-            <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
+            <div className="p-[clamp(0.5rem,2vw,2rem)] flex items-center justify-center flex-1 min-h-0">
               {currentDoctorCall ? (
                 <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
+                  <h2 className="text-[clamp(1.5rem,8vw,6rem)] font-black text-white tracking-wide leading-[1.1] break-words px-[clamp(0.25rem,1vw,0.5rem)]">
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 font-semibold">
+                  <p className="text-[clamp(0.875rem,2.5vw,2rem)] text-emerald-400 mt-[clamp(0.5rem,1vh,1rem)] font-semibold leading-tight">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg sm:text-xl lg:text-2xl text-slate-500">
+                <p className="text-[clamp(0.875rem,2vw,1.5rem)] text-slate-500">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -587,45 +587,45 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* History Panel - Narrower on landscape */}
-        <div className="lg:col-span-3 bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 p-2 sm:p-3 backdrop-blur-sm flex flex-col min-h-0 max-h-[200px] sm:max-h-none">
-          <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white mb-2 flex items-center gap-2 shrink-0">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+        <div className="lg:col-span-3 bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 p-[clamp(0.375rem,1vw,0.75rem)] backdrop-blur-sm flex flex-col min-h-0 max-h-[25vh] sm:max-h-none">
+          <h3 className="text-[clamp(0.75rem,1.5vw,1.25rem)] font-bold text-white mb-[clamp(0.25rem,0.5vh,0.5rem)] flex items-center gap-[clamp(0.25rem,0.5vw,0.5rem)] shrink-0">
+            <Clock className="w-[clamp(0.875rem,1.5vw,1.25rem)] h-[clamp(0.875rem,1.5vw,1.25rem)] text-primary" />
             Últimas Chamadas
           </h3>
-          <div className="space-y-2 flex-1 overflow-y-auto">
+          <div className="space-y-[clamp(0.25rem,0.5vh,0.5rem)] flex-1 overflow-y-auto">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-4 text-sm sm:text-base">
+              <p className="text-slate-500 text-center py-[clamp(0.5rem,2vh,1rem)] text-[clamp(0.625rem,1.2vw,1rem)]">
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-2 lg:p-3 rounded-lg ${
+                  className={`p-[clamp(0.375rem,1vw,0.75rem)] rounded-lg ${
                     index === 0 
                       ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
                       : 'bg-slate-700/50'
                   } transition-all`}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-[clamp(0.25rem,0.5vw,0.5rem)]">
+                    <div className={`w-[clamp(1.5rem,2.5vw,2.5rem)] h-[clamp(1.5rem,2.5vw,2.5rem)] rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <Activity className="w-[clamp(0.75rem,1.2vw,1.25rem)] h-[clamp(0.75rem,1.2vw,1.25rem)] text-white" />
                       ) : (
-                        <Stethoscope className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <Stethoscope className="w-[clamp(0.75rem,1.2vw,1.25rem)] h-[clamp(0.75rem,1.2vw,1.25rem)] text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-sm lg:text-base truncate">
+                      <p className="font-semibold text-white text-[clamp(0.625rem,1.2vw,1rem)] truncate">
                         {item.name}
                       </p>
-                      <p className="text-xs lg:text-sm text-slate-400">
+                      <p className="text-[clamp(0.5rem,1vw,0.875rem)] text-slate-400">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-xs lg:text-sm text-slate-400 font-mono shrink-0">
+                    <span className="text-[clamp(0.5rem,1vw,0.875rem)] text-slate-400 font-mono shrink-0">
                       {format(item.time, 'HH:mm')}
                     </span>
                   </div>
@@ -638,22 +638,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* News Ticker - Compact for landscape */}
       {newsItems.length > 0 && (
-        <div className="relative z-10 mt-2 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-lg overflow-hidden border border-red-500/50 shrink-0">
+        <div className="relative z-10 mt-[clamp(0.25rem,0.5vh,0.5rem)] bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-lg overflow-hidden border border-red-500/50 shrink-0">
           <div className="flex items-center">
-            <div className="bg-red-800 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2 flex items-center gap-2 shrink-0 z-10">
-              <Newspaper className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+            <div className="bg-red-800 px-[clamp(0.5rem,1.5vw,1.25rem)] py-[clamp(0.25rem,0.75vh,0.5rem)] flex items-center gap-[clamp(0.25rem,0.5vw,0.5rem)] shrink-0 z-10">
+              <Newspaper className="w-[clamp(0.875rem,1.5vw,1.5rem)] h-[clamp(0.875rem,1.5vw,1.5rem)] text-white" />
               <div className="flex flex-col">
-                <span className="text-white font-bold text-xs sm:text-sm lg:text-base">NOTÍCIAS</span>
-                <span className="text-red-200 text-[9px] sm:text-[10px]">
-                  Irá atualizar em: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                <span className="text-white font-bold text-[clamp(0.625rem,1.2vw,1rem)]">NOTÍCIAS</span>
+                <span className="text-red-200 text-[clamp(0.5rem,0.8vw,0.625rem)]">
+                  Atualiza em: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </div>
-            <div className="flex-1 overflow-hidden py-1.5 sm:py-2 lg:py-2.5">
+            <div className="flex-1 overflow-hidden py-[clamp(0.25rem,0.75vh,0.625rem)]">
               <div className="animate-marquee whitespace-nowrap inline-flex">
                 {newsItems.map((item, index) => (
-                  <span key={index} className="text-sm sm:text-base lg:text-lg xl:text-xl mx-3 sm:mx-4 lg:mx-6 inline-block text-white">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs lg:text-sm font-bold mr-1.5 sm:mr-2 inline-block ${
+                  <span key={index} className="text-[clamp(0.625rem,1.5vw,1.25rem)] mx-[clamp(0.5rem,1.5vw,1.5rem)] inline-block text-white">
+                    <span className={`px-[clamp(0.25rem,0.5vw,0.375rem)] py-[clamp(0.125rem,0.25vh,0.125rem)] rounded text-[clamp(0.5rem,0.8vw,0.875rem)] font-bold mr-[clamp(0.25rem,0.5vw,0.5rem)] inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -674,8 +674,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </span>
                 ))}
                 {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-sm sm:text-base lg:text-lg xl:text-xl mx-3 sm:mx-4 lg:mx-6 inline-block text-white">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] sm:text-xs lg:text-sm font-bold mr-1.5 sm:mr-2 inline-block ${
+                  <span key={`dup-${index}`} className="text-[clamp(0.625rem,1.5vw,1.25rem)] mx-[clamp(0.5rem,1.5vw,1.5rem)] inline-block text-white">
+                    <span className={`px-[clamp(0.25rem,0.5vw,0.375rem)] py-[clamp(0.125rem,0.25vh,0.125rem)] rounded text-[clamp(0.5rem,0.8vw,0.875rem)] font-bold mr-[clamp(0.25rem,0.5vw,0.5rem)] inline-block ${
                       item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
                       item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
                       item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
@@ -702,8 +702,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Credits - Minimal */}
-      <div className="relative z-10 mt-1 text-center shrink-0">
-        <p className="text-slate-500 text-[9px] sm:text-[10px] lg:text-xs">
+      <div className="relative z-10 mt-[clamp(0.125rem,0.25vh,0.25rem)] text-center shrink-0">
+        <p className="text-slate-500 text-[clamp(0.5rem,0.8vw,0.75rem)]">
           Solução criada por Kalebe Gomes
         </p>
       </div>
