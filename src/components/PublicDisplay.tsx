@@ -501,6 +501,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
+      {/* Flash overlay during announcement */}
+      {announcingType && (
+        <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
+          <div className={`absolute inset-0 ${
+            announcingType === 'triage' 
+              ? 'bg-blue-500/30' 
+              : 'bg-emerald-500/30'
+          }`} />
+        </div>
+      )}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
