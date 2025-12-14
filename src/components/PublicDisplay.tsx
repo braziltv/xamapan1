@@ -30,6 +30,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
+  const [isAnnouncingTriage, setIsAnnouncingTriage] = useState(false);
+  const [isAnnouncingDoctor, setIsAnnouncingDoctor] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -255,6 +257,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('speakName called with:', { name, caller, destination });
     
+    // Set announcing state
+    if (caller === 'triage') {
+      setIsAnnouncingTriage(true);
+    } else {
+      setIsAnnouncingDoctor(true);
+    }
+    
     // Play notification sound first
     await playNotificationSound();
     
@@ -319,9 +328,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Cancel any ongoing speech and speak
     window.speechSynthesis.cancel();
     
-    utterance.onerror = (e) => console.error('TTS error:', e);
+    const clearAnnouncingState = () => {
+      if (caller === 'triage') {
+        setIsAnnouncingTriage(false);
+      } else {
+        setIsAnnouncingDoctor(false);
+      }
+    };
+    
+    utterance.onerror = (e) => {
+      console.error('TTS error:', e);
+      clearAnnouncingState();
+    };
     utterance.onstart = () => console.log('TTS started');
-    utterance.onend = () => console.log('TTS ended');
+    utterance.onend = () => {
+      console.log('TTS ended');
+      clearAnnouncingState();
+    };
     
     window.speechSynthesis.speak(utterance);
   }, [playNotificationSound]);
@@ -543,15 +566,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center w-full animate-[pulse_1s_ease-in-out_infinite]">
-                  <div className="relative inline-block">
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-4 py-3 bg-gradient-to-r from-blue-600/30 via-blue-500/50 to-blue-600/30 rounded-2xl border-4 border-blue-400 shadow-[0_0_40px_rgba(59,130,246,0.8),0_0_80px_rgba(59,130,246,0.5),0_0_120px_rgba(59,130,246,0.3)] animate-[glow-blue_1.5s_ease-in-out_infinite_alternate]">
+                <div className={`text-center w-full ${isAnnouncingTriage ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}>
+                  <div className={`${isAnnouncingTriage ? 'relative inline-block' : ''}`}>
+                    <h2 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2 ${
+                      isAnnouncingTriage 
+                        ? 'px-4 py-3 bg-gradient-to-r from-blue-600/30 via-blue-500/50 to-blue-600/30 rounded-2xl border-4 border-blue-400 shadow-[0_0_40px_rgba(59,130,246,0.8),0_0_80px_rgba(59,130,246,0.5),0_0_120px_rgba(59,130,246,0.3)] animate-glow-blue' 
+                        : ''
+                    }`}>
                       {currentTriageCall.name}
                     </h2>
-                    <div className="absolute inset-0 rounded-2xl border-4 border-blue-300/50 animate-ping" />
+                    {isAnnouncingTriage && <div className="absolute inset-0 rounded-2xl border-4 border-blue-300/50 animate-ping" />}
                   </div>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-4 sm:mt-6 font-bold animate-bounce">
-                    ➤ Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
+                  <p className={`text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 ${isAnnouncingTriage ? 'mt-4 sm:mt-6 font-bold animate-bounce' : 'font-semibold'}`}>
+                    {isAnnouncingTriage ? '➤ ' : ''}Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
@@ -572,15 +599,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center w-full animate-[pulse_1s_ease-in-out_infinite]">
-                  <div className="relative inline-block">
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-4 py-3 bg-gradient-to-r from-emerald-600/30 via-emerald-500/50 to-emerald-600/30 rounded-2xl border-4 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.8),0_0_80px_rgba(16,185,129,0.5),0_0_120px_rgba(16,185,129,0.3)] animate-[glow-emerald_1.5s_ease-in-out_infinite_alternate]">
+                <div className={`text-center w-full ${isAnnouncingDoctor ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}>
+                  <div className={`${isAnnouncingDoctor ? 'relative inline-block' : ''}`}>
+                    <h2 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2 ${
+                      isAnnouncingDoctor 
+                        ? 'px-4 py-3 bg-gradient-to-r from-emerald-600/30 via-emerald-500/50 to-emerald-600/30 rounded-2xl border-4 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.8),0_0_80px_rgba(16,185,129,0.5),0_0_120px_rgba(16,185,129,0.3)] animate-glow-emerald' 
+                        : ''
+                    }`}>
                       {currentDoctorCall.name}
                     </h2>
-                    <div className="absolute inset-0 rounded-2xl border-4 border-emerald-300/50 animate-ping" />
+                    {isAnnouncingDoctor && <div className="absolute inset-0 rounded-2xl border-4 border-emerald-300/50 animate-ping" />}
                   </div>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-4 sm:mt-6 font-bold animate-bounce">
-                    ➤ Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
+                  <p className={`text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 ${isAnnouncingDoctor ? 'mt-4 sm:mt-6 font-bold animate-bounce' : 'font-semibold'}`}>
+                    {isAnnouncingDoctor ? '➤ ' : ''}Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
