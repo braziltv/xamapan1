@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface SettingsDialogProps {
   trigger?: React.ReactNode;
@@ -16,6 +18,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const { theme, setTheme } = useTheme();
 
   const loadVoices = useCallback(() => {
     const voices = window.speechSynthesis.getVoices();
@@ -159,6 +162,25 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Theme Toggle Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {theme === 'dark' ? (
+                <Moon className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <Sun className="w-4 h-4 text-muted-foreground" />
+              )}
+              <Label htmlFor="theme-toggle" className="text-sm font-medium">
+                Tema Escuro
+              </Label>
+            </div>
+            <Switch
+              id="theme-toggle"
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
+          </div>
+
           {/* TTS Test Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium">
