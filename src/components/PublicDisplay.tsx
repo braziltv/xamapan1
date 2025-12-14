@@ -543,12 +543,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentTriageCall ? (
-                <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
-                    {currentTriageCall.name}
-                  </h2>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-3 sm:mt-4 font-semibold">
-                    Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
+                <div className="text-center w-full animate-[pulse_1s_ease-in-out_infinite]">
+                  <div className="relative inline-block">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-4 py-3 bg-gradient-to-r from-blue-600/30 via-blue-500/50 to-blue-600/30 rounded-2xl border-4 border-blue-400 shadow-[0_0_40px_rgba(59,130,246,0.8),0_0_80px_rgba(59,130,246,0.5),0_0_120px_rgba(59,130,246,0.3)] animate-[glow-blue_1.5s_ease-in-out_infinite_alternate]">
+                      {currentTriageCall.name}
+                    </h2>
+                    <div className="absolute inset-0 rounded-2xl border-4 border-blue-300/50 animate-ping" />
+                  </div>
+                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-blue-400 mt-4 sm:mt-6 font-bold animate-bounce">
+                    ➤ Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
@@ -569,12 +572,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
               {currentDoctorCall ? (
-                <div className="text-center animate-pulse w-full">
-                  <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-2">
-                    {currentDoctorCall.name}
-                  </h2>
-                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-3 sm:mt-4 font-semibold">
-                    Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
+                <div className="text-center w-full animate-[pulse_1s_ease-in-out_infinite]">
+                  <div className="relative inline-block">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black text-white tracking-wide leading-tight break-words px-4 py-3 bg-gradient-to-r from-emerald-600/30 via-emerald-500/50 to-emerald-600/30 rounded-2xl border-4 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.8),0_0_80px_rgba(16,185,129,0.5),0_0_120px_rgba(16,185,129,0.3)] animate-[glow-emerald_1.5s_ease-in-out_infinite_alternate]">
+                      {currentDoctorCall.name}
+                    </h2>
+                    <div className="absolute inset-0 rounded-2xl border-4 border-emerald-300/50 animate-ping" />
+                  </div>
+                  <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-emerald-400 mt-4 sm:mt-6 font-bold animate-bounce">
+                    ➤ Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (

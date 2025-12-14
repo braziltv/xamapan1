@@ -106,10 +106,32 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "glow-blue": {
+          "0%": { 
+            boxShadow: "0 0 40px rgba(59,130,246,0.8), 0 0 80px rgba(59,130,246,0.5), 0 0 120px rgba(59,130,246,0.3)",
+            transform: "scale(1)"
+          },
+          "100%": { 
+            boxShadow: "0 0 60px rgba(59,130,246,1), 0 0 100px rgba(59,130,246,0.7), 0 0 150px rgba(59,130,246,0.5)",
+            transform: "scale(1.02)"
+          },
+        },
+        "glow-emerald": {
+          "0%": { 
+            boxShadow: "0 0 40px rgba(16,185,129,0.8), 0 0 80px rgba(16,185,129,0.5), 0 0 120px rgba(16,185,129,0.3)",
+            transform: "scale(1)"
+          },
+          "100%": { 
+            boxShadow: "0 0 60px rgba(16,185,129,1), 0 0 100px rgba(16,185,129,0.7), 0 0 150px rgba(16,185,129,0.5)",
+            transform: "scale(1.02)"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow-blue": "glow-blue 1.5s ease-in-out infinite alternate",
+        "glow-emerald": "glow-emerald 1.5s ease-in-out infinite alternate",
       },
     },
   },
