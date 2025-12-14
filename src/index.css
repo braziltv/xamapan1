@@ -217,3 +217,19 @@
   display: inline-flex;
   animation: marquee 1200s linear infinite;
 }
+
+@keyframes flash {
+  0%, 100% {
+    opacity: 0;
+  }
+  10%, 30%, 50%, 70%, 90% {
+    opacity: 1;
+  }
+  20%, 40%, 60%, 80% {
+    opacity: 0.3;
+  }
+}
+
+.animate-flash {
+  animation: flash 1.5s ease-in-out infinite;
+}
