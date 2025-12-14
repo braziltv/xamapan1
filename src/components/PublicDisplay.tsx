@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -555,11 +555,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         {/* Current Calls - Side by side on landscape */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {/* Triage Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
+          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+            announcingType === 'triage' 
+              ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
+              : 'border border-slate-700'
+          }`}>
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
               <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
                 <Activity className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                 TRIAGEM
+                {announcingType === 'triage' && (
+                  <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-yellow-300 animate-bounce ml-auto" />
+                )}
               </p>
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
@@ -585,11 +592,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 overflow-hidden backdrop-blur-sm flex flex-col">
+          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+            announcingType === 'doctor' 
+              ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
+              : 'border border-slate-700'
+          }`}>
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 lg:px-6 lg:py-4 shrink-0">
               <p className="text-white text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
                 <Stethoscope className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                 CONSULTÓRIO MÉDICO
+                {announcingType === 'doctor' && (
+                  <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-yellow-300 animate-bounce ml-auto" />
+                )}
               </p>
             </div>
             <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center flex-1">
