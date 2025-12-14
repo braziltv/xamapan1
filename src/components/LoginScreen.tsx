@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Tv, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -24,7 +26,25 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fetch user IP
+  useEffect(() => {
+    fetch("https://api.ipify.org?format=json")
+      .then((res) => res.json())
+      .then((data) => setUserIp(data.ip))
+      .catch(() => setUserIp("Não disponível"));
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +233,30 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               Entrar
             </Button>
           </form>
+
+          {/* IP Address and Clock Section */}
+          <div className="mt-6 pt-4 border-t border-border space-y-3">
+            {/* Digital Clock */}
+            <div className="flex items-center justify-center gap-2 text-center">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="font-mono text-lg font-bold text-foreground">
+                {format(currentTime, "HH:mm:ss", { locale: ptBR })}
+              </span>
+              <span className="text-xs text-muted-foreground">Hora Atualizada</span>
+            </div>
+            
+            {/* IP Address */}
+            <div className="flex items-center justify-center gap-2 text-center">
+              <Shield className="w-4 h-4 text-amber-500" />
+              <div className="text-sm">
+                <span className="font-medium text-foreground">IP: </span>
+                <span className="font-mono text-muted-foreground">{userIp || "Carregando..."}</span>
+              </div>
+            </div>
+            <p className="text-xs text-center text-muted-foreground">
+              Registrado para prevenir acessos indevidos
+            </p>
+          </div>
         </CardContent>
       </Card>
       <footer className="fixed bottom-6 left-0 right-0 text-center">
