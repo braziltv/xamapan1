@@ -236,15 +236,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
           {/* IP Address and Clock Section */}
           <div className="mt-6 pt-4 border-t border-border space-y-3">
-            {/* Digital Clock */}
-            <div className="flex items-center justify-center gap-2 text-center">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="font-mono text-lg font-bold text-foreground">
-                {format(currentTime, "HH:mm:ss", { locale: ptBR })}
-              </span>
-              <span className="text-xs text-muted-foreground">Hora Atualizada</span>
-            </div>
-            
             {/* IP Address */}
             <div className="flex items-center justify-center gap-2 text-center">
               <Shield className="w-4 h-4 text-amber-500" />
@@ -256,6 +247,20 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             <p className="text-xs text-center text-muted-foreground">
               Registrado para prevenir acessos indevidos
             </p>
+            
+            {/* Digital Clock */}
+            <div className="flex flex-col items-center justify-center gap-1 text-center">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                <span className="font-mono text-lg font-bold text-foreground">
+                  {format(currentTime, "HH:mm:ss", { locale: ptBR })}
+                </span>
+                <span className="text-xs text-muted-foreground">Hora Atualizada</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {format(currentTime, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
