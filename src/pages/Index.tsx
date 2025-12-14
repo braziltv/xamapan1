@@ -177,7 +177,7 @@ const Index = () => {
         </div>
 
         {/* Cadastro */}
-        <TabsContent value="cadastro" className="mt-0">
+        <TabsContent value="cadastro" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <PatientRegistration
               patients={patients}
@@ -192,7 +192,7 @@ const Index = () => {
         </TabsContent>
 
         {/* Triagem */}
-        <TabsContent value="triagem" className="mt-0">
+        <TabsContent value="triagem" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <TriagePanel
               waitingPatients={waitingForTriage}
@@ -208,7 +208,7 @@ const Index = () => {
         </TabsContent>
 
         {/* Médico */}
-        <TabsContent value="medico" className="mt-0">
+        <TabsContent value="medico" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <DoctorPanel
               waitingPatients={waitingForDoctor}
@@ -222,7 +222,7 @@ const Index = () => {
         </TabsContent>
 
         {/* Administrativo */}
-        <TabsContent value="administrativo" className="mt-0">
+        <TabsContent value="administrativo" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <StatisticsPanel patients={patients} history={history} />
           </main>
