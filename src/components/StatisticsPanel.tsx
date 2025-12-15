@@ -933,7 +933,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
-  // Função para excluir apenas estatísticas de atendimento
+  // Função para excluir estatísticas de atendimento e pacientes do dia
   const handleDeleteStatistics = async () => {
     if (deleteStatsPassword !== 'Paineiras@1') {
       toast({
@@ -946,16 +946,25 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
 
     setDeletingStats(true);
     try {
-      const { error } = await supabase
+      // Apagar estatísticas diárias
+      const { error: statsError } = await supabase
         .from('statistics_daily')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
-      if (error) throw error;
+      if (statsError) throw statsError;
+
+      // Apagar pacientes chamados (para limpar tempo de espera)
+      const { error: patientsError } = await supabase
+        .from('patient_calls')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (patientsError) throw patientsError;
 
       toast({
         title: "Estatísticas apagadas",
-        description: "Todas as estatísticas de atendimento foram removidas com sucesso.",
+        description: "Estatísticas de atendimento e dados de tempo de espera foram removidos.",
       });
 
       setDeleteStatsDialogOpen(false);
