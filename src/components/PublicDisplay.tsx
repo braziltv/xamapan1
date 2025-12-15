@@ -1084,7 +1084,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className={item.source === 'Créditos' ? 'text-yellow-300 font-semibold' : ''}>
+                      <span>
                         {item.title}
                       </span>
                     </span>
@@ -1121,7 +1121,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       }`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className={item.source === 'Créditos' ? 'text-yellow-300 font-semibold' : ''}>
+                      <span>
                         {item.title}
                       </span>
                     </span>
