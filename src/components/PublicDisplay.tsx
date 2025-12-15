@@ -60,10 +60,31 @@ const extractGoogleDriveUrl = (url: string): string | null => {
   return null;
 };
 
-// Check if URL is from Cloudinary (supports autoplay with sound)
+// Check if URL is from Cloudinary and extract direct video URL
+const getCloudinaryDirectUrl = (url: string): string | null => {
+  if (!url) return null;
+  
+  // Handle embed player URL format
+  // Example: https://player.cloudinary.com/embed/?cloud_name=xxx&public_id=yyy&profile=cld-default
+  const embedMatch = url.match(/player\.cloudinary\.com\/embed\/\?.*cloud_name=([^&]+).*public_id=([^&]+)/);
+  if (embedMatch) {
+    const cloudName = embedMatch[1];
+    const publicId = decodeURIComponent(embedMatch[2]);
+    return `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+  }
+  
+  // Already a direct URL
+  if (url.includes('res.cloudinary.com')) {
+    return url;
+  }
+  
+  return null;
+};
+
+// Check if URL is from Cloudinary
 const isCloudinaryUrl = (url: string): boolean => {
   if (!url) return false;
-  return url.includes('res.cloudinary.com') || url.includes('cloudinary.com');
+  return url.includes('res.cloudinary.com') || url.includes('player.cloudinary.com') || url.includes('cloudinary.com/video');
 };
 
 // Determine video type from URL
@@ -1039,7 +1060,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {videoType === 'cloudinary' && (
             <video
               key={currentVideoIndex}
-              src={currentYoutubeUrl}
+              src={getCloudinaryDirectUrl(currentYoutubeUrl) || currentYoutubeUrl}
               className="w-full h-full object-contain"
               autoPlay
               loop={youtubePlaylist.length === 1}
