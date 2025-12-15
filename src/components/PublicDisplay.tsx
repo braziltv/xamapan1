@@ -60,11 +60,19 @@ const extractGoogleDriveUrl = (url: string): string | null => {
   return null;
 };
 
+// Check if URL is from Cloudinary (supports autoplay with sound)
+const isCloudinaryUrl = (url: string): boolean => {
+  if (!url) return false;
+  return url.includes('res.cloudinary.com') || url.includes('cloudinary.com');
+};
+
 // Determine video type from URL
-const getVideoType = (url: string): 'youtube' | 'googledrive' | 'direct' | null => {
+const getVideoType = (url: string): 'youtube' | 'googledrive' | 'cloudinary' | 'direct' | null => {
   if (!url) return null;
   if (extractYouTubeId(url)) return 'youtube';
   if (extractGoogleDriveUrl(url)) return 'googledrive';
+  // Cloudinary URLs - supports autoplay with sound!
+  if (isCloudinaryUrl(url)) return 'cloudinary';
   // Check for direct video URLs
   if (url.match(/\.(mp4|webm|ogg|mov)(\?|$)/i)) return 'direct';
   return null;
@@ -1027,6 +1035,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             />
           )}
           
+          {/* Cloudinary video - with sound! */}
+          {videoType === 'cloudinary' && (
+            <video
+              key={currentVideoIndex}
+              src={currentYoutubeUrl}
+              className="w-full h-full object-contain"
+              autoPlay
+              loop={youtubePlaylist.length === 1}
+              onEnded={switchToNextVideo}
+              playsInline
+            />
+          )}
+          
           {/* Direct video URL - with sound! */}
           {videoType === 'direct' && (
             <video
@@ -1044,7 +1065,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
             {/* Video type indicator */}
             <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-xs">
-              {videoType === 'googledrive' ? 'Google Drive' : videoType === 'youtube' ? 'YouTube (mudo)' : 'Vídeo'}
+              {videoType === 'cloudinary' ? 'Cloudinary ♪' : videoType === 'googledrive' ? 'Google Drive' : videoType === 'youtube' ? 'YouTube (mudo)' : 'Vídeo'}
             </div>
             
             {/* Playlist info */}
