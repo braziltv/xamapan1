@@ -373,7 +373,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const testAudio = useCallback(async () => {
     console.log('Testing audio...');
     try {
-      await playNotificationSound();
+      // IMPORTANT: do not await here, otherwise some TV browsers treat it as not user-initiated
+      // (and the voice is blocked). The chime starts first anyway.
+      void playNotificationSound();
 
       const testText = 'Teste de áudio. Som funcionando corretamente.';
 
@@ -417,7 +419,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       try {
         // Play notification sound first (mandatory)
-        await playNotificationSound();
+        // IMPORTANT: do not await here, otherwise some TV browsers block voice.
+        // The chime starts immediately, so it's still "som antes da voz".
+        void playNotificationSound();
 
         // Prefer Web Speech API (works offline)
         try {
