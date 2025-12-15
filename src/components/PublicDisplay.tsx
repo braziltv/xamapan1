@@ -213,34 +213,55 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     if (!audioUnlocked) return;
 
+    // More frequent keep-alive (every 30 seconds instead of 2 minutes)
     const interval = window.setInterval(() => {
+      console.log('TTS keep-alive ping...');
+      
       try {
-        window.speechSynthesis?.resume?.();
-      } catch {
-        // ignore
+        // Resume Web Speech API
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+        }
+      } catch (e) {
+        console.log('speechSynthesis resume failed:', e);
       }
 
       const responsiveVoice = (window as any).responsiveVoice;
-      try {
-        responsiveVoice?.resume?.();
-      } catch {
-        // ignore
-      }
-
-      // Tiny silent warm-up to prevent ResponsiveVoice from going dormant
-      try {
-        if (responsiveVoice?.voiceSupport?.() && !responsiveVoice?.isPlaying?.()) {
-          responsiveVoice.speak(' ', 'Brazilian Portuguese Female', {
-            volume: 0,
-            rate: 1,
-            pitch: 1,
-          });
-          window.setTimeout(() => responsiveVoice?.cancel?.(), 200);
+      
+      // Check if ResponsiveVoice is available and initialized
+      if (responsiveVoice) {
+        try {
+          // Force cancel any stuck speech
+          responsiveVoice.cancel?.();
+          
+          // Check if voice support is still working
+          if (responsiveVoice.voiceSupport?.()) {
+            // Silent warm-up to prevent dormancy
+            responsiveVoice.speak('.', 'Brazilian Portuguese Female', {
+              volume: 0,
+              rate: 10,
+              pitch: 1,
+              onend: () => console.log('Keep-alive silent speech ended'),
+            });
+            window.setTimeout(() => {
+              try { responsiveVoice.cancel?.(); } catch {}
+            }, 100);
+          } else {
+            console.warn('ResponsiveVoice voice support returned false - may need re-init');
+          }
+        } catch (e) {
+          console.log('ResponsiveVoice keep-alive failed:', e);
         }
-      } catch {
-        // ignore
       }
-    }, 120000);
+      
+      // Also keep AudioContext alive
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().then(() => {
+          console.log('AudioContext resumed in keep-alive');
+        });
+      }
+    }, 30000); // Every 30 seconds
 
     return () => window.clearInterval(interval);
   }, [audioUnlocked]);
@@ -401,13 +422,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (responsiveVoice && responsiveVoice.voiceSupport()) {
       console.log('Using ResponsiveVoice for TTS');
 
-      // "Wake" engines that can go dormant after inactivity on kiosk/TV
+      // Force wake and reset engines before speaking
       try {
-        window.speechSynthesis?.resume?.();
-        responsiveVoice.resume?.();
+        // Cancel any pending speech
         responsiveVoice.cancel?.();
-      } catch {
-        // ignore
+        
+        // Resume Web Speech API (ResponsiveVoice uses it internally)
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+        }
+        
+        // Small delay to ensure engines are ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (e) {
+        console.log('Engine wake-up error (continuing):', e);
       }
 
       responsiveVoice.speak(text, 'Brazilian Portuguese Female', {
@@ -423,7 +452,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         },
         onerror: (e: any) => {
           console.error('ResponsiveVoice TTS error:', e);
-          setAnnouncingType(null);
+          // Try fallback to Web Speech API
+          console.log('Attempting Web Speech API fallback...');
+          try {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.85;
+            utterance.pitch = 1.2;
+            utterance.onend = () => setAnnouncingType(null);
+            utterance.onerror = () => setAnnouncingType(null);
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.resume();
+            window.speechSynthesis.speak(utterance);
+          } catch {
+            setAnnouncingType(null);
+          }
         },
       });
 
