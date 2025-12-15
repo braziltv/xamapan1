@@ -288,8 +288,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('Audio unlocked and saved to localStorage');
   }, [audioUnlocked]);
 
-  // Play audio with amplification using Web Audio API (2x volume = 100% increase)
-  const playAmplifiedAudio = useCallback((audioElement: HTMLAudioElement, gain: number = 2.0): Promise<void> => {
+  // Play audio with amplification using Web Audio API (2.5x volume = 150% increase)
+  const playAmplifiedAudio = useCallback((audioElement: HTMLAudioElement, gain: number = 2.5): Promise<void> => {
     return new Promise((resolve, reject) => {
       try {
         const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -338,7 +338,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audio = new Audio('/sounds/notification.mp3');
       audio.currentTime = 0;
       
-      playAmplifiedAudio(audio, 2.0)
+      playAmplifiedAudio(audio, 2.5)
         .then(() => {
           console.log('Notification sound finished');
           resolve();
@@ -420,7 +420,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       const audio = new Audio(audioUrl);
       try {
-        await playAmplifiedAudio(audio, 2.0);
+        await playAmplifiedAudio(audio, 2.5);
       } finally {
         URL.revokeObjectURL(audioUrl);
       }
@@ -532,7 +532,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       const audio = new Audio(audioUrl);
       try {
-        await playAmplifiedAudio(audio, 2.0);
+        await playAmplifiedAudio(audio, 2.5);
       } finally {
         URL.revokeObjectURL(audioUrl);
       }
