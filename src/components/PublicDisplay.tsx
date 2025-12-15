@@ -887,6 +887,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               Painel de Chamadas
             </h1>
             <p className="text-slate-400 text-[10px] lg:text-xs xl:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-500 text-[8px] lg:text-[10px] xl:text-xs leading-tight">Solução criada e cedida gratuitamente por Kalebe Gomes</p>
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-3 shrink-0">
@@ -1037,9 +1038,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       </div>
 
-      {/* News Ticker - Compact for landscape */}
+      {/* News Ticker - Fixed at bottom like TV news */}
       {newsItems.length > 0 && (
-        <div className="relative z-10 mt-1 lg:mt-2 bg-gradient-to-r from-red-700 via-red-600 to-red-700 rounded-lg overflow-hidden border border-red-500/50 shrink-0">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-red-700 via-red-600 to-red-700 border-t-2 border-red-500/50 shrink-0">
           <div className="flex items-center">
             <div className="bg-red-800 px-2 py-1 lg:px-4 lg:py-1.5 xl:px-5 xl:py-2 flex items-center gap-1 lg:gap-2 shrink-0 z-10">
               <Newspaper className="w-3 h-3 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white shrink-0" />
@@ -1168,11 +1169,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       </div>
 
-      {/* Credits and Audio Test - Minimal */}
-      <div className="relative z-10 mt-0.5 lg:mt-1 flex items-center justify-center gap-2 lg:gap-4 shrink-0">
-        <p className="text-slate-500 text-[8px] lg:text-[10px] xl:text-xs">
-          Solução criada por Kalebe Gomes
-        </p>
+      {/* Audio Test Button - Discrete */}
+      <div className="relative z-10 mt-0.5 lg:mt-1 flex items-center justify-center shrink-0 pb-12 lg:pb-14">
         <button
           onClick={testAudio}
           className="flex items-center gap-1 px-1.5 py-0.5 lg:px-2 lg:py-1 text-[8px] lg:text-[10px] xl:text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-md border border-slate-700 hover:border-slate-600 transition-colors"
