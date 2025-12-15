@@ -323,8 +323,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     console.log('Notification sound played');
     
-    // Return promise that resolves after the chime
-    return new Promise<void>(resolve => setTimeout(resolve, 800));
+    // Return promise that resolves after the chime (reduced delay for quicker announcement)
+    return new Promise<void>(resolve => setTimeout(resolve, 400));
   }, []);
 
   const speakWithWebSpeech = useCallback(
