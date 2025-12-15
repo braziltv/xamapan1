@@ -281,50 +281,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
     
-    // Create a new AudioContext if needed
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      console.log('Created new AudioContext in playNotificationSound');
-    }
-    
-    const audioContext = audioContextRef.current;
-    
-    // Resume if suspended
-    if (audioContext.state === 'suspended') {
-      console.log('AudioContext suspended, resuming...');
-      audioContext.resume();
-    }
-    
-    console.log('AudioContext state:', audioContext.state);
-    
-    // Create a pleasant chime sound
-    const playTone = (frequency: number, startTime: number, duration: number) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+    return new Promise<void>((resolve, reject) => {
+      const audio = new Audio('/sounds/notification.mp3');
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      audio.onended = () => {
+        console.log('Notification sound finished');
+        resolve();
+      };
       
-      oscillator.frequency.value = frequency;
-      oscillator.type = 'sine';
+      audio.onerror = (e) => {
+        console.error('Error playing notification sound:', e);
+        reject(e);
+      };
       
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-      gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + startTime + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
-      
-      oscillator.start(audioContext.currentTime + startTime);
-      oscillator.stop(audioContext.currentTime + startTime + duration);
-    };
-    
-    // Play a three-tone chime (ascending)
-    playTone(523.25, 0, 0.3);      // C5
-    playTone(659.25, 0.15, 0.3);   // E5
-    playTone(783.99, 0.3, 0.4);    // G5
-    
-    console.log('Notification sound played');
-    
-    // Return promise that resolves after the chime (reduced delay for quicker announcement)
-    return new Promise<void>(resolve => setTimeout(resolve, 400));
+      audio.play().then(() => {
+        console.log('Notification sound playing');
+      }).catch((err) => {
+        console.error('Failed to play notification sound:', err);
+        reject(err);
+      });
+    });
   }, []);
 
   const speakWithWebSpeech = useCallback(
