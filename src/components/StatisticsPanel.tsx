@@ -2222,16 +2222,24 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Configure até 10 vídeos do YouTube para reprodução aleatória na tela de Atendimento ao Público.
-            Os vídeos serão exibidos em tela cheia e pausarão automaticamente durante as chamadas de pacientes.
+            Configure até 10 vídeos para reprodução aleatória na tela de Atendimento ao Público.
+            Os vídeos pausarão automaticamente durante as chamadas de pacientes.
           </p>
+          <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-4">
+            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+              💡 Google Drive = com som automático
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              YouTube inicia mudo (política do navegador). Use Google Drive para vídeos com som.
+            </p>
+          </div>
           
           <div className="space-y-3">
             {youtubeUrls.map((url, index) => (
               <div key={index} className="flex items-center gap-2">
                 <span className="text-sm font-medium w-6 text-muted-foreground">{index + 1}.</span>
                 <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder="Link do Google Drive ou YouTube..."
                   value={url}
                   onChange={(e) => {
                     const newUrls = [...youtubeUrls];

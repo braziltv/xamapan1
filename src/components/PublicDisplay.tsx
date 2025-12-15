@@ -39,6 +39,37 @@ const extractYouTubeId = (url: string): string | null => {
   return null;
 };
 
+// Extract Google Drive file ID and return direct video URL
+const extractGoogleDriveUrl = (url: string): string | null => {
+  if (!url) return null;
+  
+  // Handle various Google Drive URL formats
+  const patterns = [
+    /drive\.google\.com\/file\/d\/([^/]+)/,
+    /drive\.google\.com\/open\?id=([^&]+)/,
+    /drive\.google\.com\/uc\?.*id=([^&]+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      // Return the preview URL for iframe embedding
+      return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+  }
+  return null;
+};
+
+// Determine video type from URL
+const getVideoType = (url: string): 'youtube' | 'googledrive' | 'direct' | null => {
+  if (!url) return null;
+  if (extractYouTubeId(url)) return 'youtube';
+  if (extractGoogleDriveUrl(url)) return 'googledrive';
+  // Check for direct video URLs
+  if (url.match(/\.(mp4|webm|ogg|mov)(\?|$)/i)) return 'direct';
+  return null;
+};
+
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
@@ -959,26 +990,64 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }
 
   const youtubeVideoId = extractYouTubeId(currentYoutubeUrl);
+  const googleDriveUrl = extractGoogleDriveUrl(currentYoutubeUrl);
+  const videoType = getVideoType(currentYoutubeUrl);
+  const hasVideo = videoType !== null;
 
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 sm:p-3 lg:p-4 relative overflow-hidden flex flex-col"
     >
-      {/* YouTube Video Fullscreen - Hidden during announcements */}
-      {youtubeVideoId && !announcingType && (
+      {/* Video Fullscreen - Hidden during announcements */}
+      {hasVideo && !announcingType && (
         <div className="absolute inset-0 z-30 bg-black">
-          <iframe
-            ref={youtubePlayerRef}
-            key={currentVideoIndex} // Force reload when video changes
-            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
-            className="w-full h-full"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            title="YouTube Video"
-          />
+          {/* Google Drive Video - with sound! */}
+          {videoType === 'googledrive' && googleDriveUrl && (
+            <iframe
+              ref={youtubePlayerRef}
+              key={currentVideoIndex}
+              src={googleDriveUrl}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title="Google Drive Video"
+            />
+          )}
+          
+          {/* YouTube Video - muted due to browser policy */}
+          {videoType === 'youtube' && youtubeVideoId && (
+            <iframe
+              ref={youtubePlayerRef}
+              key={currentVideoIndex}
+              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title="YouTube Video"
+            />
+          )}
+          
+          {/* Direct video URL - with sound! */}
+          {videoType === 'direct' && (
+            <video
+              key={currentVideoIndex}
+              src={currentYoutubeUrl}
+              className="w-full h-full object-contain"
+              autoPlay
+              loop={youtubePlaylist.length === 1}
+              onEnded={switchToNextVideo}
+              playsInline
+            />
+          )}
+          
           {/* Overlay controls on video */}
           <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
+            {/* Video type indicator */}
+            <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-xs">
+              {videoType === 'googledrive' ? 'Google Drive' : videoType === 'youtube' ? 'YouTube (mudo)' : 'Vídeo'}
+            </div>
+            
             {/* Playlist info */}
             {youtubePlaylist.length > 1 && (
               <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-sm">
@@ -1014,7 +1083,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Youtube className="w-5 h-5 text-red-500" />
-                    Playlist do YouTube
+                    Playlist de Vídeos
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -1030,10 +1099,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Adicionar vídeo rapidamente</label>
                     <Input
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      placeholder="Link do Google Drive ou YouTube..."
                       value={tempYoutubeUrl}
                       onChange={(e) => setTempYoutubeUrl(e.target.value)}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Google Drive: com som • YouTube: sem som
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={saveYoutubeUrl} className="flex-1" disabled={!tempYoutubeUrl}>
@@ -1064,7 +1136,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Animated background elements - only show when no video */}
-      {!youtubeVideoId && (
+      {!hasVideo && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-10 w-48 md:w-72 lg:w-96 h-48 md:h-72 lg:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-10 right-10 w-40 md:w-60 lg:w-80 h-40 md:h-60 lg:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
