@@ -387,28 +387,27 @@ export function useCallPanel() {
 
   // Forward to triage with voice call on TV
   const forwardToTriage = useCallback((patientId: string, destination?: string) => {
-    setPatients(prev => {
-      const patient = prev.find(p => p.id === patientId);
-      if (!patient) return prev;
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) return;
 
-      // Create call to show on TV
-      createCall(patient.name, 'triage', destination || 'Triagem');
-      triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
+    // Create call to show on TV
+    createCall(patient.name, 'triage', destination || 'Triagem');
+    triggerCallEvent({ name: patient.name }, 'triage', destination || 'Triagem');
 
-      const updatedPatient: Patient = {
-        ...patient,
-        status: 'waiting' as const, // Keep as waiting so it shows in triage queue
-        calledAt: new Date(),
-      };
-      
-      // Set as current triage call so it appears in "Chamada Atual"
-      setCurrentTriageCall(updatedPatient);
+    const updatedPatient: Patient = {
+      ...patient,
+      status: 'waiting' as const, // Keep as waiting so it shows in triage queue
+      calledAt: new Date(),
+    };
+    
+    // Set as current triage call so it appears in "Chamada Atual"
+    setCurrentTriageCall(updatedPatient);
 
-      return prev.map(p => 
-        p.id === patientId ? updatedPatient : p
-      );
-    });
-  }, [createCall, triggerCallEvent]);
+    // Update patient in list
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? updatedPatient : p
+    ));
+  }, [patients, createCall, triggerCallEvent]);
 
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback((patientId: string, destination?: string) => {
@@ -424,19 +423,18 @@ export function useCallPanel() {
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
-    setPatients(prev => {
-      const patient = prev.find(p => p.id === patientId);
-      if (!patient) return prev;
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) return;
 
-      // Create call to show on TV
-      createCall(patient.name, 'doctor', destination || 'Consultório Médico');
-      triggerCallEvent({ name: patient.name }, 'doctor', destination || 'Consultório Médico');
+    // Create call to show on TV
+    createCall(patient.name, 'doctor', destination || 'Consultório Médico');
+    triggerCallEvent({ name: patient.name }, 'doctor', destination || 'Consultório Médico');
 
-      return prev.map(p => 
-        p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
-      );
-    });
-  }, [createCall, triggerCallEvent]);
+    // Update patient in list
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
+    ));
+  }, [patients, createCall, triggerCallEvent]);
 
   // Sort by priority first (emergency > priority > normal), then by time
   const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
