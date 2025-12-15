@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Users, Volume2, CheckCircle, ArrowRight, Activity, Stethoscope } from 'lucide-react';
-import { Patient } from '@/types/patient';
+import { UserPlus, Trash2, Users, Volume2, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -13,15 +13,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface PatientRegistrationProps {
   patients: Patient[];
-  onAddPatient: (name: string) => void;
+  onAddPatient: (name: string, priority?: PatientPriority) => void;
   onRemovePatient: (id: string) => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
   onForwardToTriage: (id: string, destination?: string) => void;
   onForwardToDoctor: (id: string, destination?: string) => void;
+  onUpdatePriority?: (id: string, priority: PatientPriority) => void;
 }
 
 const SALAS = [
@@ -42,6 +50,12 @@ const CONSULTORIOS_MEDICO = [
   { id: 'med2', name: 'Consultório Médico 2' },
 ];
 
+const PRIORITY_CONFIG = {
+  emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
+  priority: { label: 'Prioridade', color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-500', icon: AlertCircle },
+  normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
+};
+
 export function PatientRegistration({ 
   patients, 
   onAddPatient, 
@@ -49,15 +63,18 @@ export function PatientRegistration({
   onDirectPatient,
   onFinishWithoutCall,
   onForwardToTriage,
-  onForwardToDoctor
+  onForwardToDoctor,
+  onUpdatePriority
 }: PatientRegistrationProps) {
   const [name, setName] = useState('');
+  const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onAddPatient(name);
+      onAddPatient(name, selectedPriority);
       setName('');
+      setSelectedPriority('normal');
       toast.success('Paciente cadastrado com sucesso!');
     }
   };
@@ -80,6 +97,31 @@ export function PatientRegistration({
             onChange={(e) => setName(e.target.value)}
             className="flex-1 text-base"
           />
+          <Select value={selectedPriority} onValueChange={(v) => setSelectedPriority(v as PatientPriority)}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Prioridade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="normal">
+                <span className="flex items-center gap-2">
+                  <Circle className="w-3 h-3 text-green-600" />
+                  Normal
+                </span>
+              </SelectItem>
+              <SelectItem value="priority">
+                <span className="flex items-center gap-2">
+                  <AlertCircle className="w-3 h-3 text-amber-600" />
+                  Prioridade
+                </span>
+              </SelectItem>
+              <SelectItem value="emergency">
+                <span className="flex items-center gap-2">
+                  <AlertTriangle className="w-3 h-3 text-red-600" />
+                  Emergência
+                </span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
           <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
             <UserPlus className="w-4 h-4 mr-2" />
             Cadastrar
@@ -100,35 +142,94 @@ export function PatientRegistration({
           </p>
         ) : (
           <div className="space-y-2 max-h-[60vh] sm:max-h-[500px] overflow-y-auto">
-            {activePatients.map((patient, index) => (
-              <div
-                key={patient.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
-              >
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Cadastrado às {format(patient.createdAt, 'HH:mm')}
-                      {' • '}
-                      <span className={`font-medium ${
-                        patient.status === 'waiting' ? 'text-amber-500' :
-                        patient.status === 'in-triage' ? 'text-blue-500' :
-                        patient.status === 'waiting-doctor' ? 'text-purple-500' :
-                        'text-green-500'
-                      }`}>
-                        {patient.status === 'waiting' && 'Aguardando triagem'}
-                        {patient.status === 'in-triage' && 'Em triagem'}
-                        {patient.status === 'waiting-doctor' && 'Aguardando médico'}
-                        {patient.status === 'in-consultation' && 'Em consulta'}
+            {activePatients.map((patient, index) => {
+              const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
+              const PriorityIcon = priorityConfig.icon;
+              
+              return (
+                <div
+                  key={patient.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-muted transition-colors gap-3 ${priorityConfig.bg} border-l-4 ${priorityConfig.border}`}
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8 text-center">
+                        {index + 1}
                       </span>
-                    </p>
+                      <PriorityIcon className={`w-4 h-4 ${priorityConfig.color}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
+                        {patient.priority === 'emergency' && (
+                          <span className="px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded animate-pulse">
+                            EMERGÊNCIA
+                          </span>
+                        )}
+                        {patient.priority === 'priority' && (
+                          <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded">
+                            PRIORIDADE
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Cadastrado às {format(patient.createdAt, 'HH:mm')}
+                        {' • '}
+                        <span className={`font-medium ${
+                          patient.status === 'waiting' ? 'text-amber-500' :
+                          patient.status === 'in-triage' ? 'text-blue-500' :
+                          patient.status === 'waiting-doctor' ? 'text-purple-500' :
+                          'text-green-500'
+                        }`}>
+                          {patient.status === 'waiting' && 'Aguardando triagem'}
+                          {patient.status === 'in-triage' && 'Em triagem'}
+                          {patient.status === 'waiting-doctor' && 'Aguardando médico'}
+                          {patient.status === 'in-consultation' && 'Em consulta'}
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
+                    {/* Alterar Prioridade */}
+                    {onUpdatePriority && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 ${priorityConfig.color}`}
+                          >
+                            <PriorityIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden xs:inline">Prioridade</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-card border border-border z-50">
+                          <DropdownMenuLabel>Alterar Prioridade</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onUpdatePriority(patient.id, 'emergency')}
+                            className="cursor-pointer text-red-600"
+                          >
+                            <AlertTriangle className="w-4 h-4 mr-2" />
+                            Emergência
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdatePriority(patient.id, 'priority')}
+                            className="cursor-pointer text-amber-600"
+                          >
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            Prioridade
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdatePriority(patient.id, 'normal')}
+                            className="cursor-pointer text-green-600"
+                          >
+                            <Circle className="w-4 h-4 mr-2" />
+                            Normal
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
                   {patient.status === 'waiting' && (
                     <>
@@ -255,7 +356,8 @@ export function PatientRegistration({
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

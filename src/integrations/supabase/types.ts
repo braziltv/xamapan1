@@ -49,6 +49,7 @@ export type Database = {
           destination: string | null
           id: string
           patient_name: string
+          priority: string
           status: string
           unit_name: string
         }
@@ -59,6 +60,7 @@ export type Database = {
           destination?: string | null
           id?: string
           patient_name: string
+          priority?: string
           status?: string
           unit_name: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           destination?: string | null
           id?: string
           patient_name?: string
+          priority?: string
           status?: string
           unit_name?: string
         }

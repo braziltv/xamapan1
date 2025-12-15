@@ -137,15 +137,22 @@ export function useCallPanel() {
     triggerCallEvent({ name: patientName }, 'triage', destination);
   }, [createCall, triggerCallEvent]);
 
-  const addPatient = useCallback((name: string) => {
+  const addPatient = useCallback((name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal') => {
     const newPatient: Patient = {
       id: `patient-${Date.now()}`,
       name: name.trim(),
       status: 'waiting',
+      priority,
       createdAt: new Date(),
     };
     setPatients(prev => [...prev, newPatient]);
     return newPatient;
+  }, []);
+
+  const updatePatientPriority = useCallback((patientId: string, priority: 'normal' | 'priority' | 'emergency') => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, priority } : p
+    ));
   }, []);
 
   const callPatientToTriage = useCallback((patientId: string) => {
@@ -291,11 +298,22 @@ export function useCallPanel() {
     });
   }, [createCall, triggerCallEvent]);
 
+  // Sort by priority first (emergency > priority > normal), then by time
+  const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
+  
   const waitingForTriage = patients.filter(p => p.status === 'waiting')
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    .sort((a, b) => {
+      const priorityDiff = priorityOrder[a.priority || 'normal'] - priorityOrder[b.priority || 'normal'];
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
 
   const waitingForDoctor = patients.filter(p => p.status === 'waiting-doctor')
-    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    .sort((a, b) => {
+      const priorityDiff = priorityOrder[a.priority || 'normal'] - priorityOrder[b.priority || 'normal'];
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
 
   return {
     patients,
@@ -318,5 +336,6 @@ export function useCallPanel() {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    updatePatientPriority,
   };
 }
