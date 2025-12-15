@@ -31,6 +31,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -192,6 +195,76 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const interval = setInterval(checkUnitName, 1000);
     return () => clearInterval(interval);
   }, [unitName]);
+
+  // Auto fullscreen on mount
+  useEffect(() => {
+    const requestFullscreen = async () => {
+      try {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen && !document.fullscreenElement) {
+          await elem.requestFullscreen();
+          setIsFullscreen(true);
+        } else if ((elem as any).webkitRequestFullscreen && !(document as any).webkitFullscreenElement) {
+          await (elem as any).webkitRequestFullscreen();
+          setIsFullscreen(true);
+        } else if ((elem as any).msRequestFullscreen && !(document as any).msFullscreenElement) {
+          await (elem as any).msRequestFullscreen();
+          setIsFullscreen(true);
+        }
+      } catch (err) {
+        console.log('Fullscreen request failed (requires user interaction):', err);
+      }
+    };
+
+    // Try fullscreen after a short delay (some browsers need this)
+    const timeout = setTimeout(requestFullscreen, 500);
+
+    // Listen for fullscreen changes
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement || !!(document as any).webkitFullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Hide cursor after inactivity
+  useEffect(() => {
+    const hideCursor = () => {
+      setCursorVisible(false);
+    };
+
+    const showCursor = () => {
+      setCursorVisible(true);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+      cursorTimeoutRef.current = setTimeout(hideCursor, 3000); // Hide after 3 seconds of inactivity
+    };
+
+    // Initial timeout to hide cursor
+    cursorTimeoutRef.current = setTimeout(hideCursor, 3000);
+
+    // Event listeners for mouse movement
+    window.addEventListener('mousemove', showCursor);
+    window.addEventListener('mousedown', showCursor);
+    window.addEventListener('touchstart', showCursor);
+
+    return () => {
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+      window.removeEventListener('mousemove', showCursor);
+      window.removeEventListener('mousedown', showCursor);
+      window.removeEventListener('touchstart', showCursor);
+    };
+  }, []);
 
   // Initialize audio context on mount if already unlocked
   useEffect(() => {
@@ -767,7 +840,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return (
       <div 
         onClick={unlockAudio}
-        className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer"
+        className={`h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer ${!cursorVisible ? 'cursor-none' : ''}`}
+        style={{ cursor: cursorVisible ? 'pointer' : 'none' }}
       >
         <div className="text-center space-y-6 animate-pulse">
           <Volume2 className="w-24 h-24 text-primary mx-auto" />
@@ -781,7 +855,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className="h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 lg:p-3 xl:p-4 relative overflow-hidden flex flex-col"
+      className={`h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 lg:p-3 xl:p-4 relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
       {/* Flash overlay during announcement */}
       {announcingType && (
