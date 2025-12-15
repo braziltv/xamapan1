@@ -355,7 +355,19 @@ export function useCallPanel() {
     });
   }, [createCall, triggerCallEvent]);
 
-  // Forward to doctor with voice call on TV
+  // Send to doctor queue WITHOUT TV announcement (triage uses this)
+  const sendToDoctorQueue = useCallback((patientId: string, destination?: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination } : p
+    ));
+    // Clear current triage call if this patient was being triaged
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage');
+    }
+  }, [currentTriageCall, completeCall]);
+
+  // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
     setPatients(prev => {
       const patient = prev.find(p => p.id === patientId);
@@ -409,6 +421,7 @@ export function useCallPanel() {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    sendToDoctorQueue,
     updatePatientPriority,
   };
 }

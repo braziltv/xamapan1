@@ -25,7 +25,7 @@ interface TriagePanelProps {
   onRecall: () => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
-  onForwardToDoctor: (id: string, destination?: string) => void;
+  onSendToDoctorQueue: (id: string, destination?: string) => void;
 }
 
 const SALAS = [
@@ -49,7 +49,7 @@ export function TriagePanel({
   onRecall,
   onDirectPatient,
   onFinishWithoutCall,
-  onForwardToDoctor
+  onSendToDoctorQueue
 }: TriagePanelProps) {
 
   return (
@@ -113,8 +113,7 @@ export function TriagePanel({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
-                        onForwardToDoctor(currentCall.id, 'Consultório Médico 1');
-                        onFinishTriage(currentCall.id);
+                        onSendToDoctorQueue(currentCall.id, 'Consultório Médico 1');
                       }}
                       className="cursor-pointer"
                     >
@@ -122,8 +121,7 @@ export function TriagePanel({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        onForwardToDoctor(currentCall.id, 'Consultório Médico 2');
-                        onFinishTriage(currentCall.id);
+                        onSendToDoctorQueue(currentCall.id, 'Consultório Médico 2');
                       }}
                       className="cursor-pointer"
                     >
@@ -257,13 +255,13 @@ export function TriagePanel({
                       <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 1')}
+                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório Médico 1')}
                         className="cursor-pointer"
                       >
                         Consultório Médico 1
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => onForwardToDoctor(patient.id, 'Consultório Médico 2')}
+                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório Médico 2')}
                         className="cursor-pointer"
                       >
                         Consultório Médico 2
