@@ -36,7 +36,8 @@ import {
   Download,
   Upload,
   FileUp,
-  HardDrive
+  HardDrive,
+  Volume2
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -72,6 +73,11 @@ interface DbCallHistory {
   destination: string | null;
   created_at: string;
   unit_name: string;
+}
+
+interface ApiKeyUsage {
+  api_key_index: number;
+  count: number;
 }
 
 export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
@@ -124,6 +130,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [deleteStatsPassword, setDeleteStatsPassword] = useState('');
   const [showDeleteStatsPassword, setShowDeleteStatsPassword] = useState(false);
   const [deletingStats, setDeletingStats] = useState(false);
+  
+  // Estado para uso de API keys do ElevenLabs
+  const [apiKeyUsage, setApiKeyUsage] = useState<ApiKeyUsage[]>([]);
   
   const { toast } = useToast();
 
@@ -240,6 +249,25 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         detailed: detailedCount || 0,
         aggregated: aggCount || 0
       });
+
+      // Carregar uso de API keys do ElevenLabs
+      const { data: apiKeyData } = await supabase
+        .from('api_key_usage')
+        .select('api_key_index')
+        .gte('created_at', startOfDay(parseISO(dateFrom)).toISOString())
+        .lte('created_at', endOfDay(parseISO(dateTo)).toISOString());
+
+      if (apiKeyData) {
+        const usageMap = new Map<number, number>();
+        apiKeyData.forEach(item => {
+          const current = usageMap.get(item.api_key_index) || 0;
+          usageMap.set(item.api_key_index, current + 1);
+        });
+        const usageArray: ApiKeyUsage[] = Array.from(usageMap.entries())
+          .map(([api_key_index, count]) => ({ api_key_index, count }))
+          .sort((a, b) => a.api_key_index - b.api_key_index);
+        setApiKeyUsage(usageArray);
+      }
     } catch (err) {
       console.error('Erro:', err);
     } finally {
@@ -1935,6 +1963,83 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Gráfico de Uso de API Keys ElevenLabs */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Volume2 className="w-5 h-5" />
+            Balanceamento de API Keys ElevenLabs
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {apiKeyUsage.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={apiKeyUsage.map((item, index) => ({
+                        name: `API Key ${item.api_key_index}`,
+                        value: item.count,
+                        color: ['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(38, 92%, 50%)'][index % 3]
+                      }))}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                      labelLine={false}
+                    >
+                      {apiKeyUsage.map((_, index) => (
+                        <Cell 
+                          key={`cell-api-${index}`} 
+                          fill={['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(38, 92%, 50%)'][index % 3]} 
+                        />
+                      ))}
+                    </Pie>
+                    <ChartTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col justify-center space-y-4">
+                {apiKeyUsage.map((item, index) => {
+                  const total = apiKeyUsage.reduce((sum, i) => sum + i.count, 0);
+                  const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                  const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
+                  return (
+                    <div key={item.api_key_index} className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full ${colors[index % 3]}`} />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-medium">API Key {item.api_key_index}</span>
+                          <span className="text-sm text-muted-foreground">{item.count} chamadas ({percentage}%)</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full ${colors[index % 3]} transition-all`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total de chamadas TTS:</span>
+                    <span className="font-bold">{apiKeyUsage.reduce((sum, i) => sum + i.count, 0)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              Nenhum uso de API registrado no período
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

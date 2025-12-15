@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, unitName } = await req.json();
 
     if (!text) {
       throw new Error("Text is required");
@@ -31,6 +32,24 @@ serve(async (req) => {
     
     const keyIndex = availableKeys.indexOf(ELEVENLABS_API_KEY) + 1;
     console.log(`Using API key ${keyIndex} of ${availableKeys.length} available`);
+
+    // Track API key usage in database
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      
+      if (supabaseUrl && supabaseServiceKey) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        await supabase.from("api_key_usage").insert({
+          api_key_index: keyIndex,
+          unit_name: unitName || "Desconhecido"
+        });
+        console.log(`Tracked API key ${keyIndex} usage for unit: ${unitName || "Desconhecido"}`);
+      }
+    } catch (trackError) {
+      console.error("Error tracking API key usage:", trackError);
+      // Don't fail the request if tracking fails
+    }
 
     console.log(`Generating TTS for: "${text}"`);
 

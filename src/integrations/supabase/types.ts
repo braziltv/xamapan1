@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_key_usage: {
+        Row: {
+          api_key_index: number
+          created_at: string
+          id: string
+          unit_name: string
+        }
+        Insert: {
+          api_key_index: number
+          created_at?: string
+          id?: string
+          unit_name: string
+        }
+        Update: {
+          api_key_index?: number
+          created_at?: string
+          id?: string
+          unit_name?: string
+        }
+        Relationships: []
+      }
       call_history: {
         Row: {
           call_type: string
