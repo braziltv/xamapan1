@@ -199,7 +199,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioContext;
       console.log('AudioContext initialized on mount (was previously unlocked)');
-      
+
       // Resume if suspended
       if (audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
@@ -209,25 +209,79 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked]);
 
+  // Keep the TTS engine awake (kiosk/TV browsers may suspend it after inactivity)
+  useEffect(() => {
+    if (!audioUnlocked) return;
+
+    const interval = window.setInterval(() => {
+      try {
+        window.speechSynthesis?.resume?.();
+      } catch {
+        // ignore
+      }
+
+      const responsiveVoice = (window as any).responsiveVoice;
+      try {
+        responsiveVoice?.resume?.();
+      } catch {
+        // ignore
+      }
+
+      // Tiny silent warm-up to prevent ResponsiveVoice from going dormant
+      try {
+        if (responsiveVoice?.voiceSupport?.() && !responsiveVoice?.isPlaying?.()) {
+          responsiveVoice.speak(' ', 'Brazilian Portuguese Female', {
+            volume: 0,
+            rate: 1,
+            pitch: 1,
+          });
+          window.setTimeout(() => responsiveVoice?.cancel?.(), 200);
+        }
+      } catch {
+        // ignore
+      }
+    }, 120000);
+
+    return () => window.clearInterval(interval);
+  }, [audioUnlocked]);
+
   // Unlock audio on first user interaction
   const unlockAudio = useCallback(() => {
     if (audioUnlocked) return;
-    
+
     // Create and play a silent audio context to unlock audio
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     audioContextRef.current = audioContext;
-    
+
     // Resume audio context if suspended
     if (audioContext.state === 'suspended') {
-      audioContext.resume();
+      void audioContext.resume();
     }
-    
-    // Also unlock speech synthesis with a real silent test
-    const utterance = new SpeechSynthesisUtterance(' ');
-    utterance.volume = 0.01;
-    utterance.rate = 10;
-    window.speechSynthesis.speak(utterance);
-    
+
+    // Unlock browser speech engine
+    try {
+      window.speechSynthesis?.cancel?.();
+      const utterance = new SpeechSynthesisUtterance(' ');
+      utterance.volume = 0.01;
+      utterance.rate = 10;
+      window.speechSynthesis?.speak?.(utterance);
+      window.speechSynthesis?.resume?.();
+    } catch {
+      // ignore
+    }
+
+    // Prime ResponsiveVoice (some browsers only allow its audio after a user gesture)
+    try {
+      const responsiveVoice = (window as any).responsiveVoice;
+      if (responsiveVoice?.voiceSupport?.()) {
+        responsiveVoice.cancel?.();
+        responsiveVoice.speak(' ', 'Brazilian Portuguese Female', { volume: 0, rate: 1, pitch: 1 });
+        window.setTimeout(() => responsiveVoice?.cancel?.(), 200);
+      }
+    } catch {
+      // ignore
+    }
+
     localStorage.setItem('audioUnlocked', 'true');
     setAudioUnlocked(true);
     console.log('Audio unlocked and saved to localStorage');
@@ -288,19 +342,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('Testing audio...');
     try {
       await playNotificationSound();
-      
+
       const testText = 'Teste de áudio. Som funcionando corretamente.';
-      
+
       // Use ResponsiveVoice for reliable TTS
       const responsiveVoice = (window as any).responsiveVoice;
-      
+
       if (responsiveVoice && responsiveVoice.voiceSupport()) {
         console.log('Testing with ResponsiveVoice');
+        try {
+          window.speechSynthesis?.resume?.();
+          responsiveVoice.resume?.();
+          responsiveVoice.cancel?.();
+        } catch {
+          // ignore
+        }
+
         responsiveVoice.speak(testText, 'Brazilian Portuguese Female', {
           pitch: 1.1,
           rate: 0.9,
           volume: 1,
-          onend: () => console.log('Audio test completed')
+          onend: () => console.log('Audio test completed'),
         });
       } else {
         console.warn('ResponsiveVoice not available, using Web Speech API');
@@ -322,23 +384,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('speakName called with:', { name, caller, destination });
-    
+
     // Set announcing state for visual emphasis
     setAnnouncingType(caller);
-    
+
     // Play notification sound first
     await playNotificationSound();
-    
+
     const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     console.log('TTS text:', text);
-    
+
     // Use ResponsiveVoice for reliable TTS
     const responsiveVoice = (window as any).responsiveVoice;
-    
+
     if (responsiveVoice && responsiveVoice.voiceSupport()) {
       console.log('Using ResponsiveVoice for TTS');
-      
+
+      // "Wake" engines that can go dormant after inactivity on kiosk/TV
+      try {
+        window.speechSynthesis?.resume?.();
+        responsiveVoice.resume?.();
+        responsiveVoice.cancel?.();
+      } catch {
+        // ignore
+      }
+
       responsiveVoice.speak(text, 'Brazilian Portuguese Female', {
         pitch: 1.1,
         rate: 0.9,
@@ -353,32 +424,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         onerror: (e: any) => {
           console.error('ResponsiveVoice TTS error:', e);
           setAnnouncingType(null);
-        }
+        },
       });
-      
+
       // Safety timeout to clear state
       setTimeout(() => {
         setAnnouncingType(null);
       }, 15000);
     } else {
       console.warn('ResponsiveVoice not available, falling back to Web Speech API');
-      
+
       // Fallback to Web Speech API
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'pt-BR';
       utterance.rate = 0.85;
       utterance.pitch = 1.2;
-      
+
       window.speechSynthesis.cancel();
       window.speechSynthesis.resume();
-      
+
       utterance.onerror = () => setAnnouncingType(null);
       utterance.onend = () => setAnnouncingType(null);
-      
+
       setTimeout(() => {
         window.speechSynthesis.speak(utterance);
       }, 200);
-      
+
       setTimeout(() => {
         setAnnouncingType(null);
       }, 15000);
