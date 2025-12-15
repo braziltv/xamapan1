@@ -34,6 +34,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [cursorVisible, setCursorVisible] = useState(true);
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -1101,21 +1102,62 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-800 border-4 border-red-500 rounded-3xl p-8 lg:p-12 xl:p-16 max-w-2xl w-full shadow-2xl shadow-red-500/20 animate-scale-in">
+            <div className="text-center space-y-6 lg:space-y-8">
+              {/* Warning Icon */}
+              <div className="w-24 h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 mx-auto rounded-full bg-red-500/20 border-4 border-red-500 flex items-center justify-center">
+                <LogOut className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 text-red-500" />
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-3xl lg:text-4xl xl:text-5xl font-black text-white">
+                SAIR DO MODO TV?
+              </h2>
+              
+              {/* Description */}
+              <p className="text-lg lg:text-xl xl:text-2xl text-slate-300">
+                Você será redirecionado para a tela de login.
+              </p>
+              
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 pt-4">
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-slate-700 hover:bg-slate-600 border-2 border-slate-500 rounded-2xl transition-all duration-200 hover:scale-105"
+                >
+                  CANCELAR
+                </button>
+                <button
+                  onClick={() => {
+                    // Exit fullscreen
+                    if (document.fullscreenElement) {
+                      document.exitFullscreen();
+                    } else if ((document as any).webkitFullscreenElement) {
+                      (document as any).webkitExitFullscreen();
+                    }
+                    // Clear audio unlock to show unlock screen next time
+                    localStorage.removeItem('audioUnlocked');
+                    // Redirect to login
+                    window.location.href = '/';
+                  }}
+                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-red-600 hover:bg-red-500 border-2 border-red-400 rounded-2xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-3"
+                >
+                  <LogOut className="w-6 h-6 lg:w-8 lg:h-8" />
+                  SAIR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hidden Exit Button - Only visible on hover */}
       <div className="fixed bottom-4 right-4 z-50 group">
         <button
-          onClick={() => {
-            // Exit fullscreen
-            if (document.fullscreenElement) {
-              document.exitFullscreen();
-            } else if ((document as any).webkitFullscreenElement) {
-              (document as any).webkitExitFullscreen();
-            }
-            // Clear audio unlock to show unlock screen next time
-            localStorage.removeItem('audioUnlocked');
-            // Redirect to login
-            window.location.href = '/';
-          }}
+          onClick={() => setShowExitConfirm(true)}
           className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
           title="Sair do modo TV"
         >
