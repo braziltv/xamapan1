@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
@@ -1100,6 +1100,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
       )}
+
+      {/* Hidden Exit Button - Only visible on hover */}
+      <div className="fixed bottom-4 right-4 z-50 group">
+        <button
+          onClick={() => {
+            // Exit fullscreen
+            if (document.fullscreenElement) {
+              document.exitFullscreen();
+            } else if ((document as any).webkitFullscreenElement) {
+              (document as any).webkitExitFullscreen();
+            }
+            // Clear audio unlock to show unlock screen next time
+            localStorage.removeItem('audioUnlocked');
+            // Redirect to login
+            window.location.href = '/';
+          }}
+          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+          title="Sair do modo TV"
+        >
+          <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <LogOut className="w-6 h-6 lg:w-8 lg:h-8 text-red-400" />
+            <span className="text-[8px] lg:text-[10px] text-red-400 font-medium">SAIR</span>
+          </div>
+        </button>
+      </div>
 
       {/* Credits and Audio Test - Minimal */}
       <div className="relative z-10 mt-0.5 lg:mt-1 flex items-center justify-center gap-2 lg:gap-4 shrink-0">
