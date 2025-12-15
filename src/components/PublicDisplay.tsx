@@ -1053,14 +1053,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="flex-1 overflow-hidden py-1 lg:py-1.5 xl:py-2">
               <div className="animate-marquee whitespace-nowrap inline-flex">
                 {(() => {
-                  // Insert credits randomly among news items
+                  // Insert credits after every 3 news items
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits = [...newsItems];
-                  // Insert credit at random positions (every ~8 items)
-                  const insertPositions = [Math.floor(newsItems.length * 0.3), Math.floor(newsItems.length * 0.7)];
-                  insertPositions.forEach((pos, i) => {
-                    if (pos <= itemsWithCredits.length) {
-                      itemsWithCredits.splice(pos + i, 0, creditItem);
+                  const itemsWithCredits: typeof newsItems = [];
+                  newsItems.forEach((item, index) => {
+                    itemsWithCredits.push(item);
+                    // After every 3 items, insert credits
+                    if ((index + 1) % 3 === 0) {
+                      itemsWithCredits.push(creditItem);
                     }
                   });
                   
@@ -1091,13 +1091,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   ));
                 })()}
                 {(() => {
-                  // Duplicate for seamless loop with credits
+                  // Duplicate for seamless loop - credits after every 3 items
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits = [...newsItems];
-                  const insertPositions = [Math.floor(newsItems.length * 0.3), Math.floor(newsItems.length * 0.7)];
-                  insertPositions.forEach((pos, i) => {
-                    if (pos <= itemsWithCredits.length) {
-                      itemsWithCredits.splice(pos + i, 0, creditItem);
+                  const itemsWithCredits: typeof newsItems = [];
+                  newsItems.forEach((item, index) => {
+                    itemsWithCredits.push(item);
+                    if ((index + 1) % 3 === 0) {
+                      itemsWithCredits.push(creditItem);
                     }
                   });
                   
