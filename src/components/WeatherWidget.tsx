@@ -104,10 +104,13 @@ export function WeatherWidget() {
 
   if (error || !weather) {
     return (
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl px-5 py-3 border border-white/20 shadow-lg">
-        <div className="flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-white/50" />
-          <span className="text-white/60 text-sm">{error || 'Indisponível'}</span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">Previsão do tempo</span>
+        <div className="bg-white/10 backdrop-blur-md rounded-xl px-6 py-3 border border-white/20 shadow-lg min-w-[280px]">
+          <div className="flex items-center justify-center gap-3">
+            <Cloud className="w-6 h-6 text-white/50" />
+            <span className="text-white/60 text-sm font-medium">{error || 'Indisponível'}</span>
+          </div>
         </div>
       </div>
     );
