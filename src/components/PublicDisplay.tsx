@@ -289,25 +289,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     try {
       await playNotificationSound();
       
-      const utterance = new SpeechSynthesisUtterance('Teste de áudio. Som funcionando corretamente.');
-      utterance.lang = 'pt-BR';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.1;
+      const testText = 'Teste de áudio. Som funcionando corretamente.';
       
-      const voices = window.speechSynthesis.getVoices();
-      const ptVoice = voices.find(v => v.lang.includes('pt'));
-      if (ptVoice) {
-        utterance.voice = ptVoice;
+      // Use ResponsiveVoice for reliable TTS
+      const responsiveVoice = (window as any).responsiveVoice;
+      
+      if (responsiveVoice && responsiveVoice.voiceSupport()) {
+        console.log('Testing with ResponsiveVoice');
+        responsiveVoice.speak(testText, 'Brazilian Portuguese Female', {
+          pitch: 1.1,
+          rate: 0.9,
+          volume: 1,
+          onend: () => console.log('Audio test completed')
+        });
+      } else {
+        console.warn('ResponsiveVoice not available, using Web Speech API');
+        const utterance = new SpeechSynthesisUtterance(testText);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+        setTimeout(() => {
+          window.speechSynthesis.speak(utterance);
+          console.log('Audio test completed');
+        }, 200);
       }
-      
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
-      
-      // Wait before speaking after cancel()
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-        console.log('Audio test completed');
-      }, 200);
     } catch (error) {
       console.error('Audio test failed:', error);
     }
@@ -326,89 +333,57 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const text = `${name}. Por favor, dirija-se ao ${location}.`;
     console.log('TTS text:', text);
     
-    // Ensure voices are loaded
-    const getVoices = (): Promise<SpeechSynthesisVoice[]> => {
-      return new Promise((resolve) => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          resolve(voices);
-          return;
-        }
-        
-        // Wait for voices to load
-        const handleVoicesChanged = () => {
-          const loadedVoices = window.speechSynthesis.getVoices();
-          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
-          resolve(loadedVoices);
-        };
-        
-        window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
-        
-        // Timeout fallback
-        setTimeout(() => {
-          window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
-          resolve(window.speechSynthesis.getVoices());
-        }, 1000);
-      });
-    };
+    // Use ResponsiveVoice for reliable TTS
+    const responsiveVoice = (window as any).responsiveVoice;
     
-    const voices = await getVoices();
-    console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    utterance.rate = 0.85;
-    utterance.pitch = 1.2;
-    
-    // Try to select the best Portuguese voice
-    const ptVoices = voices.filter(v => v.lang.includes('pt'));
-    console.log('Portuguese voices:', ptVoices.map(v => v.name));
-    
-    // Prefer Google or Microsoft neural voices
-    const preferredVoice = ptVoices.find(v => 
-      v.name.includes('Google') || 
-      v.name.includes('Microsoft') ||
-      v.name.includes('Luciana') || 
-      v.name.includes('Vitória') || 
-      v.name.includes('Maria') ||
-      v.name.toLowerCase().includes('female') || 
-      v.name.toLowerCase().includes('feminino')
-    ) || ptVoices[0] || voices[0];
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-      console.log('Selected voice:', preferredVoice.name);
-    }
-    
-    // Cancel any ongoing speech and ensure synthesizer is ready
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.resume(); // Ensure it's not stuck in paused state
-    
-    utterance.onerror = (e) => {
-      console.error('TTS error:', e);
-      setAnnouncingType(null);
-    };
-    utterance.onstart = () => console.log('TTS started');
-    utterance.onend = () => {
-      console.log('TTS ended');
-      setAnnouncingType(null);
-    };
-    
-    // CRITICAL: Wait before speaking after cancel() - browser needs time to clear queue
-    // This is a well-known Web Speech API bug
-    setTimeout(() => {
-      console.log('Attempting to speak after delay...');
-      window.speechSynthesis.speak(utterance);
+    if (responsiveVoice && responsiveVoice.voiceSupport()) {
+      console.log('Using ResponsiveVoice for TTS');
       
-      // Safety timeout to clear state if onend never fires (Chrome bug with some voices)
-      setTimeout(() => {
-        if (announcingType) {
-          console.log('Safety timeout: clearing announcing state');
+      responsiveVoice.speak(text, 'Brazilian Portuguese Female', {
+        pitch: 1.1,
+        rate: 0.9,
+        volume: 1,
+        onstart: () => {
+          console.log('ResponsiveVoice TTS started');
+        },
+        onend: () => {
+          console.log('ResponsiveVoice TTS ended');
+          setAnnouncingType(null);
+        },
+        onerror: (e: any) => {
+          console.error('ResponsiveVoice TTS error:', e);
           setAnnouncingType(null);
         }
+      });
+      
+      // Safety timeout to clear state
+      setTimeout(() => {
+        setAnnouncingType(null);
       }, 15000);
-    }, 200);
-  }, [playNotificationSound, announcingType]);
+    } else {
+      console.warn('ResponsiveVoice not available, falling back to Web Speech API');
+      
+      // Fallback to Web Speech API
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.85;
+      utterance.pitch = 1.2;
+      
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      
+      utterance.onerror = () => setAnnouncingType(null);
+      utterance.onend = () => setAnnouncingType(null);
+      
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 200);
+      
+      setTimeout(() => {
+        setAnnouncingType(null);
+      }, 15000);
+    }
+  }, [playNotificationSound]);
 
   // Load initial data from Supabase
   useEffect(() => {
