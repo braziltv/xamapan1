@@ -60,24 +60,32 @@ const extractGoogleDriveUrl = (url: string): string | null => {
   return null;
 };
 
-// Check if URL is from Cloudinary and extract direct video URL
+// Check if URL is from Cloudinary and extract a direct delivery URL
 const getCloudinaryDirectUrl = (url: string): string | null => {
   if (!url) return null;
-  
-  // Handle embed player URL format
+
+  // Embed player URL format
   // Example: https://player.cloudinary.com/embed/?cloud_name=xxx&public_id=yyy&profile=cld-default
-  const embedMatch = url.match(/player\.cloudinary\.com\/embed\/\?.*cloud_name=([^&]+).*public_id=([^&]+)/);
-  if (embedMatch) {
-    const cloudName = embedMatch[1];
-    const publicId = decodeURIComponent(embedMatch[2]);
-    return `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'player.cloudinary.com' && u.pathname.startsWith('/embed')) {
+      const cloudName = u.searchParams.get('cloud_name') || '';
+      const publicIdRaw = u.searchParams.get('public_id') || '';
+      if (cloudName && publicIdRaw) {
+        const publicIdDecoded = decodeURIComponent(publicIdRaw);
+        // Encode only what's needed for a URL path (keeps slashes if any)
+        const publicIdPath = encodeURI(publicIdDecoded);
+        // Do NOT force .mp4 extension; Cloudinary will serve the correct format.
+        return `https://res.cloudinary.com/${cloudName}/video/upload/${publicIdPath}`;
+      }
+    }
+  } catch {
+    // ignore invalid URL
   }
-  
+
   // Already a direct URL
-  if (url.includes('res.cloudinary.com')) {
-    return url;
-  }
-  
+  if (url.includes('res.cloudinary.com')) return url;
+
   return null;
 };
 
@@ -1065,6 +1073,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               autoPlay
               loop={youtubePlaylist.length === 1}
               onEnded={switchToNextVideo}
+              onError={(e) => {
+                console.error('Cloudinary video failed to load:', {
+                  originalUrl: currentYoutubeUrl,
+                  resolvedUrl: getCloudinaryDirectUrl(currentYoutubeUrl),
+                  error: e,
+                });
+                toast.error('Falha ao carregar vídeo (Cloudinary)');
+              }}
               playsInline
             />
           )}
