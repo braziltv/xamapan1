@@ -55,13 +55,95 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   
-  // YouTube video states
-  const [youtubeUrl, setYoutubeUrl] = useState(() => localStorage.getItem('publicDisplayYoutubeUrl') || '');
+  // YouTube playlist states
+  const [youtubePlaylist, setYoutubePlaylist] = useState<string[]>(() => {
+    const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
+    if (saved) {
+      try {
+        return JSON.parse(saved).filter((url: string) => url.trim());
+      } catch {
+        return [];
+      }
+    }
+    // Fallback to old single URL
+    const oldUrl = localStorage.getItem('publicDisplayYoutubeUrl');
+    return oldUrl ? [oldUrl] : [];
+  });
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(() => {
+    const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
+    if (saved) {
+      try {
+        const urls = JSON.parse(saved).filter((url: string) => url.trim());
+        if (urls.length > 0) {
+          return Math.floor(Math.random() * urls.length);
+        }
+      } catch {}
+    }
+    return 0;
+  });
   const [tempYoutubeUrl, setTempYoutubeUrl] = useState('');
   const [showVideoSettings, setShowVideoSettings] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const youtubePlayerRef = useRef<HTMLIFrameElement>(null);
   const wasPlayingBeforeAnnouncement = useRef(true);
+  
+  // Get current video URL
+  const currentYoutubeUrl = youtubePlaylist[currentVideoIndex] || '';
+  
+  // Switch to next random video
+  const switchToNextVideo = useCallback(() => {
+    if (youtubePlaylist.length <= 1) return;
+    
+    let nextIndex;
+    do {
+      nextIndex = Math.floor(Math.random() * youtubePlaylist.length);
+    } while (nextIndex === currentVideoIndex && youtubePlaylist.length > 1);
+    
+    setCurrentVideoIndex(nextIndex);
+    console.log('Switching to video:', nextIndex, youtubePlaylist[nextIndex]);
+  }, [youtubePlaylist, currentVideoIndex]);
+
+  // Listen for video end events from YouTube iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://www.youtube.com') return;
+      
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        // YouTube sends state change events: 0 = ended
+        if (data.event === 'onStateChange' && data.info === 0) {
+          console.log('Video ended, switching to next...');
+          switchToNextVideo();
+        }
+      } catch {
+        // Ignore non-JSON messages
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [switchToNextVideo]);
+
+  // Reload playlist from localStorage periodically
+  useEffect(() => {
+    const checkPlaylist = () => {
+      const saved = localStorage.getItem('publicDisplayYoutubePlaylist');
+      if (saved) {
+        try {
+          const urls = JSON.parse(saved).filter((url: string) => url.trim());
+          if (JSON.stringify(urls) !== JSON.stringify(youtubePlaylist)) {
+            setYoutubePlaylist(urls);
+            if (urls.length > 0) {
+              setCurrentVideoIndex(Math.floor(Math.random() * urls.length));
+            }
+          }
+        } catch {}
+      }
+    };
+    
+    const interval = setInterval(checkPlaylist, 5000);
+    return () => clearInterval(interval);
+  }, [youtubePlaylist]);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -640,7 +722,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Handle YouTube video pause/play based on announcement state
   useEffect(() => {
-    const videoId = extractYouTubeId(youtubeUrl);
+    const videoId = extractYouTubeId(currentYoutubeUrl);
     if (!videoId || !youtubePlayerRef.current) return;
 
     if (announcingType) {
@@ -671,9 +753,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         }
       }
     }
-  }, [announcingType, youtubeUrl, isVideoPlaying]);
+  }, [announcingType, currentYoutubeUrl, isVideoPlaying]);
 
-  // Save YouTube URL
+  // Save YouTube URL (for single video mode from display)
   const saveYoutubeUrl = useCallback(() => {
     const videoId = extractYouTubeId(tempYoutubeUrl);
     if (tempYoutubeUrl && !videoId) {
@@ -681,25 +763,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return;
     }
     
-    setYoutubeUrl(tempYoutubeUrl);
-    localStorage.setItem('publicDisplayYoutubeUrl', tempYoutubeUrl);
-    setShowVideoSettings(false);
-    setIsVideoPlaying(true);
-    
     if (tempYoutubeUrl) {
-      toast.success('Vídeo do YouTube configurado!');
-    } else {
-      toast.success('Vídeo removido');
+      // Add to playlist
+      const newPlaylist = [tempYoutubeUrl, ...youtubePlaylist.filter(u => u !== tempYoutubeUrl)].slice(0, 10);
+      setYoutubePlaylist(newPlaylist);
+      localStorage.setItem('publicDisplayYoutubePlaylist', JSON.stringify(newPlaylist.concat(Array(10 - newPlaylist.length).fill(''))));
+      setCurrentVideoIndex(0);
+      toast.success('Vídeo adicionado à playlist!');
     }
-  }, [tempYoutubeUrl]);
-
-  // Remove YouTube video
-  const removeYoutubeVideo = useCallback(() => {
-    setYoutubeUrl('');
+    
+    setShowVideoSettings(false);
     setTempYoutubeUrl('');
+    setIsVideoPlaying(true);
+  }, [tempYoutubeUrl, youtubePlaylist]);
+
+  // Remove all YouTube videos
+  const removeYoutubeVideo = useCallback(() => {
+    setYoutubePlaylist([]);
+    setTempYoutubeUrl('');
+    localStorage.removeItem('publicDisplayYoutubePlaylist');
     localStorage.removeItem('publicDisplayYoutubeUrl');
     setShowVideoSettings(false);
-    toast.success('Vídeo removido');
+    toast.success('Playlist removida');
   }, []);
 
   // Load initial data from Supabase
@@ -873,7 +958,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     );
   }
 
-  const youtubeVideoId = extractYouTubeId(youtubeUrl);
+  const youtubeVideoId = extractYouTubeId(currentYoutubeUrl);
 
   return (
     <div 
@@ -885,7 +970,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="absolute inset-0 z-30 bg-black">
           <iframe
             ref={youtubePlayerRef}
-            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&controls=0&loop=1&playlist=${youtubeVideoId}&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
+            key={currentVideoIndex} // Force reload when video changes
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&controls=0&loop=0&enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
             className="w-full h-full"
             allow="autoplay; encrypted-media"
             allowFullScreen
@@ -893,9 +979,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           />
           {/* Overlay controls on video */}
           <div className="absolute top-4 right-4 flex items-center gap-2 z-40">
+            {/* Playlist info */}
+            {youtubePlaylist.length > 1 && (
+              <div className="px-3 py-1.5 rounded-full bg-black/50 text-white/70 text-sm">
+                {currentVideoIndex + 1} / {youtubePlaylist.length}
+              </div>
+            )}
+            
+            {/* Next video button */}
+            {youtubePlaylist.length > 1 && (
+              <button
+                onClick={switchToNextVideo}
+                className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/70 hover:text-white transition-colors"
+                title="Próximo vídeo"
+              >
+                <Play className="w-5 h-5" />
+              </button>
+            )}
+            
+            {/* Settings button */}
             <Dialog open={showVideoSettings} onOpenChange={(open) => {
               setShowVideoSettings(open);
-              if (open) setTempYoutubeUrl(youtubeUrl);
+              if (open) setTempYoutubeUrl('');
             }}>
               <DialogTrigger asChild>
                 <button
@@ -909,29 +1014,35 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Youtube className="w-5 h-5 text-red-500" />
-                    Configurar Vídeo do YouTube
+                    Playlist do YouTube
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="p-3 rounded-lg bg-muted/50">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">{youtubePlaylist.length}</span> vídeos na playlist
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Configure a playlist na aba Administrativo
+                    </p>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Link do YouTube</label>
+                    <label className="text-sm font-medium">Adicionar vídeo rapidamente</label>
                     <Input
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={tempYoutubeUrl}
                       onChange={(e) => setTempYoutubeUrl(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Cole o link do vídeo do YouTube que deseja exibir
-                    </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={saveYoutubeUrl} className="flex-1">
+                    <Button onClick={saveYoutubeUrl} className="flex-1" disabled={!tempYoutubeUrl}>
                       <Play className="w-4 h-4 mr-2" />
-                      Salvar
+                      Adicionar
                     </Button>
                     <Button variant="destructive" onClick={removeYoutubeVideo}>
                       <X className="w-4 h-4 mr-2" />
-                      Remover
+                      Limpar
                     </Button>
                   </div>
                 </div>
@@ -1204,7 +1315,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         {!youtubeVideoId && (
           <Dialog open={showVideoSettings} onOpenChange={(open) => {
             setShowVideoSettings(open);
-            if (open) setTempYoutubeUrl(youtubeUrl);
+            if (open) setTempYoutubeUrl('');
           }}>
             <DialogTrigger asChild>
               <button
