@@ -110,14 +110,18 @@ export function useTTSPreCache() {
       const success = await preCacheDestinationPhrase(phrase);
       if (success) successCount++;
       // Pequeno delay entre requisições para não sobrecarregar
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     console.log(`Pre-cache complete: ${successCount}/${DESTINATION_PHRASES.length} phrases cached`);
     
-    // Marcar como pré-cacheado apenas se todas foram bem-sucedidas
-    if (successCount === DESTINATION_PHRASES.length) {
+    // Marcar como pré-cacheado se pelo menos 80% das frases foram cacheadas
+    // Isso evita travamentos se algumas chaves da API estiverem com problemas temporários
+    if (successCount >= Math.floor(DESTINATION_PHRASES.length * 0.8)) {
       localStorage.setItem(PRECACHE_KEY, new Date().toISOString());
+      console.log('Pre-cache flag set (sufficient phrases cached)');
+    } else {
+      console.log('Pre-cache incomplete, will retry on next login');
     }
 
     isPreCachingRef.current = false;
