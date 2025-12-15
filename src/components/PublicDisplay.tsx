@@ -193,6 +193,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [unitName]);
 
+  // Initialize audio context on mount if already unlocked
+  useEffect(() => {
+    if (audioUnlocked && !audioContextRef.current) {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      console.log('AudioContext initialized on mount (was previously unlocked)');
+      
+      // Resume if suspended
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+          console.log('AudioContext resumed on mount');
+        });
+      }
+    }
+  }, [audioUnlocked]);
+
   // Unlock audio on first user interaction
   const unlockAudio = useCallback(() => {
     if (audioUnlocked) return;
@@ -206,9 +222,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       audioContext.resume();
     }
     
-    // Also unlock speech synthesis
-    const utterance = new SpeechSynthesisUtterance('');
-    utterance.volume = 0;
+    // Also unlock speech synthesis with a real silent test
+    const utterance = new SpeechSynthesisUtterance(' ');
+    utterance.volume = 0.01;
+    utterance.rate = 10;
     window.speechSynthesis.speak(utterance);
     
     localStorage.setItem('audioUnlocked', 'true');
@@ -218,12 +235,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Play notification sound effect
   const playNotificationSound = useCallback(() => {
-    const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
+    console.log('playNotificationSound called');
+    
+    // Create a new AudioContext if needed
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      console.log('Created new AudioContext in playNotificationSound');
+    }
+    
+    const audioContext = audioContextRef.current;
     
     // Resume if suspended
     if (audioContext.state === 'suspended') {
+      console.log('AudioContext suspended, resuming...');
       audioContext.resume();
     }
+    
+    console.log('AudioContext state:', audioContext.state);
     
     // Create a pleasant chime sound
     const playTone = (frequency: number, startTime: number, duration: number) => {
@@ -248,6 +276,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     playTone(523.25, 0, 0.3);      // C5
     playTone(659.25, 0.15, 0.3);   // E5
     playTone(783.99, 0.3, 0.4);    // G5
+    
+    console.log('Notification sound played');
     
     // Return promise that resolves after the chime
     return new Promise<void>(resolve => setTimeout(resolve, 800));
@@ -393,6 +423,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Subscribe to realtime updates
   useEffect(() => {
+    console.log('Setting up realtime subscription for unit:', unitName);
+    
     const channel = supabase
       .channel('public-display-calls')
       .on(
@@ -403,15 +435,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'patient_calls',
         },
         (payload) => {
+          console.log('Received INSERT event:', payload);
           const call = payload.new as any;
           
           // Skip empty unit_name calls
-          if (!call.unit_name) return;
+          if (!call.unit_name) {
+            console.log('Skipping call with empty unit_name');
+            return;
+          }
           // If we have a unit filter, only accept matching calls
-          if (unitName && call.unit_name !== unitName) return;
-          if (processedCallsRef.current.has(call.id)) return;
+          if (unitName && call.unit_name !== unitName) {
+            console.log('Skipping call for different unit:', call.unit_name, 'vs', unitName);
+            return;
+          }
+          if (processedCallsRef.current.has(call.id)) {
+            console.log('Skipping already processed call:', call.id);
+            return;
+          }
           processedCallsRef.current.add(call.id);
 
+          console.log('Processing call:', call.patient_name, call.call_type, call.status);
+          
           if (call.status === 'active') {
             if (call.call_type === 'triage') {
               setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
@@ -420,6 +464,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             }
             
             // Play audio announcement
+            console.log('About to call speakName...');
             speakName(call.patient_name, call.call_type, call.destination || undefined);
           }
         }
