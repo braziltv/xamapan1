@@ -80,6 +80,14 @@ interface ApiKeyUsage {
   count: number;
 }
 
+interface TTSNameUsage {
+  name_text: string;
+  name_hash: string;
+  usage_count: number;
+  first_used: string;
+  last_used: string;
+}
+
 export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [dbHistory, setDbHistory] = useState<DbCallHistory[]>([]);
   const [aggregatedStats, setAggregatedStats] = useState<any[]>([]);
@@ -133,6 +141,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para uso de API keys do ElevenLabs
   const [apiKeyUsage, setApiKeyUsage] = useState<ApiKeyUsage[]>([]);
+  
+  // Estado para uso de nomes TTS
+  const [ttsNameUsage, setTtsNameUsage] = useState<TTSNameUsage[]>([]);
+  const [showNamesDialog, setShowNamesDialog] = useState(false);
   
   const { toast } = useToast();
 
@@ -267,6 +279,44 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           .map(([api_key_index, count]) => ({ api_key_index, count }))
           .sort((a, b) => a.api_key_index - b.api_key_index);
         setApiKeyUsage(usageArray);
+      }
+
+      // Carregar uso de nomes TTS (cache de nomes de pacientes)
+      const { data: ttsNameData } = await supabase
+        .from('tts_name_usage')
+        .select('name_text, name_hash, used_at')
+        .gte('used_at', startOfDay(parseISO(dateFrom)).toISOString())
+        .lte('used_at', endOfDay(parseISO(dateTo)).toISOString());
+
+      if (ttsNameData) {
+        // Agrupar por nome
+        const nameMap = new Map<string, { name_text: string; name_hash: string; count: number; first: string; last: string }>();
+        ttsNameData.forEach(item => {
+          const existing = nameMap.get(item.name_hash);
+          if (existing) {
+            existing.count++;
+            if (item.used_at < existing.first) existing.first = item.used_at;
+            if (item.used_at > existing.last) existing.last = item.used_at;
+          } else {
+            nameMap.set(item.name_hash, {
+              name_text: item.name_text,
+              name_hash: item.name_hash,
+              count: 1,
+              first: item.used_at,
+              last: item.used_at
+            });
+          }
+        });
+        const nameArray: TTSNameUsage[] = Array.from(nameMap.values())
+          .map(item => ({
+            name_text: item.name_text,
+            name_hash: item.name_hash,
+            usage_count: item.count,
+            first_used: item.first,
+            last_used: item.last
+          }))
+          .sort((a, b) => b.usage_count - a.usage_count);
+        setTtsNameUsage(nameArray);
       }
     } catch (err) {
       console.error('Erro:', err);
@@ -1964,82 +2014,231 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </Card>
       </div>
 
-      {/* Gráfico de Uso de API Keys ElevenLabs */}
+      {/* Estatísticas TTS ElevenLabs */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Volume2 className="w-5 h-5" />
-            Balanceamento de API Keys ElevenLabs
+            Estatísticas TTS (ElevenLabs)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {apiKeyUsage.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={apiKeyUsage.map((item, index) => ({
-                        name: `API Key ${item.api_key_index}`,
-                        value: item.count,
-                        color: ['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(38, 92%, 50%)'][index % 3]
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                      labelLine={false}
-                    >
-                      {apiKeyUsage.map((_, index) => (
-                        <Cell 
-                          key={`cell-api-${index}`} 
-                          fill={['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(38, 92%, 50%)'][index % 3]} 
-                        />
-                      ))}
-                    </Pie>
-                    <ChartTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+          {/* Cards de Resumo TTS */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4 text-blue-500" />
+                <span className="text-xs text-muted-foreground">Consultas API</span>
               </div>
-              <div className="flex flex-col justify-center space-y-4">
-                {apiKeyUsage.map((item, index) => {
-                  const total = apiKeyUsage.reduce((sum, i) => sum + i.count, 0);
-                  const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
-                  const colors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
-                  return (
-                    <div key={item.api_key_index} className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${colors[index % 3]}`} />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium">API Key {item.api_key_index}</span>
-                          <span className="text-sm text-muted-foreground">{item.count} chamadas ({percentage}%)</span>
+              <p className="text-2xl font-bold text-blue-600">
+                {apiKeyUsage.reduce((sum, i) => sum + i.count, 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">gerações no período</p>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <HardDrive className="w-4 h-4 text-green-500" />
+                <span className="text-xs text-muted-foreground">Uso do Cache</span>
+              </div>
+              <p className="text-2xl font-bold text-green-600">
+                {ttsNameUsage.reduce((sum, i) => sum + i.usage_count, 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">reproduções totais</p>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-purple-500" />
+                <span className="text-xs text-muted-foreground">Nomes Salvos</span>
+              </div>
+              <p className="text-2xl font-bold text-purple-600">
+                {ttsNameUsage.length}
+              </p>
+              <p className="text-xs text-muted-foreground">pacientes no cache</p>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-amber-500" />
+                <span className="text-xs text-muted-foreground">Economia</span>
+              </div>
+              <p className="text-2xl font-bold text-amber-600">
+                {ttsNameUsage.length > 0 && apiKeyUsage.reduce((sum, i) => sum + i.count, 0) > 0
+                  ? Math.round(((ttsNameUsage.reduce((sum, i) => sum + i.usage_count, 0) - apiKeyUsage.reduce((sum, i) => sum + i.count, 0)) / Math.max(ttsNameUsage.reduce((sum, i) => sum + i.usage_count, 0), 1)) * 100)
+                  : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">de chamadas API</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Gráfico de Nomes Mais Usados */}
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Top 10 Nomes Mais Chamados
+              </h4>
+              {ttsNameUsage.length > 0 ? (
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={ttsNameUsage.slice(0, 10)} layout="vertical">
+                      <XAxis type="number" />
+                      <YAxis 
+                        dataKey="name_text" 
+                        type="category" 
+                        width={100}
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(value) => value.length > 12 ? value.substring(0, 12) + '...' : value}
+                      />
+                      <ChartTooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload as TTSNameUsage;
+                            return (
+                              <div className="bg-background border rounded-lg p-3 shadow-lg">
+                                <p className="font-medium text-sm mb-1 capitalize">{data.name_text}</p>
+                                <p className="text-sm text-purple-600">{data.usage_count} chamadas</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Último uso: {format(parseISO(data.last_used), 'dd/MM HH:mm')}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="usage_count" fill="hsl(270, 70%, 55%)" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Nenhum nome registrado no período
+                </div>
+              )}
+            </div>
+
+            {/* Lista de Nomes com Botão Ver Todos */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Nomes em Cache
+                </h4>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowNamesDialog(true)}
+                  disabled={ttsNameUsage.length === 0}
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  Ver Todos ({ttsNameUsage.length})
+                </Button>
+              </div>
+              
+              {ttsNameUsage.length > 0 ? (
+                <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                  {ttsNameUsage.slice(0, 8).map((item) => (
+                    <div 
+                      key={item.name_hash}
+                      className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                          <span className="text-xs font-bold text-purple-600">
+                            {item.name_text.charAt(0).toUpperCase()}
+                          </span>
                         </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${colors[index % 3]} transition-all`}
-                            style={{ width: `${percentage}%` }}
-                          />
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate capitalize">{item.name_text}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(parseISO(item.last_used), 'dd/MM HH:mm')}
+                          </p>
                         </div>
                       </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-sm font-bold text-purple-600">{item.usage_count}x</span>
+                        {item.usage_count >= 5 && (
+                          <span className="block text-[10px] text-green-600">permanente</span>
+                        )}
+                      </div>
                     </div>
-                  );
-                })}
-                <div className="pt-2 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Total de chamadas TTS:</span>
-                    <span className="font-bold">{apiKeyUsage.reduce((sum, i) => sum + i.count, 0)}</span>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Nenhum nome registrado
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-              Nenhum uso de API registrado no período
-            </div>
-          )}
+          </div>
         </CardContent>
       </Card>
+
+      {/* Dialog para Ver Todos os Nomes */}
+      <Dialog open={showNamesDialog} onOpenChange={setShowNamesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              Nomes de Pacientes em Cache ({ttsNameUsage.length})
+            </DialogTitle>
+            <DialogDescription>
+              Lista completa de nomes armazenados no cache TTS. Nomes com 5+ usos são promovidos a cache permanente.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto max-h-[50vh] mt-4">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-background border-b">
+                <tr>
+                  <th className="text-left py-2 px-2">Nome</th>
+                  <th className="text-center py-2 px-2">Usos</th>
+                  <th className="text-center py-2 px-2">Status</th>
+                  <th className="text-right py-2 px-2">Último Uso</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ttsNameUsage.map((item) => (
+                  <tr key={item.name_hash} className="border-b hover:bg-muted/30">
+                    <td className="py-2 px-2 capitalize font-medium">{item.name_text}</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className="font-bold text-purple-600">{item.usage_count}</span>
+                    </td>
+                    <td className="py-2 px-2 text-center">
+                      {item.usage_count >= 5 ? (
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-600">
+                          Permanente
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-600">
+                          Temporário
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2 px-2 text-right text-muted-foreground">
+                      {format(parseISO(item.last_used), 'dd/MM/yyyy HH:mm')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <div className="flex justify-between w-full items-center">
+              <div className="text-sm text-muted-foreground">
+                <span className="text-green-600 font-medium">{ttsNameUsage.filter(n => n.usage_count >= 5).length}</span> permanentes • 
+                <span className="text-amber-600 font-medium ml-1">{ttsNameUsage.filter(n => n.usage_count < 5).length}</span> temporários
+              </div>
+              <Button variant="outline" onClick={() => setShowNamesDialog(false)}>
+                Fechar
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
