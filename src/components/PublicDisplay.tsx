@@ -17,7 +17,7 @@ interface NewsItem {
 }
 
 export function PublicDisplay(_props: PublicDisplayProps) {
-  const currentTime = useBrazilTime();
+  const { currentTime, isSynced } = useBrazilTime();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);

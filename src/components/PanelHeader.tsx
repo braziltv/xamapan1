@@ -10,7 +10,7 @@ interface PanelHeaderProps {
 }
 
 export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
-  const currentTime = useBrazilTime();
+  const { currentTime } = useBrazilTime();
 
   return (
     <header className="bg-card shadow-health border-b border-border">

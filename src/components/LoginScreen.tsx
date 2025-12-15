@@ -26,7 +26,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
-  const currentTime = useBrazilTime();
+  const { currentTime } = useBrazilTime();
   const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
