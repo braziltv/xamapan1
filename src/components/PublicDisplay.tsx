@@ -39,7 +39,7 @@ const extractYouTubeId = (url: string): string | null => {
   return null;
 };
 
-// Extract Google Drive file ID and return direct video URL for HTML5 video playback
+// Extract Google Drive file ID and return preview URL for iframe embedding
 const extractGoogleDriveUrl = (url: string): string | null => {
   if (!url) return null;
   
@@ -53,8 +53,8 @@ const extractGoogleDriveUrl = (url: string): string | null => {
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) {
-      // Return direct download URL for HTML5 video element (enables autoplay with sound)
-      return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      // Return preview URL for iframe (user needs to click play manually)
+      return `https://drive.google.com/file/d/${match[1]}/preview`;
     }
   }
   return null;
@@ -1002,16 +1002,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* Video Fullscreen - Hidden during announcements */}
       {hasVideo && !announcingType && (
         <div className="absolute inset-0 z-30 bg-black">
-          {/* Google Drive Video - with sound using HTML5 video element */}
+          {/* Google Drive Video - iframe (autoplay not guaranteed, user may need to click play) */}
           {videoType === 'googledrive' && googleDriveUrl && (
-            <video
+            <iframe
               key={currentVideoIndex}
               src={googleDriveUrl}
-              className="w-full h-full object-contain"
-              autoPlay
-              loop={youtubePlaylist.length === 1}
-              onEnded={switchToNextVideo}
-              playsInline
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title="Google Drive Video"
             />
           )}
           
