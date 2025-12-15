@@ -457,6 +457,79 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
 
+  // Mapeamento de frases de destino gramaticalmente corretas (artigos à/ao)
+  const getDestinationPhrase = useCallback((destination: string): string => {
+    // Mapeamento de destinos para frases corretas
+    const destinationPhrases: Record<string, string> = {
+      'Triagem': 'Por favor, dirija-se à Triagem',
+      'Sala de Eletrocardiograma': 'Por favor, dirija-se à Sala de Eletrocardiograma',
+      'Sala de Curativos': 'Por favor, dirija-se à Sala de Curativos',
+      'Sala do Raio X': 'Por favor, dirija-se à Sala do Raio X',
+      'Enfermaria': 'Por favor, dirija-se à Enfermaria',
+      'Consultório 1': 'Por favor, dirija-se ao Consultório 1',
+      'Consultório 2': 'Por favor, dirija-se ao Consultório 2',
+      'Consultório Médico': 'Por favor, dirija-se ao Consultório Médico',
+      'Consultório Médico 1': 'Por favor, dirija-se ao Consultório Médico 1',
+      'Consultório Médico 2': 'Por favor, dirija-se ao Consultório Médico 2',
+    };
+    
+    // Retorna frase mapeada ou gera uma frase genérica
+    if (destinationPhrases[destination]) {
+      return destinationPhrases[destination];
+    }
+    
+    // Lógica genérica para destinos não mapeados
+    const useFeminineArticle = 
+      destination.toLowerCase().startsWith('sala') ||
+      destination.toLowerCase().startsWith('triagem') ||
+      destination.toLowerCase().startsWith('enfermaria');
+    
+    return `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
+  }, []);
+
+  // Gerar TTS para frase de destino (usa cache permanente com prefixo "phrase_")
+  const speakDestinationPhrase = useCallback(
+    async (phrase: string): Promise<void> => {
+      console.log('Speaking destination phrase:', phrase);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: phrase, unitName, isPermanentCache: true }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(audioUrl);
+        audio.volume = 1.0;
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        audio.onerror = (e) => {
+          URL.revokeObjectURL(audioUrl);
+          reject(e);
+        };
+        audio.play().catch(reject);
+      });
+    },
+    [unitName]
+  );
+
   const speakName = useCallback(
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
       console.log('speakName called with:', { name, caller, destination });
@@ -465,25 +538,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       setAnnouncingType(caller);
 
       const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
-      const text = `${name}. Por favor, dirija-se ao ${location}.`;
-      console.log('TTS text:', text);
+      const destinationPhrase = getDestinationPhrase(location);
+      console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
       try {
         // Play notification sound first (mandatory)
         await playNotificationSound();
 
         // Try ElevenLabs first (most reliable on Android TV)
+        // Play name first, then destination phrase (uses permanent cache)
         try {
-          await speakWithElevenLabs(text);
-          console.log('TTS completed (ElevenLabs)');
+          await speakWithElevenLabs(name);
+          await speakDestinationPhrase(destinationPhrase);
+          console.log('TTS completed (ElevenLabs - name + destination phrase)');
           return;
         } catch (e) {
           console.warn('ElevenLabs failed in speakName, trying Web Speech API...', e);
         }
 
-        // Fallback to Web Speech API
+        // Fallback to Web Speech API (combined text)
+        const fullText = `${name}. ${destinationPhrase}.`;
         try {
-          await speakWithWebSpeech(text, { rate: 0.85, pitch: 1.2, volume: 1 });
+          await speakWithWebSpeech(fullText, { rate: 0.85, pitch: 1.2, volume: 1 });
           console.log('TTS completed (Web Speech API)');
           return;
         } catch (e) {
@@ -499,7 +575,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             // ignore
           }
 
-          responsiveVoice.speak(text, 'Brazilian Portuguese Female', {
+          responsiveVoice.speak(fullText, 'Brazilian Portuguese Female', {
             pitch: 1.1,
             rate: 0.9,
             volume: 1,
@@ -512,7 +588,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.error('speakName failed:', e);
       }
     },
-    [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]
+    [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech, getDestinationPhrase, speakDestinationPhrase]
   );
 
   // Stop the flashing alert after exactly 10 seconds

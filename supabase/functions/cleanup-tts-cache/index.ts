@@ -40,8 +40,10 @@ Deno.serve(async (req) => {
     }
 
     // Filter files older than 45 minutes based on created_at metadata
+    // IMPORTANT: Skip files with "phrase_" prefix - these are permanent destination phrase caches
     const filesToDelete = files.filter(file => {
       if (!file.created_at) return false
+      if (file.name.startsWith('phrase_')) return false // Never delete permanent phrase cache
       const fileCreatedAt = new Date(file.created_at)
       return fileCreatedAt < cutoffTime
     })

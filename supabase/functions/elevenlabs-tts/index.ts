@@ -17,7 +17,8 @@ function getDailyKeyIndex(totalKeys: number): number {
 }
 
 // Generate a cache key from the text
-function generateCacheKey(text: string): string {
+// isPermanent: if true, uses "phrase_" prefix for permanent cache (not auto-deleted)
+function generateCacheKey(text: string, isPermanent: boolean = false): string {
   // Simple hash for filename
   let hash = 0;
   for (let i = 0; i < text.length; i++) {
@@ -25,7 +26,8 @@ function generateCacheKey(text: string): string {
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash;
   }
-  return `tts_${Math.abs(hash)}.mp3`;
+  const prefix = isPermanent ? 'phrase_' : 'tts_';
+  return `${prefix}${Math.abs(hash)}.mp3`;
 }
 
 serve(async (req) => {
@@ -37,12 +39,12 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache } = await req.json();
 
     // Handle cache clearing request
     if (clearCache && supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      const cacheKey = generateCacheKey(clearCache);
+      const cacheKey = generateCacheKey(clearCache, false); // Never clear permanent cache via this method
       
       const { error } = await supabase.storage
         .from('tts-cache')
@@ -63,8 +65,10 @@ serve(async (req) => {
       throw new Error("Text is required");
     }
 
-    const cacheKey = generateCacheKey(text);
-    console.log(`TTS request for: "${text}" (cache key: ${cacheKey})`);
+    // Use permanent cache prefix for destination phrases (won't be auto-deleted)
+    const isPermanent = isPermanentCache === true;
+    const cacheKey = generateCacheKey(text, isPermanent);
+    console.log(`TTS request for: "${text}" (cache key: ${cacheKey}, permanent: ${isPermanent})`);
 
     // Check if cached audio exists
     if (supabaseUrl && supabaseServiceKey) {
