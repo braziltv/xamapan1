@@ -369,25 +369,76 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     []
   );
 
+  // ElevenLabs TTS via edge function - plays MP3 audio (works on any device)
+  const speakWithElevenLabs = useCallback(
+    async (text: string): Promise<void> => {
+      console.log('Speaking with ElevenLabs:', text);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(audioUrl);
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        audio.onerror = (e) => {
+          URL.revokeObjectURL(audioUrl);
+          reject(e);
+        };
+        audio.play().catch(reject);
+      });
+    },
+    []
+  );
+
   // Test audio function
   const testAudio = useCallback(async () => {
     console.log('Testing audio...');
     try {
-      // IMPORTANT: do not await here, otherwise some TV browsers treat it as not user-initiated
-      // (and the voice is blocked). The chime starts first anyway.
-      void playNotificationSound();
+      // Play notification sound first
+      await playNotificationSound();
 
       const testText = 'Teste de áudio. Som funcionando corretamente.';
 
-      // Prefer Web Speech API (works offline). If it fails, try ResponsiveVoice.
+      // Try ElevenLabs first (most reliable on Android TV)
+      try {
+        await speakWithElevenLabs(testText);
+        console.log('Audio test completed (ElevenLabs)');
+        return;
+      } catch (e) {
+        console.warn('ElevenLabs failed, trying Web Speech API...', e);
+      }
+
+      // Fallback to Web Speech API
       try {
         await speakWithWebSpeech(testText, { rate: 0.9, pitch: 1.1, volume: 1 });
         console.log('Audio test completed (Web Speech API)');
         return;
       } catch (e) {
-        console.warn('Web Speech API failed in testAudio, trying ResponsiveVoice...', e);
+        console.warn('Web Speech API failed, trying ResponsiveVoice...', e);
       }
 
+      // Last resort: ResponsiveVoice
       const responsiveVoice = (window as any).responsiveVoice;
       if (responsiveVoice?.voiceSupport?.()) {
         responsiveVoice.cancel?.();
@@ -404,7 +455,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     } catch (error) {
       console.error('Audio test failed:', error);
     }
-  }, [playNotificationSound, speakWithWebSpeech]);
+  }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
 
   const speakName = useCallback(
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
@@ -419,18 +470,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       try {
         // Play notification sound first (mandatory)
-        // IMPORTANT: do not await here, otherwise some TV browsers block voice.
-        // The chime starts immediately, so it's still "som antes da voz".
-        void playNotificationSound();
+        await playNotificationSound();
 
-        // Prefer Web Speech API (works offline)
+        // Try ElevenLabs first (most reliable on Android TV)
+        try {
+          await speakWithElevenLabs(text);
+          console.log('TTS completed (ElevenLabs)');
+          return;
+        } catch (e) {
+          console.warn('ElevenLabs failed in speakName, trying Web Speech API...', e);
+        }
+
+        // Fallback to Web Speech API
         try {
           await speakWithWebSpeech(text, { rate: 0.85, pitch: 1.2, volume: 1 });
+          console.log('TTS completed (Web Speech API)');
           return;
         } catch (e) {
           console.warn('Web Speech API failed in speakName, trying ResponsiveVoice...', e);
         }
 
+        // Last resort: ResponsiveVoice
         const responsiveVoice = (window as any).responsiveVoice;
         if (responsiveVoice?.voiceSupport?.()) {
           try {
@@ -452,7 +512,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.error('speakName failed:', e);
       }
     },
-    [playNotificationSound, speakWithWebSpeech]
+    [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]
   );
 
   // Stop the flashing alert after exactly 10 seconds
