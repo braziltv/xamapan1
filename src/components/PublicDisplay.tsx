@@ -887,7 +887,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               Painel de Chamadas
             </h1>
             <p className="text-slate-400 text-[10px] lg:text-xs xl:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
-            <p className="text-slate-500 text-[8px] lg:text-[10px] xl:text-xs leading-tight">Solução criada e cedida gratuitamente por Kalebe Gomes</p>
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-3 shrink-0">
@@ -1053,50 +1052,81 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
             <div className="flex-1 overflow-hidden py-1 lg:py-1.5 xl:py-2">
               <div className="animate-marquee whitespace-nowrap inline-flex">
-                {newsItems.map((item, index) => (
-                  <span key={index} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                    <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
-                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
-                      item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
-                      item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
-                      item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
-                      item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
-                      item.source === 'Política' ? 'bg-red-400 text-red-900' :
-                      item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
-                      item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
-                      item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
-                      item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
-                      item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
-                      item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
-                      'bg-green-500 text-green-900'
-                    }`}>
-                      {item.source}
+                {(() => {
+                  // Insert credits randomly among news items
+                  const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
+                  const itemsWithCredits = [...newsItems];
+                  // Insert credit at random positions (every ~8 items)
+                  const insertPositions = [Math.floor(newsItems.length * 0.3), Math.floor(newsItems.length * 0.7)];
+                  insertPositions.forEach((pos, i) => {
+                    if (pos <= itemsWithCredits.length) {
+                      itemsWithCredits.splice(pos + i, 0, creditItem);
+                    }
+                  });
+                  
+                  return itemsWithCredits.map((item, index) => (
+                    <span key={index} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
+                      <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
+                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
+                        item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
+                        item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
+                        item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                        item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
+                        item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
+                        item.source === 'Política' ? 'bg-red-400 text-red-900' :
+                        item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
+                        item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
+                        item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
+                        item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
+                        item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
+                        item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
+                        'bg-green-500 text-green-900'
+                      }`}>
+                        {item.source === 'Créditos' ? '⭐' : item.source}
+                      </span>
+                      <span className={item.source === 'Créditos' ? 'text-yellow-300 font-semibold' : ''}>
+                        {item.title}
+                      </span>
                     </span>
-                    {item.title}
-                  </span>
-                ))}
-                {newsItems.map((item, index) => (
-                  <span key={`dup-${index}`} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                    <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
-                      item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
-                      item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
-                      item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
-                      item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
-                      item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
-                      item.source === 'Política' ? 'bg-red-400 text-red-900' :
-                      item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
-                      item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
-                      item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
-                      item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
-                      item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
-                      item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
-                      'bg-green-500 text-green-900'
-                    }`}>
-                      {item.source}
+                  ));
+                })()}
+                {(() => {
+                  // Duplicate for seamless loop with credits
+                  const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
+                  const itemsWithCredits = [...newsItems];
+                  const insertPositions = [Math.floor(newsItems.length * 0.3), Math.floor(newsItems.length * 0.7)];
+                  insertPositions.forEach((pos, i) => {
+                    if (pos <= itemsWithCredits.length) {
+                      itemsWithCredits.splice(pos + i, 0, creditItem);
+                    }
+                  });
+                  
+                  return itemsWithCredits.map((item, index) => (
+                    <span key={`dup-${index}`} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
+                      <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
+                        item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
+                        item.source === 'MG' ? 'bg-yellow-500 text-yellow-900' : 
+                        item.source === 'Saúde' ? 'bg-pink-500 text-pink-900' :
+                        item.source === 'Mundo' ? 'bg-blue-500 text-blue-900' :
+                        item.source === 'Tech' ? 'bg-purple-500 text-purple-900' :
+                        item.source === 'Economia' ? 'bg-orange-500 text-orange-900' :
+                        item.source === 'Política' ? 'bg-red-400 text-red-900' :
+                        item.source === 'Pop' ? 'bg-fuchsia-500 text-fuchsia-900' :
+                        item.source === 'Educação' ? 'bg-cyan-500 text-cyan-900' :
+                        item.source === 'Natureza' ? 'bg-lime-500 text-lime-900' :
+                        item.source === 'Carros' ? 'bg-slate-400 text-slate-900' :
+                        item.source === 'Emprego' ? 'bg-teal-500 text-teal-900' :
+                        item.source === 'Turismo' ? 'bg-sky-500 text-sky-900' :
+                        'bg-green-500 text-green-900'
+                      }`}>
+                        {item.source === 'Créditos' ? '⭐' : item.source}
+                      </span>
+                      <span className={item.source === 'Créditos' ? 'text-yellow-300 font-semibold' : ''}>
+                        {item.title}
+                      </span>
                     </span>
-                    {item.title}
-                  </span>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
           </div>
