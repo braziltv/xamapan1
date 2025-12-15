@@ -216,28 +216,6 @@ export function TriagePanel({
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Menu Consultórios na fila */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3">
-                        <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden xs:inline">Consultório</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-card border border-border z-50">
-                      <DropdownMenuLabel>Direcionar para Consultório</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {CONSULTORIOS.map((cons) => (
-                        <DropdownMenuItem
-                          key={cons.id}
-                          onClick={() => onDirectPatient(patient.name, cons.name)}
-                          className="cursor-pointer"
-                        >
-                          {cons.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
 
                   {/* Encaminhar para médico sem chamada */}
                   <DropdownMenu>
