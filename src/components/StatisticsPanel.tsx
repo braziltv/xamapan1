@@ -2019,7 +2019,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Volume2 className="w-5 h-5" />
-            Estatísticas TTS (ElevenLabs)
+            Estatísticas TTS (Texto para Voz)
           </CardTitle>
         </CardHeader>
         <CardContent>
