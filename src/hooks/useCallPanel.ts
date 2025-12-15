@@ -39,6 +39,12 @@ export function useCallPanel() {
     return [];
   });
 
+  // Ref to always have the latest patients for callbacks
+  const patientsRef = useRef(patients);
+  useEffect(() => {
+    patientsRef.current = patients;
+  }, [patients]);
+
   const [currentTriageCall, setCurrentTriageCall] = useState<Patient | null>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TRIAGE);
     if (saved) {
@@ -387,7 +393,7 @@ export function useCallPanel() {
 
   // Forward to triage with voice call on TV
   const forwardToTriage = useCallback((patientId: string, destination?: string) => {
-    const patient = patients.find(p => p.id === patientId);
+    const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
     // Create call to show on TV
@@ -407,7 +413,7 @@ export function useCallPanel() {
     setPatients(prev => prev.map(p => 
       p.id === patientId ? updatedPatient : p
     ));
-  }, [patients, createCall, triggerCallEvent]);
+  }, [createCall, triggerCallEvent]);
 
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback((patientId: string, destination?: string) => {
@@ -423,7 +429,7 @@ export function useCallPanel() {
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
-    const patient = patients.find(p => p.id === patientId);
+    const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
     // Create call to show on TV
@@ -434,7 +440,7 @@ export function useCallPanel() {
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
     ));
-  }, [patients, createCall, triggerCallEvent]);
+  }, [createCall, triggerCallEvent]);
 
   // Sort by priority first (emergency > priority > normal), then by time
   const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
