@@ -9,35 +9,92 @@ const corsHeaders = {
 // Get the API key index for the current day (rotates daily)
 function getDailyKeyIndex(totalKeys: number): number {
   const today = new Date();
-  // Use day of year + some randomization based on the year
   const startOfYear = new Date(today.getFullYear(), 0, 0);
   const diff = today.getTime() - startOfYear.getTime();
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
-  // Add year to create variation across years
   const seed = dayOfYear + today.getFullYear();
-  
   return seed % totalKeys;
 }
 
+// Generate a cache key from the text
+function generateCacheKey(text: string): string {
+  // Simple hash for filename
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return `tts_${Math.abs(hash)}.mp3`;
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
   try {
-    const { text, voiceId, unitName } = await req.json();
+    const { text, voiceId, unitName, clearCache } = await req.json();
+
+    // Handle cache clearing request
+    if (clearCache && supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const cacheKey = generateCacheKey(clearCache);
+      
+      const { error } = await supabase.storage
+        .from('tts-cache')
+        .remove([cacheKey]);
+      
+      if (error) {
+        console.log(`Cache clear failed for ${cacheKey}:`, error.message);
+      } else {
+        console.log(`Cache cleared for: ${cacheKey}`);
+      }
+      
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!text) {
       throw new Error("Text is required");
     }
 
+    const cacheKey = generateCacheKey(text);
+    console.log(`TTS request for: "${text}" (cache key: ${cacheKey})`);
+
+    // Check if cached audio exists
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      
+      const { data: existingFile } = await supabase.storage
+        .from('tts-cache')
+        .download(cacheKey);
+      
+      if (existingFile) {
+        console.log(`Cache HIT for: ${cacheKey}`);
+        const audioBuffer = await existingFile.arrayBuffer();
+        
+        return new Response(audioBuffer, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "audio/mpeg",
+            "X-Cache": "HIT",
+          },
+        });
+      }
+      
+      console.log(`Cache MISS for: ${cacheKey}`);
+    }
+
+    // Generate new audio from ElevenLabs
     const ELEVENLABS_API_KEY_1 = Deno.env.get("ELEVENLABS_API_KEY");
     const ELEVENLABS_API_KEY_2 = Deno.env.get("ELEVENLABS_API_KEY_2");
     const ELEVENLABS_API_KEY_3 = Deno.env.get("ELEVENLABS_API_KEY_3");
     
-    // Get all available API keys with their indices
     const allKeys = [
       { key: ELEVENLABS_API_KEY_1, index: 1 },
       { key: ELEVENLABS_API_KEY_2, index: 2 },
@@ -48,25 +105,20 @@ serve(async (req) => {
       throw new Error("No ELEVENLABS_API_KEY configured");
     }
 
-    // Select the key for today (daily rotation)
     const todayKeyIdx = getDailyKeyIndex(allKeys.length);
-    
-    // Reorder keys: start with today's key, then the others as fallback
     const orderedKeys = [
       allKeys[todayKeyIdx],
       ...allKeys.filter((_, idx) => idx !== todayKeyIdx)
     ];
     
-    console.log(`Today's primary API key: ${orderedKeys[0].index} (day rotation)`);
-    console.log(`Generating TTS for: "${text}"`);
+    console.log(`Today's primary API key: ${orderedKeys[0].index}`);
 
-    // Use Lucas voice - male, good for Portuguese
-    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq"; // Lucas
+    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
 
     let lastError: Error | null = null;
     let successKeyIndex = 0;
+    let audioBuffer: ArrayBuffer | null = null;
 
-    // Try each key in order (primary first, then fallbacks)
     for (const { key, index } of orderedKeys) {
       console.log(`Trying API key ${index}`);
       
@@ -97,45 +149,55 @@ serve(async (req) => {
           const errorText = await response.text();
           console.error(`API key ${index} failed:`, response.status, errorText);
           lastError = new Error(`ElevenLabs API error: ${response.status}`);
-          continue; // Try next key
+          continue;
         }
 
-        const audioBuffer = await response.arrayBuffer();
-        console.log(`Audio generated successfully with key ${index}, size: ${audioBuffer.byteLength} bytes`);
+        audioBuffer = await response.arrayBuffer();
+        console.log(`Audio generated with key ${index}, size: ${audioBuffer.byteLength} bytes`);
         successKeyIndex = index;
-
-        // Track API key usage in database (only on success)
-        try {
-          const supabaseUrl = Deno.env.get("SUPABASE_URL");
-          const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-          
-          if (supabaseUrl && supabaseServiceKey) {
-            const supabase = createClient(supabaseUrl, supabaseServiceKey);
-            await supabase.from("api_key_usage").insert({
-              api_key_index: successKeyIndex,
-              unit_name: unitName || "Desconhecido"
-            });
-            console.log(`Tracked API key ${successKeyIndex} usage for unit: ${unitName || "Desconhecido"}`);
-          }
-        } catch (trackError) {
-          console.error("Error tracking API key usage:", trackError);
-        }
-
-        return new Response(audioBuffer, {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "audio/mpeg",
-          },
-        });
+        break;
       } catch (fetchError) {
         console.error(`Error with API key ${index}:`, fetchError);
         lastError = fetchError instanceof Error ? fetchError : new Error(String(fetchError));
-        continue; // Try next key
+        continue;
       }
     }
 
-    // All keys failed
-    throw lastError || new Error("All API keys failed");
+    if (!audioBuffer) {
+      throw lastError || new Error("All API keys failed");
+    }
+
+    // Save to cache
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('tts-cache')
+        .upload(cacheKey, audioBuffer, {
+          contentType: 'audio/mpeg',
+          upsert: true,
+        });
+      
+      if (uploadError) {
+        console.error(`Failed to cache audio:`, uploadError.message);
+      } else {
+        console.log(`Audio cached as: ${cacheKey}`);
+      }
+
+      // Track API key usage
+      await supabase.from("api_key_usage").insert({
+        api_key_index: successKeyIndex,
+        unit_name: unitName || "Desconhecido"
+      });
+    }
+
+    return new Response(audioBuffer, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "audio/mpeg",
+        "X-Cache": "MISS",
+      },
+    });
     
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

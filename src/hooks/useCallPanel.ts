@@ -278,24 +278,73 @@ export function useCallPanel() {
   }, [createCall, triggerCallEvent]);
 
   const finishTriage = useCallback((patientId: string) => {
+    const patient = patients.find(p => p.id === patientId);
+    
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-doctor' as const } : p
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
       completeCall('triage');
+      // Clear TTS cache for this patient (will be defined below)
+      if (patient) {
+        // Inline cache clearing since clearTtsCache is defined after
+        const text = `${patient.name}. Por favor, dirija-se ao Triagem.`;
+        fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ clearCache: text }),
+          }
+        ).catch(err => console.error('Error clearing TTS cache:', err));
+      }
     }
-  }, [currentTriageCall, completeCall]);
+  }, [patients, currentTriageCall, completeCall]);
+
+  // Clear TTS cache for a patient name
+  const clearTtsCache = useCallback(async (patientName: string, destination?: string) => {
+    try {
+      const location = destination || 'Triagem';
+      const text = `${patientName}. Por favor, dirija-se ao ${location}.`;
+      
+      await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ clearCache: text }),
+        }
+      );
+      console.log('TTS cache cleared for:', patientName);
+    } catch (error) {
+      console.error('Error clearing TTS cache:', error);
+    }
+  }, []);
 
   const finishConsultation = useCallback((patientId: string) => {
+    const patient = patients.find(p => p.id === patientId);
+    
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'attended' as const } : p
     ));
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
       completeCall('doctor');
+      // Clear TTS cache for this patient
+      if (patient) {
+        clearTtsCache(patient.name, 'Consultório Médico');
+      }
     }
-  }, [currentDoctorCall, completeCall]);
+  }, [patients, currentDoctorCall, completeCall, clearTtsCache]);
 
   const recallTriage = useCallback(() => {
     if (currentTriageCall) {
@@ -316,6 +365,8 @@ export function useCallPanel() {
   }, []);
 
   const finishWithoutCall = useCallback((patientId: string) => {
+    const patient = patients.find(p => p.id === patientId);
+    
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'attended' as const } : p
     ));
@@ -323,12 +374,16 @@ export function useCallPanel() {
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
       completeCall('triage');
+      // Clear TTS cache
+      if (patient) clearTtsCache(patient.name, 'Triagem');
     }
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
       completeCall('doctor');
+      // Clear TTS cache
+      if (patient) clearTtsCache(patient.name, 'Consultório Médico');
     }
-  }, [currentTriageCall, currentDoctorCall, completeCall]);
+  }, [patients, currentTriageCall, currentDoctorCall, completeCall, clearTtsCache]);
 
   // Forward to triage with voice call on TV
   const forwardToTriage = useCallback((patientId: string, destination?: string) => {
