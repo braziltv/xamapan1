@@ -25,17 +25,8 @@ serve(async (req) => {
 
     console.log(`Generating TTS for: "${text}"`);
 
-    // Random voice selection from: Sarah, Laura, Jessica, Lily, Daniel
-    const voices = [
-      { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
-      { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura" },
-      { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica" },
-      { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily" },
-      { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel" },
-    ];
-    const randomVoice = voices[Math.floor(Math.random() * voices.length)];
-    const selectedVoiceId = voiceId || randomVoice.id;
-    console.log(`Selected voice: ${randomVoice.name} (${selectedVoiceId})`);
+    // Use Daniel voice - professional male voice
+    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9"; // Daniel
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
