@@ -271,97 +271,82 @@ serve(async (req) => {
       console.log(`Cache MISS for: ${cacheKey}`);
     }
 
-    // Get all API keys
-    const apiKeys = [
-      { name: "ELEVENLABS_API_KEY", key: Deno.env.get("ELEVENLABS_API_KEY"), index: 1 },
-      { name: "ELEVENLABS_API_KEY_2", key: Deno.env.get("ELEVENLABS_API_KEY_2"), index: 2 },
-      { name: "ELEVENLABS_API_KEY_3", key: Deno.env.get("ELEVENLABS_API_KEY_3"), index: 3 },
-    ].filter(k => k.key);
-
-    if (apiKeys.length === 0) {
-      throw new Error("No ElevenLabs API keys configured");
+    // Use the single API key
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error("ELEVENLABS_API_KEY not configured");
     }
 
-    // Get daily rotation index and try keys in order starting from daily key
-    const dailyIndex = getDailyKeyIndex(apiKeys.length);
-    let lastError = "";
-    let usedKeyIndex = 0;
+    console.log("Using ELEVENLABS_API_KEY");
 
-    for (let attempt = 0; attempt < apiKeys.length; attempt++) {
-      const keyData = apiKeys[(dailyIndex + attempt) % apiKeys.length];
-      console.log(`Trying ${keyData.name}...`);
+    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
 
-      const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
-
-      const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
-        {
-          method: "POST",
-          headers: {
-            "xi-api-key": keyData.key!,
-            "Content-Type": "application/json",
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          model_id: "eleven_multilingual_v2",
+          output_format: "mp3_44100_128",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.3,
+            use_speaker_boost: true,
           },
-          body: JSON.stringify({
-            text,
-            model_id: "eleven_multilingual_v2",
-            output_format: "mp3_44100_128",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.3,
-              use_speaker_boost: true,
-            },
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const audioBuffer = await response.arrayBuffer();
-        console.log(`Audio generated with ${keyData.name}, size: ${audioBuffer.byteLength} bytes`);
-        usedKeyIndex = keyData.index;
-
-        // Save to cache
-        if (supabase) {
-          const { error: uploadError } = await supabase.storage
-            .from('tts-cache')
-            .upload(cacheKey, audioBuffer, {
-              contentType: 'audio/mpeg',
-              upsert: true,
-            });
-          
-          if (uploadError) {
-            console.error(`Failed to cache audio:`, uploadError.message);
-          } else {
-            console.log(`Audio cached as: ${cacheKey}`);
-          }
-
-          // For non-permanent, track usage
-          if (!isPermanent) {
-            await trackNameUsage(supabase, nameHash, text);
-          }
-
-          // Track API key usage
-          await supabase.from("api_key_usage").insert({
-            api_key_index: usedKeyIndex,
-            unit_name: unitName || "Desconhecido"
-          });
-        }
-
-        return new Response(audioBuffer, {
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "audio/mpeg",
-            "X-Cache": "MISS",
-            "X-Key-Used": keyData.name,
-          },
-        });
-      } else {
-        lastError = await response.text();
-        console.error(`${keyData.name} failed: ${response.status} - ${lastError.substring(0, 100)}`);
+        }),
       }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("ElevenLabs API error:", response.status, errorText);
+      throw new Error(`ElevenLabs API error: ${response.status}`);
     }
 
-    throw new Error(`All API keys failed. Last error: ${lastError}`);
+    const audioBuffer = await response.arrayBuffer();
+    console.log(`Audio generated, size: ${audioBuffer.byteLength} bytes`);
+
+    // Save to cache
+    if (supabase) {
+      const { error: uploadError } = await supabase.storage
+        .from('tts-cache')
+        .upload(cacheKey, audioBuffer, {
+          contentType: 'audio/mpeg',
+          upsert: true,
+        });
+      
+      if (uploadError) {
+        console.error(`Failed to cache audio:`, uploadError.message);
+      } else {
+        console.log(`Audio cached as: ${cacheKey}`);
+      }
+
+      // For non-permanent, track usage
+      if (!isPermanent) {
+        await trackNameUsage(supabase, nameHash, text);
+      }
+
+      // Track API key usage
+      await supabase.from("api_key_usage").insert({
+        api_key_index: 1,
+        unit_name: unitName || "Desconhecido"
+      });
+    }
+
+    return new Response(audioBuffer, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "audio/mpeg",
+        "X-Cache": "MISS",
+      },
+    });
     
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
