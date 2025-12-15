@@ -18,11 +18,14 @@ function getDailyKeyIndex(totalKeys: number): number {
 
 // Generate a cache key from the text
 // isPermanent: if true, uses "phrase_" prefix for permanent cache (not auto-deleted)
+// Normalizes text to lowercase to avoid duplicate cache entries for same name with different casing
 function generateCacheKey(text: string, isPermanent: boolean = false): string {
+  // Normalize to lowercase to prevent duplicate cache entries
+  const normalizedText = text.toLowerCase();
   // Simple hash for filename
   let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    const char = text.charCodeAt(i);
+  for (let i = 0; i < normalizedText.length; i++) {
+    const char = normalizedText.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash;
   }

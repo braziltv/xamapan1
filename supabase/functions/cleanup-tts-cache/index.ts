@@ -16,10 +16,10 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const maxAgeMinutes = 4320 // 72 horas
-    const cutoffTime = new Date(Date.now() - maxAgeMinutes * 60 * 1000)
+    const maxAgeDays = 30 // 30 dias
+    const cutoffTime = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000)
 
-    console.log(`Cleaning up TTS cache files older than ${maxAgeMinutes} minutes (before ${cutoffTime.toISOString()})...`)
+    console.log(`Cleaning up TTS cache files older than ${maxAgeDays} days (before ${cutoffTime.toISOString()})...`)
 
     // List all files in the tts-cache bucket
     const { data: files, error: listError } = await supabase.storage
