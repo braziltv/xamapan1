@@ -1,9 +1,8 @@
 import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
+import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -18,7 +17,7 @@ interface NewsItem {
 }
 
 export function PublicDisplay(_props: PublicDisplayProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const currentTime = useBrazilTime();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
@@ -761,11 +760,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, speakName]);
 
-  // Update clock
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Clock is managed by useBrazilTime hook
 
   // Show unlock overlay if audio not yet unlocked
   if (!audioUnlocked) {
@@ -825,13 +820,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Clock */}
           <div className="text-center bg-slate-800/50 rounded-xl px-3 py-2 sm:px-4 lg:px-6 lg:py-3 border border-slate-700">
             <p className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-mono font-bold text-white leading-none">
-              {format(currentTime, 'HH:mm')}
+              {formatBrazilTime(currentTime, 'HH:mm')}
             </p>
             <p className="text-sm sm:text-base lg:text-lg text-yellow-400 font-bold">
-              {format(currentTime, "EEEE", { locale: ptBR }).charAt(0).toUpperCase() + format(currentTime, "EEEE", { locale: ptBR }).slice(1)}
+              {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
             </p>
             <p className="text-xs sm:text-sm lg:text-base text-slate-300 font-medium">
-              {format(currentTime, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              {formatBrazilTime(currentTime, "dd 'de' MMMM 'de' yyyy")}
             </p>
           </div>
         </div>
@@ -956,7 +951,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       </p>
                     </div>
                     <span className="text-xs lg:text-sm text-slate-400 font-mono shrink-0">
-                      {format(item.time, 'HH:mm')}
+                      {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>
                 </div>

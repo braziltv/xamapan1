@@ -1,9 +1,7 @@
 import { Volume2, VolumeX, Activity, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
 import { SettingsDialog } from './SettingsDialog';
+import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -12,14 +10,7 @@ interface PanelHeaderProps {
 }
 
 export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const currentTime = useBrazilTime();
 
   return (
     <header className="bg-card shadow-health border-b border-border">
@@ -56,10 +47,10 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             {/* Time */}
             <div className="flex items-center gap-1.5 text-xs">
               <span className="font-mono font-medium text-foreground">
-                {format(currentTime, 'HH:mm', { locale: ptBR })}
+                {formatBrazilTime(currentTime, 'HH:mm')}
               </span>
               <span className="text-muted-foreground hidden xs:inline">
-                {format(currentTime, "dd/MM", { locale: ptBR })}
+                {formatBrazilTime(currentTime, "dd/MM")}
               </span>
             </div>
             
@@ -122,10 +113,10 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             {/* Current Date/Time */}
             <div className="text-right hidden md:block">
               <p className="text-sm font-medium text-foreground">
-                {format(currentTime, 'HH:mm:ss', { locale: ptBR })}
+                {formatBrazilTime(currentTime, 'HH:mm:ss')}
               </p>
               <p className="text-xs text-muted-foreground">
-                {format(currentTime, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                {formatBrazilTime(currentTime, "EEEE, dd 'de' MMMM")}
               </p>
             </div>
 

@@ -6,9 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { useTheme } from "next-themes";
+import { useBrazilTime, formatBrazilTime } from "@/hooks/useBrazilTime";
 import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
 
 const HEALTH_UNITS = [
@@ -27,18 +26,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const currentTime = useBrazilTime();
   const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-
-  // Update clock every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Fetch user IP
   useEffect(() => {
@@ -273,11 +264,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               <div className="flex items-center gap-1.5 sm:gap-2">
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               <span className="font-mono text-base sm:text-lg font-bold text-foreground">
-                {format(currentTime, "HH:mm:ss", { locale: ptBR })}
+                {formatBrazilTime(currentTime, "HH:mm:ss")}
               </span>
             </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground capitalize">
-                {format(currentTime, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                {formatBrazilTime(currentTime, "EEEE, dd 'de' MMMM 'de' yyyy")}
               </p>
             </div>
           </div>
