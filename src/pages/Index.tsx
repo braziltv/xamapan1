@@ -96,6 +96,7 @@ const Index = () => {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    updatePatientPriority,
   } = useCallPanel();
 
   const handleLogout = () => {
@@ -187,6 +188,7 @@ const Index = () => {
               onFinishWithoutCall={finishWithoutCall}
               onForwardToTriage={forwardToTriage}
               onForwardToDoctor={forwardToDoctor}
+              onUpdatePriority={updatePatientPriority}
             />
           </main>
         </TabsContent>

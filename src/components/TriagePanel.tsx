@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle, Stethoscope } from 'lucide-react';
-import { Patient } from '@/types/patient';
+import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import {
   DropdownMenu,
@@ -10,6 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+
+const PRIORITY_CONFIG = {
+  emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
+  priority: { label: 'Prioridade', color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-500', icon: AlertCircle },
+  normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
+};
 
 interface TriagePanelProps {
   waitingPatients: Patient[];
@@ -144,23 +150,42 @@ export function TriagePanel({
           </p>
         ) : (
           <div className="space-y-2 max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
-            {waitingPatients.map((patient, index) => (
-              <div
-                key={patient.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
-              >
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Chegou às {format(patient.createdAt, 'HH:mm')}
-                    </p>
+            {waitingPatients.map((patient, index) => {
+              const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
+              const PriorityIcon = priorityConfig.icon;
+              
+              return (
+                <div
+                  key={patient.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-muted transition-colors gap-3 ${priorityConfig.bg} border-l-4 ${priorityConfig.border}`}
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8 text-center">
+                        {index + 1}
+                      </span>
+                      <PriorityIcon className={`w-4 h-4 ${priorityConfig.color}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
+                        {patient.priority === 'emergency' && (
+                          <span className="px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded animate-pulse">
+                            EMERGÊNCIA
+                          </span>
+                        )}
+                        {patient.priority === 'priority' && (
+                          <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded">
+                            PRIORIDADE
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Chegou às {format(patient.createdAt, 'HH:mm')}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
                   {/* Menu Salas na fila */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -258,7 +283,8 @@ export function TriagePanel({
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
