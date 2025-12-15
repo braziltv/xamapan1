@@ -1200,16 +1200,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Audio Test Button - Discrete */}
-      <div className="relative z-10 mt-0.5 lg:mt-1 flex items-center justify-center shrink-0 pb-12 lg:pb-14">
-        <button
-          onClick={testAudio}
-          className="flex items-center gap-1 px-1.5 py-0.5 lg:px-2 lg:py-1 text-[8px] lg:text-[10px] xl:text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-md border border-slate-700 hover:border-slate-600 transition-colors"
-          title="Testar áudio"
-        >
-          <Volume2 className="w-2.5 h-2.5 lg:w-3 lg:h-3" />
-          <span>Testar Áudio</span>
-        </button>
-      </div>
     </div>
   );
 }
