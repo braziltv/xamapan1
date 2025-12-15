@@ -137,6 +137,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tts_name_usage: {
+        Row: {
+          id: string
+          name_hash: string
+          name_text: string
+          used_at: string
+        }
+        Insert: {
+          id?: string
+          name_hash: string
+          name_text: string
+          used_at?: string
+        }
+        Update: {
+          id?: string
+          name_hash?: string
+          name_text?: string
+          used_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

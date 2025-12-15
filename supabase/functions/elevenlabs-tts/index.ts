@@ -33,6 +33,92 @@ function generateCacheKey(text: string, isPermanent: boolean = false): string {
   return `${prefix}${Math.abs(hash)}.mp3`;
 }
 
+// Get just the hash part for tracking usage
+function getNameHash(text: string): string {
+  const normalizedText = text.toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < normalizedText.length; i++) {
+    const char = normalizedText.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return String(Math.abs(hash));
+}
+
+// Check if a name has been used frequently and should be promoted to permanent cache
+async function checkAndPromoteFrequentName(
+  supabase: any,
+  nameHash: string,
+  nameText: string,
+  currentCacheKey: string
+): Promise<boolean> {
+  try {
+    // Count usage in the last 20 days
+    const twentyDaysAgo = new Date();
+    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+    
+    const { count, error: countError } = await supabase
+      .from('tts_name_usage')
+      .select('*', { count: 'exact', head: true })
+      .eq('name_hash', nameHash)
+      .gte('used_at', twentyDaysAgo.toISOString());
+    
+    if (countError) {
+      console.error('Error counting name usage:', countError);
+      return false;
+    }
+    
+    console.log(`Name hash ${nameHash} used ${count} times in last 20 days`);
+    
+    // If used more than 5 times, promote to permanent cache
+    if (count && count >= 5) {
+      const permanentKey = `phrase_${nameHash}.mp3`;
+      
+      // Check if permanent cache already exists
+      const { data: existingPermanent } = await supabase.storage
+        .from('tts-cache')
+        .download(permanentKey);
+      
+      if (!existingPermanent) {
+        // Copy from temporary to permanent cache
+        const { data: tempFile } = await supabase.storage
+          .from('tts-cache')
+          .download(currentCacheKey);
+        
+        if (tempFile) {
+          const audioBuffer = await tempFile.arrayBuffer();
+          await supabase.storage
+            .from('tts-cache')
+            .upload(permanentKey, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+          console.log(`Promoted ${nameText} to permanent cache: ${permanentKey}`);
+        }
+      }
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error in checkAndPromoteFrequentName:', error);
+    return false;
+  }
+}
+
+// Track name usage in database
+async function trackNameUsage(supabase: any, nameHash: string, nameText: string): Promise<void> {
+  try {
+    await supabase.from('tts_name_usage').insert({
+      name_hash: nameHash,
+      name_text: nameText.toLowerCase(),
+    });
+    console.log(`Tracked usage for name hash: ${nameHash}`);
+  } catch (error) {
+    console.error('Error tracking name usage:', error);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -47,7 +133,7 @@ serve(async (req) => {
     // Handle cache clearing request
     if (clearCache && supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      const cacheKey = generateCacheKey(clearCache, false); // Never clear permanent cache via this method
+      const cacheKey = generateCacheKey(clearCache, false);
       
       const { error } = await supabase.storage
         .from('tts-cache')
@@ -71,12 +157,39 @@ serve(async (req) => {
     // Use permanent cache prefix for destination phrases (won't be auto-deleted)
     const isPermanent = isPermanentCache === true;
     const cacheKey = generateCacheKey(text, isPermanent);
+    const nameHash = getNameHash(text);
     console.log(`TTS request for: "${text}" (cache key: ${cacheKey}, permanent: ${isPermanent})`);
 
-    // Check if cached audio exists
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = supabaseUrl && supabaseServiceKey 
+      ? createClient(supabaseUrl, supabaseServiceKey) 
+      : null;
+
+    // For non-permanent caches (patient names), check if permanent version exists first
+    if (!isPermanent && supabase) {
+      const permanentKey = `phrase_${nameHash}.mp3`;
+      const { data: permanentFile } = await supabase.storage
+        .from('tts-cache')
+        .download(permanentKey);
       
+      if (permanentFile) {
+        console.log(`Permanent cache HIT for: ${permanentKey}`);
+        const audioBuffer = await permanentFile.arrayBuffer();
+        
+        // Track usage even for permanent cache hits
+        await trackNameUsage(supabase, nameHash, text);
+        
+        return new Response(audioBuffer, {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "audio/mpeg",
+            "X-Cache": "HIT-PERMANENT",
+          },
+        });
+      }
+    }
+
+    // Check if cached audio exists (temporary or permanent based on isPermanent flag)
+    if (supabase) {
       const { data: existingFile } = await supabase.storage
         .from('tts-cache')
         .download(cacheKey);
@@ -84,6 +197,12 @@ serve(async (req) => {
       if (existingFile) {
         console.log(`Cache HIT for: ${cacheKey}`);
         const audioBuffer = await existingFile.arrayBuffer();
+        
+        // For non-permanent, track usage and check for promotion
+        if (!isPermanent) {
+          await trackNameUsage(supabase, nameHash, text);
+          await checkAndPromoteFrequentName(supabase, nameHash, text, cacheKey);
+        }
         
         return new Response(audioBuffer, {
           headers: {
@@ -140,9 +259,7 @@ serve(async (req) => {
     console.log(`Audio generated, size: ${audioBuffer.byteLength} bytes`);
 
     // Save to cache
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      
+    if (supabase) {
       const { error: uploadError } = await supabase.storage
         .from('tts-cache')
         .upload(cacheKey, audioBuffer, {
@@ -154,6 +271,11 @@ serve(async (req) => {
         console.error(`Failed to cache audio:`, uploadError.message);
       } else {
         console.log(`Audio cached as: ${cacheKey}`);
+      }
+
+      // For non-permanent, track usage
+      if (!isPermanent) {
+        await trackNameUsage(supabase, nameHash, text);
       }
 
       // Track API key usage
