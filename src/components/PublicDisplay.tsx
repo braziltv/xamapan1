@@ -1,4 +1,4 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone } from 'lucide-react';
+import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -282,6 +282,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Return promise that resolves after the chime
     return new Promise<void>(resolve => setTimeout(resolve, 800));
   }, []);
+
+  // Test audio function
+  const testAudio = useCallback(async () => {
+    console.log('Testing audio...');
+    try {
+      await playNotificationSound();
+      
+      const utterance = new SpeechSynthesisUtterance('Teste de áudio. Som funcionando corretamente.');
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find(v => v.lang.includes('pt'));
+      if (ptVoice) {
+        utterance.voice = ptVoice;
+      }
+      
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      console.log('Audio test completed');
+    } catch (error) {
+      console.error('Audio test failed:', error);
+    }
+  }, [playNotificationSound]);
 
   const speakName = useCallback(async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
     console.log('speakName called with:', { name, caller, destination });
@@ -789,11 +814,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Credits - Minimal */}
-      <div className="relative z-10 mt-1 text-center shrink-0">
+      {/* Credits and Audio Test - Minimal */}
+      <div className="relative z-10 mt-1 flex items-center justify-center gap-4 shrink-0">
         <p className="text-slate-500 text-[9px] sm:text-[10px] lg:text-xs">
           Solução criada por Kalebe Gomes
         </p>
+        <button
+          onClick={testAudio}
+          className="flex items-center gap-1 px-2 py-1 text-[9px] sm:text-[10px] lg:text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 rounded-md border border-slate-700 hover:border-slate-600 transition-colors"
+          title="Testar áudio"
+        >
+          <Volume2 className="w-3 h-3" />
+          <span>Testar Áudio</span>
+        </button>
       </div>
     </div>
   );
