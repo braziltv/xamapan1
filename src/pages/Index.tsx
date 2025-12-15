@@ -256,7 +256,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t border-border py-4 text-center">
         <p className="text-sm text-muted-foreground">
-          Solução criada por Kalebe Gomes
+          Solução criada e cedida gratuitamente por Kalebe Gomes
         </p>
       </footer>
     </div>
