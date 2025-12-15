@@ -31,6 +31,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -209,6 +210,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked]);
 
+  // Preload notification sound on mount for faster playback
+  useEffect(() => {
+    const audio = new Audio('/sounds/notification.mp3');
+    audio.preload = 'auto';
+    audio.volume = 1.0;
+    audio.load();
+    notificationAudioRef.current = audio;
+    console.log('Notification sound preloaded');
+  }, []);
+
   // Keep the TTS engine awake (kiosk/TV browsers may suspend it after inactivity)
   // NOTE: avoid calling cancel() here, because it can interrupt real announcements.
   useEffect(() => {
@@ -277,27 +288,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('Audio unlocked and saved to localStorage');
   }, [audioUnlocked]);
 
-  // Play notification sound effect
+  // Play notification sound effect (uses preloaded audio for faster playback)
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
     
     return new Promise<void>((resolve, reject) => {
-      const audio = new Audio('/sounds/notification.mp3');
+      // Use preloaded audio if available, otherwise create new
+      const audio = notificationAudioRef.current || new Audio('/sounds/notification.mp3');
+      audio.volume = 1.0; // Maximum volume
+      audio.currentTime = 0; // Reset to beginning
       
-      audio.onended = () => {
+      const handleEnded = () => {
         console.log('Notification sound finished');
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
         resolve();
       };
       
-      audio.onerror = (e) => {
+      const handleError = (e: Event) => {
         console.error('Error playing notification sound:', e);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
         reject(e);
       };
+      
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
       
       audio.play().then(() => {
         console.log('Notification sound playing');
       }).catch((err) => {
         console.error('Failed to play notification sound:', err);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
         reject(err);
       });
     });
@@ -373,6 +396,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       return new Promise((resolve, reject) => {
         const audio = new Audio(audioUrl);
+        audio.volume = 1.0; // Maximum volume
         audio.onended = () => {
           URL.revokeObjectURL(audioUrl);
           resolve();
