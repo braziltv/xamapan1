@@ -290,20 +290,21 @@ export function useCallPanel() {
     ));
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage');
+      completeCall('triage', 'completed');
       // TTS cache is preserved for 72 hours and cleaned automatically
     }
   }, [currentTriageCall, completeCall]);
 
   const finishConsultation = useCallback((patientId: string) => {
-    // Remove patient completely from all modules
+    // Remove patient completely from all modules - consultation completed successfully
     setPatients(prev => prev.filter(p => p.id !== patientId));
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
-      completeCall('doctor');
+      completeCall('doctor', 'completed');
     }
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
+      completeCall('triage', 'completed');
     }
   }, [currentDoctorCall, currentTriageCall, completeCall]);
 
@@ -326,16 +327,16 @@ export function useCallPanel() {
   }, []);
 
   const finishWithoutCall = useCallback((patientId: string) => {
-    // Remove patient completely from all modules
+    // Remove patient completely from all modules - patient withdrawal/no-show
     setPatients(prev => prev.filter(p => p.id !== patientId));
     // Clear current calls if this patient was being called
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage');
+      completeCall('triage', 'withdrawal');
     }
     if (currentDoctorCall?.id === patientId) {
       setCurrentDoctorCall(null);
-      completeCall('doctor');
+      completeCall('doctor', 'withdrawal');
     }
   }, [currentTriageCall, currentDoctorCall, completeCall]);
 
@@ -371,7 +372,7 @@ export function useCallPanel() {
     // Clear current triage call if this patient was being triaged
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
-      completeCall('triage');
+      completeCall('triage', 'completed');
     }
   }, [currentTriageCall, completeCall]);
 
