@@ -6,30 +6,30 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Get the API key index for the current day (rotates daily)
-function getDailyKeyIndex(totalKeys: number): number {
-  const today = new Date();
-  const startOfYear = new Date(today.getFullYear(), 0, 0);
-  const diff = today.getTime() - startOfYear.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const seed = dayOfYear + today.getFullYear();
-  return seed % totalKeys;
+// Maximum size for permanent cache in bytes (200MB)
+const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
+
+// Split a full name into individual parts (first name, last name, third name, etc.)
+function splitNameIntoParts(fullName: string): string[] {
+  return fullName
+    .trim()
+    .split(/\s+/)
+    .filter(part => part.length > 0)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
 }
 
 // Generate a cache key from the text
 // isPermanent: if true, uses "phrase_" prefix for permanent cache (not auto-deleted)
 // Normalizes text to lowercase to avoid duplicate cache entries for same name with different casing
 function generateCacheKey(text: string, isPermanent: boolean = false): string {
-  // Normalize to lowercase to prevent duplicate cache entries
   const normalizedText = text.toLowerCase();
-  // Simple hash for filename
   let hash = 0;
   for (let i = 0; i < normalizedText.length; i++) {
     const char = normalizedText.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash;
   }
-  const prefix = isPermanent ? 'phrase_' : 'tts_';
+  const prefix = isPermanent ? 'phrase_' : 'part_';
   return `${prefix}${Math.abs(hash)}.mp3`;
 }
 
@@ -45,42 +45,136 @@ function getNameHash(text: string): string {
   return String(Math.abs(hash));
 }
 
-// Check if a name has been used frequently and should be promoted to permanent cache
-async function checkAndPromoteFrequentName(
+// Calculate total size of permanent cache
+async function getPermanentCacheSize(supabase: any): Promise<number> {
+  try {
+    const { data: files, error } = await supabase.storage
+      .from('tts-cache')
+      .list('', { limit: 1000 });
+    
+    if (error || !files) return 0;
+    
+    const permanentFiles = files.filter((f: any) => f.name.startsWith('phrase_'));
+    const totalSize = permanentFiles.reduce((acc: number, f: any) => {
+      return acc + (f.metadata?.size || 0);
+    }, 0);
+    
+    console.log(`Permanent cache size: ${(totalSize / 1024 / 1024).toFixed(2)}MB (${permanentFiles.length} files)`);
+    return totalSize;
+  } catch (error) {
+    console.error('Error calculating cache size:', error);
+    return 0;
+  }
+}
+
+// Clean up least used entries when cache exceeds limit
+async function cleanupCacheIfNeeded(supabase: any): Promise<void> {
+  try {
+    const cacheSize = await getPermanentCacheSize(supabase);
+    
+    if (cacheSize < MAX_PERMANENT_CACHE_SIZE) {
+      return;
+    }
+    
+    console.log(`Cache size ${(cacheSize / 1024 / 1024).toFixed(2)}MB exceeds limit of ${MAX_PERMANENT_CACHE_SIZE / 1024 / 1024}MB, cleaning up...`);
+    
+    // Get usage counts for all name parts from last 20 days
+    const twentyDaysAgo = new Date();
+    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
+    
+    const { data: usageData, error: usageError } = await supabase
+      .from('tts_name_usage')
+      .select('name_hash, name_text')
+      .gte('used_at', twentyDaysAgo.toISOString());
+    
+    if (usageError || !usageData) {
+      console.error('Error fetching usage data:', usageError);
+      return;
+    }
+    
+    // Count usage per hash
+    const usageCounts: Record<string, number> = {};
+    for (const entry of usageData) {
+      usageCounts[entry.name_hash] = (usageCounts[entry.name_hash] || 0) + 1;
+    }
+    
+    // Get permanent cache files
+    const { data: files, error: filesError } = await supabase.storage
+      .from('tts-cache')
+      .list('', { limit: 1000 });
+    
+    if (filesError || !files) return;
+    
+    const permanentFiles = files
+      .filter((f: any) => f.name.startsWith('phrase_'))
+      .map((f: any) => {
+        const hash = f.name.replace('phrase_', '').replace('.mp3', '');
+        return {
+          name: f.name,
+          hash,
+          usageCount: usageCounts[hash] || 0,
+          size: f.metadata?.size || 0
+        };
+      })
+      .sort((a: any, b: any) => a.usageCount - b.usageCount);
+    
+    // Delete 50% least used files
+    const filesToDelete = permanentFiles.slice(0, Math.ceil(permanentFiles.length / 2));
+    
+    if (filesToDelete.length === 0) return;
+    
+    const filePaths = filesToDelete.map((f: any) => f.name);
+    console.log(`Deleting ${filePaths.length} least used permanent cache files`);
+    
+    const { error: deleteError } = await supabase.storage
+      .from('tts-cache')
+      .remove(filePaths);
+    
+    if (deleteError) {
+      console.error('Error deleting files:', deleteError);
+    } else {
+      console.log(`Successfully deleted ${filePaths.length} cache files to free space`);
+    }
+  } catch (error) {
+    console.error('Error in cleanupCacheIfNeeded:', error);
+  }
+}
+
+// Check if a name part has been used frequently and should be promoted to permanent cache
+async function checkAndPromoteFrequentPart(
   supabase: any,
-  nameHash: string,
-  nameText: string,
+  partHash: string,
+  partText: string,
   currentCacheKey: string
 ): Promise<boolean> {
   try {
-    // Count usage in the last 20 days
     const twentyDaysAgo = new Date();
     twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
     
     const { count, error: countError } = await supabase
       .from('tts_name_usage')
       .select('*', { count: 'exact', head: true })
-      .eq('name_hash', nameHash)
+      .eq('name_hash', partHash)
       .gte('used_at', twentyDaysAgo.toISOString());
     
     if (countError) {
-      console.error('Error counting name usage:', countError);
+      console.error('Error counting part usage:', countError);
       return false;
     }
     
-    console.log(`Name hash ${nameHash} used ${count} times in last 20 days`);
+    console.log(`Part "${partText}" (hash ${partHash}) used ${count} times in last 20 days`);
     
-    // If used more than 5 times, promote to permanent cache
     if (count && count >= 5) {
-      const permanentKey = `phrase_${nameHash}.mp3`;
+      const permanentKey = `phrase_${partHash}.mp3`;
       
-      // Check if permanent cache already exists
       const { data: existingPermanent } = await supabase.storage
         .from('tts-cache')
         .download(permanentKey);
       
       if (!existingPermanent) {
-        // Copy from temporary to permanent cache
+        // Check cache size before promoting
+        await cleanupCacheIfNeeded(supabase);
+        
         const { data: tempFile } = await supabase.storage
           .from('tts-cache')
           .download(currentCacheKey);
@@ -93,7 +187,7 @@ async function checkAndPromoteFrequentName(
               contentType: 'audio/mpeg',
               upsert: true,
             });
-          console.log(`Promoted ${nameText} to permanent cache: ${permanentKey}`);
+          console.log(`Promoted "${partText}" to permanent cache: ${permanentKey}`);
         }
       }
       return true;
@@ -101,21 +195,21 @@ async function checkAndPromoteFrequentName(
     
     return false;
   } catch (error) {
-    console.error('Error in checkAndPromoteFrequentName:', error);
+    console.error('Error in checkAndPromoteFrequentPart:', error);
     return false;
   }
 }
 
-// Track name usage in database
-async function trackNameUsage(supabase: any, nameHash: string, nameText: string): Promise<void> {
+// Track name part usage in database
+async function trackPartUsage(supabase: any, partHash: string, partText: string): Promise<void> {
   try {
     await supabase.from('tts_name_usage').insert({
-      name_hash: nameHash,
-      name_text: nameText.toLowerCase(),
+      name_hash: partHash,
+      name_text: partText.toLowerCase(),
     });
-    console.log(`Tracked usage for name hash: ${nameHash}`);
+    console.log(`Tracked usage for part: "${partText}" (hash: ${partHash})`);
   } catch (error) {
-    console.error('Error tracking name usage:', error);
+    console.error('Error tracking part usage:', error);
   }
 }
 
@@ -153,7 +247,7 @@ async function testApiKey(keyName: string, apiKey: string | undefined): Promise<
   }
 }
 
-// Get or generate audio for a text segment
+// Get or generate audio for a single name part or phrase
 async function getOrGenerateAudio(
   supabase: any,
   text: string,
@@ -162,17 +256,17 @@ async function getOrGenerateAudio(
   voiceId: string
 ): Promise<ArrayBuffer> {
   const cacheKey = generateCacheKey(text, isPermanent);
-  const nameHash = getNameHash(text);
+  const partHash = getNameHash(text);
   
   // Check permanent cache first for non-permanent requests
   if (!isPermanent && supabase) {
-    const permanentKey = `phrase_${nameHash}.mp3`;
+    const permanentKey = `phrase_${partHash}.mp3`;
     const { data: permanentFile } = await supabase.storage
       .from('tts-cache')
       .download(permanentKey);
     
     if (permanentFile) {
-      console.log(`Permanent cache HIT for segment: ${permanentKey}`);
+      console.log(`Permanent cache HIT for: "${text}" (${permanentKey})`);
       return permanentFile.arrayBuffer();
     }
   }
@@ -184,13 +278,13 @@ async function getOrGenerateAudio(
       .download(cacheKey);
     
     if (existingFile) {
-      console.log(`Cache HIT for segment: ${cacheKey}`);
+      console.log(`Cache HIT for: "${text}" (${cacheKey})`);
       return existingFile.arrayBuffer();
     }
   }
   
   // Generate new audio
-  console.log(`Generating audio for segment: "${text}"`);
+  console.log(`Generating audio for: "${text}"`);
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
     {
@@ -228,7 +322,7 @@ async function getOrGenerateAudio(
         contentType: 'audio/mpeg',
         upsert: true,
       });
-    console.log(`Cached segment: ${cacheKey}`);
+    console.log(`Cached: "${text}" as ${cacheKey}`);
   }
   
   return audioBuffer;
@@ -266,7 +360,7 @@ serve(async (req) => {
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
 
-    // Handle concatenation mode: combine name + prefix + destination
+    // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
       const { name, prefix, destination } = concatenate;
       console.log(`Concatenation request: name="${name}", prefix="${prefix}", destination="${destination}"`);
@@ -274,23 +368,46 @@ serve(async (req) => {
       const audioBuffers: ArrayBuffer[] = [];
       let apiCallsMade = 0;
       
-      // Get name audio (check cache first, generate if needed)
+      // Split name into parts and process each separately
       if (name) {
-        const nameHash = getNameHash(name);
-        const nameCacheKey = generateCacheKey(name, false);
+        const nameParts = splitNameIntoParts(name);
+        console.log(`Name "${name}" split into ${nameParts.length} parts: ${nameParts.join(', ')}`);
         
-        // Track name usage
-        await trackNameUsage(supabase, nameHash, name);
-        
-        const nameAudio = await getOrGenerateAudio(supabase, name, false, ELEVENLABS_API_KEY, selectedVoiceId);
-        audioBuffers.push(nameAudio);
-        
-        // Check if this was a cache miss (for API tracking)
-        const { data: cached } = await supabase.storage.from('tts-cache').download(nameCacheKey);
-        if (!cached) apiCallsMade++;
-        
-        // Check for promotion to permanent cache
-        await checkAndPromoteFrequentName(supabase, nameHash, name, nameCacheKey);
+        for (const part of nameParts) {
+          const partHash = getNameHash(part);
+          const partCacheKey = generateCacheKey(part, false);
+          
+          // Track part usage
+          await trackPartUsage(supabase, partHash, part);
+          
+          // Check if this part is in cache (permanent or temporary)
+          const permanentKey = `phrase_${partHash}.mp3`;
+          const { data: permanentFile } = await supabase.storage
+            .from('tts-cache')
+            .download(permanentKey);
+          
+          if (permanentFile) {
+            console.log(`Part "${part}" found in permanent cache`);
+            audioBuffers.push(await permanentFile.arrayBuffer());
+          } else {
+            const { data: tempFile } = await supabase.storage
+              .from('tts-cache')
+              .download(partCacheKey);
+            
+            if (tempFile) {
+              console.log(`Part "${part}" found in temporary cache`);
+              audioBuffers.push(await tempFile.arrayBuffer());
+            } else {
+              // Generate new audio for this part
+              const partAudio = await getOrGenerateAudio(supabase, part, false, ELEVENLABS_API_KEY, selectedVoiceId);
+              audioBuffers.push(partAudio);
+              apiCallsMade++;
+            }
+          }
+          
+          // Check for promotion to permanent cache
+          await checkAndPromoteFrequentPart(supabase, partHash, part, partCacheKey);
+        }
       }
       
       // Get prefix audio (always from permanent cache)
@@ -307,7 +424,7 @@ serve(async (req) => {
       
       // Concatenate all audio segments
       const combinedAudio = concatenateAudioBuffers(audioBuffers);
-      console.log(`Concatenated audio: ${audioBuffers.length} segments, ${combinedAudio.byteLength} bytes total`);
+      console.log(`Concatenated audio: ${audioBuffers.length} segments, ${combinedAudio.byteLength} bytes, ${apiCallsMade} API calls`);
       
       // Track API usage if any calls were made
       if (apiCallsMade > 0) {
@@ -323,6 +440,7 @@ serve(async (req) => {
           "Content-Type": "audio/mpeg",
           "X-Cache": apiCallsMade > 0 ? "PARTIAL" : "HIT",
           "X-Segments": String(audioBuffers.length),
+          "X-API-Calls": String(apiCallsMade),
         },
       });
     }
@@ -374,12 +492,12 @@ serve(async (req) => {
     // Use permanent cache prefix for destination phrases (won't be auto-deleted)
     const isPermanent = isPermanentCache === true;
     const cacheKey = generateCacheKey(text, isPermanent);
-    const nameHash = getNameHash(text);
+    const partHash = getNameHash(text);
     console.log(`TTS request for: "${text}" (cache key: ${cacheKey}, permanent: ${isPermanent})`);
 
     // For non-permanent caches (patient names), check if permanent version exists first
     if (!isPermanent && supabase) {
-      const permanentKey = `phrase_${nameHash}.mp3`;
+      const permanentKey = `phrase_${partHash}.mp3`;
       const { data: permanentFile } = await supabase.storage
         .from('tts-cache')
         .download(permanentKey);
@@ -389,7 +507,7 @@ serve(async (req) => {
         const audioBuffer = await permanentFile.arrayBuffer();
         
         // Track usage even for permanent cache hits
-        await trackNameUsage(supabase, nameHash, text);
+        await trackPartUsage(supabase, partHash, text);
         
         return new Response(audioBuffer, {
           headers: {
@@ -413,8 +531,8 @@ serve(async (req) => {
         
         // For non-permanent, track usage and check for promotion
         if (!isPermanent) {
-          await trackNameUsage(supabase, nameHash, text);
-          await checkAndPromoteFrequentName(supabase, nameHash, text, cacheKey);
+          await trackPartUsage(supabase, partHash, text);
+          await checkAndPromoteFrequentPart(supabase, partHash, text, cacheKey);
         }
         
         return new Response(audioBuffer, {
@@ -483,7 +601,7 @@ serve(async (req) => {
 
       // For non-permanent, track usage
       if (!isPermanent) {
-        await trackNameUsage(supabase, nameHash, text);
+        await trackPartUsage(supabase, partHash, text);
       }
 
       // Track API key usage
