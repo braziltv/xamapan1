@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Sun, Moon, Bell, Clock, Megaphone } from 'lucide-react';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Sun, Moon, Bell, Clock, Megaphone, Sunrise } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 
@@ -27,6 +27,8 @@ const DEFAULT_VOLUMES: VolumeSettings = {
   timeAnnouncement: 1,
 };
 
+const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
+
 export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
@@ -36,6 +38,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const { theme, setTheme } = useTheme();
   
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
+  const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
 
   // Load volumes from localStorage on mount
   useEffect(() => {
@@ -227,22 +230,49 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
 
         <div className="space-y-6 py-4">
           {/* Theme Toggle Section */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {theme === 'dark' ? (
-                <Moon className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <Sun className="w-4 h-4 text-muted-foreground" />
-              )}
-              <Label htmlFor="theme-toggle" className="text-sm font-medium">
-                Tema Escuro
-              </Label>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {theme === 'dark' ? (
+                  <Moon className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Sun className="w-4 h-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="theme-toggle" className="text-sm font-medium">
+                  Tema Escuro
+                </Label>
+              </div>
+              <Switch
+                id="theme-toggle"
+                checked={theme === 'dark'}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                disabled={autoNightMode}
+              />
             </div>
-            <Switch
-              id="theme-toggle"
-              checked={theme === 'dark'}
-              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-            />
+
+            {/* Auto Night Mode */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sunrise className="w-4 h-4 text-orange-500" />
+                <div>
+                  <Label htmlFor="auto-night-toggle" className="text-sm font-medium">
+                    Modo Noturno Automático
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Escuro 19h-6h, claro 6h-19h
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="auto-night-toggle"
+                checked={autoNightMode}
+                onCheckedChange={(checked) => {
+                  setAutoNightMode(checked);
+                  localStorage.setItem(AUTO_NIGHT_KEY, String(checked));
+                  toast.success(checked ? 'Modo noturno automático ativado' : 'Modo noturno automático desativado');
+                }}
+              />
+            </div>
           </div>
 
           {/* Volume Controls Section */}

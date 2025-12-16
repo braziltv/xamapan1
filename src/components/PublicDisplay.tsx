@@ -1136,7 +1136,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             announcingType === 'triage' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
-          }`}>
+          } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 shrink-0">
               <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
                 <Activity className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
@@ -1149,11 +1149,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
-                  }`} style={{ wordBreak: 'break-word' }}>
+                  }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
                   <p className="text-lg lg:text-xl xl:text-2xl text-blue-400 mt-3 font-semibold">
@@ -1173,7 +1173,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             announcingType === 'doctor' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
-          }`}>
+          } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 shrink-0">
               <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
                 <Stethoscope className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
@@ -1186,11 +1186,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
-                  }`} style={{ wordBreak: 'break-word' }}>
+                  }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
                   <p className="text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-3 font-semibold">
@@ -1223,9 +1223,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   key={item.id}
                   className={`p-2 lg:p-3 rounded-lg ${
                     index === 0 
-                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
+                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20 animate-call-entrance' 
                       : 'bg-slate-700/50'
                   } transition-all`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center shrink-0 ${

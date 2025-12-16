@@ -4,29 +4,80 @@ import { Patient, PatientPriority } from '@/types/patient';
 const STORAGE_KEY_TRIAGE = 'triageNewPatientSoundEnabled';
 const STORAGE_KEY_DOCTOR = 'doctorNewPatientSoundEnabled';
 
-// Subtle notification sound for new patient arrival
-const playNewPatientSound = () => {
+// Different notification sounds based on priority
+const playPrioritySound = (priority: PatientPriority) => {
   try {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
-    // Short, subtle ascending tone (gentle "ding")
-    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-    oscillator.frequency.setValueAtTime(1100, audioContext.currentTime + 0.08); // C#6
-    
-    oscillator.type = 'sine';
-    
-    // Quick fade in and out for subtle sound
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
+
+    if (priority === 'emergency') {
+      // EMERGENCY: Urgent siren-like sound (alternating high frequencies)
+      const osc1 = audioContext.createOscillator();
+      const osc2 = audioContext.createOscillator();
+      osc1.connect(gainNode);
+      osc2.connect(gainNode);
+      
+      osc1.type = 'square';
+      osc2.type = 'square';
+      
+      // Alternating siren effect
+      osc1.frequency.setValueAtTime(1200, audioContext.currentTime);
+      osc1.frequency.setValueAtTime(800, audioContext.currentTime + 0.15);
+      osc1.frequency.setValueAtTime(1200, audioContext.currentTime + 0.3);
+      osc1.frequency.setValueAtTime(800, audioContext.currentTime + 0.45);
+      
+      osc2.frequency.setValueAtTime(800, audioContext.currentTime);
+      osc2.frequency.setValueAtTime(1200, audioContext.currentTime + 0.15);
+      osc2.frequency.setValueAtTime(800, audioContext.currentTime + 0.3);
+      osc2.frequency.setValueAtTime(1200, audioContext.currentTime + 0.45);
+      
+      gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.6);
+      
+      osc1.start(audioContext.currentTime);
+      osc2.start(audioContext.currentTime);
+      osc1.stop(audioContext.currentTime + 0.6);
+      osc2.stop(audioContext.currentTime + 0.6);
+      
+    } else if (priority === 'priority') {
+      // PRIORITY: Double beep (attention-grabbing but not alarming)
+      const osc = audioContext.createOscillator();
+      osc.connect(gainNode);
+      osc.type = 'sine';
+      
+      // First beep
+      osc.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.1);
+      
+      // Pause
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime + 0.15);
+      
+      // Second beep (higher)
+      osc.frequency.setValueAtTime(1100, audioContext.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + 0.2);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.35);
+      
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + 0.35);
+      
+    } else {
+      // NORMAL: Soft gentle chime
+      const osc = audioContext.createOscillator();
+      osc.connect(gainNode);
+      osc.type = 'sine';
+      
+      osc.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+      osc.frequency.setValueAtTime(1100, audioContext.currentTime + 0.08); // C#6
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+      
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + 0.2);
+    }
   } catch (error) {
     console.log('Could not play notification sound:', error);
   }
@@ -75,9 +126,9 @@ export function useNewPatientSound(panelType: 'triage' | 'doctor', patients: Pat
         return priorityOrder[patient.priority] < priorityOrder[highest] ? patient.priority : highest;
       }, 'normal' as PatientPriority);
 
-      // Play sound if enabled
+      // Play sound based on priority if enabled
       if (soundEnabled) {
-        playNewPatientSound();
+        playPrioritySound(highestPriority);
       }
 
       // Show visual alert with duration based on priority (emergency: 5s, priority: 3s, normal: 2s)

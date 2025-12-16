@@ -2151,20 +2151,65 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       </div>
 
       {/* Tempo Médio de Espera */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-lg">Tempo Médio de Espera (Hoje)</CardTitle>
-          <TrendingUp className="h-5 w-5 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold text-primary">
-            {avgWaitTime} <span className="text-lg font-normal text-muted-foreground">minutos</span>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Baseado em {patientsWithWaitTime.length} pacientes chamados
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-lg">Tempo Médio de Espera (Hoje)</CardTitle>
+            <Clock className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold text-primary">
+              {avgWaitTime} <span className="text-lg font-normal text-muted-foreground">minutos</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Baseado em {patientsWithWaitTime.length} pacientes chamados
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Horário de Pico */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-lg">Horário de Pico</CardTitle>
+            <TrendingUp className="h-5 w-5 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const peakHour = hourlyData.reduce((max, h) => h.atendimentos > max.atendimentos ? h : max, { hour: '-', atendimentos: 0 });
+              return (
+                <>
+                  <div className="text-4xl font-bold text-orange-600">
+                    {peakHour.atendimentos > 0 ? peakHour.hour : '-'}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {peakHour.atendimentos > 0 
+                      ? `${peakHour.atendimentos} atendimentos neste horário` 
+                      : 'Nenhum atendimento no período'}
+                  </p>
+                  {peakHour.atendimentos > 0 && (
+                    <div className="mt-3 flex gap-1">
+                      {hourlyData.slice(0, 12).map((h, i) => {
+                        const maxAtt = Math.max(...hourlyData.map(d => d.atendimentos), 1);
+                        const height = (h.atendimentos / maxAtt) * 100;
+                        const isPeak = h.hour === peakHour.hour;
+                        return (
+                          <div key={i} className="flex-1 flex flex-col items-center">
+                            <div 
+                              className={`w-full rounded-t transition-all ${isPeak ? 'bg-orange-500' : 'bg-primary/30'}`}
+                              style={{ height: `${Math.max(height, 5)}%`, minHeight: '4px', maxHeight: '40px' }}
+                            />
+                            <span className="text-[8px] text-muted-foreground mt-1">{h.hour.substring(0, 2)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Gráfico de Atendimentos por Dia */}

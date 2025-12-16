@@ -248,3 +248,61 @@
 .animate-border-pulse {
   animation: borderPulse 0.5s ease-in-out infinite;
 }
+
+/* New call entrance animation */
+@keyframes callEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-call-entrance {
+  animation: callEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Card pop animation for new patient */
+@keyframes cardPop {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(250, 204, 21, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(250, 204, 21, 0);
+  }
+}
+
+.animate-card-pop {
+  animation: cardPop 0.5s ease-out;
+}
+
+/* Smooth text fade for patient name */
+@keyframes textReveal {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.animate-text-reveal {
+  animation: textReveal 0.4s ease-out forwards;
+}
