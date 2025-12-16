@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { UserPlus, Trash2, Users, Volume2, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
-import { format } from 'date-fns';
+import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -202,7 +202,7 @@ export function PatientRegistration({
                         </TooltipProvider>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Cadastrado às {format(patient.createdAt, 'HH:mm')}
+                        Cadastrado às {formatBrazilTime(patient.createdAt, 'HH:mm')}
                         {' • '}
                         <span className={`font-medium ${
                           patient.status === 'waiting' ? 'text-amber-500' :

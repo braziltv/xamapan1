@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
-import { format } from 'date-fns';
+import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
 import {
   Select,
@@ -141,7 +141,7 @@ export function DoctorPanel({
                 {currentCall.name}
               </p>
               <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-                Chamado às {format(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
+                Chamado às {formatBrazilTime(currentCall.calledAt!, 'HH:mm')} - {currentConsultorio}
               </p>
               <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
                 <Button onClick={handleRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
@@ -217,7 +217,7 @@ export function DoctorPanel({
                         </TooltipProvider>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Triagem finalizada às {format(patient.calledAt || patient.createdAt, 'HH:mm')}
+                        Triagem finalizada às {formatBrazilTime(patient.calledAt || patient.createdAt, 'HH:mm')}
                       </p>
                     </div>
                   </div>

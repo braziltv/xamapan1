@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
 import { useSupabaseSync } from './useSupabaseSync';
 import { supabase } from '@/integrations/supabase/client';
+import { getBrazilTime } from './useBrazilTime';
 
 const STORAGE_KEYS = {
   PATIENTS: 'callPanel_patients',
@@ -213,7 +214,7 @@ export function useCallPanel() {
       name: name.trim(),
       status: 'waiting',
       priority,
-      createdAt: new Date(),
+      createdAt: getBrazilTime(),
     };
     setPatients(prev => [...prev, newPatient]);
     return newPatient;

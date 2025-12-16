@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
-import { format } from 'date-fns';
+import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
 import {
@@ -123,7 +123,7 @@ export function TriagePanel({
                 {currentCall.name}
               </p>
               <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-                Chamado às {format(currentCall.calledAt!, 'HH:mm')}
+                Chamado às {formatBrazilTime(currentCall.calledAt!, 'HH:mm')}
               </p>
               <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
                 <Button onClick={onRecall} variant="outline" size="sm" className="text-xs sm:text-sm">
@@ -253,7 +253,7 @@ export function TriagePanel({
                         </TooltipProvider>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Chegou às {format(patient.createdAt, 'HH:mm')}
+                        Chegou às {formatBrazilTime(patient.createdAt, 'HH:mm')}
                       </p>
                     </div>
                   </div>
