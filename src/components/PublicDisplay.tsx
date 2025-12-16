@@ -934,7 +934,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
         
         {/* Center: Weather - shifted left */}
-        <div className="flex-1 flex justify-start pl-8">
+        <div className="flex-1 flex justify-start">
           <WeatherWidget />
         </div>
         
