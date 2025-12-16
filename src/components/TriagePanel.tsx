@@ -1,3 +1,4 @@
+import { useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
@@ -41,6 +42,34 @@ const CONSULTORIOS = [
   { id: 'cons2', name: 'Consultório 2' },
 ];
 
+// Subtle notification sound for new patient arrival
+const playNewPatientSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Short, subtle ascending tone (gentle "ding")
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+    oscillator.frequency.setValueAtTime(1100, audioContext.currentTime + 0.08); // C#6
+    
+    oscillator.type = 'sine';
+    
+    // Quick fade in and out for subtle sound
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch (error) {
+    console.log('Could not play notification sound:', error);
+  }
+};
+
 export function TriagePanel({ 
   waitingPatients, 
   currentCall, 
@@ -51,6 +80,25 @@ export function TriagePanel({
   onFinishWithoutCall,
   onSendToDoctorQueue
 }: TriagePanelProps) {
+  const prevCountRef = useRef(waitingPatients.length);
+  const isInitialMount = useRef(true);
+
+  // Detect new patient arrival and play notification sound
+  useEffect(() => {
+    // Skip on initial mount to avoid sound when component loads
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      prevCountRef.current = waitingPatients.length;
+      return;
+    }
+
+    // Play sound only when count increases (new patient added)
+    if (waitingPatients.length > prevCountRef.current) {
+      playNewPatientSound();
+    }
+    
+    prevCountRef.current = waitingPatients.length;
+  }, [waitingPatients.length]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
