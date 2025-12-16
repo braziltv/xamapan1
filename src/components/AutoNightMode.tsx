@@ -10,8 +10,8 @@ export function AutoNightMode() {
   const { currentTime } = useBrazilTime();
   const lastHourRef = useRef<number | null>(null);
 
-  // Check if auto night mode is enabled (default: true)
-  const isEnabled = localStorage.getItem(STORAGE_KEY) !== 'false';
+  // Check if auto night mode is enabled (default: false - disabled)
+  const isEnabled = localStorage.getItem(STORAGE_KEY) === 'true';
   
   // Check if user manually overrode the theme
   const hasManualOverride = localStorage.getItem(MANUAL_THEME_KEY) === 'true';
@@ -51,7 +51,7 @@ export function useAutoNightModeToggle() {
     }
   };
 
-  const isAutoNightModeEnabled = localStorage.getItem(STORAGE_KEY) !== 'false';
+  const isAutoNightModeEnabled = localStorage.getItem(STORAGE_KEY) === 'true';
 
   return { isAutoNightModeEnabled, toggleAutoNightMode };
 }
