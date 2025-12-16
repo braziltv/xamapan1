@@ -576,6 +576,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [audioUnlocked, currentTime, announceTime, generateRandomMinutesForHour]);
 
+  // Listen for manual time announcement trigger from admin panel
+  useEffect(() => {
+    if (!audioUnlocked) return;
+
+    const channel = supabase.channel('time-announcement');
+    
+    channel
+      .on('broadcast', { event: 'announce-time' }, (payload) => {
+        console.log('Received time announcement command:', payload);
+        announceTime();
+      })
+      .subscribe((status) => {
+        console.log('Time announcement channel status:', status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [audioUnlocked, announceTime]);
+
   const speakWithWebSpeech = useCallback(
     (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
       return new Promise<void>((resolve, reject) => {
