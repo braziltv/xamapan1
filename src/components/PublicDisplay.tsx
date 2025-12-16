@@ -918,60 +918,87 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="absolute bottom-10 right-10 w-40 lg:w-60 xl:w-80 h-40 lg:h-60 xl:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
-      {/* Header - Compact for TV */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-1 lg:mb-2 shrink-0">
-        <div className="flex items-center gap-2 lg:gap-3">
-          <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
-            <Volume2 className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-white" />
+      {/* Header - Compact for TV Landscape */}
+      <div className="relative z-10 flex items-center justify-between gap-3 mb-2 shrink-0">
+        {/* Left: Logo + Title */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
+            <Volume2 className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base lg:text-xl xl:text-2xl 2xl:text-3xl font-bold text-white leading-tight truncate">
+            <h1 className="text-lg lg:text-2xl xl:text-3xl font-bold text-white leading-tight">
               Painel de Chamadas
             </h1>
-            <p className="text-slate-400 text-[10px] lg:text-xs xl:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-400 text-xs lg:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-          {/* Weather Widget */}
+        
+        {/* Center: Weather */}
+        <div className="flex-1 flex justify-center">
           <WeatherWidget />
+        </div>
+        
+        {/* Right: Modern Clock - Horizontal compact */}
+        <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-xl border border-slate-600/50 px-4 py-2 backdrop-blur-sm shrink-0">
+          <div className="flex items-center gap-4">
+            {/* Time with seconds */}
+            <div className="flex items-baseline">
+              <span className="text-3xl lg:text-4xl xl:text-5xl font-mono font-black text-white tracking-tight">
+                {formatBrazilTime(currentTime, 'HH:mm')}
+              </span>
+              <span className="text-xl lg:text-2xl xl:text-3xl font-mono font-bold text-primary animate-pulse">
+                :{formatBrazilTime(currentTime, 'ss')}
+              </span>
+            </div>
+            <div className="w-px h-10 bg-slate-600" />
+            {/* Date info - vertical stack */}
+            <div className="text-center">
+              <p className="text-sm lg:text-base font-mono font-bold text-white leading-tight whitespace-nowrap">
+                {formatBrazilTime(currentTime, "EEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEE").slice(1)}
+              </p>
+              <p className="text-xs lg:text-sm font-mono font-semibold text-cyan-400 leading-tight">
+                {formatBrazilTime(currentTime, "dd/MM")}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Content - Landscape optimized: horizontal layout on wide screens */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-2 lg:gap-3 min-h-0">
-        {/* Current Calls - Side by side on landscape */}
-        <div className="col-span-12 lg:col-span-9 grid grid-cols-2 gap-2 lg:gap-3">
+      {/* Main Content - Landscape optimized */}
+      <div className="relative z-10 flex-1 grid grid-cols-12 gap-3 min-h-0 pb-12">
+        {/* Current Calls - Side by side */}
+        <div className="col-span-9 grid grid-cols-2 gap-3">
           {/* Triage Call */}
-          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`bg-slate-800/50 rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
           }`}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2 lg:px-5 lg:py-3 xl:px-6 xl:py-4 shrink-0">
-              <p className="text-white text-sm lg:text-xl xl:text-2xl 2xl:text-3xl font-bold flex items-center gap-2 lg:gap-3">
-                <Activity className="w-5 h-5 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 shrink-0" />
-                <span className="truncate">TRIAGEM</span>
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 shrink-0">
+              <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
+                <Activity className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
+                <span>TRIAGEM</span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-5 h-5 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-300 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-3 lg:p-6 xl:p-8 flex items-center justify-center flex-1 min-h-0">
+            <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-2xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-wide leading-tight break-words hyphens-auto transition-all duration-300 ${
+                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
                   }`} style={{ wordBreak: 'break-word' }}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-sm lg:text-xl xl:text-2xl 2xl:text-3xl text-blue-400 mt-2 lg:mt-3 font-semibold truncate px-2">
+                  <p className="text-lg lg:text-xl xl:text-2xl text-blue-400 mt-3 font-semibold">
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm lg:text-lg xl:text-xl text-slate-500 text-center">
+                <p className="text-lg text-slate-500 text-center">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -979,36 +1006,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className={`bg-slate-800/50 rounded-xl lg:rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`bg-slate-800/50 rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'doctor' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
           }`}>
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 lg:px-5 lg:py-3 xl:px-6 xl:py-4 shrink-0">
-              <p className="text-white text-sm lg:text-xl xl:text-2xl 2xl:text-3xl font-bold flex items-center gap-2 lg:gap-3">
-                <Stethoscope className="w-5 h-5 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 shrink-0" />
-                <span className="truncate">CONSULTÓRIO MÉDICO</span>
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 shrink-0">
+              <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
+                <Stethoscope className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
+                <span>CONSULTÓRIO</span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-5 h-5 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-300 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-3 lg:p-6 xl:p-8 flex items-center justify-center flex-1 min-h-0">
+            <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-2xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-wide leading-tight break-words hyphens-auto transition-all duration-300 ${
+                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
                   }`} style={{ wordBreak: 'break-word' }}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-sm lg:text-xl xl:text-2xl 2xl:text-3xl text-emerald-400 mt-2 lg:mt-3 font-semibold truncate px-2">
+                  <p className="text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-3 font-semibold">
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm lg:text-lg xl:text-xl text-slate-500 text-center">
+                <p className="text-lg text-slate-500 text-center">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -1016,79 +1043,52 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* Right Column: Clock + History Panel */}
-        <div className="col-span-12 lg:col-span-3 flex flex-col gap-2 lg:gap-3 min-h-0">
-          {/* Modern Clock */}
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl lg:rounded-2xl border border-slate-600/50 p-3 lg:p-4 xl:p-5 backdrop-blur-sm shrink-0">
-            <div className="flex items-center justify-between gap-3 lg:gap-4">
-              {/* Time with seconds */}
-              <div className="flex items-baseline gap-1 shrink-0">
-                <span className="text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-mono font-black text-white tracking-tight">
-                  {formatBrazilTime(currentTime, 'HH:mm')}
-                </span>
-                <span className="text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-mono font-bold text-primary animate-pulse">
-                  :{formatBrazilTime(currentTime, 'ss')}
-                </span>
-              </div>
-              {/* Date info */}
-              <div className="text-right shrink-0">
-                <p className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-mono font-bold text-white leading-none tracking-tight whitespace-nowrap">
-                  {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
-                </p>
-                <p className="text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-mono font-semibold text-cyan-400 leading-tight tracking-tight mt-0.5">
-                  {formatBrazilTime(currentTime, "dd/MM/yyyy")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* History Panel */}
-          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 p-2 lg:p-3 backdrop-blur-sm flex flex-col flex-1 min-h-0 max-h-[120px] lg:max-h-none">
-            <h3 className="text-sm lg:text-base xl:text-lg font-bold text-white mb-1 lg:mb-2 flex items-center gap-2 shrink-0">
-              <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
-              <span className="truncate">Últimas Chamadas</span>
-            </h3>
-            <div className="space-y-1 lg:space-y-2 flex-1 overflow-y-auto">
-              {historyItems.length === 0 ? (
-                <p className="text-slate-500 text-center py-2 text-xs lg:text-sm">
-                  Nenhuma chamada ainda
-                </p>
-              ) : (
-                historyItems.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className={`p-1.5 lg:p-2 xl:p-3 rounded-lg ${
-                      index === 0 
-                        ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
-                        : 'bg-slate-700/50'
-                    } transition-all`}
-                  >
-                    <div className="flex items-center gap-1.5 lg:gap-2">
-                      <div className={`w-6 h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center shrink-0 ${
-                        item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
-                      }`}>
-                        {item.type === 'triage' ? (
-                          <Activity className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
-                        ) : (
-                          <Stethoscope className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-white text-xs lg:text-sm xl:text-base truncate">
-                          {item.name}
-                        </p>
-                        <p className="text-[10px] lg:text-xs text-slate-400 truncate">
-                          {item.type === 'triage' ? 'Triagem' : 'Médico'}
-                        </p>
-                      </div>
-                      <span className="text-[10px] lg:text-xs xl:text-sm text-slate-400 font-mono shrink-0">
-                        {formatBrazilTime(item.time, 'HH:mm')}
-                      </span>
+        {/* Right Column: History Panel */}
+        <div className="col-span-3 bg-slate-800/50 rounded-2xl border border-slate-700 p-3 backdrop-blur-sm flex flex-col min-h-0">
+          <h3 className="text-base lg:text-lg font-bold text-white mb-2 flex items-center gap-2 shrink-0">
+            <Clock className="w-5 h-5 text-primary shrink-0" />
+            <span>Últimas Chamadas</span>
+          </h3>
+          <div className="space-y-2 flex-1 overflow-y-auto">
+            {historyItems.length === 0 ? (
+              <p className="text-slate-500 text-center py-4 text-sm">
+                Nenhuma chamada ainda
+              </p>
+            ) : (
+              historyItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`p-2 lg:p-3 rounded-lg ${
+                    index === 0 
+                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
+                      : 'bg-slate-700/50'
+                  } transition-all`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center shrink-0 ${
+                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
+                    }`}>
+                      {item.type === 'triage' ? (
+                        <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                      ) : (
+                        <Stethoscope className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                      )}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white text-sm lg:text-base truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
+                      </p>
+                    </div>
+                    <span className="text-xs lg:text-sm text-slate-400 font-mono shrink-0">
+                      {formatBrazilTime(item.time, 'HH:mm')}
+                    </span>
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
