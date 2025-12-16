@@ -401,46 +401,57 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, [audioUnlocked]);
 
   // Play audio with amplification using Web Audio API (2.5x volume = 150% increase)
-  const playAmplifiedAudio = useCallback((audioElement: HTMLAudioElement, gain: number = 2.5): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      try {
-        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (!audioContextRef.current) audioContextRef.current = audioContext;
-        
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-        
-        const source = audioContext.createMediaElementSource(audioElement);
-        const gainNode = audioContext.createGain();
-        gainNode.gain.value = gain; // 2.0 = 100% volume increase
-        
-        source.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        audioElement.onended = () => {
-          source.disconnect();
-          gainNode.disconnect();
-          resolve();
-        };
-        audioElement.onerror = (e) => {
-          source.disconnect();
-          gainNode.disconnect();
-          reject(e);
-        };
-        
-        audioElement.play().catch(reject);
-      } catch (e) {
-        // Fallback to normal playback if Web Audio API fails
-        console.warn('Web Audio API amplification failed, using normal volume:', e);
-        audioElement.volume = 1.0;
-        audioElement.onended = () => resolve();
-        audioElement.onerror = (e) => reject(e);
-        audioElement.play().catch(reject);
-      }
-    });
-  }, []);
+  const playAmplifiedAudio = useCallback(
+    (audioElement: HTMLAudioElement, gain: number = 2.5): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        try {
+          const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+          const audioContext = audioContextRef.current || new AudioContextCtor();
+          if (!audioContextRef.current) audioContextRef.current = audioContext;
 
+          const startPlayback = async () => {
+            try {
+              if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+              }
+
+              const source = audioContext.createMediaElementSource(audioElement);
+              const gainNode = audioContext.createGain();
+              gainNode.gain.value = gain;
+
+              source.connect(gainNode);
+              gainNode.connect(audioContext.destination);
+
+              audioElement.onended = () => {
+                source.disconnect();
+                gainNode.disconnect();
+                resolve();
+              };
+              audioElement.onerror = (e) => {
+                source.disconnect();
+                gainNode.disconnect();
+                reject(e);
+              };
+
+              await audioElement.play();
+            } catch (err) {
+              reject(err);
+            }
+          };
+
+          void startPlayback();
+        } catch (e) {
+          // Fallback to normal playback if Web Audio API fails
+          console.warn('Web Audio API amplification failed, using normal volume:', e);
+          audioElement.volume = 1.0;
+          audioElement.onended = () => resolve();
+          audioElement.onerror = (ev) => reject(ev);
+          audioElement.play().catch(reject);
+        }
+      });
+    },
+    []
+  );
   // Play notification sound effect (uses preloaded audio for faster playback)
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
