@@ -299,10 +299,11 @@ async function getOrGenerateAudio(
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
         voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.3,
-          use_speaker_boost: true,
+          stability: 0.85,          // Alta estabilidade para voz consistente
+          similarity_boost: 0.80,   // Boa similaridade com a voz original
+          style: 0.1,               // Pouco estilo para locução mais natural
+          use_speaker_boost: true,  // Clareza e nitidez aprimoradas
+          speed: 0.95,              // Velocidade ligeiramente mais lenta para clareza
         },
       }),
     }
