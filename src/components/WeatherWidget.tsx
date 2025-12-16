@@ -178,7 +178,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
               {showMaxTemp ? weather.current.maxTemp : weather.current.minTemp}°<span className="text-yellow-400">c</span>
             </span>
           </div>
-          <Droplets className="w-3 h-3 text-cyan-300 ml-2" />
+          <Droplets className="w-5 h-5 text-cyan-300 ml-2" />
           <span className="text-red-100 text-[10px]">{weather.current.humidity}%</span>
         </div>
         
