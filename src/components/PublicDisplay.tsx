@@ -146,6 +146,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
         ];
 
+        // Function to fix encoding issues and decode HTML entities
+        const fixEncoding = (text: string): string => {
+          // Decode HTML entities
+          const textarea = document.createElement('textarea');
+          textarea.innerHTML = text;
+          let decoded = textarea.value;
+          
+          // Remove replacement character (appears as triangle with ?)
+          decoded = decoded.replace(/\uFFFD/g, '');
+          
+          // Clean up CDATA markers
+          decoded = decoded.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
+          
+          return decoded.trim();
+        };
+
         // Fetch all feeds in parallel for speed
         const fetchPromises = feedsToFetch.map(async (feed) => {
           const feedNews: NewsItem[] = [];
@@ -155,14 +171,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' },
               });
               if (response.ok) {
-                const text = await response.text();
+                // Try to get proper encoding from response
+                const buffer = await response.arrayBuffer();
+                let text: string;
+                
+                // Try UTF-8 first, then ISO-8859-1 as fallback
+                try {
+                  text = new TextDecoder('utf-8').decode(buffer);
+                  // Check if decoding produced replacement characters
+                  if (text.includes('\uFFFD')) {
+                    text = new TextDecoder('iso-8859-1').decode(buffer);
+                  }
+                } catch {
+                  text = new TextDecoder('iso-8859-1').decode(buffer);
+                }
+                
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
                 if (items.length > 0) {
                   items.forEach((item, index) => {
                     if (index < 4) { // Max 4 per source
-                      const title = item.querySelector('title')?.textContent || '';
+                      const rawTitle = item.querySelector('title')?.textContent || '';
+                      const title = fixEncoding(rawTitle);
                       if (title && title.length > 10) {
                         feedNews.push({ title, link: '', source: feed.source });
                       }
