@@ -336,11 +336,11 @@ async function getOrGenerateAudio(
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
         voice_settings: {
-          stability: 0.85,
-          similarity_boost: 0.80,
-          style: 0.1,
+          stability: 0.55,
+          similarity_boost: 0.78,
+          style: 0.15,
           use_speaker_boost: true,
-          speed: 0.95,
+          speed: 0.92,
         },
       }),
     }
@@ -490,8 +490,18 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    // Alice voice - natural female voice that works excellently with Brazilian Portuguese
-    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2";
+    // Alice voice - voz feminina natural otimizada para português brasileiro
+    // Configurações ajustadas para máxima naturalidade com sotaque BR e acentuação correta
+    const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
+
+    // Configurações de voz otimizadas para português brasileiro natural
+    const brazilianVoiceSettings = {
+      stability: 0.55,           // Equilíbrio entre consistência e naturalidade
+      similarity_boost: 0.78,    // Mantém clareza da voz
+      style: 0.15,               // Leve expressividade natural
+      use_speaker_boost: true,   // Melhora clareza e pronúncia
+      speed: 0.92,               // Levemente mais lento para melhor dicção
+    };
 
     // Handle concatenation mode
     // IMPORTANT: to avoid MP3 concatenation playback issues on TVs/browsers,
@@ -523,12 +533,7 @@ serve(async (req) => {
             text: combinedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: {
-              stability: 0.6,
-              similarity_boost: 0.78,
-              style: 0.2,
-              use_speaker_boost: true,
-            },
+            voice_settings: brazilianVoiceSettings,
           }),
         }
       );
@@ -671,12 +676,7 @@ serve(async (req) => {
             text,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-              style: 0.3,
-              use_speaker_boost: true,
-            },
+            voice_settings: brazilianVoiceSettings,
           }),
         }
       );

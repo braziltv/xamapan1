@@ -529,7 +529,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('Speaking with direct API TTS:', { name: cleanName, destinationPhrase: cleanDestination });
+      console.log('Speaking with unified TTS (single API call):', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -542,54 +542,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      // Fetch both audios in parallel - skipCache: true forces fresh API generation
-      const [nameResp, destResp] = await Promise.all([
-        fetch(url, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ text: cleanName, unitName, skipCache: true }),
+      // Generate unified audio with name + destination in a single API call
+      // This produces more natural speech with proper prosody and pauses
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          concatenate: {
+            name: cleanName,
+            prefix: '',
+            destination: cleanDestination,
+          },
+          unitName,
         }),
-        fetch(url, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ text: cleanDestination, unitName, skipCache: true }),
-        }),
-      ]);
+      });
 
-      if (!nameResp.ok) {
-        const errorData = await nameResp.json().catch(() => ({}));
-        console.error('Name TTS error:', errorData);
-        throw new Error(errorData.error || `ElevenLabs name error: ${nameResp.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Unified TTS error:', errorData);
+        throw new Error(errorData.error || `ElevenLabs unified TTS error: ${response.status}`);
       }
 
-      if (!destResp.ok) {
-        const errorData = await destResp.json().catch(() => ({}));
-        console.error('Destination TTS error:', errorData);
-        throw new Error(errorData.error || `ElevenLabs destination error: ${destResp.status}`);
-      }
+      const audioBlob = await response.blob();
+      console.log('Unified audio blob received:', { size: audioBlob.size });
 
-      const [nameBlob, destBlob] = await Promise.all([nameResp.blob(), destResp.blob()]);
-      console.log('Audio blobs received:', { nameSize: nameBlob.size, destSize: destBlob.size });
-
-      const nameUrl = URL.createObjectURL(nameBlob);
-      const destUrl = URL.createObjectURL(destBlob);
+      const audioUrl = URL.createObjectURL(audioBlob);
 
       try {
-        // Play name first
-        console.log('Playing name audio...');
-        await playAmplifiedAudio(new Audio(nameUrl), gain);
-        console.log('Name audio finished');
-        
-        // Small pause for clarity
-        await new Promise((r) => setTimeout(r, 300));
-        
-        // Play destination
-        console.log('Playing destination audio...');
-        await playAmplifiedAudio(new Audio(destUrl), gain);
-        console.log('Destination audio finished');
+        // Play the unified audio (name + destination in one natural speech)
+        console.log('Playing unified audio...');
+        await playAmplifiedAudio(new Audio(audioUrl), gain);
+        console.log('Unified audio finished');
       } finally {
-        URL.revokeObjectURL(nameUrl);
-        URL.revokeObjectURL(destUrl);
+        URL.revokeObjectURL(audioUrl);
       }
     },
     [unitName, playAmplifiedAudio]
