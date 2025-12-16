@@ -522,6 +522,57 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   );
 
   // ElevenLabs TTS via edge function - plays MP3 audio (works on any device)
+  // Speak using concatenated TTS (splits name into parts for efficient caching)
+  const speakWithConcatenatedTTS = useCallback(
+    async (name: string, destinationPhrase: string): Promise<void> => {
+      console.log('Speaking with concatenated TTS:', { name, destinationPhrase });
+      
+      // Get TTS volume from localStorage
+      const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
+      const gain = 2.5 * ttsVolume;
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            unitName,
+            concatenate: {
+              name,              // Will be split into parts (first, last name) and cached separately
+              destination: destinationPhrase  // Full phrase, permanently cached
+            }
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+      }
+
+      const cacheStatus = response.headers.get('X-Cache');
+      const segments = response.headers.get('X-Segments');
+      const apiCalls = response.headers.get('X-API-Calls');
+      console.log(`TTS concatenated: cache=${cacheStatus}, segments=${segments}, apiCalls=${apiCalls}`);
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      try {
+        await playAmplifiedAudio(audio, gain);
+      } finally {
+        URL.revokeObjectURL(audioUrl);
+      }
+    },
+    [unitName, playAmplifiedAudio]
+  );
+
   const speakWithElevenLabs = useCallback(
     async (text: string): Promise<void> => {
       console.log('Speaking with ElevenLabs:', text);
@@ -558,7 +609,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [playAmplifiedAudio]
+    [unitName, playAmplifiedAudio]
   );
 
   // Test audio function
@@ -839,15 +890,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Play notification sound first (mandatory)
         await playNotificationSound();
 
-        // Try ElevenLabs first (most reliable on Android TV)
-        // Play name first, then destination phrase (uses permanent cache)
+        // Try ElevenLabs with concatenated mode first (splits name into parts for efficient caching)
+        // This caches each name part (first name, last name) separately for reuse
         try {
-          await speakWithElevenLabs(name);
-          await speakDestinationPhrase(destinationPhrase);
-          console.log('TTS completed (ElevenLabs - name + destination phrase)');
+          await speakWithConcatenatedTTS(name, destinationPhrase);
+          console.log('TTS completed (ElevenLabs - concatenated name parts + destination)');
           return;
         } catch (e) {
-          console.warn('ElevenLabs failed in speakName, trying Web Speech API...', e);
+          console.warn('ElevenLabs concatenated failed, trying Web Speech API...', e);
         }
 
         // Fallback to Web Speech API (combined text)
@@ -882,7 +932,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.error('speakName failed:', e);
       }
     },
-    [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech, getDestinationPhrase, speakDestinationPhrase]
+    [playNotificationSound, speakWithConcatenatedTTS, speakWithWebSpeech, getDestinationPhrase]
   );
 
   // Stop the flashing alert after exactly 10 seconds
