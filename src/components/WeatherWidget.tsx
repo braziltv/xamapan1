@@ -168,7 +168,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       <div className="flex items-center gap-4">
         {/* Current weather with city */}
         <div className="flex items-center gap-3">
-          <span className="text-white text-sm font-poppins font-medium drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">Previsão do tempo em <span className="text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]">Paineiras</span></span>
+          <span className="text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]">Previsão do tempo em Paineiras</span>
           {getWeatherIcon(weather.current.description, 'lg')}
           <div className="flex items-baseline gap-1.5 transition-all duration-500">
             <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
