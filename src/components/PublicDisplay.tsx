@@ -37,7 +37,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const lastAnnouncedHourRef = useRef<number>(-1);
+  const lastTimeAnnouncementRef = useRef<number>(0); // timestamp da última chamada de hora
+  const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
+  const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -613,24 +615,66 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio]);
 
-  // Announce time every hour on the hour
+  // Generate 3 random announcement times per hour with minimum 10 min between them
+  const generateRandomAnnouncements = useCallback((hour: number): number[] => {
+    const announcements: number[] = [];
+    const minGap = 10; // mínimo de 10 minutos entre anúncios
+    
+    // Gerar 3 momentos aleatórios
+    for (let i = 0; i < 3; i++) {
+      let attempts = 0;
+      let minute: number;
+      
+      do {
+        minute = Math.floor(Math.random() * 60); // 0-59
+        attempts++;
+        
+        // Verificar se há pelo menos 10 min de distância dos outros
+        const isValid = announcements.every(m => Math.abs(minute - m) >= minGap);
+        
+        if (isValid || attempts > 50) {
+          if (isValid) announcements.push(minute);
+          break;
+        }
+      } while (attempts <= 50);
+    }
+    
+    console.log(`Hour ${hour} scheduled announcements at minutes:`, announcements.sort((a, b) => a - b));
+    return announcements.sort((a, b) => a - b);
+  }, []);
+
+  // Announce time 3 times per hour at random moments
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
     
     const hour = currentTime.getHours();
     const minute = currentTime.getMinutes();
     const second = currentTime.getSeconds();
+    const now = Date.now();
     
-    // Announce only at the start of each hour (minute = 0, second < 5)
-    if (minute === 0 && second < 5 && lastAnnouncedHourRef.current !== hour) {
-      lastAnnouncedHourRef.current = hour;
+    // Regenerar agendamento quando mudar de hora
+    if (currentScheduleHourRef.current !== hour) {
+      currentScheduleHourRef.current = hour;
+      scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour);
+    }
+    
+    // Verificar se é momento de anunciar
+    const shouldAnnounce = scheduledAnnouncementsRef.current.includes(minute) && second < 5;
+    const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
+    const minGapMs = 10 * 60 * 1000; // 10 minutos em ms
+    
+    if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
+      lastTimeAnnouncementRef.current = now;
       
-      // Small delay to avoid conflicts with other audio
+      // Remover este minuto do agendamento para não repetir
+      scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter(m => m !== minute);
+      
+      // Pequeno delay para evitar conflitos com outros áudios
       setTimeout(() => {
-        playHourAnnouncement(hour, 0);
+        playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement]);
+  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements]);
 
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
