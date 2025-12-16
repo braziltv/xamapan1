@@ -382,33 +382,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       void audioContext.resume();
     }
 
-    // Unlock browser speech engine
+    // Play a silent tone to fully unlock audio on mobile/TV browsers
     try {
-      window.speechSynthesis?.cancel?.();
-      const utterance = new SpeechSynthesisUtterance(' ');
-      utterance.volume = 0.01;
-      utterance.rate = 10;
-      window.speechSynthesis?.speak?.(utterance);
-      window.speechSynthesis?.resume?.();
-    } catch {
-      // ignore
-    }
-
-    // Prime ResponsiveVoice (some browsers only allow its audio after a user gesture)
-    try {
-      const responsiveVoice = (window as any).responsiveVoice;
-      if (responsiveVoice?.voiceSupport?.()) {
-        responsiveVoice.cancel?.();
-        responsiveVoice.speak(' ', 'Brazilian Portuguese Female', { volume: 0, rate: 1, pitch: 1 });
-        window.setTimeout(() => responsiveVoice?.cancel?.(), 200);
-      }
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = 0.001; // Nearly silent
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
     } catch {
       // ignore
     }
 
     localStorage.setItem('audioUnlocked', 'true');
     setAudioUnlocked(true);
-    console.log('Audio unlocked and saved to localStorage');
+    console.log('Audio unlocked (ElevenLabs only mode)');
   }, [audioUnlocked]);
 
   // Play audio with amplification using Web Audio API (2.5x volume = 150% increase)
@@ -623,42 +612,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       const testText = 'Teste de áudio. Som funcionando corretamente.';
 
-      // Try ElevenLabs first (most reliable on Android TV)
+      // Use only ElevenLabs API with local cache
       try {
         await speakWithElevenLabs(testText);
         console.log('Audio test completed (ElevenLabs)');
-        return;
       } catch (e) {
-        console.warn('ElevenLabs failed, trying Web Speech API...', e);
-      }
-
-      // Fallback to Web Speech API
-      try {
-        await speakWithWebSpeech(testText, { rate: 0.9, pitch: 1.1, volume: 1 });
-        console.log('Audio test completed (Web Speech API)');
-        return;
-      } catch (e) {
-        console.warn('Web Speech API failed, trying ResponsiveVoice...', e);
-      }
-
-      // Last resort: ResponsiveVoice
-      const responsiveVoice = (window as any).responsiveVoice;
-      if (responsiveVoice?.voiceSupport?.()) {
-        responsiveVoice.cancel?.();
-        responsiveVoice.speak(testText, 'Brazilian Portuguese Female', {
-          pitch: 1.1,
-          rate: 0.9,
-          volume: 1,
-          onend: () => console.log('Audio test completed (ResponsiveVoice)'),
-          onerror: () => console.warn('ResponsiveVoice failed in testAudio'),
-        });
-      } else {
-        console.warn('Nenhum motor de TTS disponível para o teste.');
+        console.error('ElevenLabs audio test failed:', e);
       }
     } catch (error) {
       console.error('Audio test failed:', error);
     }
-  }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
+  }, [playNotificationSound, speakWithElevenLabs]);
 
   // Play time notification sound (different from patient call notification - softer tone)
   const playTimeNotificationSound = useCallback(() => {
@@ -933,57 +897,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Play notification sound first (mandatory)
         await playNotificationSound();
 
-        // Cancel any ongoing Web Speech synthesis to prevent overlap
-        try {
-          window.speechSynthesis?.cancel();
-        } catch {
-          // ignore
-        }
-
-        // Try ElevenLabs with concatenated mode (Brazilian Portuguese accent)
-        try {
-          await speakWithConcatenatedTTS(name, destinationPhrase);
-          console.log('TTS completed (ElevenLabs - Brazilian Portuguese)');
-          return;
-        } catch (e) {
-          console.warn('ElevenLabs failed, trying Web Speech API...', e);
-        }
-
-        // Fallback to Web Speech API (combined text)
-        const fullText = `${name}. ${destinationPhrase}.`;
-        try {
-          await speakWithWebSpeech(fullText, { rate: 0.85, pitch: 1.2, volume: 1 });
-          console.log('TTS completed (Web Speech API)');
-          return;
-        } catch (e) {
-          console.warn('Web Speech API failed in speakName, trying ResponsiveVoice...', e);
-        }
-
-        // Last resort: ResponsiveVoice
-        const responsiveVoice = (window as any).responsiveVoice;
-        if (responsiveVoice?.voiceSupport?.()) {
-          try {
-            responsiveVoice.cancel?.();
-          } catch {
-            // ignore
-          }
-
-          responsiveVoice.speak(fullText, 'Brazilian Portuguese Female', {
-            pitch: 1.1,
-            rate: 0.9,
-            volume: 1,
-            onstart: () => console.log('ResponsiveVoice TTS started'),
-            onend: () => console.log('ResponsiveVoice TTS ended'),
-            onerror: (err: any) => console.error('ResponsiveVoice TTS error:', err),
-          });
-        }
+        // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
+        // Audio is cached locally in Supabase Storage for reuse
+        await speakWithConcatenatedTTS(name, destinationPhrase);
+        console.log('TTS completed (ElevenLabs - Brazilian Portuguese with local cache)');
       } catch (e) {
-        console.error('speakName failed:', e);
+        console.error('ElevenLabs TTS failed:', e);
       } finally {
         isSpeakingRef.current = false;
       }
     },
-    [playNotificationSound, speakWithConcatenatedTTS, speakWithWebSpeech, getDestinationPhrase]
+    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase]
   );
 
   // Stop the flashing alert after exactly 10 seconds
