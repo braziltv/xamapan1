@@ -493,128 +493,74 @@ serve(async (req) => {
     // Alice voice - natural female voice that works excellently with Brazilian Portuguese
     const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2";
 
-    // Handle concatenation mode: combine name parts + prefix + destination
-    if (concatenate && supabase && ELEVENLABS_API_KEY) {
+    // Handle concatenation mode
+    // IMPORTANT: to avoid MP3 concatenation playback issues on TVs/browsers,
+    // we generate a SINGLE audio file in one ElevenLabs request.
+    if (concatenate && ELEVENLABS_API_KEY) {
       const { name, prefix, destination } = concatenate;
-      console.log(`Concatenation request: name="${name}", prefix="${prefix}", destination="${destination}"`);
-      
-      const audioBuffers: ArrayBuffer[] = [];
-      const namePartBuffers: ArrayBuffer[] = [];
-      let apiCallsMade = 0;
-      const silenceBuffer = generateSilenceBuffer();
-      
-      // Helper function to get or generate audio for a part with caching
-      async function getPartAudio(part: string, isPermanent: boolean): Promise<{ audio: ArrayBuffer; fromCache: boolean }> {
-        const partHash = getNameHash(part);
-        const partCacheKey = generateCacheKey(part, isPermanent);
-        
-        // Track part usage for non-permanent parts
-        if (!isPermanent) {
-          await trackPartUsage(supabase!, partHash, part);
-        }
-        
-        // Check permanent cache first
-        const permanentKey = `phrase_${partHash}.mp3`;
-        const { data: permanentFile } = await supabase!.storage
-          .from('tts-cache')
-          .download(permanentKey);
-        
-        if (permanentFile) {
-          console.log(`Part "${part}" found in permanent cache (${permanentKey})`);
-          return { audio: await permanentFile.arrayBuffer(), fromCache: true };
-        }
-        
-        // Check temporary cache
-        const { data: tempFile } = await supabase!.storage
-          .from('tts-cache')
-          .download(partCacheKey);
-        
-        if (tempFile) {
-          console.log(`Part "${part}" found in temporary cache (${partCacheKey})`);
-          
-          // Check for promotion to permanent cache
-          if (!isPermanent) {
-            await checkAndPromoteFrequentPart(supabase!, partHash, part, partCacheKey);
-          }
-          
-          return { audio: await tempFile.arrayBuffer(), fromCache: true };
-        }
-        
-        // Generate new audio
-        console.log(`Generating audio for part: "${part}"`);
-        const partAudio = await getOrGenerateAudio(supabase!, part, isPermanent, ELEVENLABS_API_KEY!, selectedVoiceId);
-        
-        // Check for promotion to permanent cache
-        if (!isPermanent) {
-          await checkAndPromoteFrequentPart(supabase!, partHash, part, partCacheKey);
-        }
-        
-        return { audio: partAudio, fromCache: false };
+      console.log(
+        `Concatenation request (single-call): name="${name}", prefix="${prefix}", destination="${destination}"`
+      );
+
+      const combinedText = [name, prefix, destination]
+        .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+        .map((v) => v.trim())
+        .join('. ');
+
+      if (!combinedText) {
+        throw new Error('Concatenation text is empty');
       }
-      
-      // Split name into parts and process each separately
-      if (name) {
-        const nameParts = splitNameIntoParts(name);
-        console.log(`Name "${name}" split into ${nameParts.length} parts: [${nameParts.map(p => `"${p}"`).join(', ')}]`);
-        
-        for (let i = 0; i < nameParts.length; i++) {
-          const part = nameParts[i];
-          const { audio, fromCache } = await getPartAudio(part, false);
-          
-          namePartBuffers.push(audio);
-          if (!fromCache) apiCallsMade++;
-          
-          // Add brief silence between name parts (except after last part)
-          if (i < nameParts.length - 1) {
-            namePartBuffers.push(silenceBuffer);
-          }
+
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: combinedText,
+            model_id: "eleven_multilingual_v2",
+            output_format: "mp3_44100_128",
+            voice_settings: {
+              stability: 0.6,
+              similarity_boost: 0.78,
+              style: 0.2,
+              use_speaker_boost: true,
+            },
+          }),
         }
-        
-        // Add all name parts to main buffer
-        audioBuffers.push(...namePartBuffers);
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          "ElevenLabs API error (single-call concat):",
+          response.status,
+          errorText
+        );
+        throw new Error(`ElevenLabs API error: ${response.status}`);
       }
-      
-      // Add silence before destination phrase for natural pause
-      if (audioBuffers.length > 0 && destination) {
-        audioBuffers.push(silenceBuffer);
-        audioBuffers.push(silenceBuffer); // Double silence for emphasis
-      }
-      
-      // Get prefix audio (always from permanent cache) - if provided
-      if (prefix) {
-        const { audio, fromCache } = await getPartAudio(prefix, true);
-        audioBuffers.push(audio);
-        if (!fromCache) apiCallsMade++;
-      }
-      
-      // Get destination audio (always from permanent cache)
-      if (destination) {
-        const { audio, fromCache } = await getPartAudio(destination, true);
-        audioBuffers.push(audio);
-        if (!fromCache) apiCallsMade++;
-      }
-      
-      // Concatenate all audio segments
-      const combinedAudio = concatenateAudioBuffers(audioBuffers);
-      const segmentCount = audioBuffers.filter(b => b.byteLength > 200).length; // Count real segments, not silence
-      console.log(`Concatenated audio: ${segmentCount} segments (${audioBuffers.length} total with silence), ${combinedAudio.byteLength} bytes, ${apiCallsMade} API calls made`);
-      
-      // Track API usage if any calls were made
-      if (apiCallsMade > 0) {
+
+      const audioBuffer = await response.arrayBuffer();
+      console.log(`Single-call concatenated audio generated, size: ${audioBuffer.byteLength} bytes`);
+
+      // Track API key usage
+      if (supabase) {
         await supabase.from("api_key_usage").insert({
           api_key_index: 1,
-          unit_name: unitName || "Desconhecido"
+          unit_name: unitName || "Desconhecido",
         });
       }
-      
-      return new Response(combinedAudio, {
+
+      return new Response(audioBuffer, {
         headers: {
           ...corsHeaders,
           "Content-Type": "audio/mpeg",
-          "X-Cache": apiCallsMade > 0 ? "PARTIAL" : "HIT",
-          "X-Segments": String(segmentCount),
-          "X-API-Calls": String(apiCallsMade),
-          "X-Name-Parts": name ? String(splitNameIntoParts(name).length) : "0",
+          "X-Mode": "CONCAT_ONECALL",
+          "X-Cache": "SKIP",
+          "X-API-Calls": "1",
         },
       });
     }
