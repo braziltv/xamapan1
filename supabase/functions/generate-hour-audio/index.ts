@@ -246,9 +246,54 @@ serve(async (req) => {
       });
     }
 
-    // Gerar todos (horas + minutos = 83 arquivos total)
+    // Gerar a palavra "minutos" para o cache
+    if (action === 'generate-minutos-word') {
+      const cacheKey = 'minutos.mp3';
+      
+      if (!force) {
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('time', { search: cacheKey });
+        
+        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+          return new Response(JSON.stringify({ success: true, skipped: true, message: 'minutos already exists' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+
+      try {
+        const audioBuffer = await generateAudioWithFallback('minutos');
+        
+        const { error: uploadError } = await supabase.storage
+          .from('tts-cache')
+          .upload(`time/${cacheKey}`, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: true,
+          });
+
+        if (uploadError) {
+          return new Response(JSON.stringify({ success: false, error: uploadError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        console.log('Generated minutos word audio');
+        return new Response(JSON.stringify({ success: true, message: 'minutos generated' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({ success: false, error: String(error) }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Gerar todos (horas + minutos + palavra "minutos" = 84 arquivos total)
     if (action === 'generate-all') {
-      const results = { hours: 0, minutes: 0, failed: 0, skipped: 0, errors: [] as string[] };
+      const results = { hours: 0, minutes: 0, minutos_word: false, failed: 0, skipped: 0, errors: [] as string[] };
 
       // Gerar horas
       for (let h = 0; h < 24; h++) {
@@ -317,6 +362,48 @@ serve(async (req) => {
         } catch (error) {
           results.failed++;
           results.errors.push(`m_${m}: ${error}`);
+        }
+      }
+
+      // Gerar palavra "minutos"
+      const minutosKey = 'minutos.mp3';
+      if (!force) {
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('time', { search: minutosKey });
+        
+        if (existingFile && existingFile.some(f => f.name === minutosKey)) {
+          results.skipped++;
+        } else {
+          try {
+            const audioBuffer = await generateAudioWithFallback('minutos');
+            await supabase.storage
+              .from('tts-cache')
+              .upload(`time/${minutosKey}`, audioBuffer, {
+                contentType: 'audio/mpeg',
+                upsert: true,
+              });
+            console.log('Generated minutos word');
+            results.minutos_word = true;
+          } catch (error) {
+            results.failed++;
+            results.errors.push(`minutos: ${error}`);
+          }
+        }
+      } else {
+        try {
+          const audioBuffer = await generateAudioWithFallback('minutos');
+          await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${minutosKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+          console.log('Generated minutos word');
+          results.minutos_word = true;
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`minutos: ${error}`);
         }
       }
 

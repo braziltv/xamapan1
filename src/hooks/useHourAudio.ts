@@ -15,6 +15,11 @@ export const useHourAudio = () => {
     return data.publicUrl;
   };
 
+  const getMinutosWordUrl = (): string => {
+    const { data } = supabase.storage.from('tts-cache').getPublicUrl('time/minutos.mp3');
+    return data.publicUrl;
+  };
+
   // Verificar se o arquivo existe no storage
   const checkFileExists = async (path: string): Promise<boolean> => {
     try {
@@ -28,7 +33,8 @@ export const useHourAudio = () => {
     }
   };
 
-  // Reproduzir hora concatenando os dois áudios (apenas do cache local)
+  // Reproduzir hora concatenando os áudios (apenas do cache local)
+  // Formato: [hora] [e X] [minutos]
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       // Get volume from localStorage
@@ -36,6 +42,7 @@ export const useHourAudio = () => {
 
       const hourUrl = getHourUrl(hour);
       const minuteUrl = getMinuteUrl(minute);
+      const minutosWordUrl = getMinutosWordUrl();
 
       // Reproduzir áudio da hora
       const hourAudio = new Audio(hourUrl);
@@ -56,6 +63,16 @@ export const useHourAudio = () => {
           minuteAudio.onended = () => resolve();
           minuteAudio.onerror = () => reject(new Error('Minute audio failed - arquivo não encontrado no cache'));
           minuteAudio.play().catch(reject);
+        });
+
+        // Reproduzir palavra "minutos" ao final
+        const minutosAudio = new Audio(minutosWordUrl);
+        minutosAudio.volume = timeAnnouncementVolume;
+
+        await new Promise<void>((resolve, reject) => {
+          minutosAudio.onended = () => resolve();
+          minutosAudio.onerror = () => reject(new Error('Minutos word audio failed - arquivo não encontrado no cache'));
+          minutosAudio.play().catch(reject);
         });
       }
 
