@@ -80,8 +80,8 @@ export function useNewPatientSound(panelType: 'triage' | 'doctor', patients: Pat
         playNewPatientSound();
       }
 
-      // Show visual alert with duration based on priority
-      const duration = highestPriority === 'emergency' ? 5000 : 3000;
+      // Show visual alert with duration based on priority (emergency: 5s, priority: 3s, normal: 2s)
+      const duration = highestPriority === 'emergency' ? 5000 : highestPriority === 'priority' ? 3000 : 2000;
       setVisualAlert({ active: true, priority: highestPriority });
       
       setTimeout(() => {
