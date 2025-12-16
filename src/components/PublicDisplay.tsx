@@ -525,30 +525,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // ElevenLabs TTS via backend function - plays MP3 audio (works on any device)
   // Calls API directly without relying on cache for reliability
-  // Alterna entre vozes feminina e masculina a cada paciente
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      
-      // Vozes disponíveis - português brasileiro
-      const VOICE_FEMALE = "Xb7hH8MSUJpSbSDYk0k2"; // Alice
-      const VOICE_MALE = "onwK4e9ZLuTAKqWW03F9";   // Daniel
-      
-      // Obtém o índice atual da voz (alterna entre 0=feminina e 1=masculina)
-      const currentVoiceIndex = parseInt(localStorage.getItem('tts-voice-index') || '0', 10);
-      const voiceId = currentVoiceIndex === 0 ? VOICE_FEMALE : VOICE_MALE;
-      const voiceName = currentVoiceIndex === 0 ? 'Feminina (Alice)' : 'Masculina (Daniel)';
-      
-      console.log('Speaking with direct API TTS:', { 
-        name: cleanName, 
-        destinationPhrase: cleanDestination,
-        voice: voiceName 
-      });
-      
-      // Alterna para a próxima voz para o próximo paciente
-      const nextIndex = currentVoiceIndex === 0 ? 1 : 0;
-      localStorage.setItem('tts-voice-index', nextIndex.toString());
+      console.log('Speaking with direct API TTS:', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -562,17 +543,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } as const;
 
       // Fetch both audios in parallel - skipCache: true forces fresh API generation
-      // Both use the same voice for consistency within the same patient call
       const [nameResp, destResp] = await Promise.all([
         fetch(url, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ text: cleanName, unitName, skipCache: true, voiceId }),
+          body: JSON.stringify({ text: cleanName, unitName, skipCache: true }),
         }),
         fetch(url, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ text: cleanDestination, unitName, skipCache: true, voiceId }),
+          body: JSON.stringify({ text: cleanDestination, unitName, skipCache: true }),
         }),
       ]);
 

@@ -490,14 +490,8 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    
-    // Vozes disponíveis - português brasileiro com acentuação correta
-    // Feminina: Alice - voz natural feminina brasileira
-    // Masculina: Daniel - voz natural masculina brasileira  
-    const VOICE_FEMALE = "Xb7hH8MSUJpSbSDYk0k2"; // Alice
-    const VOICE_MALE = "onwK4e9ZLuTAKqWW03F9";   // Daniel
-    
-    const selectedVoiceId = voiceId || VOICE_FEMALE;
+    // Alice voice - natural female voice that works excellently with Brazilian Portuguese
+    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2";
 
     // Handle concatenation mode
     // IMPORTANT: to avoid MP3 concatenation playback issues on TVs/browsers,
