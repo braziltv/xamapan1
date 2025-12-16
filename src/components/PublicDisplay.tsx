@@ -35,6 +35,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  
+  // Time announcement state - 3 random times per hour
+  const timeAnnouncementScheduleRef = useRef<number[]>([]);
+  const lastHourCheckedRef = useRef<number>(-1);
+  const isAnnouncingTimeRef = useRef(false);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -464,6 +469,122 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         });
     });
   }, [playAmplifiedAudio]);
+
+  // Play audio file from Supabase Storage (horaminuto folder)
+  const playStorageAudio = useCallback(async (fileName: string): Promise<void> => {
+    const storageUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tts-cache/horaminuto/${fileName}`;
+    console.log('Playing storage audio:', storageUrl);
+    
+    const audio = new Audio(storageUrl);
+    await playAmplifiedAudio(audio, 2.5);
+  }, [playAmplifiedAudio]);
+
+  // Announce current time using audio files from Storage
+  const announceTime = useCallback(async () => {
+    if (!audioUnlocked || isAnnouncingTimeRef.current || announcingType) {
+      console.log('Skipping time announcement - audio locked, already announcing, or patient call in progress');
+      return;
+    }
+
+    isAnnouncingTimeRef.current = true;
+    
+    try {
+      const now = currentTime;
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      
+      // Format with leading zeros
+      const hoursStr = hours.toString().padStart(2, '0');
+      const minutesStr = minutes.toString().padStart(2, '0');
+      
+      console.log(`Announcing time: ${hoursStr}:${minutesStr}`);
+      
+      // Play notification sound first
+      await playNotificationSound();
+      
+      // Play hour audio (e.g., "14.mp3" or "hora_14.mp3")
+      try {
+        await playStorageAudio(`${hoursStr}.mp3`);
+      } catch (e) {
+        console.warn('Failed to play hour audio, trying alternate name...', e);
+        try {
+          await playStorageAudio(`hora_${hoursStr}.mp3`);
+        } catch (e2) {
+          console.error('Failed to play hour audio:', e2);
+        }
+      }
+      
+      // Small pause between hour and minute
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Play minute audio (e.g., "35.mp3" or "minuto_35.mp3")
+      try {
+        await playStorageAudio(`${minutesStr}.mp3`);
+      } catch (e) {
+        console.warn('Failed to play minute audio, trying alternate name...', e);
+        try {
+          await playStorageAudio(`minuto_${minutesStr}.mp3`);
+        } catch (e2) {
+          console.error('Failed to play minute audio:', e2);
+        }
+      }
+      
+      console.log('Time announcement completed');
+    } catch (error) {
+      console.error('Time announcement failed:', error);
+    } finally {
+      isAnnouncingTimeRef.current = false;
+    }
+  }, [audioUnlocked, currentTime, announcingType, playNotificationSound, playStorageAudio]);
+
+  // Generate 3 random minutes for time announcements within an hour
+  const generateRandomMinutesForHour = useCallback(() => {
+    const minutes: number[] = [];
+    while (minutes.length < 3) {
+      const randomMinute = Math.floor(Math.random() * 60);
+      // Ensure at least 5 minutes apart
+      const isFarEnough = minutes.every(m => Math.abs(m - randomMinute) >= 5);
+      if (isFarEnough) {
+        minutes.push(randomMinute);
+      }
+    }
+    return minutes.sort((a, b) => a - b);
+  }, []);
+
+  // Schedule and check time announcements
+  useEffect(() => {
+    if (!audioUnlocked) return;
+
+    const checkTimeAnnouncement = () => {
+      const now = currentTime;
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      // If hour changed, generate new random schedule
+      if (currentHour !== lastHourCheckedRef.current) {
+        timeAnnouncementScheduleRef.current = generateRandomMinutesForHour();
+        lastHourCheckedRef.current = currentHour;
+        console.log(`New time announcement schedule for hour ${currentHour}:`, timeAnnouncementScheduleRef.current);
+      }
+
+      // Check if current minute matches any scheduled announcement
+      const schedule = timeAnnouncementScheduleRef.current;
+      if (schedule.includes(currentMinute)) {
+        // Remove the minute from schedule to avoid repeating
+        timeAnnouncementScheduleRef.current = schedule.filter(m => m !== currentMinute);
+        console.log(`Time to announce! (${currentHour}:${currentMinute})`);
+        announceTime();
+      }
+    };
+
+    // Check every 30 seconds
+    const interval = setInterval(checkTimeAnnouncement, 30000);
+    
+    // Initial check
+    checkTimeAnnouncement();
+
+    return () => clearInterval(interval);
+  }, [audioUnlocked, currentTime, announceTime, generateRandomMinutesForHour]);
 
   const speakWithWebSpeech = useCallback(
     (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
