@@ -656,7 +656,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     });
   }, []);
 
-  // Play hour announcement using pre-cached audio (concatenating hour + minute)
+  // Play hour announcement using pre-cached audio (concatenating hour + minute) - repeats 2x with notification before each
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
       console.log('Audio not unlocked, skipping hour announcement');
@@ -664,17 +664,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
     
     try {
-      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
+      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
       
-      // Play distinct notification sound before hour announcement
-      await playTimeNotificationSound();
-      
-      const success = await playHourAudio(hour, minute);
-      if (success) {
-        console.log('Hour announcement completed');
-      } else {
-        console.warn('Hour announcement failed');
+      // Repeat the announcement 2 times, each with notification sound before
+      for (let i = 0; i < 2; i++) {
+        console.log(`Hour announcement iteration ${i + 1}/2`);
+        
+        // Play distinct notification sound before hour announcement
+        await playTimeNotificationSound();
+        
+        const success = await playHourAudio(hour, minute);
+        if (success) {
+          console.log(`Hour announcement iteration ${i + 1} completed`);
+        } else {
+          console.warn(`Hour announcement iteration ${i + 1} failed`);
+        }
+        
+        // Small pause between repetitions (only if not the last iteration)
+        if (i < 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
+      
+      console.log('Hour announcement fully completed (2x)');
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
     }
