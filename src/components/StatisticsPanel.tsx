@@ -1667,35 +1667,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             Limpar Painel
           </Button>
           <Button 
-            variant="outline" 
-            onClick={async () => {
-              try {
-                const channel = supabase.channel('time-announcement');
-                await channel.send({
-                  type: 'broadcast',
-                  event: 'announce-time',
-                  payload: { timestamp: Date.now() }
-                });
-                supabase.removeChannel(channel);
-                toast({
-                  title: "Comando enviado",
-                  description: "O anúncio de hora será reproduzido na TV.",
-                });
-              } catch (error) {
-                console.error('Erro ao enviar comando:', error);
-                toast({
-                  title: "Erro",
-                  description: "Não foi possível enviar o comando.",
-                  variant: "destructive",
-                });
-              }
-            }} 
-            className="gap-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950"
-          >
-            <Clock className="w-4 h-4" />
-            Testar Hora
-          </Button>
-          <Button 
             variant="destructive" 
             onClick={() => setDeleteDialogOpen(true)} 
             className="gap-2"
