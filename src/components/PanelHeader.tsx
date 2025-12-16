@@ -2,7 +2,7 @@ import { Volume2, VolumeX, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
-import { HealthBuilding3D } from './HealthBuilding3D';
+import { HealthCrossIcon } from './HealthCrossIcon';
 
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
@@ -22,8 +22,8 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
           {/* First Row - Logo, Title, Logout */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500/20 to-blue-500/20 border border-red-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)] flex-shrink-0 overflow-hidden">
-                <HealthBuilding3D size={48} />
+              <div className="w-12 h-12 rounded-lg bg-white/90 dark:bg-white/10 border border-red-500/30 flex items-center justify-center shadow-lg flex-shrink-0">
+                <HealthCrossIcon size={40} />
               </div>
               <div className="min-w-0">
                 <h1 className="text-sm font-bold text-foreground truncate">
@@ -94,8 +94,8 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
         <div className="hidden sm:flex items-center justify-between h-16">
           {/* Logo and Title */}
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500/20 to-blue-500/20 border border-red-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.4)] overflow-hidden">
-              <HealthBuilding3D size={56} />
+            <div className="w-14 h-14 rounded-xl bg-white/90 dark:bg-white/10 border border-red-500/30 flex items-center justify-center shadow-lg">
+              <HealthCrossIcon size={48} />
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-bold text-foreground">
