@@ -103,8 +103,8 @@ export function useWaitTimeEstimate(unitName: string) {
 
   useEffect(() => {
     calculateStats();
-    // Recalcular a cada 5 minutos
-    const interval = setInterval(calculateStats, 5 * 60 * 1000);
+    // Recalcular a cada 1 hora (60 minutos)
+    const interval = setInterval(calculateStats, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [calculateStats]);
 
