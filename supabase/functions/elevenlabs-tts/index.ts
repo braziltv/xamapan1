@@ -9,6 +9,9 @@ const corsHeaders = {
 // Maximum size for permanent cache in bytes (200MB)
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
+// Force a single voice for all patient-call TTS: Alice (same voice used for hour announcements)
+// IMPORTANT: this also namespaces cache keys so we never reuse old MP3s generated with a different voice.
+const TTS_VOICE_ID = "Xb7hH8MSUJpSbSDYk0k2";
 // Split a full name into individual parts (first name, last name, third name, etc.)
 // All parts are normalized to lowercase to avoid duplicate cache entries
 // Handles compound names: "da", "de", "do", "dos", "das" are joined with the following word
@@ -60,7 +63,8 @@ function splitNameIntoParts(fullName: string): string[] {
 // isPermanent: if true, uses "phrase_" prefix for permanent cache (not auto-deleted)
 // Normalizes text to lowercase to avoid duplicate cache entries for same name with different casing
 function generateCacheKey(text: string, isPermanent: boolean = false): string {
-  const normalizedText = text.toLowerCase();
+  // Include voice ID in the hash so changing the voice never reuses older cached MP3s.
+  const normalizedText = `${TTS_VOICE_ID}|${text.toLowerCase()}`;
   let hash = 0;
   for (let i = 0; i < normalizedText.length; i++) {
     const char = normalizedText.charCodeAt(i);
@@ -73,7 +77,8 @@ function generateCacheKey(text: string, isPermanent: boolean = false): string {
 
 // Get just the hash part for tracking usage
 function getNameHash(text: string): string {
-  const normalizedText = text.toLowerCase();
+  // Keep hash aligned with cache key namespace (voice-specific)
+  const normalizedText = `${TTS_VOICE_ID}|${text.toLowerCase()}`;
   let hash = 0;
   for (let i = 0; i < normalizedText.length; i++) {
     const char = normalizedText.charCodeAt(i);
@@ -423,9 +428,12 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    // Alice voice - voz feminina natural em português (mesma voz usada para horas)
-    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2";
 
+    // Force Alice only (ignore any voiceId provided by clients)
+    const selectedVoiceId = TTS_VOICE_ID;
+    if (voiceId && voiceId !== selectedVoiceId) {
+      console.log(`Ignoring client voiceId="${voiceId}". Forcing Alice voiceId="${selectedVoiceId}".`);
+    }
     // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
       const { name, prefix, destination } = concatenate;
