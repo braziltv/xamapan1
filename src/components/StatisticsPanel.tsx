@@ -153,12 +153,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [ttsNameUsage, setTtsNameUsage] = useState<TTSNameUsage[]>([]);
   const [showNamesDialog, setShowNamesDialog] = useState(false);
   
-  // Estado para geração de áudios de horas
-  const [generatingHourAudios, setGeneratingHourAudios] = useState(false);
-  const [generationStage, setGenerationStage] = useState<'hours' | 'minutes' | null>(null);
+  // Estado para teste de áudio de hora
+  const [testingHourAudio, setTestingHourAudio] = useState(false);
   
   const { toast } = useToast();
-  const { generateAllTimeAudios, checkAudiosExist } = useHourAudio();
+  const { playHourAudio } = useHourAudio();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1683,44 +1682,45 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <Button 
             variant="outline" 
             onClick={async () => {
-              setGeneratingHourAudios(true);
-              setGenerationStage('hours');
+              setTestingHourAudio(true);
+              const now = new Date();
+              const hour = now.getHours();
+              const minute = now.getMinutes();
               toast({
-                title: "Gerando áudios de tempo",
-                description: "Gerando 83 áudios (24 horas + 59 minutos). Aguarde...",
+                title: "Testando áudio de hora",
+                description: `Reproduzindo: ${hour}h${minute.toString().padStart(2, '0')}`,
               });
               try {
-                const result = await generateAllTimeAudios((stage, done) => {
-                  setGenerationStage(done ? null : stage);
-                });
-                toast({
-                  title: "Áudios gerados",
-                  description: `${result.hours} horas + ${result.minutes} minutos gerados. ${result.failed} falhas.`,
-                  variant: result.failed > 0 ? "destructive" : "default",
-                });
+                const success = await playHourAudio(hour, minute);
+                if (!success) {
+                  toast({
+                    title: "Erro no áudio",
+                    description: "Não foi possível reproduzir o áudio da hora.",
+                    variant: "destructive",
+                  });
+                }
               } catch (error) {
                 toast({
-                  title: "Erro ao gerar áudios",
-                  description: "Ocorreu um erro ao gerar os áudios de tempo.",
+                  title: "Erro ao testar",
+                  description: "Ocorreu um erro ao reproduzir o áudio.",
                   variant: "destructive",
                 });
               } finally {
-                setGeneratingHourAudios(false);
-                setGenerationStage(null);
+                setTestingHourAudio(false);
               }
             }}
-            disabled={generatingHourAudios}
+            disabled={testingHourAudio}
             className="gap-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950"
           >
-            {generatingHourAudios ? (
+            {testingHourAudio ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                {generationStage === 'hours' ? 'Gerando horas...' : generationStage === 'minutes' ? 'Gerando minutos...' : 'Gerando...'}
+                <Volume2 className="w-4 h-4 animate-pulse" />
+                Reproduzindo...
               </>
             ) : (
               <>
                 <Volume2 className="w-4 h-4" />
-                Gerar Áudios Tempo
+                Testar Hora Falada
               </>
             )}
           </Button>
