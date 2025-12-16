@@ -502,31 +502,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Play notification sound first
       await playNotificationSound();
       
-      // Play hour audio (e.g., "14.mp3" or "hora_14.mp3")
+      // Play hour audio (HRS00.mp3 to HRS23.mp3)
       try {
-        await playStorageAudio(`${hoursStr}.mp3`);
+        await playStorageAudio(`HRS${hoursStr}.mp3`);
       } catch (e) {
-        console.warn('Failed to play hour audio, trying alternate name...', e);
-        try {
-          await playStorageAudio(`hora_${hoursStr}.mp3`);
-        } catch (e2) {
-          console.error('Failed to play hour audio:', e2);
-        }
+        console.error('Failed to play hour audio:', e);
       }
       
       // Small pause between hour and minute
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Play minute audio (e.g., "35.mp3" or "minuto_35.mp3")
+      // Play minute audio (MIN00.mp3 to MIN59.mp3)
       try {
-        await playStorageAudio(`${minutesStr}.mp3`);
+        await playStorageAudio(`MIN${minutesStr}.mp3`);
       } catch (e) {
-        console.warn('Failed to play minute audio, trying alternate name...', e);
-        try {
-          await playStorageAudio(`minuto_${minutesStr}.mp3`);
-        } catch (e2) {
-          console.error('Failed to play minute audio:', e2);
-        }
+        console.error('Failed to play minute audio:', e);
       }
       
       console.log('Time announcement completed');
