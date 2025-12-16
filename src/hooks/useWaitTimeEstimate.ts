@@ -29,14 +29,14 @@ export function useWaitTimeEstimate(unitName: string) {
     if (!unitName) return;
 
     try {
-      // Buscar histórico dos últimos 7 dias
-      const sevenDaysAgo = startOfDay(subDays(new Date(), 7));
+      // Buscar histórico dos últimos 20 dias
+      const twentyDaysAgo = startOfDay(subDays(new Date(), 20));
       
       const { data: history, error } = await supabase
         .from('call_history')
         .select('*')
         .eq('unit_name', unitName)
-        .gte('created_at', sevenDaysAgo.toISOString())
+        .gte('created_at', twentyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
 
       if (error) {
