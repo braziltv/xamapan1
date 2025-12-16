@@ -931,22 +931,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <p className="text-slate-400 text-[10px] lg:text-xs xl:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 lg:gap-3 shrink-0 mr-auto ml-4">
+        <div className="flex items-center gap-2 lg:gap-3 shrink-0">
           {/* Weather Widget */}
           <WeatherWidget />
-          
-          {/* Clock */}
-          <div className="text-center bg-slate-800/50 rounded-lg lg:rounded-xl px-2 py-1 lg:px-4 lg:py-2 xl:px-5 xl:py-3 border border-slate-700">
-            <p className="text-xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-mono font-bold text-white leading-none">
-              {formatBrazilTime(currentTime, 'HH:mm')}
-            </p>
-            <p className="text-xs lg:text-sm xl:text-base text-yellow-400 font-bold leading-tight">
-              {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
-            </p>
-            <p className="text-[10px] lg:text-xs xl:text-sm text-slate-300 font-medium leading-tight">
-              {formatBrazilTime(currentTime, "dd 'de' MMMM 'de' yyyy")}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -1029,52 +1016,79 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* History Panel - Narrower on landscape */}
-        <div className="col-span-12 lg:col-span-3 bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 p-2 lg:p-3 backdrop-blur-sm flex flex-col min-h-0 max-h-[120px] lg:max-h-none">
-          <h3 className="text-sm lg:text-base xl:text-lg font-bold text-white mb-1 lg:mb-2 flex items-center gap-2 shrink-0">
-            <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
-            <span className="truncate">Últimas Chamadas</span>
-          </h3>
-          <div className="space-y-1 lg:space-y-2 flex-1 overflow-y-auto">
-            {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-2 text-xs lg:text-sm">
-                Nenhuma chamada ainda
-              </p>
-            ) : (
-              historyItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`p-1.5 lg:p-2 xl:p-3 rounded-lg ${
-                    index === 0 
-                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
-                      : 'bg-slate-700/50'
-                  } transition-all`}
-                >
-                  <div className="flex items-center gap-1.5 lg:gap-2">
-                    <div className={`w-6 h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center shrink-0 ${
-                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
-                    }`}>
-                      {item.type === 'triage' ? (
-                        <Activity className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
-                      ) : (
-                        <Stethoscope className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
-                      )}
+        {/* Right Column: Clock + History Panel */}
+        <div className="col-span-12 lg:col-span-3 flex flex-col gap-2 lg:gap-3 min-h-0">
+          {/* Modern Clock */}
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl lg:rounded-2xl border border-slate-600/50 p-3 lg:p-4 backdrop-blur-sm shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              {/* Time with seconds */}
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl lg:text-4xl xl:text-5xl font-mono font-black text-white tracking-tight">
+                  {formatBrazilTime(currentTime, 'HH:mm')}
+                </span>
+                <span className="text-xl lg:text-2xl xl:text-3xl font-mono font-bold text-primary animate-pulse">
+                  :{formatBrazilTime(currentTime, 'ss')}
+                </span>
+              </div>
+              {/* Date info */}
+              <div className="text-right">
+                <p className="text-sm lg:text-base xl:text-lg text-yellow-400 font-bold leading-tight">
+                  {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
+                </p>
+                <p className="text-xs lg:text-sm text-slate-300 font-medium leading-tight">
+                  {formatBrazilTime(currentTime, "dd/MM/yyyy")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* History Panel */}
+          <div className="bg-slate-800/50 rounded-xl lg:rounded-2xl border border-slate-700 p-2 lg:p-3 backdrop-blur-sm flex flex-col flex-1 min-h-0 max-h-[120px] lg:max-h-none">
+            <h3 className="text-sm lg:text-base xl:text-lg font-bold text-white mb-1 lg:mb-2 flex items-center gap-2 shrink-0">
+              <Clock className="w-4 h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
+              <span className="truncate">Últimas Chamadas</span>
+            </h3>
+            <div className="space-y-1 lg:space-y-2 flex-1 overflow-y-auto">
+              {historyItems.length === 0 ? (
+                <p className="text-slate-500 text-center py-2 text-xs lg:text-sm">
+                  Nenhuma chamada ainda
+                </p>
+              ) : (
+                historyItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={`p-1.5 lg:p-2 xl:p-3 rounded-lg ${
+                      index === 0 
+                        ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20' 
+                        : 'bg-slate-700/50'
+                    } transition-all`}
+                  >
+                    <div className="flex items-center gap-1.5 lg:gap-2">
+                      <div className={`w-6 h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 rounded-full flex items-center justify-center shrink-0 ${
+                        item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
+                      }`}>
+                        {item.type === 'triage' ? (
+                          <Activity className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
+                        ) : (
+                          <Stethoscope className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-white text-xs lg:text-sm xl:text-base truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] lg:text-xs text-slate-400 truncate">
+                          {item.type === 'triage' ? 'Triagem' : 'Médico'}
+                        </p>
+                      </div>
+                      <span className="text-[10px] lg:text-xs xl:text-sm text-slate-400 font-mono shrink-0">
+                        {formatBrazilTime(item.time, 'HH:mm')}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-xs lg:text-sm xl:text-base truncate">
-                        {item.name}
-                      </p>
-                      <p className="text-[10px] lg:text-xs text-slate-400 truncate">
-                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
-                      </p>
-                    </div>
-                    <span className="text-[10px] lg:text-xs xl:text-sm text-slate-400 font-mono shrink-0">
-                      {formatBrazilTime(item.time, 'HH:mm')}
-                    </span>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
