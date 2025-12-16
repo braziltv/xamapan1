@@ -77,8 +77,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       { url: 'https://www.estadao.com.br/pf/api/v1/rss/site/estadao/?outputType=xml', source: 'Estadão' },
       // CNN Brasil
       { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
-      // R7
-      { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
       // Band
       { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
       // O Globo
