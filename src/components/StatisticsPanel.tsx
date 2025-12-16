@@ -1066,7 +1066,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
-  // Função para limpar apenas o painel de chamados (patient_calls)
+  // Função para limpar painel de chamados (patient_calls) e histórico de chamadas (call_history)
   // Mantém TTS cache e estatísticas intactas
   const handleClearPatientCalls = async () => {
     if (clearCallsPassword !== 'Paineiras@1') {
@@ -1085,17 +1085,25 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     setClearCallsPassword('');
     
     try {
-      // Apagar apenas os registros de patient_calls (painel de chamados)
-      const { error: callsError, count } = await supabase
+      // Apagar registros de patient_calls (painel de chamados)
+      const { error: callsError } = await supabase
         .from('patient_calls')
         .delete()
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (callsError) throw callsError;
 
+      // Apagar registros de call_history (últimas chamadas)
+      const { error: historyError } = await supabase
+        .from('call_history')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (historyError) throw historyError;
+
       toast({
-        title: "Painel de chamados limpo",
-        description: "Todos os pacientes foram removidos do painel. Estatísticas e cache TTS permanecem arquivados.",
+        title: "Painel limpo",
+        description: "Pacientes e histórico de chamadas removidos. Estatísticas e cache TTS permanecem arquivados.",
       });
 
       // Recarregar dados em background

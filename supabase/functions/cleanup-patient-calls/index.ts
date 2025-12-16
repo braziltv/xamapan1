@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
     console.log(`Deleted ${completedCount} completed patient calls`)
 
     // 2. Apagar atendimentos em aberto com mais de 2 horas de inatividade
-    // Inatividade = created_at ou updated_at (se existir) > 2 horas atrás
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
 
     const { data: inactiveDeleted, error: inactiveError } = await supabase
@@ -53,7 +52,24 @@ Deno.serve(async (req) => {
     const inactiveCount = inactiveDeleted?.length || 0
     console.log(`Deleted ${inactiveCount} inactive patient calls (> 2 hours old)`)
 
-    const totalDeleted = completedCount + inactiveCount
+    // 3. Apagar histórico de chamadas com mais de 24 horas
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: historyDeleted, error: historyError } = await supabase
+      .from('call_history')
+      .delete()
+      .lt('created_at', twentyFourHoursAgo)
+      .select('id')
+
+    if (historyError) {
+      console.error('Error deleting old call history:', historyError)
+      throw historyError
+    }
+
+    const historyCount = historyDeleted?.length || 0
+    console.log(`Deleted ${historyCount} old call history entries (> 24 hours)`)
+
+    const totalDeleted = completedCount + inactiveCount + historyCount
 
     console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
 
@@ -62,6 +78,7 @@ Deno.serve(async (req) => {
         success: true,
         completedDeleted: completedCount,
         inactiveDeleted: inactiveCount,
+        historyDeleted: historyCount,
         totalDeleted,
         timestamp: new Date().toISOString()
       }),
