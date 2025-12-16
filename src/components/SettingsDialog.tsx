@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Sun, Moon, Bell, Clock, Megaphone, Sunrise } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { setManualThemeOverride } from './AutoNightMode';
 
 interface SettingsDialogProps {
   trigger?: React.ReactNode;
@@ -269,6 +270,10 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                 onCheckedChange={(checked) => {
                   setAutoNightMode(checked);
                   localStorage.setItem(AUTO_NIGHT_KEY, String(checked));
+                  if (checked) {
+                    // Clear manual override when enabling auto mode
+                    setManualThemeOverride(false);
+                  }
                   toast.success(checked ? 'Modo noturno automático ativado' : 'Modo noturno automático desativado');
                 }}
               />
