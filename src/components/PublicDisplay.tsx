@@ -81,6 +81,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
       // Band
       { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
+      // O Globo
+      { url: 'https://oglobo.globo.com/rss.xml', source: 'O Globo' },
     ];
     
     let currentFeedIndex = 0;
