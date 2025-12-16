@@ -9,6 +9,7 @@ import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon } from "lucide-rea
 import { useTheme } from "next-themes";
 import { useBrazilTime, formatBrazilTime } from "@/hooks/useBrazilTime";
 import { HealthCrossIcon } from "./HealthCrossIcon";
+import { setManualThemeOverride } from "./AutoNightMode";
 
 const HEALTH_UNITS = [
   { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
@@ -170,7 +171,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        onClick={() => {
+          const newTheme = theme === 'dark' ? 'light' : 'dark';
+          setTheme(newTheme);
+          setManualThemeOverride(true); // Mark as manually changed
+        }}
         className="absolute top-3 right-3 sm:top-4 sm:right-4 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80"
         title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
       >
