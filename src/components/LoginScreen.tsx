@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useBrazilTime, formatBrazilTime } from "@/hooks/useBrazilTime";
-import xamaPanLogo from "@/assets/xama-pan-logo.jpg";
+import { HealthCrossIcon } from "./HealthCrossIcon";
 
 const HEALTH_UNITS = [
   { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
@@ -183,8 +183,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
       <Card className="w-full max-w-[95vw] sm:max-w-md shadow-xl my-auto">
         <CardHeader className="text-center space-y-2 p-4 sm:p-6">
-          <div className="mx-auto mb-2 sm:mb-4">
-            <img src={xamaPanLogo} alt="Xama Pan Logo" className="w-20 h-20 sm:w-32 sm:h-32 object-contain" />
+          <div className="mx-auto mb-2 sm:mb-4 flex items-center justify-center">
+            <HealthCrossIcon size={80} className="sm:w-32 sm:h-32" />
           </div>
           <CardTitle className="text-lg sm:text-2xl font-bold leading-tight">CHAMADA DE PACIENTES POR VOZ</CardTitle>
         </CardHeader>
