@@ -17,6 +17,11 @@ interface WeatherData {
   city: string;
 }
 
+interface WeatherWidgetProps {
+  currentTime?: Date;
+  formatTime?: (date: Date, format: string) => string;
+}
+
 function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   const desc = description.toLowerCase();
   const iconClass = size === 'lg' ? 'w-8 h-8' : 'w-4 h-4';
@@ -39,7 +44,7 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
 }
 
-export function WeatherWidget() {
+export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,12 +98,42 @@ export function WeatherWidget() {
     return () => clearInterval(interval);
   }, []);
 
+  // Clock section component
+  const ClockSection = () => {
+    if (!currentTime || !formatTime) return null;
+    
+    return (
+      <>
+        <div className="w-px h-6 bg-red-600/50" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-baseline whitespace-nowrap">
+            <span className="text-xl font-mono font-black text-white tracking-tight">
+              {formatTime(currentTime, 'HH:mm')}
+            </span>
+            <span className="text-sm font-mono font-bold text-yellow-400 animate-pulse">
+              :{formatTime(currentTime, 'ss')}
+            </span>
+          </div>
+          <div className="text-center">
+            <p className="text-[9px] font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
+              {formatTime(currentTime, "EEE").toUpperCase()}
+            </p>
+            <p className="text-[9px] font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
+              {formatTime(currentTime, "dd/MM")}
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
           <span className="text-white/80 text-xs">Carregando...</span>
+          <ClockSection />
         </div>
       </div>
     );
@@ -110,6 +145,7 @@ export function WeatherWidget() {
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/50" />
           <span className="text-white/60 text-xs">{error || 'Indisponível'}</span>
+          <ClockSection />
         </div>
       </div>
     );
@@ -142,6 +178,9 @@ export function WeatherWidget() {
             </div>
           </div>
         ))}
+        
+        {/* Clock after forecast */}
+        <ClockSection />
       </div>
     </div>
   );
