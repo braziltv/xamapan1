@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Users, Volume2, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { UserPlus, Trash2, Users, Volume2, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle, Clock, Timer } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -30,6 +30,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useWaitTimeEstimate } from '@/hooks/useWaitTimeEstimate';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface PatientRegistrationProps {
   patients: Patient[];
@@ -79,6 +86,9 @@ export function PatientRegistration({
   const [name, setName] = useState('');
   const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
+  
+  const unitName = localStorage.getItem('selectedUnitName') || '';
+  const { stats, getEstimateForPatient, formatEstimate } = useWaitTimeEstimate(unitName);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +104,37 @@ export function PatientRegistration({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Tempo Médio de Espera Card */}
+      {!stats.loading && (
+        <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-500/20">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <Clock className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Tempo Médio de Espera (estimado)</p>
+                <p className="text-xs text-muted-foreground">Baseado nos últimos 7 dias</p>
+              </div>
+            </div>
+            <div className="flex gap-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-blue-600">{stats.avgTriageWait}</p>
+                <p className="text-xs text-muted-foreground">min/triagem</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-purple-600">{stats.avgDoctorWait}</p>
+                <p className="text-xs text-muted-foreground">min/médico</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-emerald-600">{stats.avgTotalService}</p>
+                <p className="text-xs text-muted-foreground">min total</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Registration Form */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
@@ -156,6 +197,7 @@ export function PatientRegistration({
             {activePatients.map((patient, index) => {
               const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
               const PriorityIcon = priorityConfig.icon;
+              const estimate = getEstimateForPatient(patient, patients);
               
               return (
                 <div
@@ -170,7 +212,7 @@ export function PatientRegistration({
                       <PriorityIcon className={`w-4 h-4 ${priorityConfig.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
                         {patient.priority === 'emergency' && (
                           <span className="px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded animate-pulse">
@@ -181,6 +223,23 @@ export function PatientRegistration({
                           <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded">
                             PRIORIDADE
                           </span>
+                        )}
+                        {/* Estimativa de tempo de espera */}
+                        {estimate && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                                  <Timer className="w-3 h-3" />
+                                  {formatEstimate(estimate.estimatedMinutes)}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Posição na fila: {estimate.queuePosition}º</p>
+                                <p>Previsão baseada na média de atendimentos</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">

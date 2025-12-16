@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, Timer } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
+import { useWaitTimeEstimate } from '@/hooks/useWaitTimeEstimate';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
@@ -65,6 +72,12 @@ export function TriagePanel({
 }: TriagePanelProps) {
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
+  
+  const unitName = localStorage.getItem('selectedUnitName') || '';
+  const { getEstimateForPatient, formatEstimate } = useWaitTimeEstimate(unitName);
+  
+  // Create a mock patients array to get estimates for waiting patients
+  const allPatients = waitingPatients.map(p => ({ ...p, status: 'waiting' as const }));
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',
@@ -206,6 +219,8 @@ export function TriagePanel({
             {waitingPatients.map((patient, index) => {
               const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
               const PriorityIcon = priorityConfig.icon;
+              const patientForEstimate = { ...patient, status: 'waiting' as const };
+              const estimate = getEstimateForPatient(patientForEstimate, allPatients);
               
               return (
                 <div
@@ -220,7 +235,7 @@ export function TriagePanel({
                       <PriorityIcon className={`w-4 h-4 ${priorityConfig.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-foreground text-sm sm:text-base truncate">{patient.name}</p>
                         {patient.priority === 'emergency' && (
                           <span className="px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded animate-pulse">
@@ -231,6 +246,21 @@ export function TriagePanel({
                           <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded">
                             PRIORIDADE
                           </span>
+                        )}
+                        {estimate && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                                  <Timer className="w-3 h-3" />
+                                  {formatEstimate(estimate.estimatedMinutes)}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Previsão baseada na média de atendimentos</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
