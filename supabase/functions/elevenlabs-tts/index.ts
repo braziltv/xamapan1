@@ -367,13 +367,80 @@ async function getOrGenerateAudio(
   return audioBuffer;
 }
 
-// Concatenate multiple MP3 audio buffers
+// Strip ID3 tags from MP3 buffer (ID3v2 at start, ID3v1 at end)
+function stripID3Tags(buffer: ArrayBuffer): ArrayBuffer {
+  const data = new Uint8Array(buffer);
+  let start = 0;
+  let end = data.length;
+  
+  // Check for ID3v2 header at start (ID3)
+  if (data.length > 10 && 
+      data[0] === 0x49 && // 'I'
+      data[1] === 0x44 && // 'D'
+      data[2] === 0x33) { // '3'
+    // ID3v2 size is stored in bytes 6-9 as syncsafe integers
+    const size = ((data[6] & 0x7f) << 21) |
+                 ((data[7] & 0x7f) << 14) |
+                 ((data[8] & 0x7f) << 7) |
+                 (data[9] & 0x7f);
+    start = 10 + size;
+    console.log(`Stripped ID3v2 header: ${start} bytes`);
+  }
+  
+  // Check for ID3v1 tag at end (TAG at -128 bytes)
+  if (data.length > 128 &&
+      data[data.length - 128] === 0x54 && // 'T'
+      data[data.length - 127] === 0x41 && // 'A'
+      data[data.length - 126] === 0x47) { // 'G'
+    end = data.length - 128;
+    console.log(`Stripped ID3v1 footer: 128 bytes`);
+  }
+  
+  // Return slice without ID3 tags
+  return data.slice(start, end).buffer;
+}
+
+// Find the first MP3 frame sync (0xFF 0xFB or 0xFF 0xFA or 0xFF 0xF3 etc)
+function findFirstMP3Frame(buffer: ArrayBuffer): number {
+  const data = new Uint8Array(buffer);
+  for (let i = 0; i < data.length - 1; i++) {
+    if (data[i] === 0xFF && (data[i + 1] & 0xE0) === 0xE0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+// Concatenate multiple MP3 audio buffers, stripping ID3 tags from segments after the first
 function concatenateAudioBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
-  const totalLength = buffers.reduce((acc, buf) => acc + buf.byteLength, 0);
+  if (buffers.length === 0) return new ArrayBuffer(0);
+  if (buffers.length === 1) return buffers[0];
+  
+  // Process buffers: keep first one intact (with ID3), strip ID3 from rest
+  const processedBuffers: ArrayBuffer[] = [];
+  
+  for (let i = 0; i < buffers.length; i++) {
+    if (i === 0) {
+      // Keep first buffer with ID3 header intact
+      processedBuffers.push(buffers[i]);
+    } else {
+      // Strip ID3 tags from subsequent buffers to avoid playback issues
+      const stripped = stripID3Tags(buffers[i]);
+      // Find and skip to first MP3 frame to ensure clean concatenation
+      const frameStart = findFirstMP3Frame(stripped);
+      if (frameStart > 0) {
+        processedBuffers.push(new Uint8Array(stripped).slice(frameStart).buffer);
+      } else {
+        processedBuffers.push(stripped);
+      }
+    }
+  }
+  
+  const totalLength = processedBuffers.reduce((acc, buf) => acc + buf.byteLength, 0);
   const result = new Uint8Array(totalLength);
   let offset = 0;
   
-  for (const buffer of buffers) {
+  for (const buffer of processedBuffers) {
     result.set(new Uint8Array(buffer), offset);
     offset += buffer.byteLength;
   }
