@@ -1,8 +1,10 @@
-import { Volume2, VolumeX, LogOut, Settings } from 'lucide-react';
+import { Volume2, VolumeX, LogOut, Settings, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { HealthCrossIcon } from './HealthCrossIcon';
+import { useTheme } from 'next-themes';
+import { setManualThemeOverride } from './AutoNightMode';
 
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
@@ -13,7 +15,13 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
   const { currentTime } = useBrazilTime();
+  const { theme, setTheme } = useTheme();
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    setManualThemeOverride(true);
+  };
   return (
     <header className="bg-card shadow-health border-b border-border">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -58,6 +66,21 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             
             {/* Controls */}
             <div className="flex items-center gap-1.5">
+              {/* Theme Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-8 w-8"
+                title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </Button>
+
               {/* Audio Toggle */}
               <Button
                 variant={isAudioEnabled ? "default" : "outline"}
@@ -121,6 +144,27 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                 {formatBrazilTime(currentTime, "EEEE, dd 'de' MMMM")}
               </p>
             </div>
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="gap-2"
+              title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-4 h-4" />
+                  <span className="hidden lg:inline">Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4" />
+                  <span className="hidden lg:inline">Escuro</span>
+                </>
+              )}
+            </Button>
 
             {/* Audio Toggle */}
             <Button
