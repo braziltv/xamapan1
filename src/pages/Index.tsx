@@ -147,7 +147,7 @@ const Index = () => {
   // TV Mode - show only PublicDisplay without any navigation
   if (isTvMode) {
     return (
-      <div ref={mainContainerRef} className="min-h-screen bg-background relative">
+      <div ref={mainContainerRef} className="min-h-screen-safe h-screen-safe bg-background relative overflow-hidden">
         <PublicDisplay 
           currentTriageCall={currentTriageCall} 
           currentDoctorCall={currentDoctorCall}
@@ -156,7 +156,7 @@ const Index = () => {
         {/* Discreet logout button for TV mode */}
         <button
           onClick={handleLogout}
-          className="absolute bottom-2 right-2 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white/70 transition-all opacity-30 hover:opacity-100 z-50"
+          className="absolute bottom-2 right-2 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white/70 transition-all opacity-30 hover:opacity-100 z-50 touch-target"
           title="Sair do modo TV"
         >
           <LogOut className="w-4 h-4" />
@@ -166,8 +166,8 @@ const Index = () => {
   }
 
   return (
-    <div ref={mainContainerRef} className="min-h-screen bg-background">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen">
+    <div ref={mainContainerRef} className="min-h-screen-safe bg-background">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen-safe flex flex-col">
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
           onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
@@ -175,33 +175,46 @@ const Index = () => {
           unitName={unitName}
         />
 
-        {/* Tab Navigation */}
-        <div className="bg-card border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TabsList className="h-12 bg-transparent flex-wrap">
-              <TabsTrigger value="cadastro" className="gap-2 data-[state=active]:bg-primary/10">
-                <UserPlus className="w-4 h-4" />
-                Cadastro
+        {/* Tab Navigation - Responsive */}
+        <div className="bg-card border-b border-border sticky top-0 z-40">
+          <div className="container-responsive">
+            <TabsList className="h-auto min-h-12 bg-transparent w-full justify-start gap-1 p-1 flex-wrap">
+              <TabsTrigger 
+                value="cadastro" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
+              >
+                <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Cadastro</span>
               </TabsTrigger>
-              <TabsTrigger value="triagem" className="gap-2 data-[state=active]:bg-primary/10">
-                <Activity className="w-4 h-4" />
-                Triagem
+              <TabsTrigger 
+                value="triagem" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
+              >
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Triagem</span>
               </TabsTrigger>
-              <TabsTrigger value="medico" className="gap-2 data-[state=active]:bg-primary/10">
-                <Stethoscope className="w-4 h-4" />
-                Médico
+              <TabsTrigger 
+                value="medico" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
+              >
+                <Stethoscope className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Médico</span>
               </TabsTrigger>
-              <TabsTrigger value="administrativo" className="gap-2 data-[state=active]:bg-primary/10">
-                <BarChart3 className="w-4 h-4" />
-                Administrativo
+              <TabsTrigger 
+                value="administrativo" 
+                className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
+              >
+                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate hidden xs:inline">Administrativo</span>
+                <span className="truncate xs:hidden">Admin</span>
               </TabsTrigger>
             </TabsList>
           </div>
         </div>
 
         {/* Cadastro */}
-        <TabsContent value="cadastro" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <TabsContent value="cadastro" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
             <PatientRegistration
               patients={patients}
               onAddPatient={handleAddPatient}
@@ -216,8 +229,8 @@ const Index = () => {
         </TabsContent>
 
         {/* Triagem */}
-        <TabsContent value="triagem" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <TabsContent value="triagem" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
             <TriagePanel
               waitingPatients={waitingForTriage}
               currentCall={currentTriageCall}
@@ -232,8 +245,8 @@ const Index = () => {
         </TabsContent>
 
         {/* Médico */}
-        <TabsContent value="medico" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <TabsContent value="medico" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
             <DoctorPanel
               waitingPatients={waitingForDoctor}
               currentCall={currentDoctorCall}
@@ -246,8 +259,8 @@ const Index = () => {
         </TabsContent>
 
         {/* Administrativo */}
-        <TabsContent value="administrativo" className="mt-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <TabsContent value="administrativo" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+          <main className="container-responsive py-4 sm:py-6 lg:py-8">
             <StatisticsPanel patients={patients} history={history} />
           </main>
         </TabsContent>
