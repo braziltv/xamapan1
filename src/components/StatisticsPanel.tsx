@@ -60,6 +60,7 @@ import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
+import { useHourAudio } from '@/hooks/useHourAudio';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -152,7 +153,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [ttsNameUsage, setTtsNameUsage] = useState<TTSNameUsage[]>([]);
   const [showNamesDialog, setShowNamesDialog] = useState(false);
   
+  // Estado para geração de áudios de horas
+  const [generatingHourAudios, setGeneratingHourAudios] = useState(false);
+  
   const { toast } = useToast();
+  const { generateAllHourAudios } = useHourAudio();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1673,6 +1678,46 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           >
             <Trash2 className="w-4 h-4" />
             Apagar Tudo
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              setGeneratingHourAudios(true);
+              toast({
+                title: "Gerando áudios de horas",
+                description: "Isso pode levar alguns minutos. Aguarde...",
+              });
+              try {
+                const result = await generateAllHourAudios();
+                toast({
+                  title: "Áudios gerados",
+                  description: `${result.success} áudios gerados com sucesso. ${result.failed} falhas.`,
+                  variant: result.failed > 0 ? "destructive" : "default",
+                });
+              } catch (error) {
+                toast({
+                  title: "Erro ao gerar áudios",
+                  description: "Ocorreu um erro ao gerar os áudios de horas.",
+                  variant: "destructive",
+                });
+              } finally {
+                setGeneratingHourAudios(false);
+              }
+            }}
+            disabled={generatingHourAudios}
+            className="gap-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950"
+          >
+            {generatingHourAudios ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4" />
+                Gerar Áudios Horas
+              </>
+            )}
           </Button>
         </div>
       </div>

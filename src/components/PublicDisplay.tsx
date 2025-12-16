@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
+import { useHourAudio } from '@/hooks/useHourAudio';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -18,6 +19,7 @@ interface NewsItem {
 
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
+  const { playHourAudio, getHourAudioUrl } = useHourAudio();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
@@ -35,6 +37,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const lastAnnouncedHourRef = useRef<number>(-1);
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -590,7 +593,44 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
 
-  // Mapeamento de frases de destino gramaticalmente corretas (artigos à/ao)
+  // Play hour announcement using pre-cached audio
+  const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
+    if (!audioUnlocked) {
+      console.log('Audio not unlocked, skipping hour announcement');
+      return;
+    }
+    
+    try {
+      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
+      const url = getHourAudioUrl(hour, minute);
+      const audio = new Audio(url);
+      
+      await playAmplifiedAudio(audio, 2.0);
+      console.log('Hour announcement completed');
+    } catch (error) {
+      console.error('Failed to play hour announcement:', error);
+    }
+  }, [audioUnlocked, getHourAudioUrl, playAmplifiedAudio]);
+
+  // Announce time every hour on the hour
+  useEffect(() => {
+    if (!currentTime || !audioUnlocked || !isSynced) return;
+    
+    const hour = currentTime.getHours();
+    const minute = currentTime.getMinutes();
+    const second = currentTime.getSeconds();
+    
+    // Announce only at the start of each hour (minute = 0, second < 5)
+    if (minute === 0 && second < 5 && lastAnnouncedHourRef.current !== hour) {
+      lastAnnouncedHourRef.current = hour;
+      
+      // Small delay to avoid conflicts with other audio
+      setTimeout(() => {
+        playHourAnnouncement(hour, 0);
+      }, 1000);
+    }
+  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement]);
+
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
     const destinationPhrases: Record<string, string> = {

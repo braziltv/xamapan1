@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.cleanup-patient-calls]
 verify_jwt = false
+
+[functions.generate-hour-audio]
+verify_jwt = false
