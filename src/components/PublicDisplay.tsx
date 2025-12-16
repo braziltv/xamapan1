@@ -400,9 +400,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('Audio unlocked (ElevenLabs only mode)');
   }, [audioUnlocked]);
 
-  // Play audio with amplification using Web Audio API (2.5x volume = 150% increase)
+  // Play audio with amplification using Web Audio API (4x volume = massive boost)
   const playAmplifiedAudio = useCallback(
-    (audioElement: HTMLAudioElement, gain: number = 2.5): Promise<void> => {
+    (audioElement: HTMLAudioElement, gain: number = 4.0): Promise<void> => {
       return new Promise((resolve, reject) => {
         try {
           const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
@@ -457,9 +457,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('playNotificationSound called');
     
     return new Promise<void>((resolve, reject) => {
-      // Get volume from localStorage
+      // Get volume from localStorage (4x base gain for maximum volume)
       const notificationVolume = parseFloat(localStorage.getItem('volume-notification') || '1');
-      const gain = 2.5 * notificationVolume;
+      const gain = 4.0 * notificationVolume;
       
       // Create new audio element each time to allow Web Audio API connection
       const audio = new Audio('/sounds/notification.mp3');
@@ -531,9 +531,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const cleanDestination = destinationPhrase.trim();
       console.log('Speaking with direct API TTS:', { name: cleanName, destinationPhrase: cleanDestination });
 
-      // Get TTS volume from localStorage
+      // Get TTS volume from localStorage (4x base gain for maximum volume)
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-      const gain = 2.5 * ttsVolume;
+      const gain = 4.0 * ttsVolume;
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
       const headers = {
@@ -599,9 +599,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (text: string): Promise<void> => {
       console.log('Speaking with ElevenLabs:', text);
       
-      // Get TTS volume from localStorage
+      // Get TTS volume from localStorage (4x base gain for maximum volume)
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-      const gain = 2.5 * ttsVolume;
+      const gain = 4.0 * ttsVolume;
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
@@ -889,7 +889,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       const audio = new Audio(audioUrl);
       try {
-        await playAmplifiedAudio(audio, 2.5);
+        await playAmplifiedAudio(audio, 4.0);
       } finally {
         URL.revokeObjectURL(audioUrl);
       }
@@ -925,8 +925,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
       try {
-        // Play notification sound first (mandatory)
-        await playNotificationSound();
+        // Play notification sound first (mandatory) - but don't wait for it to fully finish
+        // Start notification and immediately prepare TTS for minimal delay
+        playNotificationSound();
+        
+        // Tiny delay to let notification start, then begin voice immediately
+        await new Promise(r => setTimeout(r, 150));
 
         // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
         // Audio is cached locally in Supabase Storage for reuse

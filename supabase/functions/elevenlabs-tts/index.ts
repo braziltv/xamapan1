@@ -336,11 +336,11 @@ async function getOrGenerateAudio(
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
         voice_settings: {
-          stability: 0.85,
-          similarity_boost: 0.80,
-          style: 0.1,
+          stability: 0.5,
+          similarity_boost: 0.95,
+          style: 0.15,
           use_speaker_boost: true,
-          speed: 0.95,
+          speed: 0.92,
         },
       }),
     }
@@ -524,10 +524,11 @@ serve(async (req) => {
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
             voice_settings: {
-              stability: 0.6,
-              similarity_boost: 0.78,
-              style: 0.2,
+              stability: 0.5,
+              similarity_boost: 0.95,
+              style: 0.15,
               use_speaker_boost: true,
+              speed: 0.92,
             },
           }),
         }
