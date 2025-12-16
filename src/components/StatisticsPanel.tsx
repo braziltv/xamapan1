@@ -160,14 +160,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   // Estado para teste de áudio de hora
   const [testingHourAudio, setTestingHourAudio] = useState(false);
   
-  // Estado para regenerar cache de horas
+  // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
-  const [regenCachePassword, setRegenCachePassword] = useState('');
-  const [showRegenCachePassword, setShowRegenCachePassword] = useState(false);
-  const [regeneratingCache, setRegeneratingCache] = useState(false);
   
   const { toast } = useToast();
-  const { playHourAudio, generateAllIncremental, checkAudiosExist } = useHourAudio();
+  const { playHourAudio, checkAudiosExist } = useHourAudio();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1123,51 +1120,13 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
-  // Função para regenerar cache de horas (incremental)
-  const handleRegenerateHourCache = async () => {
-    if (regenCachePassword !== 'Paineiras@1') {
-      toast({
-        title: "Senha incorreta",
-        description: "A senha informada está incorreta.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setRegeneratingCache(true);
-    setRegenCacheDialogOpen(false);
-    setRegenCachePassword('');
-
+  // Função para verificar status do cache de horas (agora 100% offline)
+  const handleCheckHourCache = async () => {
+    const status = await checkAudiosExist();
     toast({
-      title: "Iniciando regeneração",
-      description: "Gerando 83 arquivos de áudio. Isso pode levar alguns minutos...",
+      title: "Status do Cache de Horas (Offline)",
+      description: `✅ Horas: ${status.hours}/24, Minutos: ${status.minutes}/59, Palavra 'minutos': ${status.hasMinutosWord ? 'Sim' : 'Não'}`,
     });
-
-    try {
-      const result = await generateAllIncremental((current, total, type, value) => {
-        // Atualizar toast a cada 5 arquivos para não sobrecarregar
-        if (current % 5 === 0 || current === total - 1) {
-          toast({
-            title: "Regenerando cache de horas",
-            description: `${type === 'hour' ? 'Hora' : 'Minuto'} ${value}... (${current + 1}/${total})`,
-          });
-        }
-      });
-
-      toast({
-        title: "Cache regenerado com sucesso!",
-        description: `✅ Horas: ${result.hours}/24, Minutos: ${result.minutes}/59. Falhas: ${result.failed}`,
-      });
-    } catch (error) {
-      console.error('Erro ao regenerar cache:', error);
-      toast({
-        title: "Erro ao regenerar cache",
-        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
-    } finally {
-      setRegeneratingCache(false);
-    }
   };
 
   // Função para limpar painel de chamados (patient_calls) e apagar as últimas chamadas exibidas na TV
@@ -1832,20 +1791,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <Button 
             variant="outline" 
             onClick={() => setRegenCacheDialogOpen(true)}
-            disabled={regeneratingCache}
-            className="gap-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+            className="gap-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
           >
-            {regeneratingCache ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Regenerando...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Regenerar Cache Horas
-              </>
-            )}
+            <Clock className="w-4 h-4" />
+            Cache Horas (Offline)
           </Button>
         </div>
       </div>
@@ -2695,78 +2644,40 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Modal para regenerar cache de horas */}
+      {/* Modal para verificar cache de horas (100% offline) */}
       <Dialog open={regenCacheDialogOpen} onOpenChange={(open) => {
         setRegenCacheDialogOpen(open);
-        if (!open) setRegenCachePassword('');
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <RefreshCw className="w-5 h-5 text-orange-500" />
-              Regenerar Cache de Horas
+              <Clock className="w-5 h-5 text-green-500" />
+              Cache de Horas (Offline)
             </DialogTitle>
             <DialogDescription>
-              Esta ação irá regenerar todos os áudios de anúncio de horas com voz mais natural em português brasileiro.
-              O processo pode levar alguns minutos.
+              O sistema de anúncio de horas funciona 100% offline. Todos os áudios estão pré-armazenados.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
-              <p className="text-sm text-orange-600 font-medium">
-                ⚠️ Serão gerados 83 arquivos de áudio (24 horas + 59 minutos)
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <p className="text-sm text-green-600 font-medium">
+                ✅ 84 arquivos de áudio pré-cacheados (24 horas + 59 minutos + palavra "minutos")
               </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="regen-cache-password">Digite a senha para confirmar:</Label>
-              <div className="relative">
-                <Input
-                  id="regen-cache-password"
-                  type={showRegenCachePassword ? 'text' : 'password'}
-                  value={regenCachePassword}
-                  onChange={(e) => setRegenCachePassword(e.target.value)}
-                  placeholder="Senha de administrador"
-                  className="pr-10"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleRegenerateHourCache();
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowRegenCachePassword(!showRegenCachePassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showRegenCachePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
             </div>
           </div>
           <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => {
-                setRegenCacheDialogOpen(false);
-                setRegenCachePassword('');
-              }}
+              onClick={() => setRegenCacheDialogOpen(false)}
             >
-              Cancelar
+              Fechar
             </Button>
             <Button
-              onClick={handleRegenerateHourCache}
-              disabled={regeneratingCache || !regenCachePassword}
-              className="gap-2 bg-orange-500 hover:bg-orange-600"
+              onClick={handleCheckHourCache}
+              className="gap-2 bg-green-500 hover:bg-green-600"
             >
-              {regeneratingCache ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Regenerando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4" />
-                  Regenerar Todos
-                </>
-              )}
+              <Clock className="w-4 h-4" />
+              Verificar Status
             </Button>
           </DialogFooter>
         </DialogContent>
