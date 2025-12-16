@@ -934,27 +934,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
         
         {/* Center: Weather + Clock together */}
-        <div className="flex-1 flex items-center gap-3">
-          <WeatherWidget />
+        <div className="flex-1 flex items-center gap-4 overflow-visible">
+          <div className="shrink-0">
+            <WeatherWidget />
+          </div>
           {/* Clock - next to weather */}
-          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-xl border border-slate-600/50 px-3 py-2 backdrop-blur-sm shrink-0">
-            <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-xl border border-slate-600/50 px-3 py-2 backdrop-blur-sm shrink-0 overflow-visible">
+            <div className="flex items-center gap-2">
               {/* Time with seconds */}
               <div className="flex items-baseline whitespace-nowrap">
-                <span className="text-2xl lg:text-3xl xl:text-4xl font-mono font-black text-white tracking-tight">
+                <span className="text-xl lg:text-2xl xl:text-3xl font-mono font-black text-white tracking-tight">
                   {formatBrazilTime(currentTime, 'HH:mm')}
                 </span>
-                <span className="text-lg lg:text-xl xl:text-2xl font-mono font-bold text-primary animate-pulse">
+                <span className="text-base lg:text-lg xl:text-xl font-mono font-bold text-primary animate-pulse">
                   :{formatBrazilTime(currentTime, 'ss')}
                 </span>
               </div>
-              <div className="w-px h-8 bg-slate-600 shrink-0" />
+              <div className="w-px h-7 bg-slate-600 shrink-0" />
               {/* Date info - vertical stack */}
               <div className="text-center shrink-0">
-                <p className="text-xs lg:text-sm font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
+                <p className="text-[10px] lg:text-xs font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
                   {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
                 </p>
-                <p className="text-xs lg:text-sm font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
+                <p className="text-[10px] lg:text-xs font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
                   {formatBrazilTime(currentTime, "dd/MM/yyyy")}
                 </p>
               </div>
