@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, Timer } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
-import { useWaitTimeEstimate } from '@/hooks/useWaitTimeEstimate';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
 import {
   DropdownMenu,
@@ -74,11 +73,6 @@ export function TriagePanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   
-  const unitName = localStorage.getItem('selectedUnitName') || '';
-  const { getEstimateForPatient, formatEstimate } = useWaitTimeEstimate(unitName);
-  
-  // Create a mock patients array to get estimates for waiting patients
-  const allPatients = waitingPatients.map(p => ({ ...p, status: 'waiting' as const }));
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',
@@ -220,8 +214,6 @@ export function TriagePanel({
             {waitingPatients.map((patient, index) => {
               const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
               const PriorityIcon = priorityConfig.icon;
-              const patientForEstimate = { ...patient, status: 'waiting' as const };
-              const estimate = getEstimateForPatient(patientForEstimate, allPatients);
               
               return (
                 <div
@@ -258,21 +250,6 @@ export function TriagePanel({
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        {estimate && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-                                  <Timer className="w-3 h-3" />
-                                  {formatEstimate(estimate.estimatedMinutes)}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Previsão baseada na média de atendimentos</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
                         Chegou às {format(patient.createdAt, 'HH:mm')}
