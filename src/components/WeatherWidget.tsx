@@ -167,13 +167,13 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   }
 
   return (
-    <div className="bg-red-800 backdrop-blur-md rounded-lg pl-[5%] pr-[10%] py-2 shadow-lg">
-      <div className="flex items-center gap-3">
+    <div className="bg-red-800 backdrop-blur-md rounded-lg pl-[5%] pr-[10%] py-3 shadow-lg">
+      <div className="flex items-center gap-5">
         {/* Current weather with city */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="text-red-200 text-[10px] font-semibold uppercase">{weather.city}</span>
           {getWeatherIcon(weather.current.description, 'lg')}
-          <div className="flex items-baseline gap-1 transition-all duration-500">
+          <div className="flex items-baseline gap-1.5 transition-all duration-500">
             <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
               {showMaxTemp ? 'MAX' : 'MIN'}
             </span>
@@ -181,17 +181,17 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
               {showMaxTemp ? weather.current.maxTemp : weather.current.minTemp}°c
             </span>
           </div>
-          <Droplets className="w-3 h-3 text-cyan-300 ml-1" />
+          <Droplets className="w-3 h-3 text-cyan-300 ml-2" />
           <span className="text-red-100 text-[10px]">{weather.current.humidity}%</span>
         </div>
         
-        <div className="w-px h-6 bg-red-600/50" />
+        <div className="w-px h-8 bg-red-600/50" />
         
         {/* Forecast inline */}
         {weather.forecast.map((day, index) => (
           <div 
             key={index} 
-            className="bg-red-700 rounded-md px-2 py-1 flex items-center gap-1.5"
+            className="bg-red-700 rounded-md px-3 py-1.5 flex items-center gap-2"
           >
             {getWeatherIcon(day.description, 'sm')}
             <div className="text-[9px] leading-tight">
