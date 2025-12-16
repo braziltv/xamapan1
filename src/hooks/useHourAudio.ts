@@ -33,50 +33,47 @@ export const useHourAudio = () => {
     }
   };
 
+  // Pré-carregar áudio e retornar promise quando estiver pronto
+  const preloadAudio = (url: string, volume: number): Promise<HTMLAudioElement> => {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      audio.volume = volume;
+      audio.preload = 'auto';
+      audio.oncanplaythrough = () => resolve(audio);
+      audio.onerror = () => reject(new Error(`Failed to preload: ${url}`));
+      audio.src = url;
+    });
+  };
+
   // Reproduzir hora concatenando os áudios (apenas do cache local)
   // Formato: [hora] [e X] [minutos]
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
-      // Get volume from localStorage
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
 
       const hourUrl = getHourUrl(hour);
       const minuteUrl = getMinuteUrl(minute);
       const minutosWordUrl = getMinutosWordUrl();
 
-      // Reproduzir áudio da hora
-      const hourAudio = new Audio(hourUrl);
-      hourAudio.volume = timeAnnouncementVolume;
-
-      await new Promise<void>((resolve, reject) => {
-        hourAudio.onended = () => resolve();
-        hourAudio.onerror = () => reject(new Error('Hour audio failed - arquivo não encontrado no cache'));
-        hourAudio.play().catch(reject);
-      });
-
-      // Se tiver minutos, reproduzir o áudio dos minutos em sequência
+      // Pré-carregar todos os áudios em paralelo para eliminar delay
+      const audioPromises: Promise<HTMLAudioElement>[] = [preloadAudio(hourUrl, timeAnnouncementVolume)];
+      
       if (minuteUrl) {
-        const minuteAudio = new Audio(minuteUrl);
-        minuteAudio.volume = timeAnnouncementVolume;
-
-        await new Promise<void>((resolve, reject) => {
-          minuteAudio.onended = () => resolve();
-          minuteAudio.onerror = () => reject(new Error('Minute audio failed - arquivo não encontrado no cache'));
-          minuteAudio.play().catch(reject);
-        });
-
-        // Reproduzir palavra "minutos" ao final (exceto para hora cheia ou "e meia")
-        // Não fala "minutos" quando minute === 0 (hora cheia) ou minute === 30 (e meia)
+        audioPromises.push(preloadAudio(minuteUrl, timeAnnouncementVolume));
         if (minute !== 30) {
-          const minutosAudio = new Audio(minutosWordUrl);
-          minutosAudio.volume = timeAnnouncementVolume;
-
-          await new Promise<void>((resolve, reject) => {
-            minutosAudio.onended = () => resolve();
-            minutosAudio.onerror = () => reject(new Error('Minutos word audio failed - arquivo não encontrado no cache'));
-            minutosAudio.play().catch(reject);
-          });
+          audioPromises.push(preloadAudio(minutosWordUrl, timeAnnouncementVolume));
         }
+      }
+
+      const audios = await Promise.all(audioPromises);
+
+      // Reproduzir em sequência (já pré-carregados, sem delay de loading)
+      for (const audio of audios) {
+        await new Promise<void>((resolve, reject) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => reject(new Error('Audio playback failed'));
+          audio.play().catch(reject);
+        });
       }
 
       return true;
