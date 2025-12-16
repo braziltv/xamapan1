@@ -931,7 +931,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <p className="text-slate-400 text-[10px] lg:text-xs xl:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+        <div className="flex items-center gap-2 lg:gap-3 shrink-0 mr-auto ml-4">
           {/* Weather Widget */}
           <WeatherWidget />
           
