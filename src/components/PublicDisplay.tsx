@@ -524,13 +524,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   );
 
   // ElevenLabs TTS via backend function - plays MP3 audio (works on any device)
-  // IMPORTANT: We DO NOT concatenate MP3 bytes server-side because some players stop after the first segment.
-  // Instead, we fetch name + destination audios separately (both cached) and play them sequentially.
+  // Calls API directly without relying on cache for reliability
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('Speaking with segmented TTS:', { name: cleanName, destinationPhrase: cleanDestination });
+      console.log('Speaking with direct API TTS:', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -543,42 +542,51 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      // Fetch both audios in parallel (cached on backend storage)
+      // Fetch both audios in parallel - skipCache: true forces fresh API generation
       const [nameResp, destResp] = await Promise.all([
         fetch(url, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ text: cleanName, unitName, isPermanentCache: false }),
+          body: JSON.stringify({ text: cleanName, unitName, skipCache: true }),
         }),
         fetch(url, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ text: cleanDestination, unitName, isPermanentCache: true }),
+          body: JSON.stringify({ text: cleanDestination, unitName, skipCache: true }),
         }),
       ]);
 
       if (!nameResp.ok) {
         const errorData = await nameResp.json().catch(() => ({}));
+        console.error('Name TTS error:', errorData);
         throw new Error(errorData.error || `ElevenLabs name error: ${nameResp.status}`);
       }
 
       if (!destResp.ok) {
         const errorData = await destResp.json().catch(() => ({}));
+        console.error('Destination TTS error:', errorData);
         throw new Error(errorData.error || `ElevenLabs destination error: ${destResp.status}`);
       }
 
       const [nameBlob, destBlob] = await Promise.all([nameResp.blob(), destResp.blob()]);
+      console.log('Audio blobs received:', { nameSize: nameBlob.size, destSize: destBlob.size });
 
       const nameUrl = URL.createObjectURL(nameBlob);
       const destUrl = URL.createObjectURL(destBlob);
 
       try {
-        // Play name
+        // Play name first
+        console.log('Playing name audio...');
         await playAmplifiedAudio(new Audio(nameUrl), gain);
+        console.log('Name audio finished');
+        
         // Small pause for clarity
-        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 300));
+        
         // Play destination
+        console.log('Playing destination audio...');
         await playAmplifiedAudio(new Audio(destUrl), gain);
+        console.log('Destination audio finished');
       } finally {
         URL.revokeObjectURL(nameUrl);
         URL.revokeObjectURL(destUrl);

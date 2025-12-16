@@ -483,7 +483,7 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
@@ -703,6 +703,62 @@ serve(async (req) => {
 
     if (!text) {
       throw new Error("Text is required");
+    }
+
+    // skipCache: true forces fresh API generation without cache lookup
+    if (skipCache) {
+      console.log(`Direct API TTS request (skipCache=true) for: "${text}"`);
+      
+      if (!ELEVENLABS_API_KEY) {
+        throw new Error("ELEVENLABS_API_KEY not configured");
+      }
+
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            model_id: "eleven_multilingual_v2",
+            output_format: "mp3_44100_128",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.3,
+              use_speaker_boost: true,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("ElevenLabs API error:", response.status, errorText);
+        throw new Error(`ElevenLabs API error: ${response.status}`);
+      }
+
+      const audioBuffer = await response.arrayBuffer();
+      console.log(`Direct API audio generated, size: ${audioBuffer.byteLength} bytes`);
+
+      // Track API key usage
+      if (supabase) {
+        await supabase.from("api_key_usage").insert({
+          api_key_index: 1,
+          unit_name: unitName || "Desconhecido"
+        });
+      }
+
+      return new Response(audioBuffer, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "audio/mpeg",
+          "X-Cache": "SKIP",
+        },
+      });
     }
 
     // Use permanent cache prefix for destination phrases (won't be auto-deleted)
