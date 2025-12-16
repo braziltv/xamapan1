@@ -919,7 +919,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       </div>
 
       {/* Header - Compact for TV Landscape */}
-      <div className="relative z-10 flex items-center justify-between gap-3 mb-2 shrink-0">
+      <div className="relative z-10 flex items-center justify-start gap-3 mb-2 shrink-0">
         {/* Left: Logo + Title */}
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
@@ -933,8 +933,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
         
-        {/* Center: Weather + Clock together */}
-        <div className="flex-1 flex items-center gap-4 overflow-visible">
+        {/* Center: Weather + Clock together (kept away from TV edges) */}
+        <div className="mx-auto flex items-center gap-4 overflow-visible min-w-0">
           <div className="shrink-0">
             <WeatherWidget />
           </div>
