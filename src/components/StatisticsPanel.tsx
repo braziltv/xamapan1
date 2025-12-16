@@ -167,7 +167,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [regeneratingCache, setRegeneratingCache] = useState(false);
   
   const { toast } = useToast();
-  const { playHourAudio } = useHourAudio();
+  const { playHourAudio, generateAllIncremental, checkAudiosExist } = useHourAudio();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1123,7 +1123,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
-  // Função para regenerar cache de horas
+  // Função para regenerar cache de horas (incremental)
   const handleRegenerateHourCache = async () => {
     if (regenCachePassword !== 'Paineiras@1') {
       toast({
@@ -1139,34 +1139,25 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     setRegenCachePassword('');
 
     toast({
-      title: "Regenerando cache de horas",
-      description: "Isso pode levar alguns minutos. Aguarde...",
+      title: "Iniciando regeneração",
+      description: "Gerando 83 arquivos de áudio. Isso pode levar alguns minutos...",
     });
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ action: 'generate-all', force: true }),
+      const result = await generateAllIncremental((current, total, type, value) => {
+        // Atualizar toast a cada 5 arquivos para não sobrecarregar
+        if (current % 5 === 0 || current === total - 1) {
+          toast({
+            title: "Regenerando cache de horas",
+            description: `${type === 'hour' ? 'Hora' : 'Minuto'} ${value}... (${current + 1}/${total})`,
+          });
         }
-      );
+      });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: "Cache regenerado com sucesso",
-          description: `Horas: ${result.hours || 0}, Minutos: ${result.minutes || 0}. Falhas: ${result.failed || 0}`,
-        });
-      } else {
-        throw new Error(result.error || 'Erro desconhecido');
-      }
+      toast({
+        title: "Cache regenerado com sucesso!",
+        description: `✅ Horas: ${result.hours}/24, Minutos: ${result.minutes}/59. Falhas: ${result.failed}`,
+      });
     } catch (error) {
       console.error('Erro ao regenerar cache:', error);
       toast({
