@@ -577,16 +577,18 @@ serve(async (req) => {
     if (generateAllPhrases && supabase && ELEVENLABS_API_KEY) {
       console.log("Generating all destination phrases with Alice voice...");
       
-      // All phrases that need to be pre-cached (destinations)
+      // All FULL phrases that need to be pre-cached (must match getDestinationPhrase on client)
       const phrases = [
-        "Por favor, dirija-se",
-        "à Triagem",
-        "à Sala de Eletrocardiograma",
-        "à Sala de Curativos",
-        "à Sala do Raio X",
-        "à Enfermaria",
-        "ao Consultório Médico 1",
-        "ao Consultório Médico 2",
+        "Por favor, dirija-se à Triagem",
+        "Por favor, dirija-se à Sala de Eletrocardiograma",
+        "Por favor, dirija-se à Sala de Curativos",
+        "Por favor, dirija-se à Sala do Raio X",
+        "Por favor, dirija-se à Enfermaria",
+        "Por favor, dirija-se ao Consultório 1",
+        "Por favor, dirija-se ao Consultório 2",
+        "Por favor, dirija-se ao Consultório Médico",
+        "Por favor, dirija-se ao Consultório Médico 1",
+        "Por favor, dirija-se ao Consultório Médico 2",
       ];
       
       const results: { phrase: string; success: boolean; cacheKey?: string; error?: string }[] = [];

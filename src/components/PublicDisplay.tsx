@@ -466,52 +466,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     });
   }, [playAmplifiedAudio]);
 
-
-  const speakWithWebSpeech = useCallback(
-    (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
-      return new Promise<void>((resolve, reject) => {
-        try {
-          const synth = window.speechSynthesis;
-          if (!synth) {
-            reject(new Error('speechSynthesis indisponível'));
-            return;
-          }
-
-          // Get TTS volume from localStorage if not provided in opts
-          const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'pt-BR';
-          utterance.rate = opts?.rate ?? 0.9;
-          utterance.pitch = opts?.pitch ?? 1.1;
-          utterance.volume = opts?.volume ?? ttsVolume;
-
-          // Try to choose a Portuguese voice when available
-          const voices = synth.getVoices?.() ?? [];
-          const ptVoice =
-            voices.find((v) => (v.lang || '').toLowerCase().startsWith('pt')) ||
-            voices.find((v) => (v.lang || '').toLowerCase().includes('pt-br'));
-          if (ptVoice) utterance.voice = ptVoice;
-
-          utterance.onend = () => resolve();
-          utterance.onerror = (e) => reject(e as any);
-
-          try {
-            synth.cancel();
-            synth.resume?.();
-          } catch {
-            // ignore
-          }
-
-          synth.speak(utterance);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    },
-    []
-  );
-
   // ElevenLabs TTS via edge function - plays MP3 audio (works on any device)
   // Speak using concatenated TTS (splits name into parts for efficient caching)
   const speakWithConcatenatedTTS = useCallback(
