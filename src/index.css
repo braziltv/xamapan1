@@ -443,3 +443,34 @@
 .animate-text-reveal {
   animation: textReveal 0.4s ease-out forwards;
 }
+
+/* Pulsing red-white animation for elapsed time */
+@keyframes pulseRedWhite {
+  0%, 100% {
+    background-color: hsl(0 84% 60%);
+    color: white;
+  }
+  50% {
+    background-color: white;
+    color: hsl(0 84% 50%);
+  }
+}
+
+.dark .animate-pulse-red-white {
+  animation: pulseRedWhiteDark 1s ease-in-out infinite;
+}
+
+.animate-pulse-red-white {
+  animation: pulseRedWhite 1s ease-in-out infinite;
+}
+
+@keyframes pulseRedWhiteDark {
+  0%, 100% {
+    background-color: hsl(0 84% 45%);
+    color: white;
+  }
+  50% {
+    background-color: hsl(0 0% 20%);
+    color: hsl(0 84% 60%);
+  }
+}
