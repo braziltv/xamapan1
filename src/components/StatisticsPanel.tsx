@@ -777,21 +777,41 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
 
     setDeleting(true);
+
+    // Fechar dialog imediatamente para não ficar preso no loading
+    setDeleteDialogOpen(false);
+    setDeletePassword('');
+
+    const withTimeout = <T,>(promise: PromiseLike<T>, ms = 30000) => {
+      return Promise.race([
+        Promise.resolve(promise),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Tempo limite ao comunicar com o servidor.')), ms)
+        ),
+      ]) as Promise<T>;
+    };
+
     try {
       if (deleteScope === 'all') {
         // Apagar TODOS os registros do histórico de chamadas
-        const { error: historyError } = await supabase
-          .from('call_history')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error: historyError } = await withTimeout(
+          supabase
+            .from('call_history')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'),
+          60000
+        );
 
         if (historyError) throw historyError;
 
         // Apagar TODOS os registros das estatísticas diárias
-        const { error: statsError } = await supabase
-          .from('statistics_daily')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error: statsError } = await withTimeout(
+          supabase
+            .from('statistics_daily')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'),
+          60000
+        );
 
         if (statsError) throw statsError;
 
@@ -801,17 +821,23 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         });
       } else {
         // Apagar apenas registros da unidade selecionada
-        const { error: historyError } = await supabase
-          .from('call_history')
-          .delete()
-          .eq('unit_name', deleteUnitName);
+        const { error: historyError } = await withTimeout(
+          supabase
+            .from('call_history')
+            .delete()
+            .eq('unit_name', deleteUnitName),
+          60000
+        );
 
         if (historyError) throw historyError;
 
-        const { error: statsError } = await supabase
-          .from('statistics_daily')
-          .delete()
-          .eq('unit_name', deleteUnitName);
+        const { error: statsError } = await withTimeout(
+          supabase
+            .from('statistics_daily')
+            .delete()
+            .eq('unit_name', deleteUnitName),
+          60000
+        );
 
         if (statsError) throw statsError;
 
@@ -821,15 +847,13 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         });
       }
 
-      setDeleteDialogOpen(false);
-      setDeletePassword('');
       setDeleteScope('all');
       loadDbHistory();
     } catch (error) {
       console.error('Erro ao apagar registros:', error);
       toast({
         title: "Erro ao apagar",
-        description: "Ocorreu um erro ao tentar apagar os registros.",
+        description: "Não foi possível apagar agora. Verifique a conexão e tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -1066,7 +1090,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
   };
 
-  // Função para limpar painel de chamados (patient_calls) e histórico de chamadas (call_history)
+  // Função para limpar painel de chamados (patient_calls) e apagar as últimas chamadas exibidas na TV
   // Mantém TTS cache e estatísticas intactas
   const handleClearPatientCalls = async () => {
     if (clearCallsPassword !== 'Paineiras@1') {
@@ -1079,31 +1103,68 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     }
 
     setClearingCalls(true);
-    
+
     // Fechar dialog imediatamente para feedback rápido
     setClearCallsDialogOpen(false);
     setClearCallsPassword('');
-    
+
+    const withTimeout = <T,>(promise: PromiseLike<T>, ms = 15000) => {
+      return Promise.race([
+        Promise.resolve(promise),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Tempo limite ao comunicar com o servidor.')),
+            ms
+          )
+        ),
+      ]) as Promise<T>;
+    };
+
     try {
-      // Apagar registros de patient_calls (painel de chamados)
-      const { error: callsError } = await supabase
-        .from('patient_calls')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+      // 1) Limpa o painel (todos os pacientes)
+      const { error: callsError } = await withTimeout(
+        supabase
+          .from('patient_calls')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000'),
+        20000
+      );
 
       if (callsError) throw callsError;
 
-      // Apagar registros de call_history (últimas chamadas)
-      const { error: historyError } = await supabase
-        .from('call_history')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+      // 2) Apaga apenas as últimas chamadas (para limpar a lista da TV), sem apagar todo o histórico do banco
+      if (currentUnitName) {
+        const { data: lastHistory, error: lastHistoryError } = await withTimeout(
+          supabase
+            .from('call_history')
+            .select('id')
+            .eq('unit_name', currentUnitName)
+            .order('created_at', { ascending: false })
+            .limit(10),
+          15000
+        );
 
-      if (historyError) throw historyError;
+        if (lastHistoryError) throw lastHistoryError;
+
+        const ids = (lastHistory ?? []).map((i) => i.id).filter(Boolean);
+
+        if (ids.length > 0) {
+          const { error: historyError } = await withTimeout(
+            supabase
+              .from('call_history')
+              .delete()
+              .in('id', ids),
+            20000
+          );
+
+          if (historyError) throw historyError;
+        }
+      }
 
       toast({
         title: "Painel limpo",
-        description: "Pacientes e histórico de chamadas removidos. Estatísticas e cache TTS permanecem arquivados.",
+        description:
+          "Pacientes removidos e últimas chamadas da TV apagadas. Estatísticas e cache TTS permanecem arquivados.",
       });
 
       // Recarregar dados em background
@@ -1112,7 +1173,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       console.error('Erro ao limpar painel de chamados:', error);
       toast({
         title: "Erro ao limpar",
-        description: "Ocorreu um erro ao tentar limpar o painel de chamados.",
+        description:
+          "Não foi possível limpar agora. Verifique a conexão e tente novamente.",
         variant: "destructive",
       });
     } finally {
