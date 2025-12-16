@@ -81,6 +81,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       { url: 'https://www.band.uol.com.br/rss/noticias.xml', source: 'Band' },
       // O Globo
       { url: 'https://oglobo.globo.com/rss.xml', source: 'O Globo' },
+      // Itatiaia (via Google News)
+      { url: 'https://news.google.com/rss/search?q=Itatiaia+site:itatiaia.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Itatiaia' },
     ];
     
     let currentFeedIndex = 0;
