@@ -35,8 +35,8 @@ export function ElapsedTimeDisplay({ startTime, className = '' }: ElapsedTimeDis
   }, [startTime]);
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full ${className}`}>
-      <Clock className="w-3 h-3" />
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full ${className}`}>
+      <Clock className="w-3 h-3 text-red-500" />
       {elapsed}
     </span>
   );
