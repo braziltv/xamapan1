@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun } from 'lucide-react';
+import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin } from 'lucide-react';
 
 interface WeatherData {
   current: {
@@ -170,7 +170,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center">
             <span>Previsão do tempo</span>
-            <span>Paineiras-MG</span>
+            <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />Paineiras-MG</span>
           </div>
           {getWeatherIcon(weather.current.description, 'lg')}
           <div className="flex items-baseline gap-1.5 transition-all duration-500">
