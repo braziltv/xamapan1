@@ -1032,10 +1032,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
               {/* Date info */}
               <div className="text-right">
-                <p className="text-sm lg:text-base xl:text-lg text-yellow-400 font-bold leading-tight">
+                <p className="text-sm lg:text-base xl:text-lg font-mono font-bold text-yellow-400 leading-tight tracking-tight">
                   {formatBrazilTime(currentTime, "EEEE").charAt(0).toUpperCase() + formatBrazilTime(currentTime, "EEEE").slice(1)}
                 </p>
-                <p className="text-xs lg:text-sm text-slate-300 font-medium leading-tight">
+                <p className="text-xs lg:text-sm font-mono font-semibold text-cyan-400 leading-tight tracking-tight">
                   {formatBrazilTime(currentTime, "dd/MM/yyyy")}
                 </p>
               </div>
