@@ -6,6 +6,8 @@ interface WeatherData {
     temp: number;
     humidity: number;
     description: string;
+    minTemp: number;
+    maxTemp: number;
   };
   forecast: Array<{
     date: string;
@@ -48,6 +50,15 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMaxTemp, setShowMaxTemp] = useState(true);
+
+  // Alternate between min and max temp every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowMaxTemp(prev => !prev);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -62,6 +73,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         const data = await response.json();
         
         const current = data.current_condition[0];
+        const todayForecast = data.weather[0];
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
         const forecast = data.weather.slice(0, 2).map((day: any, index: number) => {
@@ -80,6 +92,8 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
             temp: parseInt(current.temp_C),
             humidity: parseInt(current.humidity),
             description: current.lang_pt?.[0]?.value || current.weatherDesc[0]?.value || '',
+            minTemp: parseInt(todayForecast.mintempC),
+            maxTemp: parseInt(todayForecast.maxtempC),
           },
           forecast,
           city: 'Paineiras',
@@ -94,6 +108,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     };
 
     fetchWeather();
+    // Update every 1 hour
     const interval = setInterval(fetchWeather, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -158,7 +173,14 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         <div className="flex items-center gap-2">
           <span className="text-red-200 text-[10px] font-semibold uppercase">{weather.city}</span>
           {getWeatherIcon(weather.current.description, 'lg')}
-          <span className="text-white font-black text-xl leading-none">{weather.current.temp}°c</span>
+          <div className="flex items-baseline gap-1 transition-all duration-500">
+            <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
+              {showMaxTemp ? 'MAX' : 'MIN'}
+            </span>
+            <span className="text-white font-black text-xl leading-none">
+              {showMaxTemp ? weather.current.maxTemp : weather.current.minTemp}°c
+            </span>
+          </div>
           <Droplets className="w-3 h-3 text-cyan-300 ml-1" />
           <span className="text-red-100 text-[10px]">{weather.current.humidity}%</span>
         </div>
