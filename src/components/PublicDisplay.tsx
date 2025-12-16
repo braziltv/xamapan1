@@ -477,14 +477,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     return new Promise((resolve, reject) => {
       const audio = new Audio(storageUrl);
+      audio.volume = 1.0;
       
-      audio.oncanplaythrough = async () => {
-        try {
-          await playAmplifiedAudio(audio, 2.5);
-          resolve();
-        } catch (e) {
-          reject(e);
-        }
+      audio.onended = () => {
+        console.log('Audio finished:', fileName);
+        resolve();
       };
       
       audio.onerror = (e) => {
@@ -492,9 +489,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         reject(new Error(`Failed to load audio: ${fileName}`));
       };
       
-      audio.load();
+      audio.play()
+        .then(() => console.log('Audio playing:', fileName))
+        .catch((e) => {
+          console.error('Audio play error:', e);
+          reject(e);
+        });
     });
-  }, [playAmplifiedAudio]);
+  }, []);
 
   // Announce current time using audio files from Storage
   const announceTimeRef = useRef<() => Promise<void>>();
