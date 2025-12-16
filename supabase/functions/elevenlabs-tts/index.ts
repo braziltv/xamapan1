@@ -416,7 +416,7 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate } = await req.json();
+    const { text, voiceId, unitName, clearCache, clearAllCache, isPermanentCache, testAllKeys, concatenate } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
@@ -573,7 +573,64 @@ serve(async (req) => {
       });
     }
 
-    // Handle cache clearing request
+    // Handle clearing ALL cache files (for regeneration with new voice)
+    if (clearAllCache && supabase) {
+      console.log("Clearing ALL TTS cache files...");
+      
+      try {
+        // List all files in the cache bucket
+        const { data: files, error: listError } = await supabase.storage
+          .from('tts-cache')
+          .list('', { limit: 1000 });
+        
+        if (listError) {
+          throw new Error(`Failed to list cache files: ${listError.message}`);
+        }
+        
+        if (files && files.length > 0) {
+          const filePaths = files.map((f: any) => f.name);
+          console.log(`Deleting ${filePaths.length} cache files...`);
+          
+          const { error: deleteError } = await supabase.storage
+            .from('tts-cache')
+            .remove(filePaths);
+          
+          if (deleteError) {
+            throw new Error(`Failed to delete cache files: ${deleteError.message}`);
+          }
+          
+          console.log(`Successfully deleted ${filePaths.length} cache files`);
+          
+          return new Response(JSON.stringify({ 
+            success: true, 
+            deletedCount: filePaths.length,
+            message: `Deleted ${filePaths.length} cache files. Please regenerate phrases.`
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } else {
+          console.log("No cache files found to delete");
+          return new Response(JSON.stringify({ 
+            success: true, 
+            deletedCount: 0,
+            message: "No cache files found"
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } catch (error) {
+        console.error("Error clearing cache:", error);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: error instanceof Error ? error.message : "Unknown error"
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Handle cache clearing request (single file)
     if (clearCache && supabase) {
       const cacheKey = generateCacheKey(clearCache, false);
       

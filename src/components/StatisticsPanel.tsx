@@ -1156,28 +1156,30 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     try {
       toast({
         title: "Limpando cache TTS...",
-        description: "Removendo todos os arquivos de áudio cacheados...",
+        description: "Removendo todos os arquivos de áudio cacheados (via servidor)...",
       });
 
-      // 1. Listar e deletar todos os arquivos do bucket tts-cache
-      const { data: files, error: listError } = await supabase.storage
-        .from('tts-cache')
-        .list('', { limit: 1000 });
-
-      if (listError) {
-        console.error('Erro ao listar arquivos:', listError);
-      } else if (files && files.length > 0) {
-        const filePaths = files.map(f => f.name);
-        const { error: deleteError } = await supabase.storage
-          .from('tts-cache')
-          .remove(filePaths);
-
-        if (deleteError) {
-          console.error('Erro ao deletar arquivos:', deleteError);
-        } else {
-          console.log(`Deletados ${filePaths.length} arquivos do cache TTS`);
+      // 1. Limpar cache via edge function (com permissões adequadas)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ clearAllCache: true }),
         }
+      );
+
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Falha ao limpar cache');
       }
+      
+      console.log(`Cache limpo via servidor: ${result.deletedCount} arquivos deletados`);
 
       // 2. Limpar tabela de uso de nomes TTS
       const { error: ttsUsageError } = await supabase
