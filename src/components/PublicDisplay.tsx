@@ -595,6 +595,51 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
 
+  // Play time notification sound (different from patient call notification - softer tone)
+  const playTimeNotificationSound = useCallback(() => {
+    console.log('playTimeNotificationSound called');
+    
+    return new Promise<void>((resolve) => {
+      try {
+        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (!audioContextRef.current) audioContextRef.current = audioContext;
+        
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        // Create a softer, distinct chime for time announcements (two ascending tones)
+        const playTone = (frequency: number, startTime: number, duration: number) => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.type = 'sine'; // Softer sine wave instead of triangle
+          oscillator.frequency.value = frequency;
+          
+          // Gentle envelope
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+          gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + startTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.start(audioContext.currentTime + startTime);
+          oscillator.stop(audioContext.currentTime + startTime + duration);
+        };
+        
+        // Two soft ascending tones (G5 -> C6) - different from patient notification
+        playTone(784, 0, 0.3);      // G5
+        playTone(1047, 0.25, 0.4);  // C6
+        
+        setTimeout(resolve, 700);
+      } catch (e) {
+        console.warn('Failed to play time notification:', e);
+        resolve();
+      }
+    });
+  }, []);
+
   // Play hour announcement using pre-cached audio (concatenating hour + minute)
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
@@ -604,6 +649,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     try {
       console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
+      
+      // Play distinct notification sound before hour announcement
+      await playTimeNotificationSound();
+      
       const success = await playHourAudio(hour, minute);
       if (success) {
         console.log('Hour announcement completed');
@@ -613,7 +662,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
     }
-  }, [audioUnlocked, playHourAudio]);
+  }, [audioUnlocked, playHourAudio, playTimeNotificationSound]);
 
   // Generate 3 random announcement times per hour with minimum 10 min between them
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
@@ -643,7 +692,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return announcements.sort((a, b) => a - b);
   }, []);
 
-  // Announce time 3 times per hour at random moments
+  // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
     
@@ -651,6 +700,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const minute = currentTime.getMinutes();
     const second = currentTime.getSeconds();
     const now = Date.now();
+    
+    // Horário de silêncio: não anunciar entre 23h e 5h (inclusive)
+    const isQuietHours = hour >= 23 || hour < 5;
+    if (isQuietHours) {
+      return; // Não anunciar durante horário de silêncio
+    }
     
     // Regenerar agendamento quando mudar de hora
     if (currentScheduleHourRef.current !== hour) {
