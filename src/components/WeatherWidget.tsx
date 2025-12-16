@@ -141,7 +141,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
 
   if (loading) {
     return (
-      <div className="bg-red-800 backdrop-blur-md rounded-lg pl-[5%] pr-[10%] py-2 shadow-lg">
+      <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
           <span className="text-white/80 text-xs">Carregando...</span>
@@ -153,7 +153,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
 
   if (error || !weather) {
     return (
-      <div className="bg-red-800 backdrop-blur-md rounded-lg pl-[5%] pr-[10%] py-2 shadow-lg">
+      <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/50" />
           <span className="text-white/60 text-xs">{error || 'Indisponível'}</span>
@@ -164,8 +164,8 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   }
 
   return (
-    <div className="bg-red-800 backdrop-blur-md rounded-lg pl-[5%] pr-[10%] py-3 shadow-lg">
-      <div className="flex items-center gap-5">
+    <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
+      <div className="flex items-center gap-4">
         {/* Current weather with city */}
         <div className="flex items-center gap-3">
           <span className="text-red-200 text-[10px] font-semibold uppercase">{weather.city}</span>
