@@ -37,7 +37,11 @@ import {
   Upload,
   FileUp,
   HardDrive,
-  Volume2
+  Volume2,
+  HeartPulse,
+  Bandage,
+  Scan,
+  Bed
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -388,6 +392,24 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const totalCalls = filteredHistory.length;
   const triageCalls = filteredHistory.filter(h => h.call_type === 'triage').length;
   const doctorCalls = filteredHistory.filter(h => h.call_type === 'doctor').length;
+
+  // Estatísticas de procedimentos (baseado no destino)
+  const ecgProcedures = filteredHistory.filter(h => 
+    h.destination?.toLowerCase().includes('eletrocardiograma') || 
+    h.destination?.toLowerCase().includes('ecg')
+  ).length;
+  const curativosProcedures = filteredHistory.filter(h => 
+    h.destination?.toLowerCase().includes('curativo')
+  ).length;
+  const raioXProcedures = filteredHistory.filter(h => 
+    h.destination?.toLowerCase().includes('raio x') || 
+    h.destination?.toLowerCase().includes('raio-x') ||
+    h.destination?.toLowerCase().includes('radiografia')
+  ).length;
+  const enfermariaProcedures = filteredHistory.filter(h => 
+    h.destination?.toLowerCase().includes('enfermaria')
+  ).length;
+  const totalProcedures = ecgProcedures + curativosProcedures + raioXProcedures + enfermariaProcedures;
 
   // Atendimentos por dia (últimos 30 dias)
   const dailyData = Array.from({ length: 30 }, (_, i) => {
@@ -2082,6 +2104,78 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <div className="mt-2">
               <TrendIndicator current={doctorCalls} previous={previousPeriodData.doctor} label="médico" />
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Cards de Procedimentos */}
+      <h3 className="text-lg font-semibold text-foreground mt-6 flex items-center gap-2">
+        <Activity className="w-5 h-5" />
+        Procedimentos Realizados (Período)
+      </h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <Card className="bg-gradient-to-br from-rose-500/10 to-rose-600/5 border-rose-500/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Eletrocardiogramas</CardTitle>
+            <HeartPulse className="h-4 w-4 text-rose-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-rose-600">{ecgProcedures}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalProcedures > 0 ? Math.round((ecgProcedures / totalProcedures) * 100) : 0}% dos procedimentos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Curativos</CardTitle>
+            <Bandage className="h-4 w-4 text-amber-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-600">{curativosProcedures}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalProcedures > 0 ? Math.round((curativosProcedures / totalProcedures) * 100) : 0}% dos procedimentos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Raio X</CardTitle>
+            <Scan className="h-4 w-4 text-violet-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-violet-600">{raioXProcedures}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalProcedures > 0 ? Math.round((raioXProcedures / totalProcedures) * 100) : 0}% dos procedimentos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-teal-500/10 to-teal-600/5 border-teal-500/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Enfermaria</CardTitle>
+            <Bed className="h-4 w-4 text-teal-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-teal-600">{enfermariaProcedures}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {totalProcedures > 0 ? Math.round((enfermariaProcedures / totalProcedures) * 100) : 0}% dos procedimentos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-slate-500/10 to-slate-600/5 border-slate-500/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Procedimentos</CardTitle>
+            <Activity className="h-4 w-4 text-slate-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-600">{totalProcedures}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              no período selecionado
+            </p>
           </CardContent>
         </Card>
       </div>
