@@ -9,6 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 
@@ -37,6 +47,7 @@ export function DoctorPanel({
 }: DoctorPanelProps) {
   const [selectedConsultorio, setSelectedConsultorio] = useState<string>('consultorio-1');
   const [currentConsultorio, setCurrentConsultorio] = useState<string>('Consultório 1');
+  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
 
   const consultorios = [
@@ -128,7 +139,7 @@ export function DoctorPanel({
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden xs:inline">Chamar</span> Novamente
                 </Button>
-                <Button onClick={() => onFinishConsultation(currentCall.id)} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
+                <Button onClick={() => setConfirmFinish({ id: currentCall.id, name: currentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden xs:inline">Finalizar</span> Consulta
                 </Button>
@@ -195,7 +206,7 @@ export function DoctorPanel({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onFinishWithoutCall(patient.id)}
+                      onClick={() => setConfirmFinish({ id: patient.id, name: patient.name, type: 'without' })}
                       className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                     >
                       <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -217,6 +228,38 @@ export function DoctorPanel({
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!confirmFinish} onOpenChange={() => setConfirmFinish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar finalização</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja finalizar o atendimento de <strong>{confirmFinish?.name}</strong>?
+              <br />
+              <span className="text-destructive">O paciente será removido de todos os módulos.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmFinish) {
+                  if (confirmFinish.type === 'consultation') {
+                    onFinishConsultation(confirmFinish.id);
+                  } else {
+                    onFinishWithoutCall(confirmFinish.id);
+                  }
+                  setConfirmFinish(null);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

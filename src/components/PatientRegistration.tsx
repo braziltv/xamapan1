@@ -20,6 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface PatientRegistrationProps {
   patients: Patient[];
@@ -68,6 +78,7 @@ export function PatientRegistration({
 }: PatientRegistrationProps) {
   const [name, setName] = useState('');
   const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
+  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -339,7 +350,7 @@ export function PatientRegistration({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onFinishWithoutCall(patient.id)}
+                    onClick={() => setConfirmFinish({ id: patient.id, name: patient.name })}
                     className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                   >
                     <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -361,6 +372,34 @@ export function PatientRegistration({
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!confirmFinish} onOpenChange={() => setConfirmFinish(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar finalização</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja finalizar o atendimento de <strong>{confirmFinish?.name}</strong>?
+              <br />
+              <span className="text-destructive">O paciente será removido de todos os módulos.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmFinish) {
+                  onFinishWithoutCall(confirmFinish.id);
+                  setConfirmFinish(null);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
