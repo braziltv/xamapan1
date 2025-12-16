@@ -102,6 +102,11 @@ export function TriagePanel({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* TEMPORARY TEST BUTTON - REMOVE AFTER TESTING */}
+      <Button onClick={playNewPatientSound} variant="outline" className="bg-yellow-100 border-yellow-500 text-yellow-800">
+        🔊 Testar Som de Novo Paciente
+      </Button>
+      
       {/* Current Call */}
       <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 sm:p-4">
