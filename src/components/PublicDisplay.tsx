@@ -869,6 +869,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           }, ...prev].slice(0, 10));
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'call_history',
+        },
+        (payload) => {
+          const deletedItem = payload.old as any;
+          if (deletedItem?.id) {
+            setHistoryItems(prev => prev.filter(item => item.id !== deletedItem.id));
+          } else {
+            // Se não tiver ID específico, limpar tudo (delete em massa)
+            setHistoryItems([]);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
