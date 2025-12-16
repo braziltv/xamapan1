@@ -221,9 +221,10 @@ export function TriagePanel({
                   className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-muted transition-colors gap-3 ${priorityConfig.bg} border-l-4 ${priorityConfig.border}`}
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-base sm:text-lg font-mono font-bold text-primary w-6 sm:w-8 text-center">
-                        {index + 1}
+                    <div className="flex flex-col items-center gap-1 min-w-[3rem]">
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Posição</span>
+                      <span className="text-xl sm:text-2xl font-mono font-bold text-primary">
+                        {index + 1}º
                       </span>
                       <PriorityIcon className={`w-4 h-4 ${priorityConfig.color}`} />
                     </div>
