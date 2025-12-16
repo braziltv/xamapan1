@@ -335,6 +335,7 @@ async function getOrGenerateAudio(
         text,
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
+        language_code: "pt-BR",  // Português Brasileiro
         voice_settings: {
           stability: 0.85,          // Alta estabilidade para voz consistente
           similarity_boost: 0.80,   // Boa similaridade com a voz original
@@ -672,6 +673,7 @@ serve(async (req) => {
           text,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
+          language_code: "pt-BR",  // Português Brasileiro
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,

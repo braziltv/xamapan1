@@ -41,6 +41,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastTimeAnnouncementRef = useRef<number>(0); // timestamp da última chamada de hora
   const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
+  const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -879,6 +880,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
       console.log('speakName called with:', { name, caller, destination });
 
+      // Prevent duplicate TTS calls
+      if (isSpeakingRef.current) {
+        console.log('Already speaking, skipping duplicate call');
+        return;
+      }
+      isSpeakingRef.current = true;
+
       // Start visual alert; it will auto-stop after 10s in the effect below
       setAnnouncingType(caller);
 
@@ -890,14 +898,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Play notification sound first (mandatory)
         await playNotificationSound();
 
-        // Try ElevenLabs with concatenated mode first (splits name into parts for efficient caching)
-        // This caches each name part (first name, last name) separately for reuse
+        // Cancel any ongoing Web Speech synthesis to prevent overlap
+        try {
+          window.speechSynthesis?.cancel();
+        } catch {
+          // ignore
+        }
+
+        // Try ElevenLabs with concatenated mode (Brazilian Portuguese accent)
         try {
           await speakWithConcatenatedTTS(name, destinationPhrase);
-          console.log('TTS completed (ElevenLabs - concatenated name parts + destination)');
+          console.log('TTS completed (ElevenLabs - Brazilian Portuguese)');
           return;
         } catch (e) {
-          console.warn('ElevenLabs concatenated failed, trying Web Speech API...', e);
+          console.warn('ElevenLabs failed, trying Web Speech API...', e);
         }
 
         // Fallback to Web Speech API (combined text)
@@ -930,6 +944,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         }
       } catch (e) {
         console.error('speakName failed:', e);
+      } finally {
+        isSpeakingRef.current = false;
       }
     },
     [playNotificationSound, speakWithConcatenatedTTS, speakWithWebSpeech, getDestinationPhrase]
