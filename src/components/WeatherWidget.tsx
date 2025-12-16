@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin } from 'lucide-react';
 
 interface WeatherData {
@@ -46,8 +46,8 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
 }
 
-const OTHER_CITIES = [
-  'Biquinhas', 'Abaeté', 'Cedro do Abaeté', 'Morada Nova de Minas',
+const ALL_CITIES = [
+  'Paineiras', 'Biquinhas', 'Abaeté', 'Cedro do Abaeté', 'Morada Nova de Minas',
   'Quartel Geral', 'Tiros', 'Martinho Campos', 'Matutina', 'Dores do Indaiá',
   'Pompéu', 'Lagoa da Prata', 'São Gotardo', 'Felixlândia', 'Curvelo',
   'Três Marias', 'Piumhi', 'Formiga', 'Arcos', 'Pains', 'Pimenta',
@@ -55,29 +55,118 @@ const OTHER_CITIES = [
   'Divinópolis', 'Iguatama', 'Japaraíba', 'Serra da Saudade', 'Lagoa Formosa'
 ];
 
+const OTHER_CITIES = ALL_CITIES.filter(c => c !== 'Paineiras');
+
 export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [weatherCache, setWeatherCache] = useState<Record<string, WeatherData>>({});
+  const [displayCity, setDisplayCity] = useState('Paineiras');
   const [showMaxTemp, setShowMaxTemp] = useState(true);
   const [rotationCount, setRotationCount] = useState(0);
   const [otherCityIndex, setOtherCityIndex] = useState(0);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const fetchingRef = useRef(false);
 
-  // Every 5th rotation shows Paineiras, otherwise show other cities
-  const currentCity = rotationCount % 5 === 0 ? 'Paineiras' : OTHER_CITIES[otherCityIndex];
+  // Get current weather from cache
+  const currentWeather = weatherCache[displayCity];
 
-  // Rotate cities every 5 seconds
+  // Fetch weather for a single city
+  const fetchCityWeather = useCallback(async (city: string): Promise<WeatherData | null> => {
+    try {
+      const cityForUrl = city.replace(/ /g, '+');
+      const response = await fetch(
+        `https://wttr.in/${cityForUrl},Minas+Gerais,Brazil?format=j1&lang=pt`
+      );
+      
+      if (!response.ok) return null;
+      
+      const data = await response.json();
+      const current = data.current_condition[0];
+      const todayForecast = data.weather[0];
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+      const forecast = data.weather.slice(0, 2).map((day: any, index: number) => {
+        const date = new Date(day.date);
+        return {
+          date: day.date,
+          dayName: index === 0 ? 'HOJE' : dayNames[date.getDay()].toUpperCase(),
+          maxTemp: parseInt(day.maxtempC),
+          minTemp: parseInt(day.mintempC),
+          description: day.hourly[4]?.lang_pt?.[0]?.value || day.hourly[0]?.weatherDesc[0]?.value || '',
+        };
+      });
+
+      return {
+        current: {
+          temp: parseInt(current.temp_C),
+          humidity: parseInt(current.humidity),
+          description: current.lang_pt?.[0]?.value || current.weatherDesc[0]?.value || '',
+          minTemp: parseInt(todayForecast.mintempC),
+          maxTemp: parseInt(todayForecast.maxtempC),
+        },
+        forecast,
+        city,
+      };
+    } catch (err) {
+      console.error(`Weather fetch error for ${city}:`, err);
+      return null;
+    }
+  }, []);
+
+  // Fetch all cities weather and update cache
+  const fetchAllWeather = useCallback(async () => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    console.log('Fetching weather for all cities...');
+    const newCache: Record<string, WeatherData> = {};
+
+    // Fetch cities in batches to avoid rate limiting
+    for (let i = 0; i < ALL_CITIES.length; i++) {
+      const city = ALL_CITIES[i];
+      const weather = await fetchCityWeather(city);
+      if (weather) {
+        newCache[city] = weather;
+      }
+      // Small delay between requests to avoid rate limiting
+      if (i < ALL_CITIES.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    if (Object.keys(newCache).length > 0) {
+      setWeatherCache(prev => ({ ...prev, ...newCache }));
+      setInitialLoading(false);
+    }
+
+    fetchingRef.current = false;
+    console.log('Weather cache updated for', Object.keys(newCache).length, 'cities');
+  }, [fetchCityWeather]);
+
+  // Initial fetch and 15-minute refresh
+  useEffect(() => {
+    fetchAllWeather();
+    const interval = setInterval(fetchAllWeather, 15 * 60 * 1000); // 15 minutes
+    return () => clearInterval(interval);
+  }, [fetchAllWeather]);
+
+  // Rotate display city every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setRotationCount(prev => {
         const next = prev + 1;
-        // If next is not a Paineiras slot, advance to next other city
-        if (next % 5 !== 0) {
-          setOtherCityIndex(prevIdx => (prevIdx + 1) % OTHER_CITIES.length);
+        // Every 5th rotation shows Paineiras
+        if (next % 5 === 0) {
+          setDisplayCity('Paineiras');
+        } else {
+          setOtherCityIndex(prevIdx => {
+            const nextIdx = (prevIdx + 1) % OTHER_CITIES.length;
+            setDisplayCity(OTHER_CITIES[nextIdx]);
+            return nextIdx;
+          });
         }
         return next;
       });
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,57 +177,6 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        setLoading(true);
-        const cityForUrl = currentCity.replace(/ /g, '+');
-        const response = await fetch(
-          `https://wttr.in/${cityForUrl},Minas+Gerais,Brazil?format=j1&lang=pt`
-        );
-        
-        if (!response.ok) throw new Error('Failed to fetch weather');
-        
-        const data = await response.json();
-        
-        const current = data.current_condition[0];
-        const todayForecast = data.weather[0];
-        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-        const forecast = data.weather.slice(0, 2).map((day: any, index: number) => {
-          const date = new Date(day.date);
-          return {
-            date: day.date,
-            dayName: index === 0 ? 'HOJE' : dayNames[date.getDay()].toUpperCase(),
-            maxTemp: parseInt(day.maxtempC),
-            minTemp: parseInt(day.mintempC),
-            description: day.hourly[4]?.lang_pt?.[0]?.value || day.hourly[0]?.weatherDesc[0]?.value || '',
-          };
-        });
-
-        setWeather({
-          current: {
-            temp: parseInt(current.temp_C),
-            humidity: parseInt(current.humidity),
-            description: current.lang_pt?.[0]?.value || current.weatherDesc[0]?.value || '',
-            minTemp: parseInt(todayForecast.mintempC),
-            maxTemp: parseInt(todayForecast.maxtempC),
-          },
-          forecast,
-          city: currentCity,
-        });
-        setError(null);
-      } catch (err) {
-        console.error('Weather fetch error:', err);
-        setError('Indisponível');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWeather();
-  }, [currentCity]);
 
   // Clock section component
   const ClockSection = () => {
@@ -166,24 +204,28 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     );
   };
 
-  if (loading) {
+  // Only show loading on initial load
+  if (initialLoading && !currentWeather) {
     return (
       <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
-          <span className="text-white/80 text-xs">Carregando...</span>
+          <span className="text-white/80 text-xs">Carregando previsões...</span>
           <ClockSection />
         </div>
       </div>
     );
   }
 
-  if (error || !weather) {
+  // If no cached data for current city, show last available or fallback
+  const weather = currentWeather || weatherCache['Paineiras'] || Object.values(weatherCache)[0];
+
+  if (!weather) {
     return (
       <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-white/50" />
-          <span className="text-white/60 text-xs">{error || 'Indisponível'}</span>
+          <span className="text-white/60 text-xs">Indisponível</span>
           <ClockSection />
         </div>
       </div>
@@ -197,7 +239,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center min-w-[120px]">
             <span>Previsão do tempo</span>
-            <span className="flex items-center gap-0.5 animate-pulse"><MapPin className="w-3 h-3" />{weather.city}-MG</span>
+            <span className="flex items-center gap-0.5 animate-pulse"><MapPin className="w-3 h-3" />{displayCity}-MG</span>
           </div>
           {getWeatherIcon(weather.current.description, 'lg')}
           <div className="flex items-baseline gap-1.5 transition-all duration-500">
