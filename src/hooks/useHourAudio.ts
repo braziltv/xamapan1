@@ -65,15 +65,18 @@ export const useHourAudio = () => {
           minuteAudio.play().catch(reject);
         });
 
-        // Reproduzir palavra "minutos" ao final
-        const minutosAudio = new Audio(minutosWordUrl);
-        minutosAudio.volume = timeAnnouncementVolume;
+        // Reproduzir palavra "minutos" ao final (exceto para hora cheia ou "e meia")
+        // Não fala "minutos" quando minute === 0 (hora cheia) ou minute === 30 (e meia)
+        if (minute !== 30) {
+          const minutosAudio = new Audio(minutosWordUrl);
+          minutosAudio.volume = timeAnnouncementVolume;
 
-        await new Promise<void>((resolve, reject) => {
-          minutosAudio.onended = () => resolve();
-          minutosAudio.onerror = () => reject(new Error('Minutos word audio failed - arquivo não encontrado no cache'));
-          minutosAudio.play().catch(reject);
-        });
+          await new Promise<void>((resolve, reject) => {
+            minutosAudio.onended = () => resolve();
+            minutosAudio.onerror = () => reject(new Error('Minutos word audio failed - arquivo não encontrado no cache'));
+            minutosAudio.play().catch(reject);
+          });
+        }
       }
 
       return true;
