@@ -22,21 +22,21 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   const iconClass = size === 'lg' ? 'w-8 h-8' : 'w-4 h-4';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) 
-    return <Sun className={`${iconClass} text-yellow-400`} />;
+    return <Sun className={`${iconClass} text-yellow-400 animate-[spin_8s_linear_infinite]`} />;
   if (desc.includes('partly') || desc.includes('parcialmente')) 
-    return <CloudSun className={`${iconClass} text-yellow-300`} />;
+    return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
   if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva')) 
-    return <CloudRain className={`${iconClass} text-blue-400`} />;
+    return <CloudRain className={`${iconClass} text-blue-400 animate-bounce`} />;
   if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada')) 
-    return <CloudLightning className={`${iconClass} text-purple-400`} />;
+    return <CloudLightning className={`${iconClass} text-purple-400 animate-[pulse_0.5s_ease-in-out_infinite]`} />;
   if (desc.includes('snow') || desc.includes('neve')) 
-    return <CloudSnow className={`${iconClass} text-white`} />;
+    return <CloudSnow className={`${iconClass} text-white animate-[bounce_2s_ease-in-out_infinite]`} />;
   if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) 
-    return <Wind className={`${iconClass} text-slate-400`} />;
+    return <Wind className={`${iconClass} text-slate-400 animate-pulse`} />;
   if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) 
-    return <Cloud className={`${iconClass} text-slate-300`} />;
+    return <Cloud className={`${iconClass} text-slate-300 animate-pulse`} />;
   
-  return <CloudSun className={`${iconClass} text-yellow-300`} />;
+  return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
 }
 
 export function WeatherWidget() {
