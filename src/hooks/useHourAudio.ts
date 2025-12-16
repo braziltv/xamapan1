@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const useHourAudio = () => {
-  // URLs diretas do storage (públicas)
+  // URLs diretas do storage (públicas) - usa apenas cache local
   const getHourUrl = (hour: number): string => {
     const cacheKey = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
     const { data } = supabase.storage.from('tts-cache').getPublicUrl(cacheKey);
@@ -15,39 +15,27 @@ export const useHourAudio = () => {
     return data.publicUrl;
   };
 
-  const getSignedUrls = async (
-    hour: number,
-    minute: number
-  ): Promise<{ hourUrl: string; minuteUrl: string | null } | null> => {
+  // Verificar se o arquivo existe no storage
+  const checkFileExists = async (path: string): Promise<boolean> => {
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ action: 'get-signed-urls', hour, minute }),
-      });
-
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      if (!data?.hourUrl) return null;
-      return { hourUrl: data.hourUrl, minuteUrl: data.minuteUrl ?? null };
+      const { data, error } = await supabase.storage
+        .from('tts-cache')
+        .list('time', { search: path.replace('time/', '') });
+      if (error) return false;
+      return data?.some(f => f.name === path.replace('time/', '')) ?? false;
     } catch {
-      return null;
+      return false;
     }
   };
 
-  // Reproduzir hora concatenando os dois áudios
+  // Reproduzir hora concatenando os dois áudios (apenas do cache local)
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       // Get volume from localStorage
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
 
-      const signed = await getSignedUrls(hour, minute);
-      const hourUrl = signed?.hourUrl ?? getHourUrl(hour);
-      const minuteUrl = signed?.minuteUrl ?? getMinuteUrl(minute);
+      const hourUrl = getHourUrl(hour);
+      const minuteUrl = getMinuteUrl(minute);
 
       // Reproduzir áudio da hora
       const hourAudio = new Audio(hourUrl);
@@ -55,7 +43,7 @@ export const useHourAudio = () => {
 
       await new Promise<void>((resolve, reject) => {
         hourAudio.onended = () => resolve();
-        hourAudio.onerror = () => reject(new Error('Hour audio failed'));
+        hourAudio.onerror = () => reject(new Error('Hour audio failed - arquivo não encontrado no cache'));
         hourAudio.play().catch(reject);
       });
 
@@ -66,7 +54,7 @@ export const useHourAudio = () => {
 
         await new Promise<void>((resolve, reject) => {
           minuteAudio.onended = () => resolve();
-          minuteAudio.onerror = () => reject(new Error('Minute audio failed'));
+          minuteAudio.onerror = () => reject(new Error('Minute audio failed - arquivo não encontrado no cache'));
           minuteAudio.play().catch(reject);
         });
       }
@@ -78,8 +66,8 @@ export const useHourAudio = () => {
     }
   };
 
-  // Gerar todos os áudios de horas (24 arquivos)
-  const generateHours = async (): Promise<{ success: number; failed: number; errors: string[] }> => {
+  // Gerar um único arquivo de hora
+  const generateSingleHour = async (hour: number): Promise<boolean> => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`,
@@ -87,26 +75,20 @@ export const useHourAudio = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ action: 'generate-hours' }),
+          body: JSON.stringify({ action: 'get-signed-urls', hour, minute: 0 }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error generating hours:', error);
-      return { success: 0, failed: 1, errors: [error instanceof Error ? error.message : 'Unknown error'] };
+      return response.ok;
+    } catch {
+      return false;
     }
   };
 
-  // Gerar todos os áudios de minutos (59 arquivos)
-  const generateMinutes = async (): Promise<{ success: number; failed: number; errors: string[] }> => {
+  // Gerar um único arquivo de minuto
+  const generateSingleMinute = async (minute: number): Promise<boolean> => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`,
@@ -114,64 +96,85 @@ export const useHourAudio = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ action: 'generate-minutes' }),
+          body: JSON.stringify({ action: 'get-signed-urls', hour: 12, minute }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error generating minutes:', error);
-      return { success: 0, failed: 1, errors: [error instanceof Error ? error.message : 'Unknown error'] };
+      return response.ok;
+    } catch {
+      return false;
     }
   };
 
-  // Gerar todos (horas + minutos = 83 arquivos)
-  const generateAllTimeAudios = async (
-    onProgress?: (stage: 'hours' | 'minutes', done: boolean) => void
-  ): Promise<{ hours: number; minutes: number; failed: number; errors: string[] }> => {
-    const results = { hours: 0, minutes: 0, failed: 0, errors: [] as string[] };
+  // Gerar todos os áudios incrementalmente (um por um)
+  const generateAllIncremental = async (
+    onProgress?: (current: number, total: number, type: 'hour' | 'minute', value: number) => void
+  ): Promise<{ hours: number; minutes: number; failed: number }> => {
+    const results = { hours: 0, minutes: 0, failed: 0 };
+    const total = 24 + 59; // 24 horas + 59 minutos
 
-    // Gerar horas
-    onProgress?.('hours', false);
-    const hoursResult = await generateHours();
-    results.hours = hoursResult.success;
-    results.failed += hoursResult.failed;
-    results.errors.push(...hoursResult.errors);
-    onProgress?.('hours', true);
+    // Gerar horas (0-23)
+    for (let h = 0; h < 24; h++) {
+      onProgress?.(h, total, 'hour', h);
+      const success = await generateSingleHour(h);
+      if (success) {
+        results.hours++;
+      } else {
+        results.failed++;
+      }
+      // Pequeno delay para não sobrecarregar
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
 
-    // Gerar minutos
-    onProgress?.('minutes', false);
-    const minutesResult = await generateMinutes();
-    results.minutes = minutesResult.success;
-    results.failed += minutesResult.failed;
-    results.errors.push(...minutesResult.errors);
-    onProgress?.('minutes', true);
+    // Gerar minutos (1-59)
+    for (let m = 1; m < 60; m++) {
+      onProgress?.(24 + m - 1, total, 'minute', m);
+      const success = await generateSingleMinute(m);
+      if (success) {
+        results.minutes++;
+      } else {
+        results.failed++;
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
 
     return results;
   };
 
-  // Verificar se os áudios existem
-  const checkAudiosExist = async (): Promise<{ hours: number; minutes: number }> => {
+  // Verificar quais áudios existem no cache
+  const checkAudiosExist = async (): Promise<{ 
+    hours: number; 
+    minutes: number;
+    missingHours: number[];
+    missingMinutes: number[];
+  }> => {
     try {
       const { data: files } = await supabase.storage
         .from('tts-cache')
         .list('time');
       
-      if (!files) return { hours: 0, minutes: 0 };
+      if (!files) return { hours: 0, minutes: 0, missingHours: Array.from({length: 24}, (_, i) => i), missingMinutes: Array.from({length: 59}, (_, i) => i + 1) };
 
-      const hours = files.filter(f => f.name.startsWith('h_')).length;
-      const minutes = files.filter(f => f.name.startsWith('m_')).length;
+      const existingHours = new Set(
+        files.filter(f => f.name.startsWith('h_')).map(f => parseInt(f.name.replace('h_', '').replace('.mp3', '')))
+      );
+      const existingMinutes = new Set(
+        files.filter(f => f.name.startsWith('m_')).map(f => parseInt(f.name.replace('m_', '').replace('.mp3', '')))
+      );
+
+      const missingHours = Array.from({length: 24}, (_, i) => i).filter(h => !existingHours.has(h));
+      const missingMinutes = Array.from({length: 59}, (_, i) => i + 1).filter(m => !existingMinutes.has(m));
       
-      return { hours, minutes };
+      return { 
+        hours: existingHours.size, 
+        minutes: existingMinutes.size,
+        missingHours,
+        missingMinutes
+      };
     } catch {
-      return { hours: 0, minutes: 0 };
+      return { hours: 0, minutes: 0, missingHours: Array.from({length: 24}, (_, i) => i), missingMinutes: Array.from({length: 59}, (_, i) => i + 1) };
     }
   };
 
@@ -179,9 +182,10 @@ export const useHourAudio = () => {
     getHourUrl,
     getMinuteUrl,
     playHourAudio,
-    generateHours,
-    generateMinutes,
-    generateAllTimeAudios,
+    checkFileExists,
+    generateSingleHour,
+    generateSingleMinute,
+    generateAllIncremental,
     checkAudiosExist,
   };
 };
