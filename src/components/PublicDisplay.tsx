@@ -715,35 +715,53 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('Audio not unlocked, skipping hour announcement');
       return;
     }
-    
+
+    // Never overlap with patient calls
+    if (announcingType || isSpeakingRef.current) {
+      console.log('Patient announcement in progress, skipping hour announcement');
+      return;
+    }
+
     try {
       console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
-      
+
       // Repeat the announcement 2 times, each with notification sound before
       for (let i = 0; i < 2; i++) {
+        // Abort if a patient call starts mid-way
+        if (announcingType || isSpeakingRef.current) {
+          console.log('Patient announcement started, aborting hour announcement');
+          return;
+        }
+
         console.log(`Hour announcement iteration ${i + 1}/2`);
-        
+
         // Play distinct notification sound before hour announcement
         await playTimeNotificationSound();
-        
+
+        // Abort again after notification
+        if (announcingType || isSpeakingRef.current) {
+          console.log('Patient announcement started, aborting hour announcement after notification');
+          return;
+        }
+
         const success = await playHourAudio(hour, minute);
         if (success) {
           console.log(`Hour announcement iteration ${i + 1} completed`);
         } else {
           console.warn(`Hour announcement iteration ${i + 1} failed`);
         }
-        
+
         // Small pause between repetitions (only if not the last iteration)
         if (i < 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
-      
+
       console.log('Hour announcement fully completed (2x)');
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
     }
-  }, [audioUnlocked, playHourAudio, playTimeNotificationSound]);
+  }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
 
   // Generate 3 random announcement times per hour with minimum 10 min between them
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
@@ -776,41 +794,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
-    
+
+    // Never overlap hour announcements with patient calls
+    if (announcingType || isSpeakingRef.current) {
+      return;
+    }
+
     const hour = currentTime.getHours();
     const minute = currentTime.getMinutes();
     const second = currentTime.getSeconds();
     const now = Date.now();
-    
+
     // Horário de silêncio: não anunciar entre 23h e 5h (inclusive)
     const isQuietHours = hour >= 23 || hour < 5;
     if (isQuietHours) {
       return; // Não anunciar durante horário de silêncio
     }
-    
+
     // Regenerar agendamento quando mudar de hora
     if (currentScheduleHourRef.current !== hour) {
       currentScheduleHourRef.current = hour;
       scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour);
     }
-    
+
     // Verificar se é momento de anunciar
     const shouldAnnounce = scheduledAnnouncementsRef.current.includes(minute) && second < 5;
     const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
     const minGapMs = 10 * 60 * 1000; // 10 minutos em ms
-    
+
     if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
       lastTimeAnnouncementRef.current = now;
-      
+
       // Remover este minuto do agendamento para não repetir
-      scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter(m => m !== minute);
-      
+      scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter((m) => m !== minute);
+
       // Pequeno delay para evitar conflitos com outros áudios
       setTimeout(() => {
+        // Double-check we are still not in a patient announcement
+        if (announcingType || isSpeakingRef.current) return;
         playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements]);
+  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
 
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
