@@ -99,7 +99,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-bold text-foreground">
-                Software de Chamada De Pacientes
+                Chamada de Pacientes
               </h1>
               <p className="text-xs text-muted-foreground truncate max-w-[200px] lg:max-w-none">
                 {unitName}
