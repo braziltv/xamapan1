@@ -9,26 +9,20 @@ const corsHeaders = {
 // Alice - voz feminina popular em português
 const VOICE_ID = 'Xb7hH8MSUJpSbSDYk0k2';
 
-function formatHourText(hour: number, minute: number): string {
-  const hourText = hour === 1 ? 'uma hora' : 
-                   hour === 0 ? 'meia noite' :
-                   hour === 12 ? 'meio dia' :
-                   `${hour} horas`;
-  
-  if (minute === 0) {
-    if (hour === 0) return 'meia noite';
-    if (hour === 12) return 'meio dia';
-    return hourText;
-  }
-  
-  const minuteText = minute === 1 ? 'um minuto' : 
-                     minute === 30 ? 'e meia' :
-                     `e ${minute} minutos`;
-  
-  if (hour === 0) return `meia noite ${minuteText}`;
-  if (hour === 12) return `meio dia ${minuteText}`;
-  
-  return `${hourText} ${minuteText}`;
+// Texto para horas (0-23)
+function getHourText(hour: number): string {
+  if (hour === 0) return 'meia noite';
+  if (hour === 1) return 'uma hora';
+  if (hour === 12) return 'meio dia';
+  return `${hour} horas`;
+}
+
+// Texto para minutos (0-59)
+function getMinuteText(minute: number): string {
+  if (minute === 0) return ''; // Não precisa de áudio para minuto 0
+  if (minute === 1) return 'e um minuto';
+  if (minute === 30) return 'e meia';
+  return `e ${minute} minutos`;
 }
 
 async function generateAudio(text: string, apiKey: string): Promise<ArrayBuffer> {
@@ -82,36 +76,31 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    if (action === 'generate-hour' && hour !== undefined) {
-      // Generate all minutes for a specific hour (60 files)
-      const results: { success: number; failed: number; errors: string[]; hour: number } = {
-        success: 0,
-        failed: 0,
-        errors: [],
-        hour: hour
-      };
+    // Gerar todos os áudios de horas (24 arquivos)
+    if (action === 'generate-hours') {
+      const results = { success: 0, failed: 0, errors: [] as string[] };
 
-      for (let m = 0; m < 60; m++) {
-        const cacheKey = `hour_${hour.toString().padStart(2, '0')}_${m.toString().padStart(2, '0')}.mp3`;
+      for (let h = 0; h < 24; h++) {
+        const cacheKey = `h_${h.toString().padStart(2, '0')}.mp3`;
         
         // Check if already exists
         const { data: existingFile } = await supabase.storage
           .from('tts-cache')
-          .list('hours', { search: cacheKey });
+          .list('time', { search: cacheKey });
         
-        if (existingFile && existingFile.length > 0) {
+        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
           console.log(`Skipping ${cacheKey} - already exists`);
           results.success++;
           continue;
         }
 
         try {
-          const text = formatHourText(hour, m);
+          const text = getHourText(h);
           const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
           
           const { error: uploadError } = await supabase.storage
             .from('tts-cache')
-            .upload(`hours/${cacheKey}`, audioBuffer, {
+            .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
               upsert: true,
             });
@@ -126,7 +115,7 @@ serve(async (req) => {
           }
 
           // Small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 150));
+          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           console.error(`Error generating ${cacheKey}:`, error);
@@ -135,62 +124,129 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify(results), {
+      return new Response(JSON.stringify({ type: 'hours', ...results }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (action === 'generate-all') {
-      // Generate all hour audios (0-23 hours, 0-59 minutes)
-      const results: { success: number; failed: number; errors: string[] } = {
-        success: 0,
-        failed: 0,
-        errors: []
-      };
+    // Gerar todos os áudios de minutos (59 arquivos - minuto 0 não precisa)
+    if (action === 'generate-minutes') {
+      const results = { success: 0, failed: 0, errors: [] as string[] };
 
-      for (let h = 0; h < 24; h++) {
-        for (let m = 0; m < 60; m++) {
-          const cacheKey = `hour_${h.toString().padStart(2, '0')}_${m.toString().padStart(2, '0')}.mp3`;
+      for (let m = 1; m < 60; m++) {
+        const cacheKey = `m_${m.toString().padStart(2, '0')}.mp3`;
+        
+        // Check if already exists
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('time', { search: cacheKey });
+        
+        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+          console.log(`Skipping ${cacheKey} - already exists`);
+          results.success++;
+          continue;
+        }
+
+        try {
+          const text = getMinuteText(m);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
           
-          // Check if already exists
-          const { data: existingFile } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
             .from('tts-cache')
-            .list('hours', { search: cacheKey });
-          
-          if (existingFile && existingFile.length > 0) {
-            console.log(`Skipping ${cacheKey} - already exists`);
-            results.success++;
-            continue;
-          }
+            .upload(`time/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
 
-          try {
-            const text = formatHourText(h, m);
-            const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
-            
-            const { error: uploadError } = await supabase.storage
-              .from('tts-cache')
-              .upload(`hours/${cacheKey}`, audioBuffer, {
-                contentType: 'audio/mpeg',
-                upsert: true,
-              });
-
-            if (uploadError) {
-              console.error(`Upload error for ${cacheKey}:`, uploadError);
-              results.failed++;
-              results.errors.push(`${cacheKey}: ${uploadError.message}`);
-            } else {
-              console.log(`Successfully generated ${cacheKey}`);
-              results.success++;
-            }
-
-            // Small delay to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 150));
-          } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-            console.error(`Error generating ${cacheKey}:`, error);
+          if (uploadError) {
+            console.error(`Upload error for ${cacheKey}:`, uploadError);
             results.failed++;
-            results.errors.push(`${cacheKey}: ${errorMsg}`);
+            results.errors.push(`${cacheKey}: ${uploadError.message}`);
+          } else {
+            console.log(`Successfully generated ${cacheKey}`);
+            results.success++;
           }
+
+          // Small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`Error generating ${cacheKey}:`, error);
+          results.failed++;
+          results.errors.push(`${cacheKey}: ${errorMsg}`);
+        }
+      }
+
+      return new Response(JSON.stringify({ type: 'minutes', ...results }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Gerar todos (horas + minutos = 83 arquivos total)
+    if (action === 'generate-all') {
+      const results = { hours: 0, minutes: 0, failed: 0, errors: [] as string[] };
+
+      // Gerar horas
+      for (let h = 0; h < 24; h++) {
+        const cacheKey = `h_${h.toString().padStart(2, '0')}.mp3`;
+        
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('time', { search: cacheKey });
+        
+        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+          results.hours++;
+          continue;
+        }
+
+        try {
+          const text = getHourText(h);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
+          
+          await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+
+          results.hours++;
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`h_${h}: ${error}`);
+        }
+      }
+
+      // Gerar minutos
+      for (let m = 1; m < 60; m++) {
+        const cacheKey = `m_${m.toString().padStart(2, '0')}.mp3`;
+        
+        const { data: existingFile } = await supabase.storage
+          .from('tts-cache')
+          .list('time', { search: cacheKey });
+        
+        if (existingFile && existingFile.some(f => f.name === cacheKey)) {
+          results.minutes++;
+          continue;
+        }
+
+        try {
+          const text = getMinuteText(m);
+          const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
+          
+          await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${cacheKey}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true,
+            });
+
+          results.minutes++;
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`m_${m}: ${error}`);
         }
       }
 
@@ -199,54 +255,27 @@ serve(async (req) => {
       });
     }
 
-    if (action === 'get' && hour !== undefined && minute !== undefined) {
-      const cacheKey = `hours/hour_${hour.toString().padStart(2, '0')}_${minute.toString().padStart(2, '0')}.mp3`;
+    // Obter URLs para reprodução concatenada
+    if (action === 'get-urls' && hour !== undefined && minute !== undefined) {
+      const hourKey = `time/h_${hour.toString().padStart(2, '0')}.mp3`;
       
-      // Try to get from cache
-      const { data: audioData, error: downloadError } = await supabase.storage
+      const { data: hourUrl } = supabase.storage
         .from('tts-cache')
-        .download(cacheKey);
+        .getPublicUrl(hourKey);
 
-      if (!downloadError && audioData) {
-        const arrayBuffer = await audioData.arrayBuffer();
-        return new Response(arrayBuffer, {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'audio/mpeg',
-            'X-Cache': 'HIT',
-          },
-        });
+      let minuteUrl = null;
+      if (minute > 0) {
+        const minuteKey = `time/m_${minute.toString().padStart(2, '0')}.mp3`;
+        const { data: mUrl } = supabase.storage
+          .from('tts-cache')
+          .getPublicUrl(minuteKey);
+        minuteUrl = mUrl.publicUrl;
       }
 
-      // Generate on-demand if not cached
-      const text = formatHourText(hour, minute);
-      const audioBuffer = await generateAudio(text, ELEVENLABS_API_KEY);
-      
-      // Cache it
-      await supabase.storage
-        .from('tts-cache')
-        .upload(cacheKey, audioBuffer, {
-          contentType: 'audio/mpeg',
-          upsert: true,
-        });
-
-      return new Response(audioBuffer, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'audio/mpeg',
-          'X-Cache': 'MISS',
-        },
-      });
-    }
-
-    if (action === 'get-url' && hour !== undefined && minute !== undefined) {
-      const cacheKey = `hours/hour_${hour.toString().padStart(2, '0')}_${minute.toString().padStart(2, '0')}.mp3`;
-      
-      const { data: publicUrl } = supabase.storage
-        .from('tts-cache')
-        .getPublicUrl(cacheKey);
-
-      return new Response(JSON.stringify({ url: publicUrl.publicUrl }), {
+      return new Response(JSON.stringify({ 
+        hourUrl: hourUrl.publicUrl, 
+        minuteUrl 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

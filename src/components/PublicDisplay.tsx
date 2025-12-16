@@ -19,7 +19,7 @@ interface NewsItem {
 
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
-  const { playHourAudio, getHourAudioUrl } = useHourAudio();
+  const { playHourAudio } = useHourAudio();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
@@ -593,7 +593,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithElevenLabs, speakWithWebSpeech]);
 
-  // Play hour announcement using pre-cached audio
+  // Play hour announcement using pre-cached audio (concatenating hour + minute)
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
       console.log('Audio not unlocked, skipping hour announcement');
@@ -602,15 +602,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     try {
       console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
-      const url = getHourAudioUrl(hour, minute);
-      const audio = new Audio(url);
-      
-      await playAmplifiedAudio(audio, 2.0);
-      console.log('Hour announcement completed');
+      const success = await playHourAudio(hour, minute);
+      if (success) {
+        console.log('Hour announcement completed');
+      } else {
+        console.warn('Hour announcement failed');
+      }
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
     }
-  }, [audioUnlocked, getHourAudioUrl, playAmplifiedAudio]);
+  }, [audioUnlocked, playHourAudio]);
 
   // Announce time every hour on the hour
   useEffect(() => {

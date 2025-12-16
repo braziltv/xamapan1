@@ -155,10 +155,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para geração de áudios de horas
   const [generatingHourAudios, setGeneratingHourAudios] = useState(false);
-  const [currentGeneratingHour, setCurrentGeneratingHour] = useState<number | null>(null);
+  const [generationStage, setGenerationStage] = useState<'hours' | 'minutes' | null>(null);
   
   const { toast } = useToast();
-  const { generateAllHourAudios } = useHourAudio();
+  const { generateAllTimeAudios, checkAudiosExist } = useHourAudio();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1684,29 +1684,29 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             variant="outline" 
             onClick={async () => {
               setGeneratingHourAudios(true);
-              setCurrentGeneratingHour(0);
+              setGenerationStage('hours');
               toast({
-                title: "Gerando áudios de horas",
-                description: "Gerando 1.440 áudios (24h × 60min). Isso pode levar ~20 minutos.",
+                title: "Gerando áudios de tempo",
+                description: "Gerando 83 áudios (24 horas + 59 minutos). Aguarde...",
               });
               try {
-                const result = await generateAllHourAudios((currentHour) => {
-                  setCurrentGeneratingHour(currentHour);
+                const result = await generateAllTimeAudios((stage, done) => {
+                  setGenerationStage(done ? null : stage);
                 });
                 toast({
                   title: "Áudios gerados",
-                  description: `${result.success} áudios gerados com sucesso. ${result.failed} falhas.`,
+                  description: `${result.hours} horas + ${result.minutes} minutos gerados. ${result.failed} falhas.`,
                   variant: result.failed > 0 ? "destructive" : "default",
                 });
               } catch (error) {
                 toast({
                   title: "Erro ao gerar áudios",
-                  description: "Ocorreu um erro ao gerar os áudios de horas.",
+                  description: "Ocorreu um erro ao gerar os áudios de tempo.",
                   variant: "destructive",
                 });
               } finally {
                 setGeneratingHourAudios(false);
-                setCurrentGeneratingHour(null);
+                setGenerationStage(null);
               }
             }}
             disabled={generatingHourAudios}
@@ -1715,12 +1715,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             {generatingHourAudios ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                {currentGeneratingHour !== null ? `Hora ${currentGeneratingHour}/23...` : 'Gerando...'}
+                {generationStage === 'hours' ? 'Gerando horas...' : generationStage === 'minutes' ? 'Gerando minutos...' : 'Gerando...'}
               </>
             ) : (
               <>
                 <Volume2 className="w-4 h-4" />
-                Gerar Áudios Horas
+                Gerar Áudios Tempo
               </>
             )}
           </Button>
