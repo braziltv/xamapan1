@@ -162,9 +162,13 @@ serve(async (req) => {
   try {
     const { action, hour, minute, force } = await req.json();
     
-    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY_HOURS');
+    // Tentar ELEVENLABS_API_KEY_HOURS primeiro, fallback para ELEVENLABS_API_KEY
+    let ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY_HOURS');
     if (!ELEVENLABS_API_KEY) {
-      throw new Error('ELEVENLABS_API_KEY_HOURS not configured');
+      ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+    }
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error('No ElevenLabs API key configured');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
