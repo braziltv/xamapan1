@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, Timer } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
+import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
 import {
   Select,
   SelectContent,
@@ -210,6 +211,16 @@ export function DoctorPanel({
                             PRIORIDADE
                           </span>
                         )}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <ElapsedTimeDisplay startTime={patient.createdAt} />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Tempo aguardando</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         {estimate && (
                           <TooltipProvider>
                             <Tooltip>
