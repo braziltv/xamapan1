@@ -177,16 +177,16 @@ export function DoctorPanel({
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
           <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Aguardando Consulta ({waitingPatients.length})
+          Aguardando Consulta - {currentConsultorioLabel} ({waitingPatients.filter(p => p.destination === currentConsultorioLabel).length})
         </h2>
         
-        {waitingPatients.length === 0 ? (
+        {waitingPatients.filter(p => p.destination === currentConsultorioLabel).length === 0 ? (
           <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
-            Nenhum paciente aguardando consulta
+            Nenhum paciente aguardando consulta neste consultório
           </p>
         ) : (
           <div className="space-y-2 max-h-[60vh] sm:max-h-[400px] overflow-y-auto">
-            {waitingPatients.map((patient, index) => {
+            {waitingPatients.filter(p => p.destination === currentConsultorioLabel).map((patient, index) => {
               const priorityConfig = PRIORITY_CONFIG[patient.priority || 'normal'];
               const PriorityIcon = priorityConfig.icon;
               

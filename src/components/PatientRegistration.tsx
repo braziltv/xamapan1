@@ -63,8 +63,8 @@ const CONSULTORIOS = [
 ];
 
 const CONSULTORIOS_MEDICO = [
-  { id: 'med1', name: 'Consultório Médico 1' },
-  { id: 'med2', name: 'Consultório Médico 2' },
+  { id: 'med1', name: 'Consultório 1' },
+  { id: 'med2', name: 'Consultório 2' },
 ];
 
 const PRIORITY_CONFIG = {

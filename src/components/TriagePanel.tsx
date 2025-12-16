@@ -167,19 +167,19 @@ export function TriagePanel({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
-                        onSendToDoctorQueue(currentCall.id, 'Consultório Médico 1');
+                        onSendToDoctorQueue(currentCall.id, 'Consultório 1');
                       }}
                       className="cursor-pointer"
                     >
-                      Consultório Médico 1
+                      Consultório 1
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        onSendToDoctorQueue(currentCall.id, 'Consultório Médico 2');
+                        onSendToDoctorQueue(currentCall.id, 'Consultório 2');
                       }}
                       className="cursor-pointer"
                     >
-                      Consultório Médico 2
+                      Consultório 2
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -298,16 +298,16 @@ export function TriagePanel({
                       <DropdownMenuLabel>Escolha o Consultório</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório Médico 1')}
+                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 1')}
                         className="cursor-pointer"
                       >
-                        Consultório Médico 1
+                        Consultório 1
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório Médico 2')}
+                        onClick={() => onSendToDoctorQueue(patient.id, 'Consultório 2')}
                         className="cursor-pointer"
                       >
-                        Consultório Médico 2
+                        Consultório 2
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
