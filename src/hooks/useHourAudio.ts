@@ -18,12 +18,15 @@ export const useHourAudio = () => {
   // Reproduzir hora concatenando os dois áudios
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
+      // Get volume from localStorage
+      const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
+      
       const hourUrl = getHourUrl(hour);
       const minuteUrl = getMinuteUrl(minute);
 
       // Reproduzir áudio da hora
       const hourAudio = new Audio(hourUrl);
-      hourAudio.volume = 1.0;
+      hourAudio.volume = timeAnnouncementVolume;
       
       await new Promise<void>((resolve, reject) => {
         hourAudio.onended = () => resolve();
@@ -34,7 +37,7 @@ export const useHourAudio = () => {
       // Se tiver minutos, reproduzir o áudio dos minutos em sequência
       if (minuteUrl) {
         const minuteAudio = new Audio(minuteUrl);
-        minuteAudio.volume = 1.0;
+        minuteAudio.volume = timeAnnouncementVolume;
         
         await new Promise<void>((resolve, reject) => {
           minuteAudio.onended = () => resolve();

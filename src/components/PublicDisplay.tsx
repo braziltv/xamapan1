@@ -454,11 +454,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     console.log('playNotificationSound called');
     
     return new Promise<void>((resolve, reject) => {
+      // Get volume from localStorage
+      const notificationVolume = parseFloat(localStorage.getItem('volume-notification') || '1');
+      const gain = 2.5 * notificationVolume;
+      
       // Create new audio element each time to allow Web Audio API connection
       const audio = new Audio('/sounds/notification.mp3');
       audio.currentTime = 0;
       
-      playAmplifiedAudio(audio, 2.5)
+      playAmplifiedAudio(audio, gain)
         .then(() => {
           console.log('Notification sound finished');
           resolve();
@@ -481,11 +485,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             return;
           }
 
+          // Get TTS volume from localStorage if not provided in opts
+          const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
+
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = 'pt-BR';
           utterance.rate = opts?.rate ?? 0.9;
           utterance.pitch = opts?.pitch ?? 1.1;
-          utterance.volume = opts?.volume ?? 1;
+          utterance.volume = opts?.volume ?? ttsVolume;
 
           // Try to choose a Portuguese voice when available
           const voices = synth.getVoices?.() ?? [];
@@ -518,6 +525,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (text: string): Promise<void> => {
       console.log('Speaking with ElevenLabs:', text);
       
+      // Get TTS volume from localStorage
+      const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
+      const gain = 2.5 * ttsVolume;
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -541,7 +552,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       
       const audio = new Audio(audioUrl);
       try {
-        await playAmplifiedAudio(audio, 2.5);
+        await playAmplifiedAudio(audio, gain);
       } finally {
         URL.revokeObjectURL(audioUrl);
       }
@@ -601,6 +612,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     
     return new Promise<void>((resolve) => {
       try {
+        // Get volume from localStorage
+        const timeNotificationVolume = parseFloat(localStorage.getItem('volume-time-notification') || '1');
+        
         const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
         if (!audioContextRef.current) audioContextRef.current = audioContext;
         
@@ -616,9 +630,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           oscillator.type = 'sine'; // Softer sine wave instead of triangle
           oscillator.frequency.value = frequency;
           
-          // Gentle envelope
+          // Gentle envelope with volume control
+          const maxGain = 0.3 * timeNotificationVolume;
           gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-          gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + startTime + 0.05);
+          gainNode.gain.linearRampToValueAtTime(maxGain, audioContext.currentTime + startTime + 0.05);
           gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
           
           oscillator.connect(gainNode);

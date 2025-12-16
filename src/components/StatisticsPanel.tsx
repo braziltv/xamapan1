@@ -1691,6 +1691,36 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 description: `Reproduzindo: ${hour}h${minute.toString().padStart(2, '0')}`,
               });
               try {
+                // Play time notification sound first (G5 → C6 ascending tones)
+                const timeNotificationVolume = parseFloat(localStorage.getItem('volume-time-notification') || '1');
+                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                
+                const playTone = (frequency: number, startTime: number, duration: number) => {
+                  const oscillator = audioContext.createOscillator();
+                  const gainNode = audioContext.createGain();
+                  
+                  oscillator.connect(gainNode);
+                  gainNode.connect(audioContext.destination);
+                  
+                  oscillator.frequency.value = frequency;
+                  oscillator.type = 'sine';
+                  
+                  const maxGain = 0.3 * timeNotificationVolume;
+                  gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+                  gainNode.gain.linearRampToValueAtTime(maxGain, audioContext.currentTime + startTime + 0.05);
+                  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
+                  
+                  oscillator.start(audioContext.currentTime + startTime);
+                  oscillator.stop(audioContext.currentTime + startTime + duration);
+                };
+                
+                // G5 (783.99 Hz) → C6 (1046.50 Hz) - soft ascending tones
+                playTone(783.99, 0, 0.25);
+                playTone(1046.50, 0.15, 0.35);
+                
+                // Wait for notification sound to finish
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
                 const success = await playHourAudio(hour, minute);
                 if (!success) {
                   toast({
