@@ -168,7 +168,9 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       <div className="flex items-center gap-4">
         {/* Current weather with city */}
         <div className="flex items-center gap-3">
-          <span className="text-red-200 text-[10px] font-semibold uppercase">{weather.city}</span>
+          <span className="text-2xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-yellow-300 animate-pulse drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">
+            {weather.city}
+          </span>
           {getWeatherIcon(weather.current.description, 'lg')}
           <div className="flex items-baseline gap-1.5 transition-all duration-500">
             <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
