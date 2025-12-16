@@ -10,12 +10,13 @@ const corsHeaders = {
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
 // Split a full name into individual parts (first name, last name, third name, etc.)
+// All parts are normalized to lowercase to avoid duplicate cache entries
 function splitNameIntoParts(fullName: string): string[] {
   return fullName
     .trim()
+    .toLowerCase()
     .split(/\s+/)
-    .filter(part => part.length > 0)
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+    .filter(part => part.length > 0);
 }
 
 // Generate a cache key from the text
