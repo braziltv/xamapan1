@@ -46,8 +46,8 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
 }
 
-const CITIES = [
-  'Paineiras', 'Biquinhas', 'Abaeté', 'Cedro do Abaeté', 'Morada Nova de Minas',
+const OTHER_CITIES = [
+  'Biquinhas', 'Abaeté', 'Cedro do Abaeté', 'Morada Nova de Minas',
   'Quartel Geral', 'Tiros', 'Martinho Campos', 'Matutina', 'Dores do Indaiá',
   'Pompéu', 'Lagoa da Prata', 'São Gotardo', 'Felixlândia', 'Curvelo',
   'Três Marias', 'Piumhi', 'Formiga', 'Arcos', 'Pains', 'Pimenta',
@@ -60,15 +60,24 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showMaxTemp, setShowMaxTemp] = useState(true);
-  const [cityIndex, setCityIndex] = useState(0);
+  const [rotationCount, setRotationCount] = useState(0);
+  const [otherCityIndex, setOtherCityIndex] = useState(0);
 
-  const currentCity = CITIES[cityIndex];
+  // Every 5th rotation shows Paineiras, otherwise show other cities
+  const currentCity = rotationCount % 5 === 0 ? 'Paineiras' : OTHER_CITIES[otherCityIndex];
 
-  // Rotate cities every 5 minutes
+  // Rotate cities every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCityIndex(prev => (prev + 1) % CITIES.length);
-    }, 300000);
+      setRotationCount(prev => {
+        const next = prev + 1;
+        // If next is not a Paineiras slot, advance to next other city
+        if (next % 5 !== 0) {
+          setOtherCityIndex(prevIdx => (prevIdx + 1) % OTHER_CITIES.length);
+        }
+        return next;
+      });
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
