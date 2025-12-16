@@ -42,6 +42,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
+  const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
 
   // Fetch news from multiple sources
   useEffect(() => {
@@ -878,13 +879,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   const speakName = useCallback(
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
-      console.log('speakName called with:', { name, caller, destination });
+      const now = Date.now();
+      console.log('speakName called with:', { name, caller, destination, timestamp: now });
 
+      // Debounce: ignore calls within 2 seconds of each other
+      if (now - lastSpeakCallRef.current < 2000) {
+        console.log('Debounce: ignoring duplicate call within 2s window');
+        return;
+      }
+      
       // Prevent duplicate TTS calls
       if (isSpeakingRef.current) {
         console.log('Already speaking, skipping duplicate call');
         return;
       }
+      
+      lastSpeakCallRef.current = now;
       isSpeakingRef.current = true;
 
       // Start visual alert; it will auto-stop after 10s in the effect below
