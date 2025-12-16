@@ -252,8 +252,8 @@ export function TriagePanel({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Chegou às {formatBrazilTime(patient.createdAt, 'HH:mm')}
+                      <p className="text-xs sm:text-sm">
+                        <span className="text-amber-500 font-medium">Chegou às {formatBrazilTime(patient.createdAt, 'HH:mm')}</span>
                       </p>
                     </div>
                   </div>

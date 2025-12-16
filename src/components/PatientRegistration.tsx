@@ -201,8 +201,8 @@ export function PatientRegistration({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Cadastrado às {formatBrazilTime(patient.createdAt, 'HH:mm')}
+                      <p className="text-xs sm:text-sm">
+                        <span className="text-amber-500 font-medium">Cadastrado às {formatBrazilTime(patient.createdAt, 'HH:mm')}</span>
                         {' • '}
                         <span className={`font-medium ${
                           patient.status === 'waiting' ? 'text-amber-500' :
