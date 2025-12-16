@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import {
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState } from 'react';
+import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
@@ -36,6 +37,7 @@ export function DoctorPanel({
 }: DoctorPanelProps) {
   const [selectedConsultorio, setSelectedConsultorio] = useState<string>('consultorio-1');
   const [currentConsultorio, setCurrentConsultorio] = useState<string>('Consultório 1');
+  const { soundEnabled, toggleSound } = useNewPatientSound('doctor', waitingPatients.length);
 
   const consultorios = [
     { value: 'consultorio-1', label: 'Consultório 1' },
@@ -54,6 +56,18 @@ export function DoctorPanel({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Sound Toggle */}
+      <div className="flex justify-end">
+        <Button 
+          onClick={toggleSound} 
+          variant="outline" 
+          size="sm"
+          className={soundEnabled ? 'text-green-600 border-green-300' : 'text-muted-foreground border-border'}
+        >
+          {soundEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
+          {soundEnabled ? 'Som Ativado' : 'Som Desativado'}
+        </Button>
+      </div>
       {/* Consultório Selection */}
       <div className="bg-card rounded-xl p-3 sm:p-4 shadow-health border border-border">
         <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
