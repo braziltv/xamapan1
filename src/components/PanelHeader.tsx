@@ -1,7 +1,9 @@
-import { Volume2, VolumeX, Activity, LogOut, Settings } from 'lucide-react';
+import { Volume2, VolumeX, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsDialog } from './SettingsDialog';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
+import { AnimatedECG } from './AnimatedECG';
+
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -20,8 +22,8 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
           {/* First Row - Logo, Title, Logout */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg gradient-health flex items-center justify-center shadow-glow flex-shrink-0">
-                <Activity className="w-4 h-4 text-primary-foreground" />
+              <div className="w-8 h-8 rounded-lg bg-card border border-red-500/30 flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.3)] flex-shrink-0">
+                <AnimatedECG size={20} />
               </div>
               <div className="min-w-0">
                 <h1 className="text-sm font-bold text-foreground truncate">
@@ -92,8 +94,8 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
         <div className="hidden sm:flex items-center justify-between h-16">
           {/* Logo and Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-health flex items-center justify-center shadow-glow">
-              <Activity className="w-6 h-6 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl bg-card border border-red-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+              <AnimatedECG size={28} />
             </div>
             <div>
               <h1 className="text-lg lg:text-xl font-bold text-foreground">
