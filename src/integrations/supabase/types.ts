@@ -38,6 +38,7 @@ export type Database = {
       call_history: {
         Row: {
           call_type: string
+          completion_type: string | null
           created_at: string
           destination: string | null
           id: string
@@ -46,6 +47,7 @@ export type Database = {
         }
         Insert: {
           call_type: string
+          completion_type?: string | null
           created_at?: string
           destination?: string | null
           id?: string
@@ -54,6 +56,7 @@ export type Database = {
         }
         Update: {
           call_type?: string
+          completion_type?: string | null
           created_at?: string
           destination?: string | null
           id?: string

@@ -47,6 +47,7 @@ export function useSupabaseSync(unitName: string) {
         call_type: callType,
         patient_name: patientName,
         destination: destination || null,
+        completion_type: 'pending', // Will be updated when call is completed
       });
 
     if (historyError) {
@@ -54,7 +55,20 @@ export function useSupabaseSync(unitName: string) {
     }
   }, [unitName]);
 
-  const completeCall = useCallback(async (callType: 'triage' | 'doctor') => {
+  const completeCall = useCallback(async (
+    callType: 'triage' | 'doctor',
+    completionType: 'completed' | 'withdrawal' = 'completed'
+  ) => {
+    // Get the active call to find the patient name
+    const { data: activeCall } = await supabase
+      .from('patient_calls')
+      .select('patient_name')
+      .eq('unit_name', unitName)
+      .eq('call_type', callType)
+      .eq('status', 'active')
+      .single();
+
+    // Complete the patient_calls record
     const { error } = await supabase
       .from('patient_calls')
       .update({ status: 'completed', completed_at: new Date().toISOString() })
@@ -64,6 +78,22 @@ export function useSupabaseSync(unitName: string) {
 
     if (error) {
       console.error('Error completing call:', error);
+    }
+
+    // Update the most recent history record for this patient with the completion type
+    if (activeCall?.patient_name) {
+      const { error: historyError } = await supabase
+        .from('call_history')
+        .update({ completion_type: completionType })
+        .eq('unit_name', unitName)
+        .eq('patient_name', activeCall.patient_name)
+        .eq('completion_type', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (historyError) {
+        console.error('Error updating history completion type:', historyError);
+      }
     }
   }, [unitName]);
 
