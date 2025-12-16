@@ -222,7 +222,7 @@ async function testApiKey(keyName: string, apiKey: string | undefined): Promise<
   
   try {
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/SVgp5d1fyFQRW1eQbwkq`,
+      `https://api.elevenlabs.io/v1/text-to-speech/onwK4e9ZLuTAKqWW03F9`,
       {
         method: "POST",
         headers: {
@@ -360,7 +360,8 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    const selectedVoiceId = voiceId || "SVgp5d1fyFQRW1eQbwkq";
+    // Daniel voice - clear, authoritative male voice that works well with Portuguese
+    const selectedVoiceId = voiceId || "onwK4e9ZLuTAKqWW03F9";
 
     // Handle concatenation mode: combine name parts + prefix + destination
     if (concatenate && supabase && ELEVENLABS_API_KEY) {
