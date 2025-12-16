@@ -64,11 +64,11 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
 
   const currentCity = CITIES[cityIndex];
 
-  // Rotate cities every 30 seconds
+  // Rotate cities every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setCityIndex(prev => (prev + 1) % CITIES.length);
-    }, 30000);
+    }, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -188,7 +188,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center min-w-[120px]">
             <span>Previsão do tempo</span>
-            <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{weather.city}-MG</span>
+            <span className="flex items-center gap-0.5 animate-pulse"><MapPin className="w-3 h-3" />{weather.city}-MG</span>
           </div>
           {getWeatherIcon(weather.current.description, 'lg')}
           <div className="flex items-baseline gap-1.5 transition-all duration-500">
