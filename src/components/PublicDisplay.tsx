@@ -830,6 +830,41 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
   }, []);
 
+  // Gerar TTS para frase de destino (usa cache permanente com prefixo "phrase_")
+  const speakDestinationPhrase = useCallback(
+    async (phrase: string): Promise<void> => {
+      console.log('Speaking destination phrase:', phrase);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: phrase, unitName, isPermanentCache: true }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      try {
+        await playAmplifiedAudio(audio, 2.5);
+      } finally {
+        URL.revokeObjectURL(audioUrl);
+      }
+    },
+    [unitName, playAmplifiedAudio]
+  );
 
   const speakName = useCallback(
     async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
@@ -841,13 +876,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.log('Debounce: ignoring duplicate call within 2s window');
         return;
       }
-
+      
       // Prevent duplicate TTS calls
       if (isSpeakingRef.current) {
         console.log('Already speaking, skipping duplicate call');
         return;
       }
-
+      
       lastSpeakCallRef.current = now;
       isSpeakingRef.current = true;
 
@@ -858,60 +893,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const destinationPhrase = getDestinationPhrase(location);
       console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
-      // Prefetch BOTH audios in parallel to reduce latency (while the notification sound is playing)
-      const headers = {
-        'Content-Type': 'application/json',
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      };
-
-      const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-      const gain = 2.5 * ttsVolume;
-
-      const fetchAudioBlob = async (text: string, isPermanentCache: boolean) => {
-        const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ text, unitName, isPermanentCache }),
-        });
-
-        if (!resp.ok) {
-          const errorData = await resp.json().catch(() => ({}));
-          throw new Error(errorData.error || `ElevenLabs error: ${resp.status}`);
-        }
-
-        return resp.blob();
-      };
-
-      const nameBlobPromise = fetchAudioBlob(name, false);
-      const destinationBlobPromise = fetchAudioBlob(destinationPhrase, true);
-
-      const playBlob = async (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        try {
-          await playAmplifiedAudio(audio, gain);
-        } finally {
-          URL.revokeObjectURL(url);
-        }
-      };
-
       try {
         // Play notification sound first (mandatory)
         await playNotificationSound();
 
-        // Play NAME first, then DESTINATION (sequentially) for reliability
-        await playBlob(await nameBlobPromise);
-        await playBlob(await destinationBlobPromise);
-
-        console.log('TTS completed (ElevenLabs - sequential: name + destination)');
+        // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
+        // Audio is cached locally in Supabase Storage for reuse
+        await speakWithConcatenatedTTS(name, destinationPhrase);
+        console.log('TTS completed (ElevenLabs - Brazilian Portuguese with local cache)');
       } catch (e) {
         console.error('ElevenLabs TTS failed:', e);
       } finally {
         isSpeakingRef.current = false;
       }
     },
-    [playNotificationSound, playAmplifiedAudio, getDestinationPhrase, unitName]
+    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase]
   );
 
   // Stop the flashing alert after exactly 10 seconds

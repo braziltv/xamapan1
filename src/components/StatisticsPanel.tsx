@@ -3,7 +3,6 @@ import { Patient, CallHistory } from '@/types/patient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { Label } from '@/components/ui/label';
 import { 
   Select,
@@ -42,8 +41,7 @@ import {
   HeartPulse,
   Bandage,
   Scan,
-  Bed,
-  Mic
+  Bed
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -165,15 +163,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
   
-  // Estado para limpar cache TTS
-  const [clearTTSDialogOpen, setClearTTSDialogOpen] = useState(false);
-  const [clearTTSPassword, setClearTTSPassword] = useState('');
-  const [showClearTTSPassword, setShowClearTTSPassword] = useState(false);
-  const [clearingTTS, setClearingTTS] = useState(false);
-  
   const { toast } = useToast();
   const { playHourAudio, checkAudiosExist } = useHourAudio();
-  const { forcePreCacheAllPhrases, DESTINATION_PHRASES } = useTTSPreCache();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1138,89 +1129,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
     });
   };
 
-  // Função para limpar cache TTS e regenerar com nova voz
-  const handleClearTTSCache = async () => {
-    if (clearTTSPassword !== 'Paineiras@1') {
-      toast({
-        title: "Senha incorreta",
-        description: "A senha informada está incorreta.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setClearingTTS(true);
-    setClearTTSDialogOpen(false);
-    setClearTTSPassword('');
-
-    try {
-      toast({
-        title: "Limpando cache TTS...",
-        description: "Removendo todos os arquivos de áudio cacheados (via servidor)...",
-      });
-
-      // 1. Limpar cache via edge function (com permissões adequadas)
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ clearAllCache: true }),
-        }
-      );
-
-      const result = await response.json();
-      
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Falha ao limpar cache');
-      }
-      
-      console.log(`Cache limpo via servidor: ${result.deletedCount} arquivos deletados`);
-
-      // 2. Limpar tabela de uso de nomes TTS
-      const { error: ttsUsageError } = await supabase
-        .from('tts_name_usage')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
-      if (ttsUsageError) {
-        console.error('Erro ao limpar tts_name_usage:', ttsUsageError);
-      }
-
-      // 3. Limpar flag de pré-cache no localStorage
-      localStorage.removeItem('tts_phrases_precached');
-
-      toast({
-        title: "Cache limpo!",
-        description: "Regenerando frases de destino com a nova voz...",
-      });
-
-      // 4. Regenerar cache das frases de destino
-      await forcePreCacheAllPhrases();
-
-      toast({
-        title: "Concluído!",
-        description: `Cache TTS limpo e ${DESTINATION_PHRASES.length} frases de destino regeneradas com a nova voz.`,
-      });
-
-      // Recarregar dados
-      loadDbHistory();
-    } catch (error) {
-      console.error('Erro ao limpar cache TTS:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao limpar o cache TTS.",
-        variant: "destructive",
-      });
-    } finally {
-      setClearingTTS(false);
-    }
-  };
-
+  // Função para limpar painel de chamados (patient_calls) e apagar as últimas chamadas exibidas na TV
   // Mantém TTS cache e estatísticas intactas
   const handleClearPatientCalls = async () => {
     if (clearCallsPassword !== 'Paineiras@1') {
@@ -1752,82 +1661,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Modal para limpar cache TTS */}
-      <Dialog open={clearTTSDialogOpen} onOpenChange={(open) => {
-        setClearTTSDialogOpen(open);
-        if (!open) setClearTTSPassword('');
-      }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-violet-600">
-              <Mic className="w-5 h-5" />
-              Limpar Cache TTS e Regenerar
-            </DialogTitle>
-            <DialogDescription>
-              Esta ação irá apagar todos os arquivos de áudio cacheados e regenerar as frases de destino com a nova voz configurada.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3">
-              <p className="text-sm text-violet-700 dark:text-violet-400 font-medium">
-                ℹ️ Use após alterar a voz TTS para regenerar todo o cache com a nova configuração.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clear-tts-password">Digite a senha para confirmar:</Label>
-              <div className="relative">
-                <Input
-                  id="clear-tts-password"
-                  type={showClearTTSPassword ? 'text' : 'password'}
-                  value={clearTTSPassword}
-                  onChange={(e) => setClearTTSPassword(e.target.value)}
-                  placeholder="Senha de administrador"
-                  className="pr-10"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleClearTTSCache();
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowClearTTSPassword(!showClearTTSPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showClearTTSPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setClearTTSDialogOpen(false);
-                setClearTTSPassword('');
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleClearTTSCache}
-              disabled={clearingTTS || !clearTTSPassword}
-              className="gap-2 bg-violet-600 hover:bg-violet-700"
-            >
-              {clearingTTS ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Limpando...
-                </>
-              ) : (
-                <>
-                  <Mic className="w-4 h-4" />
-                  Limpar e Regenerar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      {/* Input oculto para seleção de arquivo */}
       <input
         type="file"
         ref={fileInputRef}
@@ -1961,24 +1795,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           >
             <Clock className="w-4 h-4" />
             Cache Horas (Offline)
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => setClearTTSDialogOpen(true)}
-            disabled={clearingTTS}
-            className="gap-2 border-violet-500 text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950"
-          >
-            {clearingTTS ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Regenerando...
-              </>
-            ) : (
-              <>
-                <Mic className="w-4 h-4" />
-                Limpar Cache TTS
-              </>
-            )}
           </Button>
         </div>
       </div>
