@@ -5,6 +5,7 @@ import { Patient, PatientPriority } from '@/types/patient';
 import { format } from 'date-fns';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useWaitTimeEstimate } from '@/hooks/useWaitTimeEstimate';
+import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -247,6 +248,16 @@ export function TriagePanel({
                             PRIORIDADE
                           </span>
                         )}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <ElapsedTimeDisplay startTime={patient.createdAt} />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Tempo aguardando</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         {estimate && (
                           <TooltipProvider>
                             <Tooltip>
