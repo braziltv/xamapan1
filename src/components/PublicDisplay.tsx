@@ -1,4 +1,5 @@
-import { Volume2, Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
+import { Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
+import { HealthCrossIcon } from './HealthCrossIcon';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
@@ -1060,7 +1061,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         style={{ cursor: cursorVisible ? 'pointer' : 'none' }}
       >
         <div className="text-center space-y-6 animate-pulse">
-          <Volume2 className="w-24 h-24 text-primary mx-auto" />
+          <HealthCrossIcon size={96} className="mx-auto" />
           <h1 className="text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
           <p className="text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
         </div>
@@ -1095,8 +1096,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div className="relative z-10 flex items-center justify-start gap-3 mb-2 shrink-0">
         {/* Left: Logo + Title */}
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
-            <Volume2 className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+          <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
+            <HealthCrossIcon size={36} className="lg:w-10 lg:h-10" />
           </div>
           <div className="min-w-0">
             <h1 className="text-lg lg:text-2xl xl:text-3xl font-bold text-white leading-tight">
