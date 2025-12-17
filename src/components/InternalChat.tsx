@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, Send, X, ChevronDown, Smile } from 'lucide-react';
+import { MessageCircle, Send, X, ChevronDown, Smile, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import {
@@ -269,6 +269,22 @@ export function InternalChat({ station }: InternalChatProps) {
     }
   };
 
+  const clearChat = async () => {
+    if (!unitName) return;
+    
+    const confirmed = window.confirm('Limpar todas as mensagens do chat desta unidade?');
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from('chat_messages')
+      .delete()
+      .eq('unit_name', unitName);
+
+    if (!error) {
+      setMessages([]);
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {/* Chat Window */}
@@ -280,14 +296,25 @@ export function InternalChat({ station }: InternalChatProps) {
               <MessageCircle className="w-4 h-4" />
               <span className="font-semibold text-sm">Chat Interno</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+                title="Limpar chat"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary-foreground/20"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Messages */}
