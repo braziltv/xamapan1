@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
+import { useHourAudio } from '@/hooks/useHourAudio';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -10,7 +11,7 @@ import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -107,7 +108,23 @@ const Index = () => {
   } = useCallPanel();
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
+  const { playHourAudio, getHourText } = useHourAudio();
 
+  // Função para testar anúncio de hora (temporário)
+  const handleTestHourAnnouncement = async () => {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const text = getHourText(hour, minute);
+    toast.info(`Testando: "${text}"`);
+    
+    const success = await playHourAudio(hour, minute);
+    if (success) {
+      toast.success('Anúncio de hora reproduzido!');
+    } else {
+      toast.error('Erro ao reproduzir anúncio de hora');
+    }
+  };
 
   // Pré-cachear todas as frases de destino ao fazer login
   useEffect(() => {
@@ -233,6 +250,19 @@ const Index = () => {
               onUpdatePriority={updatePatientPriority}
               onUpdateObservations={updatePatientObservations}
             />
+            
+            {/* Botão de teste temporário - REMOVER DEPOIS */}
+            <div className="mt-4 p-4 border border-dashed border-amber-500 rounded-lg bg-amber-500/10">
+              <p className="text-amber-600 dark:text-amber-400 text-sm mb-3 font-medium">🧪 Teste de Anúncio de Hora</p>
+              <Button 
+                onClick={handleTestHourAnnouncement}
+                variant="outline"
+                className="gap-2"
+              >
+                <Clock className="w-4 h-4" />
+                Testar Hora Atual
+              </Button>
+            </div>
           </main>
           <InternalChat station="cadastro" />
         </TabsContent>
