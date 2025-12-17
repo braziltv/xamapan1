@@ -44,171 +44,40 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
 
-  // Fetch news from multiple sources
+  // Fetch news from database cache
   useEffect(() => {
-    const feeds = [
-      // G1 (funcionando bem)
-      { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/economia/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/mundo/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/politica/rss2.xml', source: 'G1' },
-      { url: 'https://g1.globo.com/dynamo/tecnologia/rss2.xml', source: 'G1' },
-      // GE Esportes
-      { url: 'https://ge.globo.com/dynamo/rss2.xml', source: 'GE' },
-      { url: 'https://ge.globo.com/dynamo/futebol/rss2.xml', source: 'GE' },
-      // ESPN Brasil (funcionando bem)
-      { url: 'https://www.espn.com.br/rss/', source: 'ESPN' },
-      // Folha
-      { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/mercado/rss091.xml', source: 'Folha' },
-      { url: 'https://feeds.folha.uol.com.br/esporte/rss091.xml', source: 'Folha' },
-      // Google News Brasil (confiável)
-      { url: 'https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
-      { url: 'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FuQjBHZ0pDVWlnQVAB?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
-      // CNN Brasil
-      { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
-      // Metrópoles
-      { url: 'https://www.metropoles.com/feed', source: 'Metrópoles' },
-      // Tecmundo
-      { url: 'https://rss.tecmundo.com.br/feed', source: 'Tecmundo' },
-      // Olhar Digital
-      { url: 'https://olhardigital.com.br/feed/', source: 'Olhar Digital' },
-      // Canaltech
-      { url: 'https://canaltech.com.br/rss/', source: 'Canaltech' },
-      // InfoMoney
-      { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
-      // Exame
-      { url: 'https://exame.com/feed/', source: 'Exame' },
-      // R7
-      { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
-      // Itatiaia via Google News
-      { url: 'https://news.google.com/rss/search?q=site:itatiaia.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Itatiaia' },
-    ];
-    
-    const fetchNews = async () => {
+    const loadNewsFromDB = async () => {
       try {
-        const allNews: NewsItem[] = [];
-        
-        // Group feeds by source to ensure diversity
-        const feedsBySource: { [key: string]: typeof feeds } = {};
-        feeds.forEach(feed => {
-          if (!feedsBySource[feed.source]) {
-            feedsBySource[feed.source] = [];
-          }
-          feedsBySource[feed.source].push(feed);
-        });
-        
-        // Fisher-Yates shuffle function
-        const shuffle = <T,>(array: T[]): T[] => {
-          const arr = [...array];
-          for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-          }
-          return arr;
-        };
-        
-        // Select ONE feed per source (max 12 different sources)
-        const sources = shuffle(Object.keys(feedsBySource));
-        const feedsToFetch = sources.slice(0, 12).map(source => {
-          const sourceFeeds = feedsBySource[source];
-          return sourceFeeds[Math.floor(Math.random() * sourceFeeds.length)];
-        });
+        const { data, error } = await supabase
+          .from('news_cache')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        // Try multiple CORS proxies
-        const corsProxies = [
-          (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-          (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        ];
+        if (error) {
+          console.error('Error loading news cache:', error);
+          return;
+        }
 
-        // Function to fix encoding issues and decode HTML entities
-        const fixEncoding = (text: string): string => {
-          // Decode HTML entities
-          const textarea = document.createElement('textarea');
-          textarea.innerHTML = text;
-          let decoded = textarea.value;
-          
-          // Remove replacement character (appears as triangle with ?)
-          decoded = decoded.replace(/\uFFFD/g, '');
-          
-          // Clean up CDATA markers
-          decoded = decoded.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
-          
-          return decoded.trim();
-        };
-
-        // Fetch all feeds in parallel for speed
-        const fetchPromises = feedsToFetch.map(async (feed) => {
-          const feedNews: NewsItem[] = [];
-          for (const getProxyUrl of corsProxies) {
-            try {
-              const response = await fetch(getProxyUrl(feed.url), {
-                headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' },
-              });
-              if (response.ok) {
-                // Try to get proper encoding from response
-                const buffer = await response.arrayBuffer();
-                let text: string;
-                
-                // Try UTF-8 first, then ISO-8859-1 as fallback
-                try {
-                  text = new TextDecoder('utf-8').decode(buffer);
-                  // Check if decoding produced replacement characters
-                  if (text.includes('\uFFFD')) {
-                    text = new TextDecoder('iso-8859-1').decode(buffer);
-                  }
-                } catch {
-                  text = new TextDecoder('iso-8859-1').decode(buffer);
-                }
-                
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'text/xml');
-                const items = xml.querySelectorAll('item');
-                if (items.length > 0) {
-                  items.forEach((item, index) => {
-                    if (index < 4) { // Max 4 per source
-                      const rawTitle = item.querySelector('title')?.textContent || '';
-                      const title = fixEncoding(rawTitle);
-                      if (title && title.length > 10) {
-                        feedNews.push({ title, link: '', source: feed.source });
-                      }
-                    }
-                  });
-                  break; // Success, don't try other proxies
-                }
-              }
-            } catch (e) {
-              // Try next proxy
-            }
-          }
-          return feedNews;
-        });
-
-        const results = await Promise.all(fetchPromises);
-        results.forEach(news => allNews.push(...news));
-
-        // If no news fetched, show static fallback news
-        if (allNews.length === 0) {
-          const fallbackNews: NewsItem[] = [
-            { title: 'Mantenha-se hidratado: beba pelo menos 2 litros de água por dia', link: '', source: 'Saúde' },
-            { title: 'Vacinas salvam vidas - mantenha sua carteira de vacinação em dia', link: '', source: 'Saúde' },
-            { title: 'Pratique exercícios físicos regularmente para uma vida mais saudável', link: '', source: 'Saúde' },
-            { title: 'Lave as mãos com frequência para prevenir doenças', link: '', source: 'Saúde' },
-            { title: 'Durma bem: adultos precisam de 7 a 9 horas de sono por noite', link: '', source: 'Saúde' },
-            { title: 'Alimentação balanceada é essencial para a saúde', link: '', source: 'Saúde' },
-          ];
-          setNewsItems(fallbackNews);
-        } else {
-          // Shuffle all news with Fisher-Yates for true randomness
-          const shuffled = shuffle(allNews);
+        if (data && data.length > 0) {
+          const news = data.map((item: { source: string; title: string; link: string }) => ({
+            source: item.source,
+            title: item.title,
+            link: item.link,
+          }));
+          // Shuffle for variety
+          const shuffled = [...news].sort(() => Math.random() - 0.5);
           setNewsItems(shuffled);
           setLastNewsUpdate(new Date());
+          console.log('News loaded from DB cache:', news.length, 'items');
+        } else {
+          // No news in cache, trigger update
+          console.log('No news cache, triggering update...');
+          await supabase.functions.invoke('update-cache');
+          // Reload after a few seconds
+          setTimeout(loadNewsFromDB, 5000);
         }
       } catch (error) {
-        console.error('Error fetching news:', error);
+        console.error('Error loading news:', error);
         // Fallback to health tips
         setNewsItems([
           { title: 'Cuide da sua saúde: faça check-ups regulares', link: '', source: 'Saúde' },
@@ -217,12 +86,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
-    fetchNews();
-    setNewsCountdown(3 * 60); // Reset countdown
-    // Update every 3 minutes
+    loadNewsFromDB();
+    setNewsCountdown(3 * 60);
+    // Reload from DB every 3 minutes to get fresh shuffled data
     const interval = setInterval(() => {
-      fetchNews();
-      setNewsCountdown(3 * 60); // Reset countdown after fetch
+      loadNewsFromDB();
+      setNewsCountdown(3 * 60);
     }, 3 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);

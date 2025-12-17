@@ -65,6 +65,30 @@ export type Database = {
         }
         Relationships: []
       }
+      news_cache: {
+        Row: {
+          created_at: string
+          id: string
+          link: string
+          source: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link: string
+          source: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string
+          source?: string
+          title?: string
+        }
+        Relationships: []
+      }
       patient_calls: {
         Row: {
           call_type: string
@@ -158,6 +182,27 @@ export type Database = {
           name_hash?: string
           name_text?: string
           used_at?: string
+        }
+        Relationships: []
+      }
+      weather_cache: {
+        Row: {
+          city_name: string
+          id: string
+          updated_at: string
+          weather_data: Json
+        }
+        Insert: {
+          city_name: string
+          id?: string
+          updated_at?: string
+          weather_data: Json
+        }
+        Update: {
+          city_name?: string
+          id?: string
+          updated_at?: string
+          weather_data?: Json
         }
         Relationships: []
       }
