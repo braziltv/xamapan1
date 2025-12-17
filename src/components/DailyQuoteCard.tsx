@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Lightbulb, Quote, Sparkles } from 'lucide-react';
 
 const QUOTES = [
@@ -122,7 +122,10 @@ function getDailyQuoteIndex(): number {
   return seed % QUOTES.length;
 }
 
+const ANIMATION_CYCLE = 15000; // 15 seconds per cycle
+
 export function DailyQuoteCard() {
+  const [animationKey, setAnimationKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [showBadge, setShowBadge] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
@@ -134,50 +137,90 @@ export function DailyQuoteCard() {
     return QUOTES[index];
   }, []);
 
-  useEffect(() => {
+  const runAnimation = useCallback(() => {
+    // Reset all states
+    setIsVisible(false);
+    setShowBadge(false);
+    setShowQuote(false);
+    setShowAuthor(false);
+    setShowInsight(false);
+
     // Staggered animation sequence
     const timers = [
       setTimeout(() => setIsVisible(true), 100),
-      setTimeout(() => setShowBadge(true), 400),
-      setTimeout(() => setShowQuote(true), 700),
-      setTimeout(() => setShowAuthor(true), 1000),
-      setTimeout(() => setShowInsight(true), 1300),
+      setTimeout(() => setShowBadge(true), 500),
+      setTimeout(() => setShowQuote(true), 900),
+      setTimeout(() => setShowAuthor(true), 1300),
+      setTimeout(() => setShowInsight(true), 1700),
     ];
 
-    return () => timers.forEach(clearTimeout);
+    return timers;
   }, []);
+
+  useEffect(() => {
+    // Run initial animation
+    let timers = runAnimation();
+
+    // Set up repeating animation
+    const interval = setInterval(() => {
+      timers.forEach(clearTimeout);
+      setAnimationKey(prev => prev + 1);
+      timers = runAnimation();
+    }, ANIMATION_CYCLE);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      clearInterval(interval);
+    };
+  }, [runAnimation]);
 
   return (
     <div 
+      key={animationKey}
       className={`
         relative w-full overflow-hidden rounded-2xl 
         bg-gradient-to-r ${dailyQuote.bgColor} 
         p-5 sm:p-6 shadow-xl
         border border-white/20
-        transition-all duration-700 ease-out
+        transition-all duration-1000 ease-out
         ${isVisible 
           ? 'opacity-100 translate-y-0 scale-100' 
-          : 'opacity-0 translate-y-8 scale-95'
+          : 'opacity-0 translate-y-6 scale-98'
         }
       `}
     >
       {/* Animated gradient overlay */}
       <div 
-        className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 
-        animate-[shimmer_3s_ease-in-out_infinite]"
+        className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0"
         style={{
           backgroundSize: '200% 100%',
-          animation: 'shimmer 3s ease-in-out infinite',
+          animation: 'shimmer 4s ease-in-out infinite',
         }}
       />
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-white/20 rounded-full"
+            style={{
+              left: `${15 + i * 20}%`,
+              animation: `float ${3 + i * 0.5}s ease-in-out infinite`,
+              animationDelay: `${i * 0.3}s`,
+              top: '80%',
+            }}
+          />
+        ))}
+      </div>
 
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
           className={`
             absolute -top-10 -right-10 text-[120px] rotate-12
-            transition-all duration-1000 delay-500
-            ${isVisible ? 'text-white/10 translate-x-0' : 'text-white/0 translate-x-20'}
+            transition-all duration-1200 delay-300
+            ${isVisible ? 'text-white/10 translate-x-0 rotate-12' : 'text-white/0 translate-x-20 rotate-45'}
           `}
         >
           {dailyQuote.emoji}
@@ -185,8 +228,8 @@ export function DailyQuoteCard() {
         <div 
           className={`
             absolute -bottom-8 -left-8 
-            transition-all duration-1000 delay-700
-            ${isVisible ? 'text-white/5 translate-y-0' : 'text-white/0 translate-y-10'}
+            transition-all duration-1200 delay-500
+            ${isVisible ? 'text-white/5 translate-y-0 rotate-0' : 'text-white/0 translate-y-10 -rotate-12'}
           `}
         >
           <Lightbulb className="w-32 h-32" />
@@ -194,7 +237,7 @@ export function DailyQuoteCard() {
         <div 
           className={`
             absolute top-4 left-4 text-white/20
-            transition-all duration-500 delay-300
+            transition-all duration-700 delay-200
             ${showBadge ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
           `}
         >
@@ -203,7 +246,7 @@ export function DailyQuoteCard() {
         <div 
           className={`
             absolute bottom-4 right-4 text-white/20
-            transition-all duration-500 delay-1000
+            transition-all duration-700 delay-800
             ${showInsight ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
           `}
         >
@@ -217,15 +260,15 @@ export function DailyQuoteCard() {
         <div 
           className={`
             inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 mb-4
-            transition-all duration-500 ease-out
+            transition-all duration-700 ease-out
             ${showBadge 
               ? 'opacity-100 translate-x-0 scale-100' 
-              : 'opacity-0 -translate-x-4 scale-90'
+              : 'opacity-0 -translate-x-8 scale-90'
             }
           `}
         >
-          <Sparkles className={`w-3.5 h-3.5 text-yellow-300 ${showBadge ? 'animate-spin' : ''}`} 
-            style={{ animationDuration: '2s', animationIterationCount: 1 }} 
+          <Sparkles 
+            className={`w-3.5 h-3.5 text-yellow-300 transition-transform duration-1000 ${showBadge ? 'rotate-[360deg]' : 'rotate-0'}`} 
           />
           <span className="text-white text-xs font-semibold tracking-wide">FRASE DO DIA</span>
         </div>
@@ -234,18 +277,18 @@ export function DailyQuoteCard() {
         <div 
           className={`
             flex items-start gap-2 mb-3
-            transition-all duration-600 ease-out
+            transition-all duration-800 ease-out
             ${showQuote 
               ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-4'
+              : 'opacity-0 translate-y-6'
             }
           `}
         >
           <Quote 
             className={`
               w-6 h-6 text-white/60 flex-shrink-0 mt-1
-              transition-all duration-500
-              ${showQuote ? 'rotate-0 scale-100' : '-rotate-12 scale-0'}
+              transition-all duration-700
+              ${showQuote ? 'rotate-0 scale-100' : '-rotate-45 scale-0'}
             `} 
           />
           <p className="text-white font-bold text-lg sm:text-xl leading-snug drop-shadow-md">
@@ -257,10 +300,10 @@ export function DailyQuoteCard() {
         <p 
           className={`
             text-white/90 text-sm font-medium mb-4 pl-8
-            transition-all duration-500 ease-out
+            transition-all duration-700 ease-out
             ${showAuthor 
               ? 'opacity-100 translate-x-0' 
-              : 'opacity-0 translate-x-4'
+              : 'opacity-0 translate-x-8'
             }
           `}
         >
@@ -271,17 +314,17 @@ export function DailyQuoteCard() {
         <div 
           className={`
             flex items-center gap-3 bg-black/20 backdrop-blur-sm rounded-xl px-4 py-3
-            transition-all duration-700 ease-out
+            transition-all duration-900 ease-out
             ${showInsight 
               ? 'opacity-100 translate-y-0 scale-100' 
-              : 'opacity-0 translate-y-6 scale-95'
+              : 'opacity-0 translate-y-8 scale-95'
             }
           `}
         >
           <div 
             className={`
               flex-shrink-0 w-10 h-10 bg-yellow-400/90 rounded-full flex items-center justify-center shadow-lg
-              transition-all duration-500 delay-200
+              transition-all duration-700 delay-100
               ${showInsight ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
             `}
           >
@@ -296,11 +339,21 @@ export function DailyQuoteCard() {
         </div>
       </div>
 
-      {/* CSS for shimmer animation */}
+      {/* CSS for animations */}
       <style>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
+        }
+        @keyframes float {
+          0%, 100% { 
+            transform: translateY(0) scale(1); 
+            opacity: 0.2;
+          }
+          50% { 
+            transform: translateY(-100px) scale(1.5); 
+            opacity: 0.6;
+          }
         }
       `}</style>
     </div>
