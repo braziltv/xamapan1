@@ -269,7 +269,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
       
       {/* Forecast Cards */}
-      <div className="flex gap-[0.5vw] shrink-0">
+      <div className="flex gap-[0.8vw] shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           // Use currentTime to calculate day names based on today
@@ -281,16 +281,16 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
           return (
             <div 
               key={index} 
-              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-[0.7vw] py-[0.4vh] flex flex-col items-center backdrop-blur-sm border border-white/10`}
+              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-[1vw] py-[0.6vh] flex flex-col items-center backdrop-blur-sm border border-white/20 min-w-[4vw]`}
             >
-              <span className="font-bold text-white/90" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>{dayName}</span>
-              <div className="my-[0.2vh]">
-                {getWeatherIcon(day.icon || 'cloud', 'sm')}
+              <span className="font-bold text-white" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 1rem)' }}>{dayName}</span>
+              <div className="my-[0.4vh]">
+                {getWeatherIcon(day.icon || 'cloud', 'lg')}
               </div>
-              <div className="flex items-center gap-[0.3vw]">
-                <span className="text-cyan-300 font-semibold tabular-nums" style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.85rem)' }}>{day.minTemp}°</span>
-                <span className="text-white/40">/</span>
-                <span className="text-orange-300 font-semibold tabular-nums" style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.85rem)' }}>{day.maxTemp}°</span>
+              <div className="flex items-center gap-[0.4vw]">
+                <span className="text-cyan-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.65rem, 1vw, 1.1rem)' }}>{day.minTemp}°</span>
+                <span className="text-white/50 font-bold">/</span>
+                <span className="text-orange-300 font-bold tabular-nums" style={{ fontSize: 'clamp(0.65rem, 1vw, 1.1rem)' }}>{day.maxTemp}°</span>
               </div>
             </div>
           );
