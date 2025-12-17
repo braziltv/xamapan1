@@ -5,9 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Sun, Moon, Bell, Clock, Megaphone, Sunrise } from 'lucide-react';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTheme } from 'next-themes';
 import { setManualThemeOverride } from './AutoNightMode';
 
 interface SettingsDialogProps {
@@ -36,7 +35,6 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const { theme, setTheme } = useTheme();
   
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
@@ -230,28 +228,8 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Theme Toggle Section */}
+          {/* Auto Night Mode Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {theme === 'dark' ? (
-                  <Moon className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <Sun className="w-4 h-4 text-muted-foreground" />
-                )}
-                <Label htmlFor="theme-toggle" className="text-sm font-medium">
-                  Tema Escuro
-                </Label>
-              </div>
-              <Switch
-                id="theme-toggle"
-                checked={theme === 'dark'}
-                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                disabled={autoNightMode}
-              />
-            </div>
-
-            {/* Auto Night Mode */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sunrise className="w-4 h-4 text-orange-500" />
@@ -271,31 +249,12 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                   setAutoNightMode(checked);
                   localStorage.setItem(AUTO_NIGHT_KEY, String(checked));
                   if (checked) {
-                    // Clear manual override when enabling auto mode
                     setManualThemeOverride(false);
                   }
                   toast.success(checked ? 'Modo noturno automático ativado' : 'Modo noturno automático desativado');
                 }}
               />
             </div>
-            
-            {/* Test Theme Notification Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                const newTheme = theme === 'dark' ? 'light' : 'dark';
-                setTheme(newTheme);
-                toast('👁️🌓 Interface adaptada para melhor ergonomia visual!', {
-                  duration: 4000,
-                  position: 'top-center',
-                });
-              }}
-            >
-              <Sunrise className="w-4 h-4 mr-2" />
-              Testar Troca de Tema
-            </Button>
           </div>
 
           {/* Volume Controls Section */}
