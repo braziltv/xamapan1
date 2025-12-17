@@ -1346,8 +1346,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={index} className="mx-[0.8vw] inline-flex items-center gap-[0.4vw] text-white" style={{ fontSize: 'clamp(0.85rem, 1.3vw, 1.4rem)' }}>
-                      <span className={`px-[0.4vw] py-[0.2vh] rounded font-bold inline-block ${
+                    <span key={index} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -1380,13 +1380,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.85rem)' }}>
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className="text-slate-100">
+                      <span className="text-white">
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-[0.3vw]">•</span>
+                      <span className="text-slate-500 mx-[0.4vw]">•</span>
                     </span>
                   ));
                 })()}
@@ -1401,8 +1401,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-[0.8vw] inline-flex items-center gap-[0.4vw] text-white" style={{ fontSize: 'clamp(0.85rem, 1.3vw, 1.4rem)' }}>
-                      <span className={`px-[0.4vw] py-[0.2vh] rounded font-bold inline-block ${
+                    <span key={`dup-${index}`} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -1435,13 +1435,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.85rem)' }}>
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className="text-slate-100">
+                      <span className="text-white">
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-[0.3vw]">•</span>
+                      <span className="text-slate-500 mx-[0.4vw]">•</span>
                     </span>
                   ));
                 })()}
