@@ -49,18 +49,21 @@ export function ConnectionIndicator() {
       )}
       title={isConnected ? "Conectado ao servidor" : "Desconectado do servidor"}
     >
-      <span className={cn(
-        "w-2 h-2 rounded-full",
-        isChecking && "bg-yellow-500 animate-pulse",
-        isConnected && !isChecking && "bg-green-500",
-        !isConnected && !isChecking && "bg-red-500"
-      )} />
       {isChecking ? (
-        <span>Conectando...</span>
+        <>
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <span>Conectando...</span>
+        </>
       ) : isConnected ? (
-        <span>Conectado com o servidor</span>
+        <>
+          <Wifi className="w-3.5 h-3.5" />
+          <span>Conectado com o Servidor</span>
+        </>
       ) : (
-        <span>Desconectado do servidor</span>
+        <>
+          <WifiOff className="w-3.5 h-3.5" />
+          <span>Desconectado do Servidor</span>
+        </>
       )}
     </div>
   );
