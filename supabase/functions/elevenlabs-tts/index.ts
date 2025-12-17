@@ -538,8 +538,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // Alice voice - voz feminina natural otimizada para português brasileiro
-    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2"; // Alice - feminina por padrão
+    // Márcio voice - voz masculina natural otimizada para português brasileiro
+    const selectedVoiceId = voiceId || "29Pm0vQJJRoVfMCsUKB6"; // Márcio - masculina por padrão
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
