@@ -97,6 +97,58 @@ export function useCallPanel() {
 
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
+  // Load existing patients from database on mount
+  useEffect(() => {
+    if (!unitName) return;
+    
+    const loadPatientsFromDB = async () => {
+      const { data, error } = await supabase
+        .from('patient_calls')
+        .select('*')
+        .eq('unit_name', unitName)
+        .in('status', ['waiting', 'active'])
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error loading patients:', error);
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        const dbPatients: Patient[] = data.map(call => {
+          let status: Patient['status'] = 'waiting';
+          if (call.call_type === 'triage' && call.status === 'active') {
+            status = 'in-triage';
+          } else if (call.call_type === 'doctor' && call.status === 'active') {
+            status = 'in-consultation';
+          } else if (call.call_type === 'registration' && call.status === 'waiting') {
+            status = 'waiting';
+          }
+          
+          return {
+            id: `patient-${call.id}`,
+            name: call.patient_name,
+            status,
+            priority: (call.priority as 'normal' | 'priority' | 'emergency') || 'normal',
+            createdAt: new Date(call.created_at),
+            calledAt: call.status === 'active' ? new Date(call.created_at) : undefined,
+            calledBy: call.call_type === 'registration' ? undefined : call.call_type as 'triage' | 'doctor',
+            destination: call.destination || undefined,
+          };
+        });
+        
+        setPatients(prev => {
+          // Merge: add DB patients that don't exist locally
+          const existingNames = new Set(prev.map(p => p.name));
+          const newPatients = dbPatients.filter(p => !existingNames.has(p.name));
+          return [...prev, ...newPatients];
+        });
+      }
+    };
+    
+    loadPatientsFromDB();
+  }, [unitName]);
+
   // Listen for unit name changes
   useEffect(() => {
     const handleStorage = () => {
@@ -113,7 +165,7 @@ export function useCallPanel() {
     };
   }, [unitName]);
 
-  // Realtime sync for patient_calls - when a patient is forwarded to triage, add them to local state
+  // Realtime sync for patient_calls - sync patients across devices
   const processedCallIdsRef = useRef<Set<string>>(new Set());
   
   useEffect(() => {
@@ -137,18 +189,28 @@ export function useCallPanel() {
           processedCallIdsRef.current.add(call.id);
           
           // Check if this patient already exists locally
-          const patientExists = patients.some(p => p.name === call.patient_name && p.status !== 'attended');
+          const patientExists = patientsRef.current.some(p => p.name === call.patient_name && p.status !== 'attended');
           
-          if (!patientExists && call.status === 'active') {
+          if (!patientExists) {
+            // Determine status based on call_type
+            let status: Patient['status'] = 'waiting';
+            if (call.call_type === 'triage' && call.status === 'active') {
+              status = 'in-triage';
+            } else if (call.call_type === 'doctor' && call.status === 'active') {
+              status = 'in-consultation';
+            } else if (call.status === 'waiting') {
+              status = 'waiting';
+            }
+            
             // Add patient from another device
             const newPatient: Patient = {
               id: `patient-${call.id}`,
               name: call.patient_name,
-              status: call.call_type === 'triage' ? 'in-triage' : 'in-consultation',
+              status,
               priority: call.priority || 'normal',
               createdAt: new Date(call.created_at),
-              calledAt: new Date(call.created_at),
-              calledBy: call.call_type,
+              calledAt: call.status === 'active' ? new Date(call.created_at) : undefined,
+              calledBy: call.call_type === 'registration' ? undefined : call.call_type,
               destination: call.destination,
             };
             
@@ -160,12 +222,35 @@ export function useCallPanel() {
               return [...prev, newPatient];
             });
             
-            // Set as current call
-            if (call.call_type === 'triage') {
-              setCurrentTriageCall(newPatient);
-            } else if (call.call_type === 'doctor') {
-              setCurrentDoctorCall(newPatient);
+            // Set as current call if active
+            if (call.status === 'active') {
+              if (call.call_type === 'triage') {
+                setCurrentTriageCall(newPatient);
+              } else if (call.call_type === 'doctor') {
+                setCurrentDoctorCall(newPatient);
+              }
             }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
+        },
+        (payload) => {
+          const call = payload.new as any;
+          
+          // If status changed to completed, remove patient from local state
+          if (call.status === 'completed') {
+            setPatients(prev => prev.filter(p => p.name !== call.patient_name));
+            
+            // Also clear current calls if this patient was being called
+            setCurrentTriageCall(prev => prev?.name === call.patient_name ? null : prev);
+            setCurrentDoctorCall(prev => prev?.name === call.patient_name ? null : prev);
           }
         }
       )
@@ -174,7 +259,7 @@ export function useCallPanel() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [unitName, patients]);
+  }, [unitName]);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -208,7 +293,7 @@ export function useCallPanel() {
     triggerCallEvent({ name: patientName }, 'triage', destination);
   }, [createCall, triggerCallEvent]);
 
-  const addPatient = useCallback((name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal') => {
+  const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal') => {
     const newPatient: Patient = {
       id: `patient-${Date.now()}`,
       name: name.trim(),
@@ -217,8 +302,22 @@ export function useCallPanel() {
       createdAt: getBrazilTime(),
     };
     setPatients(prev => [...prev, newPatient]);
+    
+    // Sync to database for multi-device synchronization
+    if (unitName) {
+      await supabase
+        .from('patient_calls')
+        .insert({
+          unit_name: unitName,
+          call_type: 'registration',
+          patient_name: name.trim(),
+          priority,
+          status: 'waiting',
+        });
+    }
+    
     return newPatient;
-  }, []);
+  }, [unitName]);
 
   const updatePatientPriority = useCallback((patientId: string, priority: 'normal' | 'priority' | 'emergency') => {
     setPatients(prev => prev.map(p => 
@@ -295,7 +394,9 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, completeCall]);
 
-  const finishConsultation = useCallback((patientId: string) => {
+  const finishConsultation = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    
     // Remove patient completely from all modules - consultation completed successfully
     setPatients(prev => prev.filter(p => p.id !== patientId));
     if (currentDoctorCall?.id === patientId) {
@@ -306,7 +407,17 @@ export function useCallPanel() {
       setCurrentTriageCall(null);
       completeCall('triage', 'completed');
     }
-  }, [currentDoctorCall, currentTriageCall, completeCall]);
+    
+    // Also mark as completed in database for sync
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentDoctorCall, currentTriageCall, completeCall, unitName]);
 
   const recallTriage = useCallback(() => {
     if (currentTriageCall) {
@@ -322,11 +433,24 @@ export function useCallPanel() {
     }
   }, [currentDoctorCall, createCall, triggerCallEvent]);
 
-  const removePatient = useCallback((patientId: string) => {
+  const removePatient = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
     setPatients(prev => prev.filter(p => p.id !== patientId));
-  }, []);
+    
+    // Sync removal to database
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [unitName]);
 
-  const finishWithoutCall = useCallback((patientId: string) => {
+  const finishWithoutCall = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    
     // Remove patient completely from all modules - patient withdrawal/no-show
     setPatients(prev => prev.filter(p => p.id !== patientId));
     // Clear current calls if this patient was being called
@@ -338,7 +462,17 @@ export function useCallPanel() {
       setCurrentDoctorCall(null);
       completeCall('doctor', 'withdrawal');
     }
-  }, [currentTriageCall, currentDoctorCall, completeCall]);
+    
+    // Sync removal to database
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentTriageCall, currentDoctorCall, completeCall, unitName]);
 
   // Forward to triage with voice call on TV
   const forwardToTriage = useCallback((patientId: string, destination?: string) => {
