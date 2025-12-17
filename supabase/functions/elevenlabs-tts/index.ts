@@ -545,8 +545,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // Laura voice - voz feminina padrão ElevenLabs otimizada para anúncios
-    const selectedVoiceId = voiceId || "FGY2WhTYpPnrIDTdsKH5"; // Laura - feminina padrão
+    // Matilda voice - voz feminina calorosa otimizada para português brasileiro
+    const selectedVoiceId = voiceId || "XrExE9yKIg1WjnnlVkGX"; // Matilda - padrão para chamadas
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo

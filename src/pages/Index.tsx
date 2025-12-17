@@ -10,7 +10,7 @@ import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2 } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -108,58 +108,6 @@ const Index = () => {
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
 
-  // Vozes femininas padrão ElevenLabs para teste
-  const femaleVoices = [
-    { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura" },
-    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
-    { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice" },
-    { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica" },
-    { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda" },
-    { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily" },
-  ];
-
-  // Função para testar chamada de paciente (temporário)
-  const handleTestPatientTTS = async (voiceId: string, voiceName: string) => {
-    const testText = "Maria Silva. Por favor, dirija-se à sala de triagem.";
-    toast.info(`Testando voz ${voiceName}...`);
-    
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ 
-            text: testText,
-            voiceId: voiceId,
-            skipCache: true,
-            unitName: 'TestPatientCall'
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        toast.error(`Erro ao testar voz ${voiceName}`);
-        return;
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.volume = 1.0;
-      
-      audio.onended = () => URL.revokeObjectURL(audioUrl);
-      await audio.play();
-      toast.success(`Voz ${voiceName} reproduzida!`);
-    } catch (error) {
-      console.error('Erro ao testar TTS:', error);
-      toast.error('Erro ao reproduzir áudio');
-    }
-  };
 
   // Pré-cachear todas as frases de destino ao fazer login
   useEffect(() => {
@@ -285,25 +233,6 @@ const Index = () => {
               onUpdatePriority={updatePatientPriority}
               onUpdateObservations={updatePatientObservations}
             />
-            
-            {/* Botão de teste temporário - REMOVER DEPOIS */}
-            <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
-              <p className="text-blue-600 dark:text-blue-400 text-sm mb-3 font-medium">🧪 Teste de Vozes Femininas (Chamada de Paciente)</p>
-              <div className="flex flex-wrap gap-2">
-                {femaleVoices.map((voice) => (
-                  <Button 
-                    key={voice.id}
-                    onClick={() => handleTestPatientTTS(voice.id, voice.name)}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Volume2 className="w-3 h-3" />
-                    {voice.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </main>
           <InternalChat station="cadastro" />
         </TabsContent>
