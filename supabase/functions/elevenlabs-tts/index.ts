@@ -545,8 +545,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // Victor Power voice - mesma voz usada no anúncio de horas
-    const selectedVoiceId = voiceId || "YNOujSUmHtgN6anjqXPf"; // Victor Power - padrão unificado
+    // Jennifer Hyper-realistic voice - voz feminina hiper-realista otimizada para português brasileiro
+    const selectedVoiceId = voiceId || "PZIBrGsMjLyYasEz50bI"; // Jennifer - padrão para chamadas
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
