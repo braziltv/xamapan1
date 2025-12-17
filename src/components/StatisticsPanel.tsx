@@ -64,7 +64,8 @@ import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
-import { useHourAudio, HOUR_VOICES, HourVoiceType } from '@/hooks/useHourAudio';
+import { useHourAudio } from '@/hooks/useHourAudio';
+import { useVoiceSettings, AVAILABLE_VOICES, FEMALE_VOICES, MALE_VOICES, VoiceKey } from '@/hooks/useVoiceSettings';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
 
 interface StatisticsPanelProps {
@@ -163,15 +164,18 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
-  const [selectedHourVoice, setSelectedHourVoice] = useState<HourVoiceType>('female');
+  const [selectedHourVoice, setSelectedHourVoice] = useState<VoiceKey>('alice');
+  const [selectedPatientVoice, setSelectedPatientVoice] = useState<VoiceKey>('alice');
   
   const { toast } = useToast();
-  const { playHourAudio, checkAudiosExist, getSelectedVoice, setSelectedVoice } = useHourAudio();
+  const { playHourAudio, checkAudiosExist } = useHourAudio();
+  const { getHourVoice, setHourVoice, getPatientVoice, setPatientVoice } = useVoiceSettings();
   const { currentTime } = useBrazilTime();
 
-  // Inicializar voz selecionada do localStorage
+  // Inicializar vozes selecionadas do localStorage
   useEffect(() => {
-    setSelectedHourVoice(getSelectedVoice());
+    setSelectedHourVoice(getHourVoice());
+    setSelectedPatientVoice(getPatientVoice());
   }, []);
 
   // Carregar dados do banco (detalhados + agregados)
@@ -1847,8 +1851,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             onClick={() => setRegenCacheDialogOpen(true)}
             className="gap-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
           >
-            <Clock className="w-4 h-4" />
-            Anúncio de Horas (ElevenLabs)
+            <Volume2 className="w-4 h-4" />
+            Configurar Vozes
           </Button>
         </div>
       </div>
@@ -2706,67 +2710,80 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-500" />
-              Anúncio de Horas (ElevenLabs)
+              Configurações de Voz
             </DialogTitle>
             <DialogDescription>
-              O sistema de anúncio de horas usa ElevenLabs TTS para gerar a frase completa do horário em tempo real.
+              Configure as vozes para anúncios de hora e chamadas de pacientes na TV.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            {/* Seletor de Voz */}
+            {/* Seletor de Voz para Horas */}
             <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
-              <p className="text-sm text-purple-600 font-medium mb-3">🎤 Voz do Anúncio:</p>
-              <div className="flex gap-2">
-                <Button
-                  variant={selectedHourVoice === 'female' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedHourVoice('female');
-                    setSelectedVoice('female');
-                    toast({ title: "Voz feminina selecionada", description: HOUR_VOICES.female.name });
-                  }}
-                  className={selectedHourVoice === 'female' ? 'bg-pink-500 hover:bg-pink-600' : ''}
-                >
-                  👩 {HOUR_VOICES.female.label}
-                </Button>
-                <Button
-                  variant={selectedHourVoice === 'male' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedHourVoice('male');
-                    setSelectedVoice('male');
-                    toast({ title: "Voz masculina selecionada", description: HOUR_VOICES.male.name });
-                  }}
-                  className={selectedHourVoice === 'male' ? 'bg-blue-500 hover:bg-blue-600' : ''}
-                >
-                  👨 {HOUR_VOICES.male.label}
-                </Button>
+              <p className="text-sm text-purple-600 font-medium mb-3">🕐 Voz para Anúncio de Horas:</p>
+              <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
+                {[...FEMALE_VOICES, ...MALE_VOICES].map((voiceKey) => {
+                  const voice = AVAILABLE_VOICES[voiceKey];
+                  return (
+                    <Button
+                      key={voiceKey}
+                      variant={selectedHourVoice === voiceKey ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedHourVoice(voiceKey);
+                        setHourVoice(voiceKey);
+                        toast({ title: "Voz de horas alterada", description: voice.name });
+                      }}
+                      className={`text-xs ${selectedHourVoice === voiceKey ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
+                    >
+                      {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
+                    </Button>
+                  );
+                })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Voz atual: {HOUR_VOICES[selectedHourVoice].name}
+                Atual: {AVAILABLE_VOICES[selectedHourVoice].name} {AVAILABLE_VOICES[selectedHourVoice].flag}
               </p>
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-              <p className="text-sm text-blue-600 font-medium">
-                🎙️ ElevenLabs TTS - Frase completa gerada em tempo real
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Ex: "duas horas e trinta e cinco minutos", "meio-dia e meia", "meia-noite"
+            {/* Seletor de Voz para Pacientes */}
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <p className="text-sm text-green-600 font-medium mb-3">📺 Voz para Chamada de Pacientes (TV):</p>
+              <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
+                {[...FEMALE_VOICES, ...MALE_VOICES].map((voiceKey) => {
+                  const voice = AVAILABLE_VOICES[voiceKey];
+                  return (
+                    <Button
+                      key={voiceKey}
+                      variant={selectedPatientVoice === voiceKey ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPatientVoice(voiceKey);
+                        setPatientVoice(voiceKey);
+                        toast({ title: "Voz de pacientes alterada", description: voice.name });
+                      }}
+                      className={`text-xs ${selectedPatientVoice === voiceKey ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
+                    >
+                      {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
+                    </Button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Atual: {AVAILABLE_VOICES[selectedPatientVoice].name} {AVAILABLE_VOICES[selectedPatientVoice].flag}
               </p>
             </div>
+
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-              <p className="text-sm text-amber-600 font-medium mb-2">📋 Regras de Anúncio:</p>
+              <p className="text-sm text-amber-600 font-medium mb-2">📋 Regras de Anúncio de Horas:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>• 3 anúncios por hora em horários aleatórios (mínimo 10 min entre eles)</li>
                 <li>• Cada anúncio repete 2x com som de notificação antes</li>
                 <li>• Silêncio entre 22h e 6h (horário de descanso)</li>
-                <li>• Não fala "minutos" em hora cheia ou meia-hora</li>
               </ul>
             </div>
             {currentTime && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                <p className="text-sm text-green-600 font-medium">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                <p className="text-sm text-blue-600 font-medium">
                   🕐 Hora atual: {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
                 </p>
               </div>

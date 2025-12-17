@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
+import { useVoiceSettings } from '@/hooks/useVoiceSettings';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -21,6 +22,7 @@ interface NewsItem {
 export function PublicDisplay(_props: PublicDisplayProps) {
   const { currentTime, isSynced } = useBrazilTime();
   const { playHourAudio } = useHourAudio();
+  const { getPatientVoiceId } = useVoiceSettings();
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
@@ -502,13 +504,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     []
   );
 
-  // ElevenLabs TTS via backend function - plays MP3 audio (works on any device)
+  // TTS via backend function - plays MP3 audio (works on any device)
   // Calls API directly without relying on cache for reliability
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('Speaking with unified TTS (single API call):', { name: cleanName, destinationPhrase: cleanDestination });
+      const voiceId = getPatientVoiceId();
+      console.log('Speaking with unified TTS (single API call):', { name: cleanName, destinationPhrase: cleanDestination, voiceId });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -532,6 +535,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             prefix: '',
             destination: cleanDestination,
           },
+          voiceId,
           unitName,
         }),
       });
@@ -539,7 +543,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Unified TTS error:', errorData);
-        throw new Error(errorData.error || `ElevenLabs unified TTS error: ${response.status}`);
+        throw new Error(errorData.error || `TTS unified error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
@@ -556,12 +560,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [unitName, playAmplifiedAudio]
+    [unitName, playAmplifiedAudio, getPatientVoiceId]
   );
 
   const speakWithElevenLabs = useCallback(
     async (text: string): Promise<void> => {
-      console.log('Speaking with ElevenLabs:', text);
+      const voiceId = getPatientVoiceId();
+      console.log('Speaking with TTS:', text, 'voiceId:', voiceId);
       
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
@@ -576,13 +581,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text, unitName }),
+          body: JSON.stringify({ text, voiceId, unitName }),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+        throw new Error(errorData.error || `TTS error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
@@ -595,7 +600,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [unitName, playAmplifiedAudio]
+    [unitName, playAmplifiedAudio, getPatientVoiceId]
   );
 
   // Test audio function
