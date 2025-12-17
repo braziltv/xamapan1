@@ -86,7 +86,22 @@ Deno.serve(async (req) => {
     const oldPatientsCount = oldPatientsDeleted?.length || 0
     console.log(`Deleted ${oldPatientsCount} old inactive patients (> 15 days)`)
 
-    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount
+    // 5. Apagar mensagens de chat com mais de 24 horas
+    const { data: chatDeleted, error: chatError } = await supabase
+      .from('chat_messages')
+      .delete()
+      .lt('created_at', twentyFourHoursAgo)
+      .select('id')
+
+    if (chatError) {
+      console.error('Error deleting old chat messages:', chatError)
+      throw chatError
+    }
+
+    const chatCount = chatDeleted?.length || 0
+    console.log(`Deleted ${chatCount} old chat messages (> 24 hours)`)
+
+    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount + chatCount
 
     console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
 
@@ -97,6 +112,7 @@ Deno.serve(async (req) => {
         inactiveDeleted: inactiveCount,
         historyDeleted: historyCount,
         oldPatientsDeleted: oldPatientsCount,
+        chatMessagesDeleted: chatCount,
         totalDeleted,
         timestamp: new Date().toISOString()
       }),
