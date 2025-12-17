@@ -34,7 +34,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [cursorVisible, setCursorVisible] = useState(true);
+  const [cursorVisible, setCursorVisible] = useState(false);
   const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -215,14 +215,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
     // Simulate user activity to prevent standby on older TVs
     const simulateActivity = () => {
-      // Dispatch synthetic mouse move event
+      // Dispatch synthetic mouse move event with a special flag to avoid showing cursor
       const event = new MouseEvent('mousemove', {
-        bubbles: true,
+        bubbles: false, // Don't bubble to avoid triggering cursor show
         cancelable: true,
         clientX: Math.random() * window.innerWidth,
         clientY: Math.random() * window.innerHeight,
       });
-      document.dispatchEvent(event);
+      // Dispatch to document body instead of window to avoid cursor handler
+      document.body.dispatchEvent(event);
 
       // Also dispatch a video play event if there's a video
       const videos = document.querySelectorAll('video');
