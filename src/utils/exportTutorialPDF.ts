@@ -9,10 +9,11 @@ export const exportTutorialPDF = () => {
   const maxWidth = pageWidth - margin * 2;
   let y = margin;
 
+  // ==================== FUNÇÕES AUXILIARES ====================
+  
   const addPage = () => {
     doc.addPage();
     y = margin;
-    // Header em todas as páginas
     doc.setFillColor(220, 38, 38);
     doc.rect(0, 0, pageWidth, 8, 'F');
   };
@@ -58,11 +59,10 @@ export const exportTutorialPDF = () => {
   const addBullet = (text: string, icon: string = '•') => {
     checkPageBreak();
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(55, 65, 81);
     doc.setTextColor(220, 38, 38);
     doc.text(icon, margin + 3, y);
     doc.setTextColor(55, 65, 81);
+    doc.setFont('helvetica', 'normal');
     const lines = doc.splitTextToSize(text, maxWidth - 15);
     lines.forEach((line: string, index: number) => {
       if (index > 0) checkPageBreak();
@@ -124,11 +124,204 @@ export const exportTutorialPDF = () => {
     y += 8;
   };
 
+  // ==================== FUNÇÕES DE ILUSTRAÇÃO ====================
+
+  // Ícone de usuário/pessoa
+  const drawPersonIcon = (x: number, yPos: number, size: number = 12, color: number[] = [59, 130, 246]) => {
+    doc.setFillColor(color[0], color[1], color[2]);
+    // Cabeça
+    doc.circle(x + size/2, yPos + size/4, size/4, 'F');
+    // Corpo
+    doc.roundedRect(x + size/4, yPos + size/2, size/2, size/2, 2, 2, 'F');
+  };
+
+  // Ícone de documento/clipboard
+  const drawClipboardIcon = (x: number, yPos: number, size: number = 20) => {
+    doc.setFillColor(37, 99, 235);
+    doc.roundedRect(x, yPos + 3, size, size - 3, 2, 2, 'F');
+    doc.setFillColor(255, 255, 255);
+    doc.rect(x + 3, yPos + 8, size - 6, 2, 'F');
+    doc.rect(x + 3, yPos + 12, size - 6, 2, 'F');
+    doc.rect(x + 3, yPos + 16, size - 10, 2, 'F');
+    // Clipe
+    doc.setFillColor(100, 100, 100);
+    doc.roundedRect(x + size/2 - 4, yPos, 8, 6, 1, 1, 'F');
+  };
+
+  // Ícone de estetoscópio
+  const drawStethoscopeIcon = (x: number, yPos: number, size: number = 20) => {
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(2);
+    // Tubo
+    doc.line(x + size/2, yPos + 5, x + size/2, yPos + size - 5);
+    // Ouvidos
+    doc.line(x + size/2, yPos + 5, x + 3, yPos);
+    doc.line(x + size/2, yPos + 5, x + size - 3, yPos);
+    // Diafragma
+    doc.setFillColor(34, 197, 94);
+    doc.circle(x + size/2, yPos + size - 3, 4, 'F');
+  };
+
+  // Ícone de TV/Monitor
+  const drawTVIcon = (x: number, yPos: number, size: number = 24) => {
+    doc.setFillColor(55, 65, 81);
+    doc.roundedRect(x, yPos, size, size * 0.65, 2, 2, 'F');
+    doc.setFillColor(59, 130, 246);
+    doc.rect(x + 2, yPos + 2, size - 4, size * 0.65 - 4, 'F');
+    // Base
+    doc.setFillColor(55, 65, 81);
+    doc.rect(x + size/2 - 3, yPos + size * 0.65, 6, 3, 'F');
+    doc.rect(x + size/2 - 6, yPos + size * 0.65 + 3, 12, 2, 'F');
+  };
+
+  // Ícone de gráfico/estatísticas
+  const drawChartIcon = (x: number, yPos: number, size: number = 20) => {
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, yPos, size, size, 2, 2, 'F');
+    doc.setFillColor(59, 130, 246);
+    doc.rect(x + 3, yPos + 12, 3, 5, 'F');
+    doc.setFillColor(34, 197, 94);
+    doc.rect(x + 8, yPos + 8, 3, 9, 'F');
+    doc.setFillColor(234, 179, 8);
+    doc.rect(x + 13, yPos + 5, 3, 12, 'F');
+  };
+
+  // Ícone de chat/mensagem
+  const drawChatIcon = (x: number, yPos: number, size: number = 20) => {
+    doc.setFillColor(59, 130, 246);
+    doc.roundedRect(x, yPos, size, size * 0.7, 3, 3, 'F');
+    // Triângulo da fala
+    doc.triangle(x + 4, yPos + size * 0.7, x + 8, yPos + size * 0.7, x + 4, yPos + size * 0.85, 'F');
+    // Linhas de texto
+    doc.setFillColor(255, 255, 255);
+    doc.rect(x + 3, yPos + 4, size - 6, 2, 'F');
+    doc.rect(x + 3, yPos + 8, size - 10, 2, 'F');
+  };
+
+  // Ícone de alto-falante/som
+  const drawSpeakerIcon = (x: number, yPos: number, size: number = 18) => {
+    doc.setFillColor(234, 179, 8);
+    // Corpo do alto-falante
+    doc.rect(x, yPos + size/3, size/3, size/3, 'F');
+    doc.triangle(x + size/3, yPos + size/3, x + size/3, yPos + size*2/3, x + size*2/3, yPos, 'F');
+    doc.triangle(x + size/3, yPos + size*2/3, x + size*2/3, yPos + size, x + size*2/3, yPos, 'F');
+    // Ondas de som
+    doc.setDrawColor(234, 179, 8);
+    doc.setLineWidth(1.5);
+    doc.line(x + size*0.75, yPos + size*0.3, x + size*0.85, yPos + size*0.2);
+    doc.line(x + size*0.75, yPos + size*0.5, x + size*0.9, yPos + size*0.5);
+    doc.line(x + size*0.75, yPos + size*0.7, x + size*0.85, yPos + size*0.8);
+  };
+
+  // Ícone de configuração/engrenagem
+  const drawGearIcon = (x: number, yPos: number, size: number = 18) => {
+    doc.setFillColor(107, 114, 128);
+    doc.circle(x + size/2, yPos + size/2, size/3, 'F');
+    doc.setFillColor(255, 255, 255);
+    doc.circle(x + size/2, yPos + size/2, size/6, 'F');
+    // Dentes
+    doc.setFillColor(107, 114, 128);
+    const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+    angles.forEach(angle => {
+      const rad = angle * Math.PI / 180;
+      const dx = Math.cos(rad) * size/3;
+      const dy = Math.sin(rad) * size/3;
+      doc.rect(x + size/2 + dx - 2, yPos + size/2 + dy - 2, 4, 4, 'F');
+    });
+  };
+
+  // Desenhar mockup de interface
+  const drawInterfaceMockup = (x: number, yPos: number, width: number, height: number, title: string, sections: string[]) => {
+    // Janela
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(x, yPos, width, height, 3, 3, 'FD');
+    
+    // Barra de título
+    doc.setFillColor(59, 130, 246);
+    doc.roundedRect(x, yPos, width, 12, 3, 3, 'F');
+    doc.rect(x, yPos + 6, width, 6, 'F');
+    
+    // Título
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(title, x + 4, yPos + 8);
+    
+    // Botões da janela
+    doc.setFillColor(239, 68, 68);
+    doc.circle(x + width - 8, yPos + 6, 2, 'F');
+    doc.setFillColor(234, 179, 8);
+    doc.circle(x + width - 14, yPos + 6, 2, 'F');
+    doc.setFillColor(34, 197, 94);
+    doc.circle(x + width - 20, yPos + 6, 2, 'F');
+    
+    // Seções
+    doc.setFontSize(6);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(55, 65, 81);
+    sections.forEach((section, i) => {
+      const sectionY = yPos + 18 + i * 12;
+      if (sectionY < yPos + height - 5) {
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(x + 4, sectionY - 3, width - 8, 10, 1, 1, 'F');
+        doc.text(section, x + 6, sectionY + 3);
+      }
+    });
+  };
+
+  // Desenhar fluxograma
+  const drawFlowChart = (x: number, yPos: number, steps: string[]) => {
+    const boxWidth = 45;
+    const boxHeight = 14;
+    const gap = 8;
+    
+    steps.forEach((step, i) => {
+      const boxX = x + i * (boxWidth + gap);
+      
+      // Caixa
+      doc.setFillColor(i === 0 ? 59 : i === steps.length - 1 ? 34 : 107, i === 0 ? 130 : i === steps.length - 1 ? 197 : 114, i === 0 ? 246 : i === steps.length - 1 ? 94 : 128);
+      doc.roundedRect(boxX, yPos, boxWidth, boxHeight, 2, 2, 'F');
+      
+      // Texto
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      const lines = doc.splitTextToSize(step, boxWidth - 4);
+      lines.forEach((line: string, j: number) => {
+        doc.text(line, boxX + 2, yPos + 5 + j * 4);
+      });
+      
+      // Seta
+      if (i < steps.length - 1) {
+        doc.setFillColor(150, 150, 150);
+        doc.triangle(
+          boxX + boxWidth + 2, yPos + boxHeight/2 - 2,
+          boxX + boxWidth + 2, yPos + boxHeight/2 + 2,
+          boxX + boxWidth + 6, yPos + boxHeight/2,
+          'F'
+        );
+      }
+    });
+  };
+
+  // Desenhar card de prioridade
+  const drawPriorityCard = (x: number, yPos: number, level: string, color: number[], label: string) => {
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(x, yPos, 50, 20, 3, 3, 'F');
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(level, x + 25, yPos + 8, { align: 'center' });
+    doc.setFontSize(6);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, x + 25, yPos + 15, { align: 'center' });
+  };
+
   // ==================== CAPA ====================
   doc.setFillColor(220, 38, 38);
   doc.rect(0, 0, pageWidth, 70, 'F');
-  
-  // Decoração
   doc.setFillColor(185, 28, 28);
   doc.rect(0, 60, pageWidth, 10, 'F');
   
@@ -141,50 +334,42 @@ export const exportTutorialPDF = () => {
   doc.setFont('helvetica', 'normal');
   doc.text('Sistema de Chamada de Pacientes por Voz', pageWidth / 2, 48, { align: 'center' });
   
-  y = 90;
+  // Ilustração na capa - ícones dos módulos
+  y = 85;
+  const iconSpacing = 35;
+  const startX = pageWidth / 2 - iconSpacing * 2;
+  
+  drawClipboardIcon(startX, y, 22);
+  drawStethoscopeIcon(startX + iconSpacing, y, 22);
+  drawTVIcon(startX + iconSpacing * 2, y + 2, 22);
+  drawChartIcon(startX + iconSpacing * 3, y + 2, 22);
+  drawChatIcon(startX + iconSpacing * 4, y + 2, 22);
+  
+  // Labels dos ícones
+  doc.setFontSize(7);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Cadastro', startX + 11, y + 30, { align: 'center' });
+  doc.text('Triagem', startX + iconSpacing + 11, y + 30, { align: 'center' });
+  doc.text('TV', startX + iconSpacing * 2 + 11, y + 30, { align: 'center' });
+  doc.text('Admin', startX + iconSpacing * 3 + 11, y + 30, { align: 'center' });
+  doc.text('Chat', startX + iconSpacing * 4 + 11, y + 30, { align: 'center' });
+  
+  y = 130;
   
   // Box de apresentação
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(margin, y, maxWidth, 50, 5, 5, 'F');
+  doc.roundedRect(margin, y, maxWidth, 45, 5, 5, 'F');
   doc.setDrawColor(220, 38, 38);
   doc.setLineWidth(0.5);
-  doc.roundedRect(margin, y, maxWidth, 50, 5, 5, 'S');
+  doc.roundedRect(margin, y, maxWidth, 45, 5, 5, 'S');
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(55, 65, 81);
-  doc.text('Este manual apresenta todas as funcionalidades do sistema', pageWidth / 2, y + 15, { align: 'center' });
-  doc.text('de gerenciamento de filas para unidades de saude,', pageWidth / 2, y + 23, { align: 'center' });
-  doc.text('incluindo cadastro, triagem, atendimento medico e', pageWidth / 2, y + 31, { align: 'center' });
-  doc.text('exibicao em TV para sala de espera.', pageWidth / 2, y + 39, { align: 'center' });
-  
-  y = 160;
-  
-  // Recursos
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(220, 38, 38);
-  doc.text('RECURSOS DO SISTEMA', pageWidth / 2, y, { align: 'center' });
-  
-  y += 12;
-  const recursos = [
-    'Cadastro de pacientes com prioridades',
-    'Triagem e encaminhamento',
-    'Chamada por voz em TV',
-    'Estatisticas e relatorios',
-    'Chat interno entre setores',
-    'Backup e restauracao'
-  ];
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(55, 65, 81);
-  recursos.forEach((r, i) => {
-    const col = i < 3 ? 0 : 1;
-    const row = i % 3;
-    const xPos = col === 0 ? margin + 20 : pageWidth / 2 + 10;
-    doc.text('✓  ' + r, xPos, y + row * 8);
-  });
+  doc.text('Este manual apresenta todas as funcionalidades do sistema', pageWidth / 2, y + 12, { align: 'center' });
+  doc.text('de gerenciamento de filas para unidades de saude,', pageWidth / 2, y + 20, { align: 'center' });
+  doc.text('incluindo cadastro, triagem, atendimento medico e', pageWidth / 2, y + 28, { align: 'center' });
+  doc.text('exibicao em TV para sala de espera.', pageWidth / 2, y + 36, { align: 'center' });
   
   // Rodapé da capa
   y = pageHeight - 30;
@@ -199,16 +384,16 @@ export const exportTutorialPDF = () => {
   addSpacer(5);
   
   const chapters = [
-    { num: '01', title: 'Visao Geral do Sistema', page: '3' },
-    { num: '02', title: 'Acesso ao Sistema', page: '4' },
-    { num: '03', title: 'Modulo Cadastro', page: '5' },
-    { num: '04', title: 'Modulo Triagem', page: '6' },
-    { num: '05', title: 'Modulo Medico', page: '7' },
-    { num: '06', title: 'Modulo Administrativo', page: '8' },
-    { num: '07', title: 'Modo TV (Display Publico)', page: '9' },
-    { num: '08', title: 'Chat Interno', page: '10' },
-    { num: '09', title: 'Configuracoes de Audio', page: '11' },
-    { num: '10', title: 'Dicas e Boas Praticas', page: '12' },
+    { num: '01', title: 'Visao Geral do Sistema' },
+    { num: '02', title: 'Acesso ao Sistema' },
+    { num: '03', title: 'Modulo Cadastro' },
+    { num: '04', title: 'Modulo Triagem' },
+    { num: '05', title: 'Modulo Medico' },
+    { num: '06', title: 'Modulo Administrativo' },
+    { num: '07', title: 'Modo TV (Display Publico)' },
+    { num: '08', title: 'Chat Interno' },
+    { num: '09', title: 'Configuracoes de Audio' },
+    { num: '10', title: 'Dicas e Boas Praticas' },
   ];
   
   chapters.forEach((ch, i) => {
@@ -225,313 +410,332 @@ export const exportTutorialPDF = () => {
     doc.setTextColor(55, 65, 81);
     doc.setFont('helvetica', 'normal');
     doc.text(ch.title, margin + 20, y);
-    doc.setTextColor(150, 150, 150);
-    doc.text(ch.page, margin + maxWidth - 10, y);
     y += 10;
   });
 
   // ==================== VISÃO GERAL ====================
   addPage();
   addTitle('01. VISAO GERAL DO SISTEMA');
-  addSpacer(3);
   
-  addText('O Sistema de Chamada de Pacientes por Voz e uma solucao completa para gerenciamento de filas em unidades de saude, oferecendo controle total do fluxo de atendimento.');
+  // Ilustração do fluxo geral
+  drawFlowChart(margin, y, ['Cadastro', 'Triagem', 'Medico', 'Concluido']);
+  y += 25;
+  
+  addText('O Sistema de Chamada de Pacientes por Voz e uma solucao completa para gerenciamento de filas em unidades de saude.');
   addSpacer(5);
   
   addSubtitle('Principais Funcionalidades');
   addBullet('Cadastro de pacientes com tres niveis de prioridade', '▸');
-  addBullet('Triagem e encaminhamento para procedimentos ou consultas', '▸');
+  addBullet('Triagem e encaminhamento para procedimentos', '▸');
   addBullet('Chamada de pacientes com anuncio por voz', '▸');
   addBullet('Exibicao em TV para sala de espera', '▸');
   addBullet('Estatisticas detalhadas e relatorios em PDF', '▸');
   addBullet('Comunicacao interna entre setores via chat', '▸');
-  addBullet('Sistema de backup e restauracao de dados', '▸');
-  
-  addSpacer(8);
-  addSubtitle('Unidades de Saude Suportadas');
-  addBullet('Pronto Atendimento Pedro Jose de Menezes', '●');
-  addBullet('PSF Aguinalda Angelica', '●');
-  addBullet('UBS Maria Alves de Mendonca', '●');
   
   addSpacer(8);
   addInfoBox('IMPORTANTE', [
-    'Todos os dispositivos (computadores e TVs) devem estar',
-    'logados na MESMA UNIDADE para a sincronizacao funcionar.'
+    'Todos os dispositivos devem estar logados na',
+    'MESMA UNIDADE para a sincronizacao funcionar.'
   ], [254, 243, 199]);
 
   // ==================== ACESSO AO SISTEMA ====================
   addPage();
   addTitle('02. ACESSO AO SISTEMA');
-  addSpacer(3);
+  
+  // Mockup da tela de login
+  drawInterfaceMockup(margin, y, 80, 55, 'Tela de Login', [
+    'Selecione a Unidade',
+    'Usuario: ________',
+    'Senha: ________',
+    '[  Entrar  ]'
+  ]);
+  
+  // Mockup do modo TV
+  drawInterfaceMockup(margin + 90, y, 80, 55, 'Modo TV', [
+    'Unidade Selecionada',
+    '[  Confirmar  ]',
+    'Clique para ativar audio'
+  ]);
+  
+  y += 65;
   
   addSubtitle('Login para Funcionarios');
-  addText('O acesso ao sistema e feito atraves da tela de login, onde o funcionario seleciona a unidade de saude e informa suas credenciais.');
-  addSpacer(3);
+  addBullet('Selecione a Unidade de Saude no menu', '1.');
+  addBullet('Informe usuario e senha', '2.');
+  addBullet('Clique em "Entrar"', '3.');
   
-  addText('Passos para acessar:');
-  addBullet('Selecione a Unidade de Saude no menu dropdown', '1.');
-  addBullet('Informe o usuario e senha fornecidos pelo administrador', '2.');
-  addBullet('Clique no botao "Entrar"', '3.');
-  
-  addSpacer(8);
+  addSpacer(5);
   addSubtitle('Login para Modo TV');
-  addText('O modo TV e utilizado para exibicao em televisores na sala de espera. Possui credenciais especificas e interface otimizada.');
-  addSpacer(3);
-  
-  addText('Passos para configurar a TV:');
   addBullet('Informe as credenciais do modo TV', '1.');
-  addBullet('Selecione a unidade de saude a ser exibida', '2.');
-  addBullet('Clique em "Confirmar"', '3.');
-  addBullet('Clique na tela para ATIVAR O AUDIO', '4.');
+  addBullet('Selecione a unidade de saude', '2.');
+  addBullet('Clique na tela para ATIVAR O AUDIO', '3.');
   
-  addSpacer(8);
+  addSpacer(5);
   addInfoBox('DICA', [
     'O modo TV entra automaticamente em tela cheia',
-    'e esconde o cursor do mouse para melhor visualizacao.'
+    'e esconde o cursor do mouse.'
   ], [220, 252, 231]);
 
   // ==================== MÓDULO CADASTRO ====================
   addPage();
   addTitle('03. MODULO CADASTRO');
-  addSpacer(3);
   
-  addText('O modulo Cadastro e o ponto de entrada dos pacientes no sistema. Aqui sao registradas as informacoes iniciais e definida a prioridade de atendimento.');
+  // Ícone grande do módulo
+  drawClipboardIcon(pageWidth - margin - 25, y - 15, 25);
+  
+  addText('O modulo Cadastro e o ponto de entrada dos pacientes no sistema.');
   addSpacer(5);
   
-  addSubtitle('Como Cadastrar um Paciente');
-  addBullet('Digite o nome completo do paciente', '1.');
-  addBullet('Selecione o nivel de prioridade adequado', '2.');
-  addBullet('Escolha o destino de encaminhamento', '3.');
-  addBullet('Clique em "Registrar" para confirmar', '4.');
+  // Mockup da interface de cadastro
+  drawInterfaceMockup(margin, y, maxWidth, 50, 'Cadastro de Pacientes', [
+    'Nome: _______________________',
+    'Prioridade: [Normal ▼]',
+    'Encaminhar para: [Triagem ▼]',
+    '[  Registrar  ]'
+  ]);
+  y += 58;
   
-  addSpacer(8);
   addSubtitle('Niveis de Prioridade');
   addSpacer(3);
-  addTableHeader(['Nivel', 'Cor', 'Indicacao'], [50, 40, 80]);
-  addTableRow(['EMERGENCIA', 'Vermelho', 'Casos graves, risco de vida'], [50, 40, 80], false);
-  addTableRow(['PRIORIDADE', 'Amarelo', 'Idosos, gestantes, deficientes'], [50, 40, 80], true);
-  addTableRow(['NORMAL', 'Verde', 'Demais pacientes'], [50, 40, 80], false);
   
-  addSpacer(8);
+  // Cards de prioridade ilustrados
+  drawPriorityCard(margin, y, 'EMERGENCIA', [220, 38, 38], 'Casos graves');
+  drawPriorityCard(margin + 55, y, 'PRIORIDADE', [234, 179, 8], 'Idosos, gestantes');
+  drawPriorityCard(margin + 110, y, 'NORMAL', [34, 197, 94], 'Demais');
+  y += 28;
+  
   addSubtitle('Opcoes de Encaminhamento');
   addBullet('Triagem - Classificacao de risco', '→');
-  addBullet('Sala de Eletrocardiograma', '→');
-  addBullet('Sala de Curativos', '→');
-  addBullet('Sala do Raio X', '→');
-  addBullet('Enfermaria', '→');
+  addBullet('Sala de Eletrocardiograma / Curativos / Raio X', '→');
   addBullet('Consultorio Medico 1 ou 2', '→');
-  
-  addSpacer(5);
-  addInfoBox('ENCAMINHAMENTO SILENCIOSO', [
-    'Marque a opcao "sem audio" para registrar o paciente',
-    'sem anunciar na TV da sala de espera.'
-  ], [239, 246, 255]);
 
   // ==================== MÓDULO TRIAGEM ====================
   addPage();
   addTitle('04. MODULO TRIAGEM');
-  addSpacer(3);
   
-  addText('O modulo Triagem e utilizado pela equipe de enfermagem para classificar os pacientes e encaminha-los ao destino adequado.');
+  drawStethoscopeIcon(pageWidth - margin - 25, y - 15, 25);
+  
+  addText('O modulo Triagem e utilizado pela equipe de enfermagem para classificar os pacientes.');
   addSpacer(5);
   
-  addSubtitle('Interface Principal');
-  addText('A tela e dividida em duas secoes: "Chamada Atual" (paciente sendo atendido) e "Fila de Espera" (proximos pacientes).');
-  addSpacer(5);
+  // Mockup da interface de triagem
+  drawInterfaceMockup(margin, y, maxWidth, 60, 'Triagem', [
+    '--- CHAMADA ATUAL ---',
+    'Joao Silva  [Rechamar] [Finalizar]',
+    '--- FILA DE ESPERA ---',
+    '1. Maria Santos    Prioridade    3min',
+    '2. Pedro Costa     Normal        8min'
+  ]);
+  y += 68;
   
   addSubtitle('Acoes Disponiveis');
-  addSpacer(3);
-  addTableHeader(['Acao', 'Descricao'], [50, 120]);
-  addTableRow(['Chamar', 'Chama o paciente e anuncia na TV'], [50, 120], false);
-  addTableRow(['Rechamar', 'Repete o chamado do paciente atual'], [50, 120], true);
-  addTableRow(['Finalizar', 'Conclui a triagem com sucesso'], [50, 120], false);
-  addTableRow(['Desistencia', 'Registra que paciente nao compareceu'], [50, 120], true);
-  addTableRow(['Encaminhar', 'Envia para medico ou procedimento'], [50, 120], false);
-  addTableRow(['Observacoes', 'Adiciona notas sobre o paciente'], [50, 120], true);
+  addTableHeader(['Acao', 'Descricao'], [45, 125]);
+  addTableRow(['Chamar', 'Chama paciente e anuncia na TV'], [45, 125], false);
+  addTableRow(['Rechamar', 'Repete o chamado atual'], [45, 125], true);
+  addTableRow(['Finalizar', 'Conclui a triagem'], [45, 125], false);
+  addTableRow(['Encaminhar', 'Envia para medico'], [45, 125], true);
   
-  addSpacer(8);
-  addSubtitle('Notificacoes de Novos Pacientes');
-  addText('Quando um novo paciente entra na fila, o sistema emite:');
+  addSpacer(5);
+  addSubtitle('Alertas de Novos Pacientes');
   addBullet('Som de alerta especifico por prioridade', '●');
   addBullet('Alerta visual pulsante na tela', '●');
-  addSpacer(3);
-  addText('Duracao do alerta visual:');
-  addBullet('Emergencia: 5 segundos', '•');
-  addBullet('Prioridade: 3 segundos', '•');
-  addBullet('Normal: 2 segundos', '•');
 
   // ==================== MÓDULO MÉDICO ====================
   addPage();
   addTitle('05. MODULO MEDICO');
-  addSpacer(3);
   
-  addText('O modulo Medico permite que os profissionais chamem pacientes para consulta, com anuncio automatico na TV da sala de espera.');
+  // Ícone de pessoa (médico)
+  drawPersonIcon(pageWidth - margin - 20, y - 12, 18, [34, 197, 94]);
+  
+  addText('O modulo Medico permite chamar pacientes para consulta com anuncio na TV.');
   addSpacer(5);
   
+  // Fluxo de atendimento
+  drawFlowChart(margin, y, ['Paciente\nna fila', 'Chamar', 'Consulta', 'Concluir']);
+  y += 25;
+  
+  // Mockup
+  drawInterfaceMockup(margin, y, maxWidth, 55, 'Painel Medico - Consultorio 1', [
+    '--- CHAMADA ATUAL ---',
+    'Ana Paula  [Rechamar] [Concluir]',
+    '--- AGUARDANDO ---',
+    '1. Carlos Souza    Normal    12min'
+  ]);
+  y += 63;
+  
   addSubtitle('Selecao de Consultorio');
-  addText('Antes de iniciar, selecione seu consultorio:');
   addBullet('Consultorio Medico 1', '●');
   addBullet('Consultorio Medico 2', '●');
-  addSpacer(3);
-  addText('O sistema memoriza sua ultima selecao automaticamente.');
+  addText('Cada consultorio possui fila independente.');
   
-  addSpacer(8);
-  addSubtitle('Filas Independentes');
-  addText('Cada consultorio possui sua propria fila de pacientes. Um medico no Consultorio 1 vera apenas os pacientes encaminhados para o Consultorio 1.');
-  
-  addSpacer(8);
-  addSubtitle('Fluxo de Atendimento');
-  addBullet('Paciente aparece na fila apos encaminhamento da triagem', '1.');
-  addBullet('Medico clica em "Chamar" para anunciar na TV', '2.');
-  addBullet('Paciente e movido para "Chamada Atual"', '3.');
-  addBullet('Apos consulta, clique em "Concluir Consulta"', '4.');
-  
-  addSpacer(8);
+  addSpacer(5);
   addSubtitle('Acoes do Medico');
-  addTableHeader(['Acao', 'Descricao'], [55, 115]);
-  addTableRow(['Chamar', 'Anuncia o paciente na TV'], [55, 115], false);
-  addTableRow(['Rechamar', 'Repete o anuncio do paciente'], [55, 115], true);
-  addTableRow(['Concluir', 'Finaliza a consulta com sucesso'], [55, 115], false);
-  addTableRow(['Desistencia', 'Paciente nao compareceu'], [55, 115], true);
+  addTableHeader(['Acao', 'Descricao'], [50, 120]);
+  addTableRow(['Chamar', 'Anuncia paciente na TV'], [50, 120], false);
+  addTableRow(['Concluir', 'Finaliza a consulta'], [50, 120], true);
 
   // ==================== MÓDULO ADMINISTRATIVO ====================
   addPage();
   addTitle('06. MODULO ADMINISTRATIVO');
-  addSpacer(3);
   
-  addText('O modulo Administrativo oferece ferramentas de gestao, estatisticas detalhadas e funcoes de manutencao do sistema.');
+  drawChartIcon(pageWidth - margin - 25, y - 15, 25);
+  
+  addText('Ferramentas de gestao, estatisticas e manutencao do sistema.');
   addSpacer(5);
+  
+  // Mockup de estatísticas
+  drawInterfaceMockup(margin, y, maxWidth, 55, 'Administrativo - Estatisticas', [
+    'Total Chamadas: 45  |  Triagem: 30  |  Medico: 15',
+    'Tempo Medio Espera: 12 min',
+    '[Grafico de Barras]',
+    '[Relatorio PDF] [Backup] [Restaurar]'
+  ]);
+  y += 63;
   
   addSubtitle('Dashboard de Estatisticas');
   addBullet('Total de chamadas do dia', '●');
-  addBullet('Divisao entre triagem e consultas medicas', '●');
-  addBullet('Tempo medio de espera dos pacientes', '●');
-  addBullet('Status atual: aguardando, em atendimento, concluidos', '●');
-  
-  addSpacer(5);
-  addSubtitle('Estatisticas de Procedimentos');
-  addBullet('Eletrocardiogramas realizados', '●');
-  addBullet('Curativos realizados', '●');
-  addBullet('Exames de Raio X', '●');
-  addBullet('Encaminhamentos para enfermaria', '●');
-  
-  addSpacer(5);
-  addSubtitle('Graficos Disponiveis');
-  addBullet('Chamadas por Dia - Historico dos ultimos 30 dias', '●');
-  addBullet('Chamadas por Hora - Distribuicao ao longo do dia', '●');
-  addBullet('Tipos de Atendimento - Proporcao triagem vs medico', '●');
+  addBullet('Divisao entre triagem e consultas', '●');
+  addBullet('Tempo medio de espera', '●');
   
   addSpacer(5);
   addSubtitle('Funcoes Administrativas');
-  addBullet('Exportar Relatorio PDF - Gera documento completo', '●');
-  addBullet('Backup - Exporta todos os dados em arquivo JSON', '●');
-  addBullet('Restaurar - Importa dados de backup anterior', '●');
-  addBullet('Comparacao de Unidades - Analise comparativa', '●');
-  
-  addSpacer(5);
-  addInfoBox('ACESSO RESTRITO', [
-    'Algumas funcoes administrativas requerem autenticacao',
-    'com senha de administrador do sistema.'
-  ], [254, 226, 226]);
+  addBullet('Exportar Relatorio PDF', '●');
+  addBullet('Backup e Restauracao de dados', '●');
+  addBullet('Comparacao entre Unidades', '●');
 
   // ==================== MODO TV ====================
   addPage();
   addTitle('07. MODO TV (DISPLAY PUBLICO)');
-  addSpacer(3);
   
-  addText('O Modo TV foi projetado para exibicao em televisores nas salas de espera, com interface limpa e anuncios por voz.');
+  drawTVIcon(pageWidth - margin - 28, y - 15, 28);
+  
+  addText('Interface otimizada para exibicao em televisores na sala de espera.');
   addSpacer(5);
+  
+  // Mockup da TV
+  doc.setFillColor(30, 30, 30);
+  doc.roundedRect(margin, y, maxWidth, 70, 5, 5, 'F');
+  doc.setFillColor(59, 130, 246);
+  doc.rect(margin + 5, y + 5, maxWidth - 10, 12, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('14:35  |  CHAMADA DE PACIENTES  |  28°C', margin + maxWidth/2, y + 13, { align: 'center' });
+  
+  // Painéis de chamada
+  doc.setFillColor(37, 99, 235);
+  doc.roundedRect(margin + 10, y + 22, 75, 35, 3, 3, 'F');
+  doc.setFillColor(34, 197, 94);
+  doc.roundedRect(margin + 90, y + 22, 75, 35, 3, 3, 'F');
+  
+  doc.setFontSize(7);
+  doc.text('TRIAGEM', margin + 47, y + 30, { align: 'center' });
+  doc.text('Joao Silva', margin + 47, y + 40, { align: 'center' });
+  doc.text('CONSULTORIO 1', margin + 127, y + 30, { align: 'center' });
+  doc.text('Maria Santos', margin + 127, y + 40, { align: 'center' });
+  
+  // Ticker de notícias
+  doc.setFillColor(50, 50, 50);
+  doc.rect(margin + 5, y + 60, maxWidth - 10, 8, 'F');
+  doc.setFontSize(6);
+  doc.text('G1: Noticias do Brasil...  |  Folha: Economia...  |  ESPN: Esportes...', margin + 10, y + 65);
+  
+  y += 78;
   
   addSubtitle('Caracteristicas da Interface');
-  addBullet('Tela cheia automatica', '●');
-  addBullet('Cursor do mouse oculto', '●');
-  addBullet('Relogio digital grande e visivel', '●');
-  addBullet('Previsao do tempo rotativa (30 cidades de MG)', '●');
+  addBullet('Tela cheia automatica e cursor oculto', '●');
+  addBullet('Relogio e previsao do tempo', '●');
   addBullet('Ticker de noticias na parte inferior', '●');
-  addBullet('Reproducao de videos institucionais', '●');
   
-  addSpacer(5);
+  addSpacer(3);
   addSubtitle('Anuncios por Voz');
-  addText('Quando um paciente e chamado, o sistema executa:');
-  addBullet('Som de notificacao', '1.');
-  addBullet('Anuncio: "Nome, por favor dirija-se ao [destino]"', '2.');
-  addBullet('Repeticao automatica do anuncio', '3.');
-  addBullet('Flash visual colorido na tela', '4.');
   
-  addSpacer(5);
-  addSubtitle('Anuncios de Hora');
-  addText('O sistema anuncia a hora atual periodicamente:');
-  addBullet('3 anuncios por hora em intervalos aleatorios', '●');
-  addBullet('Silenciado automaticamente entre 22h e 6h', '●');
-  addBullet('Inclui saudacao: "Bom dia/tarde/noite"', '●');
+  // Ilustração do fluxo de anúncio
+  drawFlowChart(margin, y, ['Som de\nalerta', 'Anuncio\npor voz', 'Flash\nvisual']);
+  y += 22;
   
-  addSpacer(5);
-  addSubtitle('Como Sair do Modo TV');
-  addBullet('Mova o mouse para exibir o cursor', '1.');
-  addBullet('Clique no botao X (canto inferior direito)', '2.');
-  addBullet('Confirme na caixa de dialogo', '3.');
+  addBullet('Nome e destino anunciados automaticamente', '●');
+  addBullet('Repeticao automatica do anuncio', '●');
 
   // ==================== CHAT INTERNO ====================
   addPage();
   addTitle('08. CHAT INTERNO');
-  addSpacer(3);
   
-  addText('O sistema de chat permite comunicacao instantanea entre os setores da unidade de saude.');
+  drawChatIcon(pageWidth - margin - 25, y - 15, 25);
+  
+  addText('Comunicacao instantanea entre os setores da unidade de saude.');
   addSpacer(5);
+  
+  // Mockup do chat
+  drawInterfaceMockup(margin, y, maxWidth, 60, 'Chat Interno', [
+    '[Cadastro] Paciente chegando!',
+    '[Triagem] Recebido, obrigado!',
+    '[Medico] Proximo paciente?',
+    '_________________________',
+    'Para: [Todos ▼]  [Enviar]'
+  ]);
+  y += 68;
   
   addSubtitle('Setores Conectados');
-  addTableHeader(['Setor', 'Cor', 'Localizacao'], [50, 40, 80]);
-  addTableRow(['Cadastro', 'Azul', 'Recepcao'], [50, 40, 80], false);
-  addTableRow(['Triagem', 'Amarelo', 'Sala de enfermagem'], [50, 40, 80], true);
-  addTableRow(['Medico', 'Verde', 'Consultorio'], [50, 40, 80], false);
   
-  addSpacer(8);
+  // Cards dos setores
+  doc.setFillColor(59, 130, 246);
+  doc.roundedRect(margin, y, 50, 18, 2, 2, 'F');
+  doc.setFillColor(234, 179, 8);
+  doc.roundedRect(margin + 55, y, 50, 18, 2, 2, 'F');
+  doc.setFillColor(34, 197, 94);
+  doc.roundedRect(margin + 110, y, 50, 18, 2, 2, 'F');
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('CADASTRO', margin + 25, y + 11, { align: 'center' });
+  doc.text('TRIAGEM', margin + 80, y + 11, { align: 'center' });
+  doc.text('MEDICO', margin + 135, y + 11, { align: 'center' });
+  
+  y += 26;
+  
   addSubtitle('Funcionalidades');
-  addBullet('Enviar mensagem para setor especifico ou para todos', '●');
-  addBullet('Indicador em tempo real de quem esta digitando', '●');
-  addBullet('Emojis rapidos para respostas ageis', '●');
-  addBullet('Sons distintos identificam o setor remetente', '●');
-  addBullet('Badge de notificacao para mensagens nao lidas', '●');
-  
-  addSpacer(5);
-  addSubtitle('Como Usar');
-  addBullet('Selecione o destinatario (setor ou "Todos")', '1.');
-  addBullet('Digite sua mensagem no campo de texto', '2.');
-  addBullet('Pressione Enter ou clique em enviar', '3.');
+  addBullet('Mensagens para setor especifico ou todos', '●');
+  addBullet('Indicador de digitacao em tempo real', '●');
+  addBullet('Sons distintos por setor remetente', '●');
   
   addSpacer(5);
   addInfoBox('LIMPEZA AUTOMATICA', [
-    'As mensagens sao excluidas automaticamente',
-    'apos 24 horas para manter o historico limpo.'
+    'Mensagens sao excluidas automaticamente apos 24h.'
   ], [239, 246, 255]);
 
   // ==================== CONFIGURAÇÕES DE ÁUDIO ====================
   addPage();
   addTitle('09. CONFIGURACOES DE AUDIO');
-  addSpacer(3);
   
-  addText('O sistema oferece controle completo sobre os volumes e vozes utilizados nos anuncios.');
+  drawSpeakerIcon(pageWidth - margin - 22, y - 12, 22);
+  drawGearIcon(pageWidth - margin - 45, y - 10, 18);
+  
+  addText('Controle completo sobre volumes e vozes utilizados nos anuncios.');
   addSpacer(5);
+  
+  // Mockup de configurações
+  drawInterfaceMockup(margin, y, maxWidth, 50, 'Configuracoes de Audio', [
+    'Notificacao de Chamada:  [====|====]',
+    'Volume da Voz TTS:       [=====|===]',
+    'Notificacao de Hora:     [===|=====]',
+    'Voz de Hora:             [======|==]'
+  ]);
+  y += 58;
   
   addSubtitle('Ajuste de Volumes');
-  addText('Acesse pelo icone de engrenagem no cabecalho:');
-  addSpacer(3);
-  addTableHeader(['Configuracao', 'Descricao'], [60, 110]);
-  addTableRow(['Notif. Chamada', 'Som antes do anuncio de paciente'], [60, 110], false);
-  addTableRow(['Voz TTS', 'Volume da voz nos anuncios'], [60, 110], true);
-  addTableRow(['Notif. Hora', 'Som antes do anuncio de hora'], [60, 110], false);
-  addTableRow(['Voz Hora', 'Volume da voz nas horas'], [60, 110], true);
+  addTableHeader(['Configuracao', 'Descricao'], [55, 115]);
+  addTableRow(['Notif. Chamada', 'Som antes do anuncio'], [55, 115], false);
+  addTableRow(['Voz TTS', 'Volume dos anuncios'], [55, 115], true);
+  addTableRow(['Notif. Hora', 'Som antes da hora'], [55, 115], false);
+  addTableRow(['Voz Hora', 'Volume das horas'], [55, 115], true);
   
-  addSpacer(8);
+  addSpacer(5);
   addSubtitle('Selecao de Vozes');
-  addText('No modulo Administrativo, acesse "Configurar Vozes":');
-  addSpacer(3);
   addText('Vozes Femininas: Alice, Aria, Domi, Elli, Bella, Rachel');
   addText('Vozes Masculinas: Antonio, Arnold, Adam, Sam, Josh, Clyde');
-  addSpacer(5);
-  addBullet('Clique em "Testar" para ouvir cada voz', '●');
-  addBullet('Configure vozes diferentes para horas e chamadas', '●');
-  addBullet('Preferencias sao salvas por unidade de saude', '●');
+  addBullet('Preferencias salvas por unidade de saude', '●');
 
   // ==================== DICAS E BOAS PRÁTICAS ====================
   addPage();
@@ -545,25 +749,18 @@ export const exportTutorialPDF = () => {
   addBullet('Clique na tela da TV para ativar o audio', '✓');
   
   addSpacer(5);
-  addSubtitle('Uso Correto das Prioridades');
-  addBullet('EMERGENCIA: Apenas casos graves com risco de vida', '●');
-  addBullet('PRIORIDADE: Idosos 60+, gestantes, lactantes, PcD', '●');
-  addBullet('NORMAL: Todos os demais pacientes', '●');
-  
-  addSpacer(5);
-  addSubtitle('Solucao de Problemas Comuns');
+  addSubtitle('Solucao de Problemas');
   addSpacer(3);
-  addTableHeader(['Problema', 'Solucao'], [60, 110]);
-  addTableRow(['Paciente nao aparece', 'Verificar se mesma unidade'], [60, 110], false);
-  addTableRow(['Audio nao funciona', 'Clicar na tela para ativar'], [60, 110], true);
-  addTableRow(['Dados nao sincronizam', 'Verificar conexao internet'], [60, 110], false);
-  addTableRow(['Tela travada', 'Aguardar auto-reload ou F5'], [60, 110], true);
+  addTableHeader(['Problema', 'Solucao'], [55, 115]);
+  addTableRow(['Paciente nao aparece', 'Verificar mesma unidade'], [55, 115], false);
+  addTableRow(['Audio nao funciona', 'Clicar na tela para ativar'], [55, 115], true);
+  addTableRow(['Dados nao sincronizam', 'Verificar conexao internet'], [55, 115], false);
+  addTableRow(['Tela travada', 'Aguardar auto-reload ou F5'], [55, 115], true);
   
   addSpacer(8);
   addSubtitle('Backup Regular');
   addBullet('Realize backup semanal dos dados', '●');
   addBullet('Armazene os arquivos em local seguro', '●');
-  addBullet('Mantenha registro das datas de backup', '●');
   
   addSpacer(8);
   addInfoBox('SUPORTE', [
@@ -575,13 +772,9 @@ export const exportTutorialPDF = () => {
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    
-    // Linha separadora
     doc.setDrawColor(220, 220, 220);
     doc.setLineWidth(0.3);
     doc.line(margin, pageHeight - 18, pageWidth - margin, pageHeight - 18);
-    
-    // Texto do rodapé
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.setFont('helvetica', 'normal');
@@ -593,6 +786,5 @@ export const exportTutorialPDF = () => {
     }
   }
 
-  // Salvar
   doc.save('Manual_Chamada_Pacientes.pdf');
 };
