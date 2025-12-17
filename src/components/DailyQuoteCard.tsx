@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Lightbulb, Quote, Sparkles } from 'lucide-react';
+import { Lightbulb, Quote, Sparkles, X } from 'lucide-react';
 
 const QUOTES = [
   {
@@ -116,36 +116,128 @@ const QUOTES = [
   }
 ];
 
+const STORAGE_KEY = 'dailyQuote_dismissState';
+const FIRST_DISMISS_DELAY = 15 * 60 * 1000; // 15 minutes
+const SECOND_DISMISS_DELAY = 9 * 60 * 60 * 1000; // 9 hours
+const ANIMATION_CYCLE = 15000; // 15 seconds per animation cycle
+
+interface DismissState {
+  dismissCount: number;
+  lastDismissTime: number;
+  lastQuoteIndex: number;
+}
+
+function getRandomQuoteIndex(excludeIndex?: number): number {
+  let index = Math.floor(Math.random() * QUOTES.length);
+  if (excludeIndex !== undefined && QUOTES.length > 1) {
+    while (index === excludeIndex) {
+      index = Math.floor(Math.random() * QUOTES.length);
+    }
+  }
+  return index;
+}
+
 function getDailyQuoteIndex(): number {
   const today = new Date();
   const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
   return seed % QUOTES.length;
 }
 
-const ANIMATION_CYCLE = 15000; // 15 seconds per cycle
-
 export function DailyQuoteCard() {
+  const [isHidden, setIsHidden] = useState(true);
+  const [quoteIndex, setQuoteIndex] = useState(getDailyQuoteIndex);
   const [animationKey, setAnimationKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [showBadge, setShowBadge] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
   const [showAuthor, setShowAuthor] = useState(false);
   const [showInsight, setShowInsight] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  const dailyQuote = useMemo(() => {
-    const index = getDailyQuoteIndex();
-    return QUOTES[index];
+  const dailyQuote = useMemo(() => QUOTES[quoteIndex], [quoteIndex]);
+
+  // Check if should be visible based on dismiss state
+  useEffect(() => {
+    const checkVisibility = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          setIsHidden(false);
+          return;
+        }
+
+        const state: DismissState = JSON.parse(stored);
+        const now = Date.now();
+        const elapsed = now - state.lastDismissTime;
+
+        if (state.dismissCount === 1 && elapsed >= FIRST_DISMISS_DELAY) {
+          // First dismiss expired, show with new quote
+          const newIndex = getRandomQuoteIndex(state.lastQuoteIndex);
+          setQuoteIndex(newIndex);
+          setIsHidden(false);
+        } else if (state.dismissCount >= 2 && elapsed >= SECOND_DISMISS_DELAY) {
+          // Second dismiss expired, reset and show
+          localStorage.removeItem(STORAGE_KEY);
+          setQuoteIndex(getDailyQuoteIndex());
+          setIsHidden(false);
+        } else {
+          // Still within dismiss period
+          setIsHidden(true);
+        }
+      } catch {
+        setIsHidden(false);
+      }
+    };
+
+    checkVisibility();
+
+    // Check every minute for visibility changes
+    const interval = setInterval(checkVisibility, 60000);
+    return () => clearInterval(interval);
   }, []);
 
+  const handleDismiss = useCallback(() => {
+    setIsClosing(true);
+    
+    setTimeout(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        const now = Date.now();
+        
+        let newState: DismissState;
+        
+        if (stored) {
+          const state: DismissState = JSON.parse(stored);
+          newState = {
+            dismissCount: state.dismissCount + 1,
+            lastDismissTime: now,
+            lastQuoteIndex: quoteIndex,
+          };
+        } else {
+          newState = {
+            dismissCount: 1,
+            lastDismissTime: now,
+            lastQuoteIndex: quoteIndex,
+          };
+        }
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        setIsHidden(true);
+        setIsClosing(false);
+      } catch {
+        setIsHidden(true);
+        setIsClosing(false);
+      }
+    }, 400);
+  }, [quoteIndex]);
+
   const runAnimation = useCallback(() => {
-    // Reset all states
     setIsVisible(false);
     setShowBadge(false);
     setShowQuote(false);
     setShowAuthor(false);
     setShowInsight(false);
 
-    // Staggered animation sequence
     const timers = [
       setTimeout(() => setIsVisible(true), 100),
       setTimeout(() => setShowBadge(true), 500),
@@ -158,10 +250,10 @@ export function DailyQuoteCard() {
   }, []);
 
   useEffect(() => {
-    // Run initial animation
+    if (isHidden) return;
+
     let timers = runAnimation();
 
-    // Set up repeating animation
     const interval = setInterval(() => {
       timers.forEach(clearTimeout);
       setAnimationKey(prev => prev + 1);
@@ -172,7 +264,9 @@ export function DailyQuoteCard() {
       timers.forEach(clearTimeout);
       clearInterval(interval);
     };
-  }, [runAnimation]);
+  }, [runAnimation, isHidden]);
+
+  if (isHidden) return null;
 
   return (
     <div 
@@ -182,13 +276,25 @@ export function DailyQuoteCard() {
         bg-gradient-to-r ${dailyQuote.bgColor} 
         p-5 sm:p-6 shadow-xl
         border border-white/20
-        transition-all duration-1000 ease-out
-        ${isVisible 
-          ? 'opacity-100 translate-y-0 scale-100' 
-          : 'opacity-0 translate-y-6 scale-98'
+        transition-all duration-500 ease-out
+        ${isClosing 
+          ? 'opacity-0 scale-95 translate-y-4' 
+          : isVisible 
+            ? 'opacity-100 translate-y-0 scale-100' 
+            : 'opacity-0 translate-y-6 scale-98'
         }
       `}
     >
+      {/* Close Button */}
+      <button
+        onClick={handleDismiss}
+        className="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-black/20 hover:bg-black/40 
+          text-white/70 hover:text-white transition-all duration-200 hover:scale-110"
+        title="Fechar (volta depois)"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
       {/* Animated gradient overlay */}
       <div 
         className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0"
@@ -219,7 +325,7 @@ export function DailyQuoteCard() {
         <div 
           className={`
             absolute -top-10 -right-10 text-[120px] rotate-12
-            transition-all duration-1200 delay-300
+            transition-all duration-1000 delay-300
             ${isVisible ? 'text-white/10 translate-x-0 rotate-12' : 'text-white/0 translate-x-20 rotate-45'}
           `}
         >
@@ -228,7 +334,7 @@ export function DailyQuoteCard() {
         <div 
           className={`
             absolute -bottom-8 -left-8 
-            transition-all duration-1200 delay-500
+            transition-all duration-1000 delay-500
             ${isVisible ? 'text-white/5 translate-y-0 rotate-0' : 'text-white/0 translate-y-10 -rotate-12'}
           `}
         >
@@ -245,7 +351,7 @@ export function DailyQuoteCard() {
         </div>
         <div 
           className={`
-            absolute bottom-4 right-4 text-white/20
+            absolute bottom-4 right-12 text-white/20
             transition-all duration-700 delay-800
             ${showInsight ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
           `}
@@ -276,7 +382,7 @@ export function DailyQuoteCard() {
         {/* Quote */}
         <div 
           className={`
-            flex items-start gap-2 mb-3
+            flex items-start gap-2 mb-3 pr-8
             transition-all duration-800 ease-out
             ${showQuote 
               ? 'opacity-100 translate-y-0' 
