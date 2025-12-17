@@ -166,10 +166,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
   const [selectedHourVoice, setSelectedHourVoice] = useState<VoiceKey>('alice');
   const [selectedPatientVoice, setSelectedPatientVoice] = useState<VoiceKey>('alice');
+  const [testingVoice, setTestingVoice] = useState<VoiceKey | null>(null);
   
   const { toast } = useToast();
   const { playHourAudio, checkAudiosExist } = useHourAudio();
-  const { getHourVoice, setHourVoice, getPatientVoice, setPatientVoice } = useVoiceSettings();
+  const { getHourVoice, setHourVoice, getPatientVoice, setPatientVoice, testVoice } = useVoiceSettings();
   const { currentTime } = useBrazilTime();
 
   // Inicializar vozes selecionadas do localStorage
@@ -2717,74 +2718,116 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* Indicador de Unidade */}
+            <div className="bg-slate-500/10 border border-slate-500/20 rounded-lg p-2">
+              <p className="text-xs text-muted-foreground text-center">
+                📍 Configurações salvas para: <span className="font-medium text-foreground">{currentUnitName}</span>
+              </p>
+            </div>
+
             {/* Seletor de Voz para Horas */}
             <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
               <p className="text-sm text-purple-600 font-medium mb-3">🕐 Voz para Anúncio de Horas:</p>
-              <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto">
                 {[...FEMALE_VOICES, ...MALE_VOICES].map((voiceKey) => {
                   const voice = AVAILABLE_VOICES[voiceKey];
+                  const isSelected = selectedHourVoice === voiceKey;
+                  const isTesting = testingVoice === voiceKey;
                   return (
-                    <Button
-                      key={voiceKey}
-                      variant={selectedHourVoice === voiceKey ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        setSelectedHourVoice(voiceKey);
-                        setHourVoice(voiceKey);
-                        toast({ title: "Voz de horas alterada", description: voice.name });
-                      }}
-                      className={`text-xs ${selectedHourVoice === voiceKey ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
-                    >
-                      {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
-                    </Button>
+                    <div key={voiceKey} className="flex gap-1">
+                      <Button
+                        variant={isSelected ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedHourVoice(voiceKey);
+                          setHourVoice(voiceKey);
+                          toast({ title: "Voz de horas alterada", description: voice.name });
+                        }}
+                        className={`flex-1 text-xs ${isSelected ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
+                      >
+                        {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isTesting}
+                        onClick={async () => {
+                          setTestingVoice(voiceKey);
+                          toast({ title: "Testando voz...", description: voice.name });
+                          await testVoice(voiceKey);
+                          setTestingVoice(null);
+                        }}
+                        className="px-2 text-xs"
+                        title={`Testar ${voice.name}`}
+                      >
+                        {isTesting ? '⏳' : '▶️'}
+                      </Button>
+                    </div>
                   );
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Atual: {AVAILABLE_VOICES[selectedHourVoice].name} {AVAILABLE_VOICES[selectedHourVoice].flag}
+                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedHourVoice].name}</span> {AVAILABLE_VOICES[selectedHourVoice].flag}
               </p>
             </div>
 
             {/* Seletor de Voz para Pacientes */}
             <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
               <p className="text-sm text-green-600 font-medium mb-3">📺 Voz para Chamada de Pacientes (TV):</p>
-              <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto">
                 {[...FEMALE_VOICES, ...MALE_VOICES].map((voiceKey) => {
                   const voice = AVAILABLE_VOICES[voiceKey];
+                  const isSelected = selectedPatientVoice === voiceKey;
+                  const isTesting = testingVoice === voiceKey;
                   return (
-                    <Button
-                      key={voiceKey}
-                      variant={selectedPatientVoice === voiceKey ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPatientVoice(voiceKey);
-                        setPatientVoice(voiceKey);
-                        toast({ title: "Voz de pacientes alterada", description: voice.name });
-                      }}
-                      className={`text-xs ${selectedPatientVoice === voiceKey ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
-                    >
-                      {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
-                    </Button>
+                    <div key={voiceKey} className="flex gap-1">
+                      <Button
+                        variant={isSelected ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPatientVoice(voiceKey);
+                          setPatientVoice(voiceKey);
+                          toast({ title: "Voz de pacientes alterada", description: voice.name });
+                        }}
+                        className={`flex-1 text-xs ${isSelected ? (voice.gender === 'female' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600') : ''}`}
+                      >
+                        {voice.gender === 'female' ? '👩' : '👨'} {voice.name}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isTesting}
+                        onClick={async () => {
+                          setTestingVoice(voiceKey);
+                          toast({ title: "Testando voz...", description: voice.name });
+                          await testVoice(voiceKey);
+                          setTestingVoice(null);
+                        }}
+                        className="px-2 text-xs"
+                        title={`Testar ${voice.name}`}
+                      >
+                        {isTesting ? '⏳' : '▶️'}
+                      </Button>
+                    </div>
                   );
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Atual: {AVAILABLE_VOICES[selectedPatientVoice].name} {AVAILABLE_VOICES[selectedPatientVoice].flag}
+                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedPatientVoice].name}</span> {AVAILABLE_VOICES[selectedPatientVoice].flag}
               </p>
             </div>
 
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
               <p className="text-sm text-amber-600 font-medium mb-2">📋 Regras de Anúncio de Horas:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• 3 anúncios por hora em horários aleatórios (mínimo 10 min entre eles)</li>
-                <li>• Cada anúncio repete 2x com som de notificação antes</li>
-                <li>• Silêncio entre 22h e 6h (horário de descanso)</li>
+                <li>• 3 anúncios por hora em horários aleatórios</li>
+                <li>• Silêncio entre 22h e 6h</li>
               </ul>
             </div>
             {currentTime && (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                <p className="text-sm text-blue-600 font-medium">
-                  🕐 Hora atual: {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2">
+                <p className="text-sm text-blue-600 font-medium text-center">
+                  🕐 {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
                 </p>
               </div>
             )}
