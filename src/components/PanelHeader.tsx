@@ -5,7 +5,7 @@ import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { HealthCrossIcon } from './HealthCrossIcon';
 import { useTheme } from 'next-themes';
 import { setManualThemeOverride } from './AutoNightMode';
-
+import { ConnectionIndicator } from './ConnectionIndicator';
 interface PanelHeaderProps {
   isAudioEnabled: boolean;
   onToggleAudio: () => void;
@@ -105,10 +105,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
               />
 
               {/* Status indicator */}
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-accent/10 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                <span className="text-[10px] font-medium text-accent">Online</span>
-              </div>
+              <ConnectionIndicator />
             </div>
           </div>
         </div>
@@ -197,10 +194,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             />
 
             {/* Status indicator */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-xs font-medium text-accent">Online</span>
-            </div>
+            <ConnectionIndicator />
 
             {/* Logout Button */}
             <Button
