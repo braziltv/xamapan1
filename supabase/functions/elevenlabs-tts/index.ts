@@ -9,6 +9,57 @@ const corsHeaders = {
 // Maximum size for permanent cache in bytes (200MB)
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
+// ========== CONFIGURAÇÕES GLOBAIS DE VOZ OTIMIZADAS ==========
+// Estas configurações foram refinadas para soar o mais humano possível
+// em anúncios de nomes de pacientes em português brasileiro
+const OPTIMIZED_VOICE_SETTINGS = {
+  // Stability: Valores mais BAIXOS = mais variação natural na entonação
+  // 0.35 permite expressividade sem perder consistência
+  stability: 0.35,
+  
+  // Similarity Boost: Mantém a clareza e timbre característico da voz
+  // 0.80 é o ponto ideal para clareza sem artificialidade
+  similarity_boost: 0.80,
+  
+  // Style: Adiciona expressividade e emoção natural
+  // 0.45 dá um tom acolhedor/profissional sem exagero
+  style: 0.45,
+  
+  // Speaker Boost: Melhora clareza e presença da voz
+  // Essencial para ambientes com ruído como salas de espera
+  use_speaker_boost: true,
+  
+  // Speed: Levemente mais lento para dicção clara de nomes
+  // 0.90 permite que nomes complexos sejam compreendidos
+  speed: 0.90,
+};
+
+// ========== PRÉ-PROCESSAMENTO GLOBAL DE TEXTO ==========
+function preprocessTextForNaturalSpeech(inputText: string): string {
+  let processed = inputText.trim();
+  
+  // Normalizar espaços múltiplos
+  processed = processed.replace(/\s+/g, ' ');
+  
+  // Adicionar pausas naturais após vírgulas
+  processed = processed.replace(/,\s*/g, ', ');
+  
+  // Melhorar pronúncia de abreviações comuns
+  processed = processed.replace(/\bDr\.\s*/gi, 'Doutor ');
+  processed = processed.replace(/\bDra\.\s*/gi, 'Doutora ');
+  processed = processed.replace(/\bSr\.\s*/gi, 'Senhor ');
+  processed = processed.replace(/\bSra\.\s*/gi, 'Senhora ');
+  
+  // Pausas naturais antes de destinos importantes
+  processed = processed.replace(/dirija-se/gi, '... dirija-se');
+  processed = processed.replace(/compareça/gi, '... compareça');
+  
+  // Adicionar micro-pausa entre nome e destino para clareza
+  processed = processed.replace(/\.\s*Por favor/g, '... Por favor');
+  
+  return processed;
+}
+
 // Split a full name into individual parts (first name, last name, third name, etc.)
 // All parts are normalized to lowercase to avoid duplicate cache entries
 // Handles compound names: "da", "de", "do", "dos", "das" are joined with the following word
@@ -321,8 +372,10 @@ async function getOrGenerateAudio(
     }
   }
   
-  // Generate new audio
-  console.log(`Generating audio for: "${text}"`);
+  // Generate new audio with preprocessing
+  const processedText = preprocessTextForNaturalSpeech(text);
+  console.log(`Generating audio for: "${text}" -> "${processedText}"`);
+  
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
     {
@@ -332,16 +385,10 @@ async function getOrGenerateAudio(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text,
+        text: processedText,
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
-        voice_settings: {
-          stability: 0.55,
-          similarity_boost: 0.78,
-          style: 0.15,
-          use_speaker_boost: true,
-          speed: 0.92,
-        },
+        voice_settings: OPTIMIZED_VOICE_SETTINGS,
       }),
     }
   );
@@ -490,18 +537,12 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    
     // Alice voice - voz feminina natural otimizada para português brasileiro
-    // Configurações ajustadas para máxima naturalidade com sotaque BR e acentuação correta
-    const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
-
-    // Configurações de voz otimizadas para português brasileiro natural
-    const brazilianVoiceSettings = {
-      stability: 0.55,           // Equilíbrio entre consistência e naturalidade
-      similarity_boost: 0.78,    // Mantém clareza da voz
-      style: 0.15,               // Leve expressividade natural
-      use_speaker_boost: true,   // Melhora clareza e pronúncia
-      speed: 0.92,               // Levemente mais lento para melhor dicção
-    };
+    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2"; // Alice - feminina por padrão
+    
+    // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
+    // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
 
     // Handle concatenation mode
     // IMPORTANT: to avoid MP3 concatenation playback issues on TVs/browsers,
@@ -521,6 +562,10 @@ serve(async (req) => {
         throw new Error('Concatenation text is empty');
       }
 
+      // Aplicar pré-processamento para naturalidade
+      const processedText = preprocessTextForNaturalSpeech(combinedText);
+      console.log(`Texto processado: "${processedText}"`);
+
       const response = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
         {
@@ -530,10 +575,10 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: combinedText,
+            text: processedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: brazilianVoiceSettings,
+            voice_settings: OPTIMIZED_VOICE_SETTINGS,
           }),
         }
       );
@@ -664,6 +709,10 @@ serve(async (req) => {
         throw new Error("ELEVENLABS_API_KEY not configured");
       }
 
+      // Aplicar pré-processamento para naturalidade
+      const processedText = preprocessTextForNaturalSpeech(text);
+      console.log(`Direct API - Texto processado: "${processedText}"`);
+
       const response = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
         {
@@ -673,10 +722,10 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text,
+            text: processedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: brazilianVoiceSettings,
+            voice_settings: OPTIMIZED_VOICE_SETTINGS,
           }),
         }
       );
@@ -771,6 +820,10 @@ serve(async (req) => {
 
     console.log("Using ELEVENLABS_API_KEY");
 
+    // Aplicar pré-processamento para naturalidade
+    const processedText = preprocessTextForNaturalSpeech(text);
+    console.log(`Cache MISS - Texto processado: "${processedText}"`);
+
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
       {
@@ -780,15 +833,11 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text,
+          text: processedText,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-            use_speaker_boost: true,
-          },
+          // USAR CONFIGURAÇÕES OTIMIZADAS UNIFICADAS
+          voice_settings: OPTIMIZED_VOICE_SETTINGS,
         }),
       }
     );
