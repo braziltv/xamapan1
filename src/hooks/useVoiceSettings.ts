@@ -1,6 +1,7 @@
 /**
  * Hook para gerenciar configurações de voz TTS
  * Vozes disponíveis para anúncios de hora e chamadas de pacientes
+ * Configurações salvas por unidade de saúde
  */
 
 // Vozes disponíveis
@@ -28,16 +29,21 @@ export type VoiceKey = keyof typeof AVAILABLE_VOICES;
 export const FEMALE_VOICES: VoiceKey[] = ['alice', 'sarah', 'laura', 'jessica', 'lily', 'matilda'];
 export const MALE_VOICES: VoiceKey[] = ['daniel', 'roger', 'charlie', 'george', 'liam', 'brian', 'chris', 'eric', 'will'];
 
-// Chaves de localStorage
-const HOUR_VOICE_KEY = 'hour-announcement-voice';
-const PATIENT_VOICE_KEY = 'patient-announcement-voice';
+// Função para obter chave de localStorage por unidade
+const getUnitKey = (baseKey: string): string => {
+  const unitName = localStorage.getItem('selectedUnitName') || 'default';
+  // Criar hash simples do nome da unidade para evitar caracteres especiais
+  const unitHash = unitName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return `${baseKey}_unit_${unitHash}`;
+};
 
 export const useVoiceSettings = () => {
   /**
-   * Obter voz selecionada para anúncios de hora
+   * Obter voz selecionada para anúncios de hora (por unidade)
    */
   const getHourVoice = (): VoiceKey => {
-    const stored = localStorage.getItem(HOUR_VOICE_KEY);
+    const key = getUnitKey('hour-announcement-voice');
+    const stored = localStorage.getItem(key);
     if (stored && stored in AVAILABLE_VOICES) {
       return stored as VoiceKey;
     }
@@ -45,17 +51,19 @@ export const useVoiceSettings = () => {
   };
 
   /**
-   * Definir voz para anúncios de hora
+   * Definir voz para anúncios de hora (por unidade)
    */
   const setHourVoice = (voice: VoiceKey): void => {
-    localStorage.setItem(HOUR_VOICE_KEY, voice);
+    const key = getUnitKey('hour-announcement-voice');
+    localStorage.setItem(key, voice);
   };
 
   /**
-   * Obter voz selecionada para chamadas de pacientes
+   * Obter voz selecionada para chamadas de pacientes (por unidade)
    */
   const getPatientVoice = (): VoiceKey => {
-    const stored = localStorage.getItem(PATIENT_VOICE_KEY);
+    const key = getUnitKey('patient-announcement-voice');
+    const stored = localStorage.getItem(key);
     if (stored && stored in AVAILABLE_VOICES) {
       return stored as VoiceKey;
     }
@@ -63,10 +71,11 @@ export const useVoiceSettings = () => {
   };
 
   /**
-   * Definir voz para chamadas de pacientes
+   * Definir voz para chamadas de pacientes (por unidade)
    */
   const setPatientVoice = (voice: VoiceKey): void => {
-    localStorage.setItem(PATIENT_VOICE_KEY, voice);
+    const key = getUnitKey('patient-announcement-voice');
+    localStorage.setItem(key, voice);
   };
 
   /**
@@ -83,6 +92,62 @@ export const useVoiceSettings = () => {
     return AVAILABLE_VOICES[getPatientVoice()].id;
   };
 
+  /**
+   * Testar uma voz específica
+   */
+  const testVoice = async (voiceKey: VoiceKey, testText?: string): Promise<boolean> => {
+    const voice = AVAILABLE_VOICES[voiceKey];
+    const text = testText || `Olá, meu nome é ${voice.name}. Esta é uma demonstração da minha voz.`;
+    
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text, 
+            voiceId: voice.id,
+            skipCache: true,
+            unitName: 'VoiceTest'
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Voice test failed:', response.status);
+        return false;
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
+      
+      await new Promise<void>((resolve, reject) => {
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl);
+          reject(new Error('Audio playback failed'));
+        };
+        audio.play().catch(reject);
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Voice test error:', error);
+      return false;
+    }
+  };
+
   return {
     AVAILABLE_VOICES,
     FEMALE_VOICES,
@@ -93,5 +158,6 @@ export const useVoiceSettings = () => {
     setPatientVoice,
     getHourVoiceId,
     getPatientVoiceId,
+    testVoice,
   };
 };
