@@ -57,12 +57,12 @@ export function ConnectionIndicator() {
       ) : isConnected ? (
         <>
           <Wifi className="w-3.5 h-3.5" />
-          <span>Conectado com o Servidor</span>
+          <span>Conectado com o servidor remoto</span>
         </>
       ) : (
         <>
           <WifiOff className="w-3.5 h-3.5" />
-          <span>Desconectado do Servidor</span>
+          <span>Desconectado do servidor remoto</span>
         </>
       )}
     </div>
