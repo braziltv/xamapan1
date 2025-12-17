@@ -750,6 +750,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return announcements.sort((a, b) => a - b);
   }, []);
 
+  // Expose test function on window for manual testing
+  useEffect(() => {
+    const testAnnouncement = () => {
+      if (!currentTime) {
+        console.log('currentTime not available');
+        return;
+      }
+      const hour = currentTime.getHours();
+      const minute = currentTime.getMinutes();
+      console.log(`Manual test: announcing time ${hour}:${minute.toString().padStart(2, '0')}`);
+      playHourAnnouncement(hour, minute);
+    };
+    
+    (window as any).testarHora = testAnnouncement;
+    
+    return () => {
+      delete (window as any).testarHora;
+    };
+  }, [currentTime, playHourAnnouncement]);
+
   // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
