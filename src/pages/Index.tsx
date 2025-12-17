@@ -100,6 +100,7 @@ const Index = () => {
     sendToTriageQueue,
     sendToDoctorQueue,
     updatePatientPriority,
+    updatePatientObservations,
   } = useCallPanel();
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
@@ -226,6 +227,7 @@ const Index = () => {
               onForwardToDoctor={forwardToDoctor}
               onSendToTriageQueue={sendToTriageQueue}
               onUpdatePriority={updatePatientPriority}
+              onUpdateObservations={updatePatientObservations}
             />
           </main>
         </TabsContent>
@@ -242,6 +244,7 @@ const Index = () => {
               onDirectPatient={directPatient}
               onFinishWithoutCall={finishWithoutCall}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onUpdateObservations={updatePatientObservations}
             />
           </main>
         </TabsContent>
@@ -256,6 +259,7 @@ const Index = () => {
               onFinishConsultation={finishConsultation}
               onRecall={recallDoctor}
               onFinishWithoutCall={finishWithoutCall}
+              onUpdateObservations={updatePatientObservations}
             />
           </main>
         </TabsContent>

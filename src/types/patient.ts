@@ -9,6 +9,7 @@ export interface Patient {
   calledAt?: Date;
   calledBy?: 'triage' | 'doctor';
   destination?: string;
+  observations?: string;
 }
 
 export interface CallHistory {

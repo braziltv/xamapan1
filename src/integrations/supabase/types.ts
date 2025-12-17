@@ -96,6 +96,7 @@ export type Database = {
           created_at: string
           destination: string | null
           id: string
+          observations: string | null
           patient_name: string
           priority: string
           status: string
@@ -107,6 +108,7 @@ export type Database = {
           created_at?: string
           destination?: string | null
           id?: string
+          observations?: string | null
           patient_name: string
           priority?: string
           status?: string
@@ -118,6 +120,7 @@ export type Database = {
           created_at?: string
           destination?: string | null
           id?: string
+          observations?: string | null
           patient_name?: string
           priority?: string
           status?: string

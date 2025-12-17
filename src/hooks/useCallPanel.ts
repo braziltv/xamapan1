@@ -325,6 +325,25 @@ export function useCallPanel() {
     ));
   }, []);
 
+  const updatePatientObservations = useCallback(async (patientId: string, observations: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, observations } : p
+    ));
+    
+    // Update in database
+    if (unitName) {
+      const patient = patientsRef.current.find(p => p.id === patientId);
+      if (patient) {
+        await supabase
+          .from('patient_calls')
+          .update({ observations })
+          .eq('patient_name', patient.name)
+          .eq('unit_name', unitName)
+          .eq('status', 'waiting');
+      }
+    }
+  }, [unitName]);
+
   const callPatientToTriage = useCallback((patientId: string) => {
     setPatients(prev => {
       const patient = prev.find(p => p.id === patientId);
@@ -573,5 +592,6 @@ export function useCallPanel() {
     sendToTriageQueue,
     sendToDoctorQueue,
     updatePatientPriority,
+    updatePatientObservations,
   };
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
@@ -45,6 +46,7 @@ interface TriagePanelProps {
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
   onSendToDoctorQueue: (id: string, destination?: string) => void;
+  onUpdateObservations?: (id: string, observations: string) => void;
 }
 
 const SALAS = [
@@ -68,11 +70,12 @@ export function TriagePanel({
   onRecall,
   onDirectPatient,
   onFinishWithoutCall,
-  onSendToDoctorQueue
+  onSendToDoctorQueue,
+  onUpdateObservations
 }: TriagePanelProps) {
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
-  
+  const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',
@@ -255,6 +258,58 @@ export function TriagePanel({
                       <p className="text-xs sm:text-sm">
                         <span className="text-amber-500 font-medium">Chegou às {formatBrazilTime(patient.createdAt, 'HH:mm')}</span>
                       </p>
+                      {/* Observações */}
+                      {editingObservation?.id === patient.id ? (
+                        <div className="mt-2 flex flex-col gap-2">
+                          <Textarea
+                            placeholder="Digite uma observação..."
+                            value={editingObservation.value}
+                            onChange={(e) => setEditingObservation({ id: patient.id, value: e.target.value })}
+                            className="text-xs min-h-[60px] resize-none"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (onUpdateObservations) {
+                                  onUpdateObservations(patient.id, editingObservation.value);
+                                }
+                                setEditingObservation(null);
+                              }}
+                              className="text-xs h-7 px-2"
+                            >
+                              Salvar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingObservation(null)}
+                              className="text-xs h-7 px-2"
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-1 flex items-start gap-1">
+                          {patient.observations ? (
+                            <div className="flex items-start gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                              <FileText className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                              <span className="break-words">{patient.observations}</span>
+                            </div>
+                          ) : null}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingObservation({ id: patient.id, value: patient.observations || '' })}
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                            title={patient.observations ? 'Editar observação' : 'Adicionar observação'}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end ml-9 sm:ml-0">
