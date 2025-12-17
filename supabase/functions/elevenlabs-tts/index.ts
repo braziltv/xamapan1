@@ -545,8 +545,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // Matilda voice - voz feminina calorosa otimizada para português brasileiro
-    const selectedVoiceId = voiceId || "XrExE9yKIg1WjnnlVkGX"; // Matilda - padrão para chamadas
+    // Victor Power voice - mesma voz do anúncio de horas, otimizada para português brasileiro
+    const selectedVoiceId = voiceId || "YNOujSUmHtgN6anjqXPf"; // Victor Power - voz unificada
     
     // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
     // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
