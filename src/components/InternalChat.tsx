@@ -50,7 +50,10 @@ export function InternalChat({ station }: InternalChatProps) {
   const [newMessage, setNewMessage] = useState('');
   const [recipient, setRecipient] = useState('todos');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const presenceChannelRef = useRef<any>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';
 
   // Scroll to bottom when new messages arrive
@@ -115,6 +118,37 @@ export function InternalChat({ station }: InternalChatProps) {
     };
   }, [unitName, station, isOpen]);
 
+  // Presence channel for typing indicators
+  useEffect(() => {
+    if (!unitName) return;
+
+    const presenceChannel = supabase.channel(`typing-${unitName}`);
+    presenceChannelRef.current = presenceChannel;
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const typing: string[] = [];
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((presence: any) => {
+            if (presence.isTyping && presence.station !== station) {
+              typing.push(presence.station);
+            }
+          });
+        });
+        setTypingUsers(typing);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({ station, isTyping: false });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [unitName, station]);
+
   const playNotificationSound = () => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -141,6 +175,11 @@ export function InternalChat({ station }: InternalChatProps) {
   const sendMessage = async () => {
     if (!newMessage.trim() || !unitName) return;
 
+    // Stop typing indicator
+    if (presenceChannelRef.current) {
+      await presenceChannelRef.current.track({ station, isTyping: false });
+    }
+
     const { error } = await supabase.from('chat_messages').insert({
       unit_name: unitName,
       sender_station: station,
@@ -150,6 +189,29 @@ export function InternalChat({ station }: InternalChatProps) {
 
     if (!error) {
       setNewMessage('');
+    }
+  };
+
+  const handleTyping = async (value: string) => {
+    setNewMessage(value);
+    
+    if (!presenceChannelRef.current) return;
+
+    // Track typing
+    await presenceChannelRef.current.track({ station, isTyping: value.length > 0 });
+
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Stop typing after 2 seconds of inactivity
+    if (value.length > 0) {
+      typingTimeoutRef.current = setTimeout(async () => {
+        if (presenceChannelRef.current) {
+          await presenceChannelRef.current.track({ station, isTyping: false });
+        }
+      }, 2000);
     }
   };
 
@@ -233,6 +295,18 @@ export function InternalChat({ station }: InternalChatProps) {
                 );
               })
             )}
+            {typingUsers.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground animate-pulse px-1">
+                <span className="flex gap-0.5">
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </span>
+                <span>
+                  {typingUsers.map(u => STATION_LABELS[u]).join(', ')} digitando...
+                </span>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -252,7 +326,7 @@ export function InternalChat({ station }: InternalChatProps) {
               </Select>
               <Input
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={(e) => handleTyping(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite uma mensagem..."
                 className="flex-1 text-sm h-8"
