@@ -151,21 +151,21 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     if (!currentTime || !formatTime) return null;
     
     return (
-      <div className="flex items-center gap-2 ml-1">
+      <div className="flex items-center gap-2">
         <div className="flex items-baseline whitespace-nowrap">
-          <span className="text-xl font-mono font-black text-white tracking-tight">
+          <span className="text-2xl font-mono font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
             {formatTime(currentTime, 'HH:mm')}
           </span>
-          <span className="text-sm font-mono font-bold text-yellow-400 animate-pulse">
+          <span className="text-base font-mono font-bold text-amber-300 animate-pulse">
             :{formatTime(currentTime, 'ss')}
           </span>
         </div>
-        <div className="text-center">
-          <p className="text-[9px] font-mono font-bold text-yellow-400 leading-tight whitespace-nowrap">
-            {formatTime(currentTime, "EEE").toUpperCase()}
+        <div className="text-center bg-white/10 rounded px-1.5 py-0.5">
+          <p className="text-[10px] font-bold text-amber-300 leading-tight whitespace-nowrap uppercase">
+            {formatTime(currentTime, "EEEE")}
           </p>
-          <p className="text-[9px] font-mono font-semibold text-cyan-400 leading-tight whitespace-nowrap">
-            {formatTime(currentTime, "dd/MM")}
+          <p className="text-[10px] font-semibold text-cyan-300 leading-tight whitespace-nowrap">
+            {formatTime(currentTime, "dd/MM/yyyy")}
           </p>
         </div>
       </div>
@@ -175,10 +175,10 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   // Only show loading on initial load
   if (initialLoading && !currentWeather) {
     return (
-      <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
-        <div className="flex items-center gap-2">
-          <Cloud className="w-5 h-5 text-white/70 animate-pulse" />
-          <span className="text-white/80 text-xs">Carregando previsões...</span>
+      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-white/10 overflow-hidden">
+        <div className="flex items-center gap-3">
+          <Cloud className="w-6 h-6 text-white/70 animate-pulse" />
+          <span className="text-white/80 text-sm">Carregando previsões...</span>
           <ClockSection />
         </div>
       </div>
@@ -190,10 +190,10 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
 
   if (!weather) {
     return (
-      <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
-        <div className="flex items-center gap-2">
-          <Cloud className="w-5 h-5 text-white/50" />
-          <span className="text-white/60 text-xs">Indisponível</span>
+      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-white/10 overflow-hidden">
+        <div className="flex items-center gap-3">
+          <Cloud className="w-6 h-6 text-white/50" />
+          <span className="text-white/60 text-sm">Indisponível</span>
           <ClockSection />
         </div>
       </div>
@@ -206,53 +206,88 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg overflow-hidden">
-      <div className="flex items-center gap-3">
-        {/* Clock first - moved to left */}
-        <ClockSection />
+    <div className="relative overflow-hidden">
+      {/* Main container with glass effect */}
+      <div className="bg-gradient-to-r from-indigo-900/90 via-purple-900/90 to-indigo-900/90 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl border border-white/20 relative">
+        {/* Decorative glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
+        <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
         
-        <div className="w-px h-8 bg-red-600/50" />
-        
-        {/* Current weather with city */}
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center min-w-[100px]">
-            <span className="text-[10px]">Previsão do tempo</span>
-            <span className="flex items-center gap-0.5 animate-pulse text-yellow-400 text-[10px]"><MapPin className="w-2.5 h-2.5 animate-bounce" />{displayCity}-MG</span>
-          </div>
-          {getWeatherIcon(weather.current.description, 'lg')}
-          <div className="flex items-baseline gap-1 transition-all duration-500">
-            <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
-              {showMaxTemp ? 'MAX' : 'MIN'}
-            </span>
-            <span className="text-white font-black text-xl leading-none">
-              {showMaxTemp ? maxTemp : minTemp}°<span className="text-yellow-400">c</span>
-            </span>
-          </div>
-          <Droplets className="w-4 h-4 text-cyan-300 ml-1" />
-          <span className="text-red-100 text-[9px]">{weather.current.humidity}%</span>
-        </div>
-        
-        <div className="w-px h-8 bg-red-600/50" />
-        
-        {/* Forecast inline */}
-        {weather.forecast?.slice(0, 2).map((day, index) => {
-          const date = new Date(day.date);
-          const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-          const dayName = index === 0 ? 'HOJE' : dayNames[date.getDay()];
+        <div className="flex items-center gap-4 relative z-10">
+          {/* Clock Section */}
+          <ClockSection />
           
-          return (
-            <div 
-              key={index} 
-              className="bg-red-700 rounded-md px-2 py-1 flex items-center gap-1.5"
-            >
-              {getWeatherIcon(day.icon || 'cloud', 'sm')}
-              <div className="text-[8px] leading-tight">
-                <p className="text-white font-bold">{dayName}</p>
-                <p className="text-red-100">{day.minTemp}°/{day.maxTemp}°</p>
+          {/* Separator */}
+          <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent" />
+          
+          {/* City & Weather Icon */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Previsão</span>
+              <div className="flex items-center gap-1 text-amber-300">
+                <MapPin className="w-3 h-3 animate-bounce" />
+                <span className="font-bold text-xs whitespace-nowrap">{displayCity}-MG</span>
               </div>
             </div>
-          );
-        })}
+            
+            {/* Weather Icon with glow */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
+              <div className="relative bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/10">
+                {getWeatherIcon(weather.current.description, 'lg')}
+              </div>
+            </div>
+          </div>
+          
+          {/* Temperature Display */}
+          <div className="flex flex-col items-center">
+            <span className={`text-[9px] font-bold uppercase tracking-wider ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
+              {showMaxTemp ? 'Máxima' : 'Mínima'}
+            </span>
+            <div className="flex items-baseline">
+              <span className="text-3xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
+                {showMaxTemp ? maxTemp : minTemp}
+              </span>
+              <span className="text-lg font-bold text-amber-300">°C</span>
+            </div>
+          </div>
+          
+          {/* Humidity */}
+          <div className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-1 backdrop-blur-sm">
+            <Droplets className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-white">{weather.current.humidity}%</span>
+            <span className="text-[8px] text-white/60">Umidade</span>
+          </div>
+          
+          {/* Separator */}
+          <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent" />
+          
+          {/* Forecast Cards */}
+          <div className="flex gap-2">
+            {weather.forecast?.slice(0, 2).map((day, index) => {
+              const date = new Date(day.date);
+              const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+              const dayName = index === 0 ? 'HOJE' : dayNames[date.getDay()];
+              
+              return (
+                <div 
+                  key={index} 
+                  className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-3 py-1.5 flex flex-col items-center backdrop-blur-sm border border-white/10`}
+                >
+                  <span className="text-[9px] font-bold text-white/90">{dayName}</span>
+                  <div className="my-0.5">
+                    {getWeatherIcon(day.icon || 'cloud', 'sm')}
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px]">
+                    <span className="text-cyan-300 font-semibold">{day.minTemp}°</span>
+                    <span className="text-white/40">/</span>
+                    <span className="text-orange-300 font-semibold">{day.maxTemp}°</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
