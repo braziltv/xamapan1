@@ -52,17 +52,17 @@ export function ConnectionIndicator() {
       {isChecking ? (
         <>
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          <span>Conectando...</span>
+          <span>Conectando</span>
         </>
       ) : isConnected ? (
         <>
           <Wifi className="w-3.5 h-3.5" />
-          <span>Conectado com o servidor remoto</span>
+          <span>Online</span>
         </>
       ) : (
         <>
           <WifiOff className="w-3.5 h-3.5" />
-          <span>Desconectado do servidor remoto</span>
+          <span>Offline</span>
         </>
       )}
     </div>
