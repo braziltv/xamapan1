@@ -111,7 +111,7 @@ const Index = () => {
   // Função para testar chamada de paciente (temporário)
   const handleTestPatientTTS = async () => {
     const testText = "Maria Silva. Por favor, dirija-se à sala de triagem.";
-    toast.info(`Testando voz Márcio: "${testText}"`);
+    toast.info(`Testando voz Jennifer: "${testText}"`);
     
     try {
       const response = await fetch(
@@ -277,7 +277,7 @@ const Index = () => {
             
             {/* Botão de teste temporário - REMOVER DEPOIS */}
             <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
-              <p className="text-blue-600 dark:text-blue-400 text-sm mb-2 font-medium">🧪 Teste temporário - Voz Márcio (Chamada de Paciente)</p>
+              <p className="text-blue-600 dark:text-blue-400 text-sm mb-2 font-medium">🧪 Teste temporário - Voz Jennifer (Chamada de Paciente)</p>
               <Button 
                 onClick={handleTestPatientTTS}
                 variant="outline"
