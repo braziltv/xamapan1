@@ -1326,8 +1326,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={index} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                      <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
+                    <span key={index} className="text-sm lg:text-lg xl:text-xl mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
+                      <span className={`px-1.5 py-0.5 rounded text-xs lg:text-sm font-bold mr-1 lg:mr-2 inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500 text-white' : 
                         item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1381,8 +1381,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={`dup-${index}`} className="text-xs lg:text-base xl:text-lg mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                      <span className={`px-1 py-0.5 rounded text-[8px] lg:text-xs font-bold mr-1 lg:mr-2 inline-block ${
+                    <span key={`dup-${index}`} className="text-sm lg:text-lg xl:text-xl mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
+                      <span className={`px-1.5 py-0.5 rounded text-xs lg:text-sm font-bold mr-1 lg:mr-2 inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500 text-white' : 
                         item.source === 'O Globo' ? 'bg-blue-600 text-white' :
