@@ -1,4 +1,4 @@
-import { Clock, Stethoscope, Activity, Newspaper, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
+import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -1330,45 +1330,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {newsItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
           <div className="flex items-stretch h-[5vh] min-h-[40px]">
-            {/* Left Red Section - Logo */}
-            <div className="bg-gradient-to-r from-rose-700 via-rose-600 to-rose-700 px-[1.5vw] flex items-center justify-center shrink-0 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-800/50 to-transparent" />
-              <div className="flex flex-col items-center relative z-10">
-                <span className="text-white font-black tracking-wider" style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.5rem)' }}>TV</span>
-                <span className="text-rose-200 font-semibold" style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)', marginTop: '-2px' }}>SAÚDE</span>
-              </div>
-              {/* Diagonal border - Red to Blue */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-[15px] z-20"
-                style={{
-                  background: 'linear-gradient(to right, rgb(190, 18, 60), rgb(29, 78, 216))',
-                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 60% 100%)',
-                }}
-              />
-            </div>
-            
-            {/* Blue Section - Breaking News Title */}
-            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1.2vw] pl-[1.5vw] flex items-center gap-[0.5vw] shrink-0 relative">
-              <Newspaper className="w-[1.8vw] h-[1.8vw] min-w-[18px] min-h-[18px] text-white shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-white font-black tracking-wide" style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1.2rem)' }}>
-                  NOTÍCIAS
-                </span>
-                <span className="text-blue-200" style={{ fontSize: 'clamp(0.45rem, 0.65vw, 0.65rem)', marginTop: '-1px' }}>
-                  Atualiza: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
-                </span>
-              </div>
-              {/* Diagonal border - Blue to Dark */}
-              <div 
-                className="absolute right-0 top-0 bottom-0 w-[15px] z-20"
-                style={{
-                  background: 'linear-gradient(to right, rgb(37, 99, 235), rgb(15, 23, 42))',
-                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 60% 100%)',
-                }}
-              />
-            </div>
-            
-            {/* Scrolling News Section - Dark background */}
+            {/* Scrolling News Section - Dark background full width */}
             <div className="flex-1 bg-slate-900 overflow-hidden flex items-center relative">
               <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
