@@ -383,10 +383,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const playAmplifiedAudio = useCallback(
     (audioElement: HTMLAudioElement, gain: number = 2.5): Promise<void> => {
       return new Promise((resolve, reject) => {
+        const playWithFallback = () => {
+          // Fallback to normal playback without Web Audio API
+          console.log('Using fallback audio playback (without amplification)');
+          audioElement.volume = Math.min(1.0, gain / 2.5); // Scale gain to 0-1 range
+          audioElement.onended = () => resolve();
+          audioElement.onerror = (ev) => reject(ev);
+          audioElement.play().catch(reject);
+        };
+
         try {
           const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
-          const audioContext = audioContextRef.current || new AudioContextCtor();
-          if (!audioContextRef.current) audioContextRef.current = audioContext;
+          if (!AudioContextCtor) {
+            console.warn('Web Audio API not available, using fallback');
+            playWithFallback();
+            return;
+          }
+
+          // Create new AudioContext for each playback to avoid MediaElementSource issues
+          const audioContext = new AudioContextCtor();
 
           const startPlayback = async () => {
             try {
@@ -402,30 +417,43 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               gainNode.connect(audioContext.destination);
 
               audioElement.onended = () => {
-                source.disconnect();
-                gainNode.disconnect();
+                try {
+                  source.disconnect();
+                  gainNode.disconnect();
+                  audioContext.close();
+                } catch (e) {
+                  console.warn('Error cleaning up audio context:', e);
+                }
                 resolve();
               };
               audioElement.onerror = (e) => {
-                source.disconnect();
-                gainNode.disconnect();
+                try {
+                  source.disconnect();
+                  gainNode.disconnect();
+                  audioContext.close();
+                } catch (err) {
+                  console.warn('Error cleaning up audio context on error:', err);
+                }
                 reject(e);
               };
 
               await audioElement.play();
             } catch (err) {
-              reject(err);
+              console.error('Web Audio API playback error:', err);
+              try {
+                audioContext.close();
+              } catch (e) {
+                // ignore
+              }
+              // Try fallback
+              playWithFallback();
             }
           };
 
-          void startPlayback();
+          startPlayback();
         } catch (e) {
-          // Fallback to normal playback if Web Audio API fails
-          console.warn('Web Audio API amplification failed, using normal volume:', e);
-          audioElement.volume = 1.0;
-          audioElement.onended = () => resolve();
-          audioElement.onerror = (ev) => reject(ev);
-          audioElement.play().catch(reject);
+          console.warn('Web Audio API initialization failed, using fallback:', e);
+          playWithFallback();
         }
       });
     },
