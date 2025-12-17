@@ -4,6 +4,13 @@ import { Input } from '@/components/ui/input';
 import { MessageCircle, Send, X, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ChatMessage {
   id: string;
@@ -11,6 +18,7 @@ interface ChatMessage {
   sender_name?: string;
   message: string;
   created_at: string;
+  recipient?: string;
 }
 
 interface InternalChatProps {
@@ -29,10 +37,18 @@ const STATION_LABELS: Record<string, string> = {
   medico: 'Médico',
 };
 
+const RECIPIENT_LABELS: Record<string, string> = {
+  todos: 'Todos',
+  cadastro: 'Cadastro',
+  triagem: 'Triagem',
+  medico: 'Médico',
+};
+
 export function InternalChat({ station }: InternalChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [recipient, setRecipient] = useState('todos');
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';
@@ -83,8 +99,9 @@ export function InternalChat({ station }: InternalChatProps) {
           const newMsg = payload.new as ChatMessage;
           setMessages((prev) => [...prev, newMsg]);
           
-          // Increment unread if chat is closed and message is from another station
-          if (!isOpen && newMsg.sender_station !== station) {
+          // Increment unread if chat is closed and message is for this station or all
+          const isForMe = newMsg.recipient === 'todos' || newMsg.recipient === station;
+          if (!isOpen && newMsg.sender_station !== station && isForMe) {
             setUnreadCount((prev) => prev + 1);
             // Play notification sound
             playNotificationSound();
@@ -128,6 +145,7 @@ export function InternalChat({ station }: InternalChatProps) {
       unit_name: unitName,
       sender_station: station,
       message: newMessage.trim(),
+      recipient: recipient,
     });
 
     if (!error) {
@@ -172,6 +190,12 @@ export function InternalChat({ station }: InternalChatProps) {
             ) : (
               messages.map((msg) => {
                 const isOwnMessage = msg.sender_station === station;
+                const isPrivate = msg.recipient && msg.recipient !== 'todos';
+                const isForMe = msg.recipient === 'todos' || msg.recipient === station || msg.sender_station === station;
+                
+                // Only show messages that are for this station or from this station
+                if (!isForMe) return null;
+                
                 return (
                   <div
                     key={msg.id}
@@ -185,6 +209,11 @@ export function InternalChat({ station }: InternalChatProps) {
                       >
                         {STATION_LABELS[msg.sender_station] || msg.sender_station}
                       </span>
+                      {isPrivate && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500 text-white">
+                          → {RECIPIENT_LABELS[msg.recipient!] || msg.recipient}
+                        </span>
+                      )}
                       <span className="text-[10px] text-muted-foreground">
                         {formatBrazilTime(new Date(msg.created_at), 'HH:mm')}
                       </span>
@@ -193,6 +222,8 @@ export function InternalChat({ station }: InternalChatProps) {
                       className={`max-w-[80%] px-3 py-1.5 rounded-lg text-sm ${
                         isOwnMessage
                           ? 'bg-primary text-primary-foreground'
+                          : isPrivate
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-foreground border border-purple-300 dark:border-purple-700'
                           : 'bg-muted text-foreground'
                       }`}
                     >
@@ -206,20 +237,31 @@ export function InternalChat({ station }: InternalChatProps) {
           </div>
 
           {/* Input */}
-          <div className="p-2 border-t border-border bg-card">
+          <div className="p-2 border-t border-border bg-card space-y-2">
             <div className="flex gap-2">
+              <Select value={recipient} onValueChange={setRecipient}>
+                <SelectTrigger className="w-28 h-8 text-xs">
+                  <SelectValue placeholder="Para" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border z-[60]">
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="cadastro" disabled={station === 'cadastro'}>Cadastro</SelectItem>
+                  <SelectItem value="triagem" disabled={station === 'triagem'}>Triagem</SelectItem>
+                  <SelectItem value="medico" disabled={station === 'medico'}>Médico</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite uma mensagem..."
-                className="flex-1 text-sm"
+                className="flex-1 text-sm h-8"
               />
               <Button
                 onClick={sendMessage}
                 disabled={!newMessage.trim()}
                 size="sm"
-                className="px-3"
+                className="px-3 h-8"
               >
                 <Send className="w-4 h-4" />
               </Button>

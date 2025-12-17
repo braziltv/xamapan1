@@ -70,6 +70,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          recipient: string | null
           sender_name: string | null
           sender_station: string
           unit_name: string
@@ -78,6 +79,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          recipient?: string | null
           sender_name?: string | null
           sender_station: string
           unit_name: string
@@ -86,6 +88,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          recipient?: string | null
           sender_name?: string | null
           sender_station?: string
           unit_name?: string
