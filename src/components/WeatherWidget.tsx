@@ -152,20 +152,20 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     if (!currentTime || !formatTime) return null;
     
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-[0.8vw] shrink-0">
         <div className="flex items-baseline whitespace-nowrap">
-          <span className="text-2xl font-mono font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 3rem)' }}>
             {formatTime(currentTime, 'HH:mm')}
           </span>
-          <span className="text-base font-mono font-bold text-amber-300 animate-pulse">
+          <span className="font-mono font-bold text-amber-300 animate-pulse" style={{ fontSize: 'clamp(1rem, 1.5vw, 2rem)' }}>
             :{formatTime(currentTime, 'ss')}
           </span>
         </div>
-        <div className="text-center bg-white/10 rounded px-1.5 py-0.5">
-          <p className="text-[10px] font-bold text-amber-300 leading-tight whitespace-nowrap uppercase">
+        <div className="text-center bg-white/10 rounded-lg px-[0.6vw] py-[0.3vh]">
+          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.9rem)' }}>
             {formatTime(currentTime, "EEEE")}
           </p>
-          <p className="text-[10px] font-semibold text-cyan-300 leading-tight whitespace-nowrap">
+          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.9rem)' }}>
             {formatTime(currentTime, "dd/MM/yyyy")}
           </p>
         </div>
@@ -176,12 +176,10 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   // Only show loading on initial load
   if (initialLoading && !currentWeather) {
     return (
-      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-white/10 overflow-hidden">
-        <div className="flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-white/70 animate-pulse" />
-          <span className="text-white/80 text-sm">Carregando previsões...</span>
-          <ClockSection />
-        </div>
+      <div className="flex items-center gap-[1vw]">
+        <Cloud className="w-6 h-6 text-white/70 animate-pulse" />
+        <span className="text-white/80 text-sm">Carregando...</span>
+        <ClockSection />
       </div>
     );
   }
@@ -191,12 +189,10 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
 
   if (!weather) {
     return (
-      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-white/10 overflow-hidden">
-        <div className="flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-white/50" />
-          <span className="text-white/60 text-sm">Indisponível</span>
-          <ClockSection />
-        </div>
+      <div className="flex items-center gap-[1vw]">
+        <Cloud className="w-6 h-6 text-white/50" />
+        <span className="text-white/60 text-sm">Indisponível</span>
+        <ClockSection />
       </div>
     );
   }
@@ -207,104 +203,95 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="relative overflow-hidden w-full">
-      {/* Main container with glass effect - fixed width to prevent jumping */}
-      <div className="bg-gradient-to-r from-indigo-900/90 via-purple-900/90 to-indigo-900/90 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl border border-white/20 relative">
-        {/* Decorative glow */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
-        <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-        
-        <div className="flex items-center gap-4 relative z-10">
-          {/* Clock Section */}
-          <ClockSection />
-          
-          {/* Separator */}
-          <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-          
-          {/* City & Weather Icon - fixed width for city name */}
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col items-center justify-center min-w-[90px]">
-              <span className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Previsão</span>
-              <div className="flex items-center gap-1 text-amber-300">
-                <MapPin className="w-3 h-3 animate-bounce shrink-0" />
-                <span className="font-bold text-xs whitespace-nowrap truncate max-w-[75px]">{displayCity}-MG</span>
-              </div>
-            </div>
-            
-            {/* Weather Icon with glow */}
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
-              <div className="relative bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/10">
-                {getWeatherIcon(weather.current.description, 'lg')}
-              </div>
-            </div>
-          </div>
-          
-          {/* Current Temperature - fixed width */}
-          <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-xl px-3 py-1.5 backdrop-blur-sm border border-white/10 min-w-[70px]">
-            <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Agora</span>
-            <div className="flex items-baseline">
-              <span className="text-2xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums min-w-[2ch] text-center">
-                {weather.current.temperature}
-              </span>
-              <span className="text-sm font-bold text-emerald-300">°C</span>
-            </div>
-            {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
-              <span className="text-[8px] text-white/70 whitespace-nowrap">
-                Sensação: <span className="font-bold text-amber-300 tabular-nums">{weather.current.feelsLike}°</span>
-              </span>
-            )}
-          </div>
-          
-          {/* Max/Min Temperature Display - fixed width */}
-          <div className="flex flex-col items-center min-w-[60px]">
-            <span className={`text-[9px] font-bold uppercase tracking-wider ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
-              {showMaxTemp ? 'Máxima' : 'Mínima'}
-            </span>
-            <div className="flex items-baseline">
-              <span className="text-2xl font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums min-w-[2ch] text-center">
-                {showMaxTemp ? maxTemp : minTemp}
-              </span>
-              <span className="text-sm font-bold text-amber-300">°C</span>
-            </div>
-          </div>
-          
-          {/* Humidity - fixed width */}
-          <div className="flex flex-col items-center bg-white/10 rounded-lg px-2 py-1 backdrop-blur-sm min-w-[50px]">
-            <Droplets className="w-4 h-4 text-cyan-400 shrink-0" />
-            <span className="text-xs font-bold text-white tabular-nums">{weather.current.humidity}%</span>
-            <span className="text-[8px] text-white/60">Umidade</span>
-          </div>
-          
-          {/* Separator */}
-          <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-          
-          {/* Forecast Cards - fixed width */}
-          <div className="flex gap-2">
-            {weather.forecast?.slice(0, 2).map((day, index) => {
-              const date = new Date(day.date);
-              const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-              const dayName = index === 0 ? 'HOJE' : dayNames[date.getDay()];
-              
-              return (
-                <div 
-                  key={index} 
-                  className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-3 py-1.5 flex flex-col items-center backdrop-blur-sm border border-white/10 min-w-[55px]`}
-                >
-                  <span className="text-[9px] font-bold text-white/90">{dayName}</span>
-                  <div className="my-0.5">
-                    {getWeatherIcon(day.icon || 'cloud', 'sm')}
-                  </div>
-                  <div className="flex items-center gap-1 text-[10px]">
-                    <span className="text-cyan-300 font-semibold tabular-nums">{day.minTemp}°</span>
-                    <span className="text-white/40">/</span>
-                    <span className="text-orange-300 font-semibold tabular-nums">{day.maxTemp}°</span>
-                  </div>
-                </div>
-              );
-            })}
+    <div className="flex items-center gap-[1.2vw] flex-wrap justify-end">
+      {/* Clock Section */}
+      <ClockSection />
+      
+      {/* Separator */}
+      <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+      
+      {/* City & Weather Icon */}
+      <div className="flex items-center gap-[0.8vw] shrink-0">
+        <div className="flex flex-col items-center justify-center">
+          <span className="font-bold text-white/70 uppercase tracking-wider" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>Previsão</span>
+          <div className="flex items-center gap-[0.3vw] text-amber-300">
+            <MapPin className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] animate-bounce shrink-0" />
+            <span className="font-bold whitespace-nowrap" style={{ fontSize: 'clamp(0.55rem, 0.9vw, 1rem)' }}>{displayCity}-MG</span>
           </div>
         </div>
+        
+        {/* Weather Icon with glow */}
+        <div className="relative shrink-0">
+          <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
+          <div className="relative bg-white/10 rounded-xl p-[0.5vw] backdrop-blur-sm border border-white/10">
+            {getWeatherIcon(weather.current.description, 'lg')}
+          </div>
+        </div>
+      </div>
+      
+      {/* Current Temperature */}
+      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-xl px-[0.8vw] py-[0.4vh] backdrop-blur-sm border border-white/10 shrink-0">
+        <span className="font-bold text-emerald-300 uppercase tracking-wider" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>Agora</span>
+        <div className="flex items-baseline">
+          <span className="font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums" style={{ fontSize: 'clamp(1.3rem, 2.2vw, 2.8rem)' }}>
+            {weather.current.temperature}
+          </span>
+          <span className="font-bold text-emerald-300" style={{ fontSize: 'clamp(0.7rem, 1vw, 1.2rem)' }}>°C</span>
+        </div>
+        {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
+          <span className="text-white/70 whitespace-nowrap" style={{ fontSize: 'clamp(0.4rem, 0.6vw, 0.7rem)' }}>
+            Sensação: <span className="font-bold text-amber-300 tabular-nums">{weather.current.feelsLike}°</span>
+          </span>
+        )}
+      </div>
+      
+      {/* Max/Min Temperature Display */}
+      <div className="flex flex-col items-center shrink-0">
+        <span className={`font-bold uppercase tracking-wider ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`} style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>
+          {showMaxTemp ? 'Máxima' : 'Mínima'}
+        </span>
+        <div className="flex items-baseline">
+          <span className="font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums" style={{ fontSize: 'clamp(1.3rem, 2.2vw, 2.8rem)' }}>
+            {showMaxTemp ? maxTemp : minTemp}
+          </span>
+          <span className="font-bold text-amber-300" style={{ fontSize: 'clamp(0.7rem, 1vw, 1.2rem)' }}>°C</span>
+        </div>
+      </div>
+      
+      {/* Humidity */}
+      <div className="flex flex-col items-center bg-white/10 rounded-lg px-[0.6vw] py-[0.4vh] backdrop-blur-sm shrink-0">
+        <Droplets className="w-[1.2vw] h-[1.2vw] min-w-[14px] min-h-[14px] text-cyan-400 shrink-0" />
+        <span className="font-bold text-white tabular-nums" style={{ fontSize: 'clamp(0.7rem, 1.1vw, 1.3rem)' }}>{weather.current.humidity}%</span>
+        <span className="text-white/60" style={{ fontSize: 'clamp(0.4rem, 0.55vw, 0.65rem)' }}>Umidade</span>
+      </div>
+      
+      {/* Separator */}
+      <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+      
+      {/* Forecast Cards */}
+      <div className="flex gap-[0.5vw] shrink-0">
+        {weather.forecast?.slice(0, 2).map((day, index) => {
+          const date = new Date(day.date);
+          const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+          const dayName = index === 0 ? 'HOJE' : dayNames[date.getDay()];
+          
+          return (
+            <div 
+              key={index} 
+              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-xl px-[0.7vw] py-[0.4vh] flex flex-col items-center backdrop-blur-sm border border-white/10`}
+            >
+              <span className="font-bold text-white/90" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.8rem)' }}>{dayName}</span>
+              <div className="my-[0.2vh]">
+                {getWeatherIcon(day.icon || 'cloud', 'sm')}
+              </div>
+              <div className="flex items-center gap-[0.3vw]">
+                <span className="text-cyan-300 font-semibold tabular-nums" style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.85rem)' }}>{day.minTemp}°</span>
+                <span className="text-white/40">/</span>
+                <span className="text-orange-300 font-semibold tabular-nums" style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.85rem)' }}>{day.maxTemp}°</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

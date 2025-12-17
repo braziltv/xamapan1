@@ -6,15 +6,41 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Cidades de Minas Gerais para previsão do tempo
-const cities = [
-  'Paineiras', 'Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora',
-  'Betim', 'Montes Claros', 'Ribeirão das Neves', 'Uberaba', 'Governador Valadares',
-  'Ipatinga', 'Sete Lagoas', 'Divinópolis', 'Santa Luzia', 'Poços de Caldas',
-  'Patos de Minas', 'Pouso Alegre', 'Teófilo Otoni', 'Barbacena', 'Sabará',
-  'Varginha', 'Conselheiro Lafaiete', 'Araguari', 'Itabira', 'Passos',
-  'Coronel Fabriciano', 'Muriaé', 'Ituiutaba', 'Araxá', 'Lavras'
-];
+// Cidades de Minas Gerais com coordenadas para previsão do tempo
+const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
+  'Paineiras': { lat: -19.26, lon: -45.52 },
+  'Belo Horizonte': { lat: -19.92, lon: -43.94 },
+  'Uberlândia': { lat: -18.92, lon: -48.28 },
+  'Contagem': { lat: -19.93, lon: -44.05 },
+  'Juiz de Fora': { lat: -21.76, lon: -43.35 },
+  'Betim': { lat: -19.97, lon: -44.20 },
+  'Montes Claros': { lat: -16.73, lon: -43.86 },
+  'Ribeirão das Neves': { lat: -19.77, lon: -44.08 },
+  'Uberaba': { lat: -19.75, lon: -47.93 },
+  'Governador Valadares': { lat: -18.85, lon: -41.95 },
+  'Ipatinga': { lat: -19.47, lon: -42.54 },
+  'Sete Lagoas': { lat: -19.46, lon: -44.25 },
+  'Divinópolis': { lat: -20.14, lon: -44.88 },
+  'Santa Luzia': { lat: -19.77, lon: -43.85 },
+  'Poços de Caldas': { lat: -21.79, lon: -46.56 },
+  'Patos de Minas': { lat: -18.58, lon: -46.52 },
+  'Pouso Alegre': { lat: -22.23, lon: -45.94 },
+  'Teófilo Otoni': { lat: -17.86, lon: -41.51 },
+  'Barbacena': { lat: -21.23, lon: -43.77 },
+  'Sabará': { lat: -19.88, lon: -43.81 },
+  'Varginha': { lat: -21.55, lon: -45.43 },
+  'Conselheiro Lafaiete': { lat: -20.66, lon: -43.79 },
+  'Araguari': { lat: -18.65, lon: -48.19 },
+  'Itabira': { lat: -19.62, lon: -43.23 },
+  'Passos': { lat: -20.72, lon: -46.61 },
+  'Coronel Fabriciano': { lat: -19.52, lon: -42.63 },
+  'Muriaé': { lat: -21.13, lon: -42.37 },
+  'Ituiutaba': { lat: -18.97, lon: -49.46 },
+  'Araxá': { lat: -19.59, lon: -46.94 },
+  'Lavras': { lat: -21.25, lon: -45.00 },
+};
+
+const cities = Object.keys(cityCoordinates);
 
 // Feeds de notícias
 const feeds = [
@@ -62,8 +88,14 @@ function decodeHTMLEntities(text: string): string {
 
 async function fetchWeatherForCity(city: string): Promise<any | null> {
   try {
+    const coords = cityCoordinates[city];
+    if (!coords) {
+      console.error(`No coordinates for city: ${city}`);
+      return null;
+    }
+    
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=-19.9&longitude=-44.0&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America/Sao_Paulo&forecast_days=3`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America/Sao_Paulo&forecast_days=3`,
       { signal: AbortSignal.timeout(10000) }
     );
     
