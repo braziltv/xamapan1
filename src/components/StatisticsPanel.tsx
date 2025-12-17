@@ -64,7 +64,7 @@ import { ptBR } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
-import { useHourAudio } from '@/hooks/useHourAudio';
+import { useHourAudio, HOUR_VOICES, HourVoiceType } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
 
 interface StatisticsPanelProps {
@@ -163,10 +163,16 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
+  const [selectedHourVoice, setSelectedHourVoice] = useState<HourVoiceType>('female');
   
   const { toast } = useToast();
-  const { playHourAudio, checkAudiosExist } = useHourAudio();
+  const { playHourAudio, checkAudiosExist, getSelectedVoice, setSelectedVoice } = useHourAudio();
   const { currentTime } = useBrazilTime();
+
+  // Inicializar voz selecionada do localStorage
+  useEffect(() => {
+    setSelectedHourVoice(getSelectedVoice());
+  }, []);
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -2707,6 +2713,40 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* Seletor de Voz */}
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+              <p className="text-sm text-purple-600 font-medium mb-3">🎤 Voz do Anúncio:</p>
+              <div className="flex gap-2">
+                <Button
+                  variant={selectedHourVoice === 'female' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedHourVoice('female');
+                    setSelectedVoice('female');
+                    toast({ title: "Voz feminina selecionada", description: HOUR_VOICES.female.name });
+                  }}
+                  className={selectedHourVoice === 'female' ? 'bg-pink-500 hover:bg-pink-600' : ''}
+                >
+                  👩 {HOUR_VOICES.female.label}
+                </Button>
+                <Button
+                  variant={selectedHourVoice === 'male' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedHourVoice('male');
+                    setSelectedVoice('male');
+                    toast({ title: "Voz masculina selecionada", description: HOUR_VOICES.male.name });
+                  }}
+                  className={selectedHourVoice === 'male' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+                >
+                  👨 {HOUR_VOICES.male.label}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Voz atual: {HOUR_VOICES[selectedHourVoice].name}
+              </p>
+            </div>
+
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
               <p className="text-sm text-blue-600 font-medium">
                 🎙️ ElevenLabs TTS - Frase completa gerada em tempo real

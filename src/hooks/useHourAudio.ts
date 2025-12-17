@@ -2,8 +2,40 @@
  * Hook para reprodução de áudios de hora via ElevenLabs TTS
  * Gera frase completa do horário em português brasileiro natural
  */
+
+// Vozes disponíveis para anúncios de hora
+export const HOUR_VOICES = {
+  female: {
+    id: 'Xb7hH8MSUJpSbSDYk0k2', // Alice
+    name: 'Alice (Feminina)',
+    label: 'Feminina'
+  },
+  male: {
+    id: 'onwK4e9ZLuTAKqWW03F9', // Daniel
+    name: 'Daniel (Masculina)',
+    label: 'Masculina'
+  }
+} as const;
+
+export type HourVoiceType = 'female' | 'male';
+
 export const useHourAudio = () => {
   
+  /**
+   * Obter voz selecionada para anúncios de hora
+   */
+  const getSelectedVoice = (): HourVoiceType => {
+    const stored = localStorage.getItem('hour-announcement-voice');
+    return (stored === 'male' || stored === 'female') ? stored : 'female';
+  };
+
+  /**
+   * Definir voz para anúncios de hora
+   */
+  const setSelectedVoice = (voice: HourVoiceType): void => {
+    localStorage.setItem('hour-announcement-voice', voice);
+  };
+
   /**
    * Gerar texto da hora em português brasileiro natural
    */
@@ -131,8 +163,10 @@ export const useHourAudio = () => {
     try {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
       const text = getHourText(hour, minute);
+      const voiceType = getSelectedVoice();
+      const voiceId = HOUR_VOICES[voiceType].id;
       
-      console.log(`[useHourAudio] Gerando TTS para: "${text}"`);
+      console.log(`[useHourAudio] Gerando TTS para: "${text}" com voz ${voiceType} (${voiceId})`);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
@@ -145,6 +179,7 @@ export const useHourAudio = () => {
           },
           body: JSON.stringify({ 
             text, 
+            voiceId,
             skipCache: true, // Sempre gerar novo áudio
             unitName: 'TimeAnnouncement'
           }),
@@ -182,7 +217,7 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Verificar status (mantido para compatibilidade, mas agora indica uso de API)
+   * Verificar status (mantido para compatibilidade)
    */
   const checkAudiosExist = async (): Promise<{ 
     hours: number; 
@@ -198,7 +233,7 @@ export const useHourAudio = () => {
       hasMinutosWord: true,
       missingHours: [],
       missingMinutes: [],
-      usingApi: true, // Indica que está usando API
+      usingApi: true,
     };
   };
 
@@ -206,5 +241,8 @@ export const useHourAudio = () => {
     getHourText,
     playHourAudio,
     checkAudiosExist,
+    getSelectedVoice,
+    setSelectedVoice,
+    HOUR_VOICES,
   };
 };
