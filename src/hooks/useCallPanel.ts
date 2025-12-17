@@ -498,6 +498,13 @@ export function useCallPanel() {
     ));
   }, [createCall, triggerCallEvent]);
 
+  // Send to triage queue WITHOUT TV announcement (registration uses this)
+  const sendToTriageQueue = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting' as const } : p
+    ));
+  }, []);
+
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback((patientId: string, destination?: string) => {
     setPatients(prev => prev.map(p => 
@@ -563,6 +570,7 @@ export function useCallPanel() {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    sendToTriageQueue,
     sendToDoctorQueue,
     updatePatientPriority,
   };
