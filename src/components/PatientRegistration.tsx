@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -92,6 +93,9 @@ export function PatientRegistration({
   const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+
+  // Auto-reload após 10 minutos de inatividade
+  useInactivityReload();
 
   // Dicas aleatórias para acentuação
   const ACCENT_TIPS = [

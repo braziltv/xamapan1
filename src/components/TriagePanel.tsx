@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -76,6 +77,9 @@ export function TriagePanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+
+  // Auto-reload após 10 minutos de inatividade
+  useInactivityReload();
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',

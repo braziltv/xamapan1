@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
+import { useInactivityReload } from '@/hooks/useInactivityReload';
 
 import {
   Tooltip,
@@ -70,6 +71,9 @@ export function DoctorPanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+
+  // Auto-reload após 10 minutos de inatividade
+  useInactivityReload();
   
   // Filter currentCall to only show if it belongs to this consultório
   const myCurrentCall = currentCall && currentCall.destination === currentConsultorioLabel ? currentCall : null;
