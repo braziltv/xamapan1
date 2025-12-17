@@ -168,47 +168,8 @@ const Index = () => {
     );
   }
 
-  // Função de teste temporária para TTS
-  const handleTestTTS = async () => {
-    try {
-      const testText = "Maria Silva. Por favor, dirija-se à sala de triagem";
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
-            text: testText,
-            voiceId: localStorage.getItem(`voiceCallPreference_${unitName}`) || "EXAVITQu4vr4xnSDxMaL",
-            skipCache: true,
-          }),
-        }
-      );
-      
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.play();
-      }
-    } catch (error) {
-      console.error("Erro no teste TTS:", error);
-    }
-  };
-
   return (
     <div ref={mainContainerRef} className="min-h-screen-safe bg-background">
-      {/* Botão de teste temporário */}
-      <button
-        onClick={handleTestTTS}
-        className="fixed bottom-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg hover:bg-primary/90 transition-all font-medium"
-      >
-        🔊 Testar TTS
-      </button>
-      
       <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen-safe flex flex-col">
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
