@@ -368,12 +368,13 @@ export const exportTutorialPDF = () => {
     { num: '02', title: 'Acesso ao Sistema' },
     { num: '03', title: 'Módulo Cadastro' },
     { num: '04', title: 'Módulo Triagem' },
-    { num: '05', title: 'Módulo Médico' },
-    { num: '06', title: 'Módulo Administrativo' },
-    { num: '07', title: 'Modo TV (Display Público)' },
-    { num: '08', title: 'Chat Interno' },
-    { num: '09', title: 'Configurações de Áudio' },
-    { num: '10', title: 'Dicas e Boas Práticas' },
+    { num: '05', title: 'Salas de Procedimentos' },
+    { num: '06', title: 'Módulo Médico' },
+    { num: '07', title: 'Módulo Administrativo' },
+    { num: '08', title: 'Modo TV (Display Público)' },
+    { num: '09', title: 'Chat Interno' },
+    { num: '10', title: 'Configurações de Áudio' },
+    { num: '11', title: 'Dicas e Boas Práticas' },
   ];
   
   chapters.forEach((ch, i) => {
@@ -532,9 +533,190 @@ export const exportTutorialPDF = () => {
   addBullet('Alerta visual pulsante na borda da tela', '●');
   addBullet('Botão para ativar/desativar notificações sonoras', '●');
 
+  // ==================== SALAS DE PROCEDIMENTOS ====================
+  addPage();
+  addTitle('05. SALAS DE PROCEDIMENTOS');
+  
+  addText('O sistema permite encaminhar pacientes diretamente para salas de procedimentos específicos, agilizando o fluxo de atendimento.');
+  addSpacer(8);
+  
+  // ===== ELETROCARDIOGRAMA =====
+  addSubtitle('Sala de Eletrocardiograma (ECG)');
+  
+  // Ilustração do ECG
+  doc.setFillColor(239, 68, 68);
+  doc.roundedRect(margin, y, maxWidth, 45, 3, 3, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(margin + 5, y + 5, maxWidth - 10, 35, 2, 2, 'F');
+  
+  // Desenhar linha de ECG
+  doc.setDrawColor(239, 68, 68);
+  doc.setLineWidth(1.5);
+  const ecgY = y + 22;
+  doc.line(margin + 10, ecgY, margin + 30, ecgY);
+  doc.line(margin + 30, ecgY, margin + 35, ecgY - 8);
+  doc.line(margin + 35, ecgY - 8, margin + 40, ecgY + 12);
+  doc.line(margin + 40, ecgY + 12, margin + 45, ecgY - 5);
+  doc.line(margin + 45, ecgY - 5, margin + 50, ecgY);
+  doc.line(margin + 50, ecgY, margin + 70, ecgY);
+  doc.line(margin + 70, ecgY, margin + 75, ecgY - 8);
+  doc.line(margin + 75, ecgY - 8, margin + 80, ecgY + 12);
+  doc.line(margin + 80, ecgY + 12, margin + 85, ecgY - 5);
+  doc.line(margin + 85, ecgY - 5, margin + 90, ecgY);
+  doc.line(margin + 90, ecgY, margin + 110, ecgY);
+  
+  // Ícone de coração
+  doc.setFillColor(239, 68, 68);
+  doc.circle(margin + 140, y + 18, 8, 'F');
+  doc.circle(margin + 152, y + 18, 8, 'F');
+  doc.triangle(margin + 132, y + 20, margin + 160, y + 20, margin + 146, y + 38, 'F');
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(239, 68, 68);
+  doc.text('ELETROCARDIOGRAMA', margin + 10, y + 12);
+  
+  y += 52;
+  
+  addBullet('Exame que registra a atividade elétrica do coração', '❤');
+  addBullet('Paciente é chamado diretamente para a sala de ECG', '❤');
+  addBullet('Anúncio na TV: "Dirija-se à Sala de Eletrocardiograma"', '❤');
+  addBullet('Tempo médio do procedimento: 10-15 minutos', '❤');
+  
+  addSpacer(8);
+  
+  // ===== CURATIVOS =====
+  addSubtitle('Sala de Curativos');
+  
+  // Ilustração de curativo
+  doc.setFillColor(59, 130, 246);
+  doc.roundedRect(margin, y, maxWidth, 40, 3, 3, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(margin + 5, y + 5, maxWidth - 10, 30, 2, 2, 'F');
+  
+  // Desenhar band-aid
+  doc.setFillColor(245, 208, 169);
+  doc.roundedRect(margin + 20, y + 12, 50, 16, 3, 3, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.rect(margin + 35, y + 14, 20, 12, 'F');
+  doc.setFillColor(200, 200, 200);
+  doc.circle(margin + 40, y + 20, 1, 'F');
+  doc.circle(margin + 45, y + 20, 1, 'F');
+  doc.circle(margin + 50, y + 20, 1, 'F');
+  
+  // Ícone de cruz médica
+  doc.setFillColor(59, 130, 246);
+  doc.rect(margin + 130, y + 10, 8, 20, 'F');
+  doc.rect(margin + 124, y + 16, 20, 8, 'F');
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(59, 130, 246);
+  doc.text('SALA DE CURATIVOS', margin + 10, y + 12);
+  
+  y += 47;
+  
+  addBullet('Tratamento de feridas, troca de curativos e suturas', '🩹');
+  addBullet('Paciente é chamado para a Sala de Curativos', '🩹');
+  addBullet('Anúncio na TV: "Dirija-se à Sala de Curativos"', '🩹');
+  addBullet('Procedimentos de enfermagem especializados', '🩹');
+  
+  addSpacer(5);
+  
+  // ===== RAIO X =====
+  addPage();
+  addSubtitle('Sala de Raio X');
+  
+  // Ilustração de Raio X
+  doc.setFillColor(107, 114, 128);
+  doc.roundedRect(margin, y, maxWidth, 45, 3, 3, 'F');
+  doc.setFillColor(30, 30, 30);
+  doc.roundedRect(margin + 5, y + 5, maxWidth - 10, 35, 2, 2, 'F');
+  
+  // Desenhar silhueta de corpo/ossos
+  doc.setFillColor(200, 220, 255);
+  // Crânio
+  doc.circle(margin + 45, y + 15, 6, 'F');
+  // Coluna
+  doc.rect(margin + 43, y + 21, 4, 15, 'F');
+  // Costelas
+  doc.setDrawColor(200, 220, 255);
+  doc.setLineWidth(1);
+  doc.line(margin + 35, y + 24, margin + 43, y + 26);
+  doc.line(margin + 55, y + 24, margin + 47, y + 26);
+  doc.line(margin + 35, y + 28, margin + 43, y + 30);
+  doc.line(margin + 55, y + 28, margin + 47, y + 30);
+  
+  // Ícone de scan
+  doc.setFillColor(200, 220, 255);
+  doc.roundedRect(margin + 120, y + 8, 40, 28, 3, 3, 'F');
+  doc.setFillColor(30, 30, 30);
+  doc.roundedRect(margin + 125, y + 12, 30, 20, 2, 2, 'F');
+  doc.setFillColor(200, 220, 255);
+  doc.circle(margin + 140, y + 22, 5, 'F');
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(200, 220, 255);
+  doc.text('SALA DE RAIO X', margin + 10, y + 12);
+  
+  y += 52;
+  
+  addBullet('Exames de imagem para diagnóstico', '📷');
+  addBullet('Radiografias de tórax, membros e abdômen', '📷');
+  addBullet('Anúncio na TV: "Dirija-se à Sala de Raio X"', '📷');
+  addBullet('Paciente deve remover objetos metálicos', '📷');
+  
+  addSpacer(8);
+  
+  // ===== ENFERMARIA =====
+  addSubtitle('Enfermaria');
+  
+  // Ilustração de cama hospitalar
+  doc.setFillColor(34, 197, 94);
+  doc.roundedRect(margin, y, maxWidth, 40, 3, 3, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(margin + 5, y + 5, maxWidth - 10, 30, 2, 2, 'F');
+  
+  // Desenhar cama
+  doc.setFillColor(100, 100, 100);
+  doc.rect(margin + 20, y + 25, 60, 3, 'F');
+  doc.rect(margin + 18, y + 15, 3, 13, 'F');
+  doc.rect(margin + 79, y + 18, 3, 10, 'F');
+  doc.setFillColor(200, 220, 255);
+  doc.rect(margin + 21, y + 17, 58, 8, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.rect(margin + 22, y + 18, 12, 6, 'F');
+  
+  // Ícone de leito
+  doc.setFillColor(34, 197, 94);
+  doc.roundedRect(margin + 120, y + 10, 40, 20, 2, 2, 'F');
+  doc.setFontSize(16);
+  doc.setTextColor(255, 255, 255);
+  doc.text('🛏️', margin + 132, y + 24);
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(34, 197, 94);
+  doc.text('ENFERMARIA', margin + 10, y + 12);
+  
+  y += 47;
+  
+  addBullet('Área para observação e internação temporária', '🛏');
+  addBullet('Pacientes que necessitam de monitoramento', '🛏');
+  addBullet('Anúncio na TV: "Dirija-se à Enfermaria"', '🛏');
+  addBullet('Acompanhamento contínuo pela equipe de saúde', '🛏');
+  
+  addSpacer(8);
+  addInfoBox('FLUXO DE ENCAMINHAMENTO', [
+    'Os pacientes podem ser encaminhados para procedimentos',
+    'diretamente do Cadastro ou após a Triagem.',
+    'O sistema anuncia automaticamente o destino na TV.'
+  ], [220, 252, 231]);
+
   // ==================== MÓDULO MÉDICO ====================
   addPage();
-  addTitle('05. MÓDULO MÉDICO');
+  addTitle('06. MÓDULO MÉDICO');
   
   // Ícone de pessoa (médico)
   drawPersonIcon(pageWidth - margin - 20, y - 12, 18, [34, 197, 94]);
@@ -570,7 +752,7 @@ export const exportTutorialPDF = () => {
 
   // ==================== MÓDULO ADMINISTRATIVO ====================
   addPage();
-  addTitle('06. MÓDULO ADMINISTRATIVO');
+  addTitle('07. MÓDULO ADMINISTRATIVO');
   
   drawChartIcon(pageWidth - margin - 25, y - 15, 25);
   
@@ -605,7 +787,7 @@ export const exportTutorialPDF = () => {
 
   // ==================== MODO TV ====================
   addPage();
-  addTitle('07. MODO TV (DISPLAY PÚBLICO)');
+  addTitle('08. MODO TV (DISPLAY PÚBLICO)');
   
   drawTVIcon(pageWidth - margin - 28, y - 15, 28);
   
@@ -663,7 +845,7 @@ export const exportTutorialPDF = () => {
 
   // ==================== CHAT INTERNO ====================
   addPage();
-  addTitle('08. CHAT INTERNO');
+  addTitle('09. CHAT INTERNO');
   
   drawChatIcon(pageWidth - margin - 25, y - 15, 25);
   
@@ -714,7 +896,7 @@ export const exportTutorialPDF = () => {
 
   // ==================== CONFIGURAÇÕES DE ÁUDIO ====================
   addPage();
-  addTitle('09. CONFIGURAÇÕES DE ÁUDIO');
+  addTitle('10. CONFIGURAÇÕES DE ÁUDIO');
   
   drawSpeakerIcon(pageWidth - margin - 22, y - 12, 22);
   drawGearIcon(pageWidth - margin - 45, y - 10, 18);
@@ -754,7 +936,7 @@ export const exportTutorialPDF = () => {
 
   // ==================== DICAS E BOAS PRÁTICAS ====================
   addPage();
-  addTitle('10. DICAS E BOAS PRÁTICAS');
+  addTitle('11. DICAS E BOAS PRÁTICAS');
   addSpacer(3);
   
   addSubtitle('Configuração Inicial');
