@@ -1311,10 +1311,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <span className="text-white font-black tracking-wider" style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.5rem)' }}>TV</span>
                 <span className="text-rose-200 font-semibold" style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)', marginTop: '-2px' }}>SAÚDE</span>
               </div>
+              {/* Diagonal border - Red to Blue */}
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-[15px] z-20"
+                style={{
+                  background: 'linear-gradient(to right, rgb(190, 18, 60), rgb(29, 78, 216))',
+                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 60% 100%)',
+                }}
+              />
             </div>
             
             {/* Blue Section - Breaking News Title */}
-            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1vw] flex items-center gap-[0.5vw] shrink-0">
+            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-[1.2vw] pl-[1.5vw] flex items-center gap-[0.5vw] shrink-0 relative">
               <Newspaper className="w-[1.8vw] h-[1.8vw] min-w-[18px] min-h-[18px] text-white shrink-0" />
               <div className="flex flex-col">
                 <span className="text-white font-black tracking-wide" style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1.2rem)' }}>
@@ -1324,6 +1332,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   Atualiza: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
+              {/* Diagonal border - Blue to Dark */}
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-[15px] z-20"
+                style={{
+                  background: 'linear-gradient(to right, rgb(37, 99, 235), rgb(15, 23, 42))',
+                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 60% 100%)',
+                }}
+              />
             </div>
             
             {/* Scrolling News Section - Dark background */}
