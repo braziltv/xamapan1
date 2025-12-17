@@ -1182,7 +1182,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center gap-[0.8vw] relative z-10">
+          <div className="flex items-center gap-[2vw] relative z-10">
             {/* Left: Logo + Title */}
             <div className="flex items-center gap-[0.5vw] shrink-0">
               <div className="w-[4vw] h-[4vw] min-w-[45px] min-h-[45px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
@@ -1202,7 +1202,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="w-px h-[5vh] bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0" />
             
             {/* Right: Weather + Clock */}
-            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
+            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0 ml-[2vw]">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>

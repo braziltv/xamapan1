@@ -191,7 +191,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="flex items-center gap-[1.5vw] flex-1 justify-end">
+    <div className="flex items-center gap-[2vw] flex-1 justify-end">
       {/* Clock Section - LARGER */}
       <ClockSection />
       
