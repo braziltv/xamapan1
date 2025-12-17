@@ -65,6 +65,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
+import { useBrazilTime } from '@/hooks/useBrazilTime';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -165,6 +166,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   const { toast } = useToast();
   const { playHourAudio, checkAudiosExist } = useHourAudio();
+  const { currentTime } = useBrazilTime();
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1127,6 +1129,52 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       title: "Status do Cache de Horas (Offline)",
       description: `✅ Horas: ${status.hours}/24, Minutos: ${status.minutes}/59, Palavra 'minutos': ${status.hasMinutosWord ? 'Sim' : 'Não'}`,
     });
+  };
+
+  // Função para testar anúncio de hora atual
+  const handleTestHourAnnouncement = async () => {
+    if (!currentTime) {
+      toast({
+        title: "Erro",
+        description: "Horário não sincronizado",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setTestingHourAudio(true);
+    const hour = currentTime.getHours();
+    const minute = currentTime.getMinutes();
+    
+    toast({
+      title: "Testando Anúncio de Hora",
+      description: `Reproduzindo: ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+    });
+    
+    try {
+      const success = await playHourAudio(hour, minute);
+      if (success) {
+        toast({
+          title: "Teste Concluído",
+          description: "Áudio reproduzido com sucesso!",
+        });
+      } else {
+        toast({
+          title: "Erro no Teste",
+          description: "Falha ao reproduzir áudio",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error testing hour audio:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao testar áudio de hora",
+        variant: "destructive",
+      });
+    } finally {
+      setTestingHourAudio(false);
+    }
   };
 
   // Função para limpar painel de chamados (patient_calls) e apagar as últimas chamadas exibidas na TV
@@ -2664,8 +2712,24 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 ✅ 84 arquivos de áudio pré-cacheados (24 horas + 59 minutos + palavra "minutos")
               </p>
             </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              <p className="text-sm text-blue-600 font-medium mb-2">📋 Regras de Anúncio:</p>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• 3 anúncios por hora em horários aleatórios (mínimo 10 min entre eles)</li>
+                <li>• Cada anúncio repete 2x com som de notificação antes</li>
+                <li>• Silêncio entre 22h e 6h (horário de descanso)</li>
+                <li>• Não fala "minutos" em hora cheia (ex: meio-dia) ou meia-hora (ex: uma e meia)</li>
+              </ul>
+            </div>
+            {currentTime && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                <p className="text-sm text-amber-600 font-medium">
+                  🕐 Hora atual: {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
+                </p>
+              </div>
+            )}
           </div>
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 flex-wrap">
             <Button
               variant="outline"
               onClick={() => setRegenCacheDialogOpen(false)}
@@ -2674,10 +2738,19 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             </Button>
             <Button
               onClick={handleCheckHourCache}
-              className="gap-2 bg-green-500 hover:bg-green-600"
+              variant="outline"
+              className="gap-2"
             >
-              <Clock className="w-4 h-4" />
-              Verificar Status
+              <Database className="w-4 h-4" />
+              Verificar Cache
+            </Button>
+            <Button
+              onClick={handleTestHourAnnouncement}
+              disabled={testingHourAudio || !currentTime}
+              className="gap-2 bg-blue-500 hover:bg-blue-600"
+            >
+              <Volume2 className="w-4 h-4" />
+              {testingHourAudio ? 'Reproduzindo...' : 'Testar Hora Atual'}
             </Button>
           </DialogFooter>
         </DialogContent>
