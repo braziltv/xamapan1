@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface WeatherData {
   current: {
     temperature: number;
+    feelsLike?: number;
     humidity: number;
     description: string;
     icon: string;
@@ -248,6 +249,11 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
               </span>
               <span className="text-sm font-bold text-emerald-300">°C</span>
             </div>
+            {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
+              <span className="text-[8px] text-white/70">
+                Sensação: <span className="font-bold text-amber-300">{weather.current.feelsLike}°</span>
+              </span>
+            )}
           </div>
           
           {/* Max/Min Temperature Display */}

@@ -63,7 +63,7 @@ function decodeHTMLEntities(text: string): string {
 async function fetchWeatherForCity(city: string): Promise<any | null> {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=-19.9&longitude=-44.0&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America/Sao_Paulo&forecast_days=3`,
+      `https://api.open-meteo.com/v1/forecast?latitude=-19.9&longitude=-44.0&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America/Sao_Paulo&forecast_days=3`,
       { signal: AbortSignal.timeout(10000) }
     );
     
@@ -101,6 +101,7 @@ async function fetchWeatherForCity(city: string): Promise<any | null> {
     return {
       current: {
         temperature: Math.round(data.current?.temperature_2m || 0),
+        feelsLike: Math.round(data.current?.apparent_temperature || data.current?.temperature_2m || 0),
         description: weather.description,
         icon: weather.icon,
         humidity: data.current?.relative_humidity_2m || 0,
