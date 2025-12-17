@@ -400,7 +400,7 @@ export function TriagePanel({
       </div>
 
       {/* Daily Motivational Quote */}
-      <div className="flex justify-center pt-2">
+      <div className="mt-4">
         <DailyQuoteCard />
       </div>
 
