@@ -271,9 +271,12 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       {/* Forecast Cards */}
       <div className="flex gap-[0.5vw] shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
-          const date = new Date(day.date);
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-          const dayName = index === 0 ? 'HOJE' : dayNames[date.getDay()];
+          // Use currentTime to calculate day names based on today
+          const today = currentTime || new Date();
+          const targetDate = new Date(today);
+          targetDate.setDate(targetDate.getDate() + index);
+          const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
           
           return (
             <div 
