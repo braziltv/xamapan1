@@ -654,8 +654,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const second = currentTime.getSeconds();
     const now = Date.now();
 
-    // Horário de silêncio: não anunciar entre 23h e 5h (inclusive)
-    const isQuietHours = hour >= 23 || hour < 5;
+    // Horário de silêncio: não anunciar entre 22h e 6h (inclusive)
+    const isQuietHours = hour >= 22 || hour < 6;
     if (isQuietHours) {
       return; // Não anunciar durante horário de silêncio
     }
