@@ -65,6 +65,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_name: string | null
+          sender_station: string
+          unit_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_name?: string | null
+          sender_station: string
+          unit_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_name?: string | null
+          sender_station?: string
+          unit_name?: string
+        }
+        Relationships: []
+      }
       news_cache: {
         Row: {
           created_at: string

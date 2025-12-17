@@ -7,6 +7,7 @@ import { TriagePanel } from '@/components/TriagePanel';
 import { DoctorPanel } from '@/components/DoctorPanel';
 import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
+import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
@@ -230,6 +231,7 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
             />
           </main>
+          <InternalChat station="cadastro" />
         </TabsContent>
 
         {/* Triagem */}
@@ -247,6 +249,7 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
             />
           </main>
+          <InternalChat station="triagem" />
         </TabsContent>
 
         {/* Médico */}
@@ -262,6 +265,7 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
             />
           </main>
+          <InternalChat station="medico" />
         </TabsContent>
 
         {/* Administrativo */}
