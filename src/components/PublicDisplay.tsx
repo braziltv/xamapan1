@@ -937,13 +937,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
       try {
-        // Play notification sound first (mandatory)
-        await playNotificationSound();
+        // Repeat the announcement 2 times (to ensure patient hears it)
+        for (let i = 0; i < 2; i++) {
+          console.log(`Patient announcement iteration ${i + 1}/2`);
+          
+          // Play notification sound first (mandatory)
+          await playNotificationSound();
 
-        // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
-        // Audio is cached locally in Supabase Storage for reuse
-        await speakWithConcatenatedTTS(name, destinationPhrase);
-        console.log('TTS completed (ElevenLabs - Brazilian Portuguese with local cache)');
+          // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
+          await speakWithConcatenatedTTS(name, destinationPhrase);
+          console.log(`TTS iteration ${i + 1} completed`);
+          
+          // Small pause between repetitions (only if not the last iteration)
+          if (i < 1) {
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          }
+        }
+        console.log('TTS completed (2x repetition - ElevenLabs Brazilian Portuguese)');
       } catch (e) {
         console.error('ElevenLabs TTS failed:', e);
       } finally {
