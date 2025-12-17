@@ -490,9 +490,8 @@ serve(async (req) => {
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    // Alice voice - voz feminina natural otimizada para português brasileiro
-    // Configurações ajustadas para máxima naturalidade com sotaque BR e acentuação correta
-    const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
+    // Usar voiceId passado pelo frontend, ou Alice como padrão
+    const selectedVoiceId = voiceId || "Xb7hH8MSUJpSbSDYk0k2"; // Alice como padrão
 
     // Configurações de voz otimizadas para português brasileiro natural
     const brazilianVoiceSettings = {

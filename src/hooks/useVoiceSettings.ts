@@ -1,33 +1,33 @@
 /**
  * Hook para gerenciar configurações de voz TTS
- * Vozes disponíveis para anúncios de hora e chamadas de pacientes
+ * Vozes otimizadas para português brasileiro (multilingual model)
  * Configurações salvas por unidade de saúde
  */
 
-// Vozes disponíveis
+// Vozes disponíveis - otimizadas para português brasileiro
+// Todas usam eleven_multilingual_v2 que suporta PT-BR nativamente
 export const AVAILABLE_VOICES = {
-  alice: { id: 'Xb7hH8MSUJpSbSDYk0k2', name: 'Alice', gender: 'female', flag: '🇧🇷' },
-  sarah: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', gender: 'female', flag: '🇺🇸' },
-  laura: { id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura', gender: 'female', flag: '🇺🇸' },
-  jessica: { id: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica', gender: 'female', flag: '🇺🇸' },
-  lily: { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily', gender: 'female', flag: '🇬🇧' },
-  matilda: { id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda', gender: 'female', flag: '🇺🇸' },
-  daniel: { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', gender: 'male', flag: '🇬🇧' },
-  roger: { id: 'CwhRBWXzGAHq8TQ4Fs17', name: 'Roger', gender: 'male', flag: '🇺🇸' },
-  charlie: { id: 'IKne3meq5aSn9XLyUdCD', name: 'Charlie', gender: 'male', flag: '🇦🇺' },
-  george: { id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George', gender: 'male', flag: '🇬🇧' },
-  liam: { id: 'TX3LPaxmHKxFdv7VOQHJ', name: 'Liam', gender: 'male', flag: '🇺🇸' },
-  brian: { id: 'nPczCjzI2devNBz1zQrb', name: 'Brian', gender: 'male', flag: '🇺🇸' },
-  chris: { id: 'iP95p4xoKVk53GoZ742B', name: 'Chris', gender: 'male', flag: '🇺🇸' },
-  eric: { id: 'cjVigY5qzO86Huf0OWal', name: 'Eric', gender: 'male', flag: '🇺🇸' },
-  will: { id: 'bIHbv24MWmeRgasZH58o', name: 'Will', gender: 'male', flag: '🇺🇸' },
+  // Vozes femininas - PT-BR
+  alice: { id: 'Xb7hH8MSUJpSbSDYk0k2', name: 'Alice', gender: 'female', description: 'Suave e clara' },
+  aria: { id: '9BWtsMINqrJLrRacOk9x', name: 'Aria', gender: 'female', description: 'Expressiva e amigável' },
+  domi: { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi', gender: 'female', description: 'Forte e confiante' },
+  elli: { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli', gender: 'female', description: 'Jovem e animada' },
+  bella: { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella', gender: 'female', description: 'Madura e elegante' },
+  rachel: { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', gender: 'female', description: 'Calma e profissional' },
+  // Vozes masculinas - PT-BR
+  antonio: { id: 'ErXwobaYiN019PkySvjV', name: 'Antonio', gender: 'male', description: 'Grave e autoritário' },
+  arnold: { id: 'VR6AewLTigWG4xSOukaG', name: 'Arnold', gender: 'male', description: 'Robusto e firme' },
+  adam: { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam', gender: 'male', description: 'Natural e versátil' },
+  sam: { id: 'yoZ06aMxZJJ28mfd3POQ', name: 'Sam', gender: 'male', description: 'Jovem e dinâmico' },
+  josh: { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Josh', gender: 'male', description: 'Amigável e caloroso' },
+  clyde: { id: '2EiwWnXFnvU5JabPnv8n', name: 'Clyde', gender: 'male', description: 'Grave e sério' },
 } as const;
 
 export type VoiceKey = keyof typeof AVAILABLE_VOICES;
 
 // Categorias de voz
-export const FEMALE_VOICES: VoiceKey[] = ['alice', 'sarah', 'laura', 'jessica', 'lily', 'matilda'];
-export const MALE_VOICES: VoiceKey[] = ['daniel', 'roger', 'charlie', 'george', 'liam', 'brian', 'chris', 'eric', 'will'];
+export const FEMALE_VOICES: VoiceKey[] = ['alice', 'aria', 'domi', 'elli', 'bella', 'rachel'];
+export const MALE_VOICES: VoiceKey[] = ['antonio', 'arnold', 'adam', 'sam', 'josh', 'clyde'];
 
 // Função para obter chave de localStorage por unidade
 const getUnitKey = (baseKey: string): string => {

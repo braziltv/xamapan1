@@ -2767,7 +2767,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedHourVoice].name}</span> {AVAILABLE_VOICES[selectedHourVoice].flag}
+                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedHourVoice].name}</span> - {AVAILABLE_VOICES[selectedHourVoice].description}
               </p>
             </div>
 
@@ -2813,7 +2813,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
                 })}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedPatientVoice].name}</span> {AVAILABLE_VOICES[selectedPatientVoice].flag}
+                Atual: <span className="font-medium">{AVAILABLE_VOICES[selectedPatientVoice].name}</span> - {AVAILABLE_VOICES[selectedPatientVoice].description}
               </p>
             </div>
 
