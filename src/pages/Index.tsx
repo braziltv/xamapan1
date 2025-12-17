@@ -108,10 +108,20 @@ const Index = () => {
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
 
+  // Vozes femininas padrão ElevenLabs para teste
+  const femaleVoices = [
+    { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura" },
+    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
+    { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice" },
+    { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica" },
+    { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda" },
+    { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily" },
+  ];
+
   // Função para testar chamada de paciente (temporário)
-  const handleTestPatientTTS = async () => {
+  const handleTestPatientTTS = async (voiceId: string, voiceName: string) => {
     const testText = "Maria Silva. Por favor, dirija-se à sala de triagem.";
-    toast.info(`Testando voz Laura: "${testText}"`);
+    toast.info(`Testando voz ${voiceName}...`);
     
     try {
       const response = await fetch(
@@ -125,6 +135,7 @@ const Index = () => {
           },
           body: JSON.stringify({ 
             text: testText,
+            voiceId: voiceId,
             skipCache: true,
             unitName: 'TestPatientCall'
           }),
@@ -132,7 +143,7 @@ const Index = () => {
       );
 
       if (!response.ok) {
-        toast.error('Erro na resposta TTS');
+        toast.error(`Erro ao testar voz ${voiceName}`);
         return;
       }
 
@@ -143,7 +154,7 @@ const Index = () => {
       
       audio.onended = () => URL.revokeObjectURL(audioUrl);
       await audio.play();
-      toast.success('Áudio reproduzido com sucesso!');
+      toast.success(`Voz ${voiceName} reproduzida!`);
     } catch (error) {
       console.error('Erro ao testar TTS:', error);
       toast.error('Erro ao reproduzir áudio');
@@ -277,15 +288,21 @@ const Index = () => {
             
             {/* Botão de teste temporário - REMOVER DEPOIS */}
             <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
-              <p className="text-blue-600 dark:text-blue-400 text-sm mb-2 font-medium">🧪 Teste temporário - Voz Laura (Chamada de Paciente)</p>
-              <Button 
-                onClick={handleTestPatientTTS}
-                variant="outline"
-                className="gap-2"
-              >
-                <Volume2 className="w-4 h-4" />
-                Testar Chamada de Paciente
-              </Button>
+              <p className="text-blue-600 dark:text-blue-400 text-sm mb-3 font-medium">🧪 Teste de Vozes Femininas (Chamada de Paciente)</p>
+              <div className="flex flex-wrap gap-2">
+                {femaleVoices.map((voice) => (
+                  <Button 
+                    key={voice.id}
+                    onClick={() => handleTestPatientTTS(voice.id, voice.name)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Volume2 className="w-3 h-3" />
+                    {voice.name}
+                  </Button>
+                ))}
+              </div>
             </div>
           </main>
           <InternalChat station="cadastro" />
