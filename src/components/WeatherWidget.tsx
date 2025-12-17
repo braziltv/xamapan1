@@ -206,25 +206,30 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="bg-red-800 backdrop-blur-md rounded-lg px-4 py-3 shadow-lg overflow-hidden">
-      <div className="flex items-center gap-4">
+    <div className="bg-red-800 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg overflow-hidden">
+      <div className="flex items-center gap-3">
+        {/* Clock first - moved to left */}
+        <ClockSection />
+        
+        <div className="w-px h-8 bg-red-600/50" />
+        
         {/* Current weather with city */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center min-w-[120px]">
-            <span>Previsão do tempo</span>
-            <span className="flex items-center gap-0.5 animate-pulse text-yellow-400"><MapPin className="w-3 h-3 animate-bounce" />{displayCity}-MG</span>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center text-white text-xs font-poppins font-semibold drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] leading-tight text-center min-w-[100px]">
+            <span className="text-[10px]">Previsão do tempo</span>
+            <span className="flex items-center gap-0.5 animate-pulse text-yellow-400 text-[10px]"><MapPin className="w-2.5 h-2.5 animate-bounce" />{displayCity}-MG</span>
           </div>
           {getWeatherIcon(weather.current.description, 'lg')}
-          <div className="flex items-baseline gap-1.5 transition-all duration-500">
+          <div className="flex items-baseline gap-1 transition-all duration-500">
             <span className={`text-[8px] font-bold ${showMaxTemp ? 'text-orange-300' : 'text-cyan-300'}`}>
               {showMaxTemp ? 'MAX' : 'MIN'}
             </span>
-            <span className="text-white font-black text-2xl leading-none">
+            <span className="text-white font-black text-xl leading-none">
               {showMaxTemp ? maxTemp : minTemp}°<span className="text-yellow-400">c</span>
             </span>
           </div>
-          <Droplets className="w-5 h-5 text-cyan-300 ml-2" />
-          <span className="text-red-100 text-[10px]">{weather.current.humidity}%</span>
+          <Droplets className="w-4 h-4 text-cyan-300 ml-1" />
+          <span className="text-red-100 text-[9px]">{weather.current.humidity}%</span>
         </div>
         
         <div className="w-px h-8 bg-red-600/50" />
@@ -238,19 +243,16 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
           return (
             <div 
               key={index} 
-              className="bg-red-700 rounded-md px-3 py-1.5 flex items-center gap-2"
+              className="bg-red-700 rounded-md px-2 py-1 flex items-center gap-1.5"
             >
               {getWeatherIcon(day.icon || 'cloud', 'sm')}
-              <div className="text-[9px] leading-tight">
+              <div className="text-[8px] leading-tight">
                 <p className="text-white font-bold">{dayName}</p>
                 <p className="text-red-100">{day.minTemp}°/{day.maxTemp}°</p>
               </div>
             </div>
           );
         })}
-        
-        {/* Clock after forecast */}
-        <ClockSection />
       </div>
     </div>
   );

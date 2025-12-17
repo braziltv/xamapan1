@@ -994,7 +994,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className={`h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-2 lg:p-3 xl:p-4 relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      className={`h-[100dvh] w-[100dvw] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-[1vw] relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
       {/* Flash overlay during announcement */}
@@ -1010,68 +1010,68 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-48 lg:w-72 xl:w-96 h-48 lg:h-72 xl:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-40 lg:w-60 xl:w-80 h-40 lg:h-60 xl:h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-[2vh] left-[2vw] w-[15vw] h-[15vw] bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-[2vh] right-[2vw] w-[12vw] h-[12vw] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* Header - Compact for TV Landscape */}
-      <div className="relative z-10 flex items-center justify-start gap-3 mb-2 shrink-0">
+      <div className="relative z-10 flex items-center justify-between gap-[1vw] mb-[0.5vh] shrink-0">
         {/* Left: Logo + Title */}
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
-            <HealthCrossIcon size={36} className="lg:w-10 lg:h-10" />
+        <div className="flex items-center gap-[0.8vw]">
+          <div className="w-[3.5vw] h-[3.5vw] min-w-[40px] min-h-[40px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
+            <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px]" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg lg:text-2xl xl:text-3xl font-bold text-white leading-tight">
+            <h1 className="text-[1.8vw] min-text-lg font-bold text-white leading-tight" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
               Painel de Chamadas
             </h1>
-            <p className="text-slate-400 text-xs lg:text-sm leading-tight truncate">{unitName || 'Unidade de Saúde'}</p>
+            <p className="text-slate-400 leading-tight truncate" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 1rem)' }}>{unitName || 'Unidade de Saúde'}</p>
           </div>
         </div>
         
-        {/* Center: Weather + Clock together */}
-        <div className="mx-auto flex items-center overflow-visible min-w-0">
+        {/* Right: Weather + Clock together - moved left */}
+        <div className="flex items-center overflow-visible min-w-0 mr-auto ml-[2vw]">
           <div className="shrink-0">
             <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
           </div>
         </div>
       </div>
 
-      {/* Main Content - Landscape optimized */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-3 min-h-0 pb-12">
+      {/* Main Content - Landscape optimized with viewport units */}
+      <div className="relative z-10 flex-1 grid grid-cols-12 gap-[0.8vw] min-h-0 pb-[5vh]">
         {/* Current Calls - Side by side */}
-        <div className="col-span-9 grid grid-cols-2 gap-3">
+        <div className="col-span-9 grid grid-cols-2 gap-[0.8vw]">
           {/* Triage Call */}
-          <div className={`bg-slate-800/50 rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 shrink-0">
-              <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
-                <Activity className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-[1vw] py-[0.8vh] shrink-0">
+              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
+                <Activity className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
                 <span>TRIAGEM</span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-yellow-300 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
+            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
-                  }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
+                  }`} style={{ fontSize: 'clamp(1.5rem, 3.5vw, 4rem)', wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-lg lg:text-xl xl:text-2xl text-blue-400 mt-3 font-semibold">
+                  <p className="text-blue-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
                     Por favor, dirija-se à {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg text-slate-500 text-center">
+                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -1079,36 +1079,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className={`bg-slate-800/50 rounded-2xl overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
             announcingType === 'doctor' 
               ? 'border-4 border-yellow-400 animate-border-pulse shadow-[0_0_30px_rgba(250,204,21,0.5)]' 
               : 'border border-slate-700'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-3 shrink-0">
-              <p className="text-white text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-3">
-                <Stethoscope className="w-8 h-8 lg:w-10 lg:h-10 shrink-0" />
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-[1vw] py-[0.8vh] shrink-0">
+              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
+                <Stethoscope className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
                 <span>CONSULTÓRIO</span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-8 h-8 lg:w-10 lg:h-10 text-yellow-300 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-yellow-300 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-4 lg:p-6 flex items-center justify-center flex-1 min-h-0">
+            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`text-4xl lg:text-5xl xl:text-6xl font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]' 
                       : 'text-white'
-                  }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
+                  }`} style={{ fontSize: 'clamp(1.5rem, 3.5vw, 4rem)', wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-lg lg:text-xl xl:text-2xl text-emerald-400 mt-3 font-semibold">
+                  <p className="text-emerald-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
                     Por favor, dirija-se ao {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-lg text-slate-500 text-center">
+                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -1117,46 +1117,46 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* Right Column: History Panel */}
-        <div className="col-span-3 bg-slate-800/50 rounded-2xl border border-slate-700 p-3 backdrop-blur-sm flex flex-col min-h-0">
-          <h3 className="text-base lg:text-lg font-bold text-white mb-2 flex items-center gap-2 shrink-0">
-            <Clock className="w-5 h-5 text-primary shrink-0" />
+        <div className="col-span-3 bg-slate-800/50 rounded-[1vw] border border-slate-700 p-[0.8vw] backdrop-blur-sm flex flex-col min-h-0">
+          <h3 className="font-bold text-white mb-[0.5vh] flex items-center gap-[0.4vw] shrink-0" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
+            <Clock className="w-[1.2vw] h-[1.2vw] min-w-[16px] min-h-[16px] text-primary shrink-0" />
             <span>Últimas Chamadas</span>
           </h3>
-          <div className="space-y-2 flex-1 overflow-y-auto">
+          <div className="space-y-[0.5vh] flex-1 overflow-y-auto">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-4 text-sm">
+              <p className="text-slate-500 text-center py-[1vh]" style={{ fontSize: 'clamp(0.7rem, 0.9vw, 1rem)' }}>
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-2 lg:p-3 rounded-lg ${
+                  className={`p-[0.6vw] rounded-lg ${
                     index === 0 
                       ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20 animate-call-entrance' 
                       : 'bg-slate-700/50'
                   } transition-all`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-[0.4vw]">
+                    <div className={`w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <Activity className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
                       ) : (
-                        <Stethoscope className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <Stethoscope className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-sm lg:text-base truncate">
+                      <p className="font-semibold text-white truncate" style={{ fontSize: 'clamp(0.7rem, 1vw, 1rem)' }}>
                         {item.name}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-slate-400" style={{ fontSize: 'clamp(0.6rem, 0.8vw, 0.8rem)' }}>
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-xs lg:text-sm text-slate-400 font-mono shrink-0">
+                    <span className="text-slate-400 font-mono shrink-0" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>
@@ -1171,16 +1171,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {newsItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-red-700 via-red-600 to-red-700 border-t-2 border-red-500/50 shrink-0">
           <div className="flex items-center">
-            <div className="bg-red-800 px-2 py-1 lg:px-4 lg:py-1.5 xl:px-5 xl:py-2 flex items-center gap-1 lg:gap-2 shrink-0 z-10">
-              <Newspaper className="w-3 h-3 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white shrink-0" />
+            <div className="bg-red-800 px-[0.8vw] py-[0.4vh] flex items-center gap-[0.4vw] shrink-0 z-10">
+              <Newspaper className="w-[1.5vw] h-[1.5vw] min-w-[16px] min-h-[16px] text-white shrink-0" />
               <div className="flex flex-col">
-                <span className="text-white font-bold text-[10px] lg:text-sm xl:text-base">NOTÍCIAS</span>
-                <span className="text-red-200 text-[8px] lg:text-[10px]">
+                <span className="text-white font-bold" style={{ fontSize: 'clamp(0.6rem, 1vw, 1rem)' }}>NOTÍCIAS</span>
+                <span className="text-red-200" style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)' }}>
                   Atualiza em: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </div>
-            <div className="flex-1 overflow-hidden py-1 lg:py-1.5 xl:py-2">
+            <div className="flex-1 overflow-hidden py-[0.3vh]">
               <div className="animate-marquee whitespace-nowrap inline-flex">
                 {(() => {
                   // Insert credits after every 3 news items
@@ -1195,8 +1195,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={index} className="text-sm lg:text-lg xl:text-xl mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                      <span className={`px-1.5 py-0.5 rounded text-xs lg:text-sm font-bold mr-1 lg:mr-2 inline-block ${
+                    <span key={index} className="mx-[0.5vw] inline-block text-white" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.3rem)' }}>
+                      <span className={`px-[0.3vw] py-[0.15vh] rounded font-bold mr-[0.3vw] inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500 text-white' : 
                         item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1229,7 +1229,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500 text-white' :
                         item.source === 'ESPN' ? 'bg-red-800 text-white' :
                         'bg-gray-500 text-white'
-                      }`}>
+                      }`} style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
                       <span>
@@ -1250,8 +1250,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   });
                   
                   return itemsWithCredits.map((item, index) => (
-                    <span key={`dup-${index}`} className="text-sm lg:text-lg xl:text-xl mx-2 lg:mx-4 xl:mx-6 inline-block text-white">
-                      <span className={`px-1.5 py-0.5 rounded text-xs lg:text-sm font-bold mr-1 lg:mr-2 inline-block ${
+                    <span key={`dup-${index}`} className="mx-[0.5vw] inline-block text-white" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.3rem)' }}>
+                      <span className={`px-[0.3vw] py-[0.15vh] rounded font-bold mr-[0.3vw] inline-block ${
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500 text-white' : 
                         item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1284,7 +1284,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500 text-white' :
                         item.source === 'ESPN' ? 'bg-red-800 text-white' :
                         'bg-gray-500 text-white'
-                      }`}>
+                      }`} style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
                       <span>
