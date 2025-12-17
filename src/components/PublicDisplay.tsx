@@ -1325,6 +1325,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <span className="text-white font-black tracking-wide" style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1.2rem)' }}>
                   NOTÍCIAS
                 </span>
+                <span className="text-blue-200" style={{ fontSize: 'clamp(0.45rem, 0.65vw, 0.65rem)', marginTop: '-1px' }}>
+                  Atualiza: {Math.floor(newsCountdown / 60)}:{(newsCountdown % 60).toString().padStart(2, '0')}
+                </span>
               </div>
             </div>
             
