@@ -97,6 +97,7 @@ const Index = () => {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    sendToTriageQueue,
     sendToDoctorQueue,
     updatePatientPriority,
   } = useCallPanel();
@@ -223,6 +224,7 @@ const Index = () => {
               onFinishWithoutCall={finishWithoutCall}
               onForwardToTriage={forwardToTriage}
               onForwardToDoctor={forwardToDoctor}
+              onSendToTriageQueue={sendToTriageQueue}
               onUpdatePriority={updatePatientPriority}
             />
           </main>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Trash2, Users, Volume2, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
+import { UserPlus, Trash2, Users, Volume2, VolumeX, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { toast } from 'sonner';
@@ -46,6 +46,7 @@ interface PatientRegistrationProps {
   onFinishWithoutCall: (id: string) => void;
   onForwardToTriage: (id: string, destination?: string) => void;
   onForwardToDoctor: (id: string, destination?: string) => void;
+  onSendToTriageQueue?: (id: string) => void;
   onUpdatePriority?: (id: string, priority: PatientPriority) => void;
 }
 
@@ -81,6 +82,7 @@ export function PatientRegistration({
   onFinishWithoutCall,
   onForwardToTriage,
   onForwardToDoctor,
+  onSendToTriageQueue,
   onUpdatePriority
 }: PatientRegistrationProps) {
   const [name, setName] = useState('');
@@ -262,7 +264,32 @@ export function PatientRegistration({
                   {/* Encaminhar para próxima etapa - apenas para pacientes aguardando */}
                   {patient.status === 'waiting' && (
                     <>
-                      {/* Menu Triagem */}
+                      {/* Fila Triagem Silenciosa */}
+                      {onSendToTriageQueue && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  onSendToTriageQueue(patient.id);
+                                  toast.success(`${patient.name} encaminhado para fila de triagem`);
+                                }}
+                                className="gap-1 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                              >
+                                <VolumeX className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Encaminhar para triagem (sem áudio)</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+
+                      {/* Menu Triagem com áudio */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -275,7 +302,7 @@ export function PatientRegistration({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-card border border-border z-50">
-                          <DropdownMenuLabel>Direcionar para</DropdownMenuLabel>
+                          <DropdownMenuLabel>Direcionar para (com áudio)</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {SALAS.map((sala) => (
                             <DropdownMenuItem
