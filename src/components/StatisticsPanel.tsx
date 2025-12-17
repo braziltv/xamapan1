@@ -1839,10 +1839,10 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <Button 
             variant="outline" 
             onClick={() => setRegenCacheDialogOpen(true)}
-            className="gap-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+            className="gap-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
           >
             <Clock className="w-4 h-4" />
-            Cache Horas (Offline)
+            Anúncio de Horas (ElevenLabs)
           </Button>
         </div>
       </div>
@@ -2699,31 +2699,34 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-green-500" />
-              Cache de Horas (Offline)
+              <Clock className="w-5 h-5 text-blue-500" />
+              Anúncio de Horas (ElevenLabs)
             </DialogTitle>
             <DialogDescription>
-              O sistema de anúncio de horas funciona 100% offline. Todos os áudios estão pré-armazenados.
+              O sistema de anúncio de horas usa ElevenLabs TTS para gerar a frase completa do horário em tempo real.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-              <p className="text-sm text-green-600 font-medium">
-                ✅ 84 arquivos de áudio pré-cacheados (24 horas + 59 minutos + palavra "minutos")
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              <p className="text-sm text-blue-600 font-medium">
+                🎙️ ElevenLabs TTS - Frase completa gerada em tempo real
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Ex: "duas horas e trinta e cinco minutos", "meio-dia e meia", "meia-noite"
               </p>
             </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-              <p className="text-sm text-blue-600 font-medium mb-2">📋 Regras de Anúncio:</p>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+              <p className="text-sm text-amber-600 font-medium mb-2">📋 Regras de Anúncio:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
                 <li>• 3 anúncios por hora em horários aleatórios (mínimo 10 min entre eles)</li>
                 <li>• Cada anúncio repete 2x com som de notificação antes</li>
                 <li>• Silêncio entre 22h e 6h (horário de descanso)</li>
-                <li>• Não fala "minutos" em hora cheia (ex: meio-dia) ou meia-hora (ex: uma e meia)</li>
+                <li>• Não fala "minutos" em hora cheia ou meia-hora</li>
               </ul>
             </div>
             {currentTime && (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-                <p className="text-sm text-amber-600 font-medium">
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                <p className="text-sm text-green-600 font-medium">
                   🕐 Hora atual: {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
                 </p>
               </div>
@@ -2737,20 +2740,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               Fechar
             </Button>
             <Button
-              onClick={handleCheckHourCache}
-              variant="outline"
-              className="gap-2"
-            >
-              <Database className="w-4 h-4" />
-              Verificar Cache
-            </Button>
-            <Button
               onClick={handleTestHourAnnouncement}
               disabled={testingHourAudio || !currentTime}
               className="gap-2 bg-blue-500 hover:bg-blue-600"
             >
               <Volume2 className="w-4 h-4" />
-              {testingHourAudio ? 'Reproduzindo...' : 'Testar Hora Atual'}
+              {testingHourAudio ? 'Gerando...' : 'Testar Hora Atual'}
             </Button>
           </DialogFooter>
         </DialogContent>
