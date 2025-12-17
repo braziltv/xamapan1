@@ -1017,7 +1017,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* Header - Compact for TV Landscape */}
       <div className="relative z-10 flex items-center justify-between gap-[1vw] mb-[0.5vh] shrink-0">
         {/* Left: Logo + Title */}
-        <div className="flex items-center gap-[0.8vw]">
+        <div className="flex items-center gap-[0.8vw] shrink-0">
           <div className="w-[3.5vw] h-[3.5vw] min-w-[40px] min-h-[40px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
             <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px]" />
           </div>
@@ -1029,12 +1029,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
         
-        {/* Right: Weather + Clock together - moved left */}
-        <div className="flex items-center overflow-visible min-w-0 mr-auto ml-[2vw]">
-          <div className="shrink-0">
+        {/* Center: Weather + Clock - centered */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center overflow-visible">
+          <div className="shrink-0 scale-110">
             <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
           </div>
         </div>
+        
+        {/* Right spacer for balance */}
+        <div className="w-[15vw] shrink-0"></div>
       </div>
 
       {/* Main Content - Landscape optimized with viewport units */}
