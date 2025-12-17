@@ -9,32 +9,31 @@ const corsHeaders = {
 // Maximum size for permanent cache in bytes (200MB)
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
-// ========== CONFIGURAÇÕES GLOBAIS DE VOZ OTIMIZADAS ==========
-// Estas configurações foram refinadas para soar o mais humano possível
-// em anúncios de nomes de pacientes em português brasileiro
+// ========== CONFIGURAÇÕES GLOBAIS DE VOZ OTIMIZADAS PARA PT-BR ==========
+// Configurações refinadas para voz Márcio em português brasileiro
+// Otimizado para anúncios de nomes de pacientes em salas de espera
 const OPTIMIZED_VOICE_SETTINGS = {
-  // Stability: Valores mais BAIXOS = mais variação natural na entonação
-  // 0.35 permite expressividade sem perder consistência
-  stability: 0.35,
+  // Stability: 0.40 para entonação natural mas consistente em PT-BR
+  // Evita variações excessivas em nomes brasileiros
+  stability: 0.40,
   
-  // Similarity Boost: Mantém a clareza e timbre característico da voz
-  // 0.80 é o ponto ideal para clareza sem artificialidade
-  similarity_boost: 0.80,
+  // Similarity Boost: 0.85 para manter clareza e timbre característico
+  // Importante para pronúncia correta de vogais abertas/fechadas do PT-BR
+  similarity_boost: 0.85,
   
-  // Style: Adiciona expressividade e emoção natural
-  // 0.45 dá um tom acolhedor/profissional sem exagero
-  style: 0.45,
+  // Style: 0.35 para tom profissional e acolhedor
+  // Ideal para ambiente hospitalar/clínico
+  style: 0.35,
   
-  // Speaker Boost: Melhora clareza e presença da voz
-  // Essencial para ambientes com ruído como salas de espera
+  // Speaker Boost: Essencial para clareza em ambientes ruidosos
   use_speaker_boost: true,
   
-  // Speed: Levemente mais lento para dicção clara de nomes
-  // 0.90 permite que nomes complexos sejam compreendidos
-  speed: 0.90,
+  // Speed: 0.92 para dicção clara de nomes brasileiros
+  // Permite articulação adequada de sílabas tônicas
+  speed: 0.92,
 };
 
-// ========== PRÉ-PROCESSAMENTO GLOBAL DE TEXTO ==========
+// ========== PRÉ-PROCESSAMENTO GLOBAL DE TEXTO PARA PT-BR ==========
 function preprocessTextForNaturalSpeech(inputText: string): string {
   let processed = inputText.trim();
   
@@ -44,18 +43,26 @@ function preprocessTextForNaturalSpeech(inputText: string): string {
   // Adicionar pausas naturais após vírgulas
   processed = processed.replace(/,\s*/g, ', ');
   
-  // Melhorar pronúncia de abreviações comuns
+  // Melhorar pronúncia de abreviações comuns em PT-BR
   processed = processed.replace(/\bDr\.\s*/gi, 'Doutor ');
   processed = processed.replace(/\bDra\.\s*/gi, 'Doutora ');
   processed = processed.replace(/\bSr\.\s*/gi, 'Senhor ');
   processed = processed.replace(/\bSra\.\s*/gi, 'Senhora ');
+  processed = processed.replace(/\bProf\.\s*/gi, 'Professor ');
+  processed = processed.replace(/\bProfa\.\s*/gi, 'Professora ');
   
   // Pausas naturais antes de destinos importantes
   processed = processed.replace(/dirija-se/gi, '... dirija-se');
   processed = processed.replace(/compareça/gi, '... compareça');
+  processed = processed.replace(/encaminhe-se/gi, '... encaminhe-se');
   
-  // Adicionar micro-pausa entre nome e destino para clareza
+  // Adicionar micro-pausa entre nome e instrução para clareza
   processed = processed.replace(/\.\s*Por favor/g, '... Por favor');
+  processed = processed.replace(/\.\s*Favor/g, '... Favor');
+  
+  // Melhorar pronúncia de nomes com acentos comuns
+  // Garantir que acentos sejam preservados para pronúncia correta
+  processed = processed.normalize('NFC');
   
   return processed;
 }
