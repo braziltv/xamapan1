@@ -9,7 +9,10 @@ import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Sunrise } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,6 +20,17 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("cadastro");
   const [isTvMode, setIsTvMode] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
+  const { theme, setTheme } = useTheme();
+
+  // TEMPORARY TEST BUTTON - remove after testing
+  const testThemeChange = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    toast('👁️🌓 Interface adaptada para melhor ergonomia visual!', {
+      duration: 4000,
+      position: 'top-center',
+    });
+  };
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -167,6 +181,16 @@ const Index = () => {
 
   return (
     <div ref={mainContainerRef} className="min-h-screen-safe bg-background">
+      {/* TEMPORARY TEST BUTTON - remove after testing */}
+      <Button
+        onClick={testThemeChange}
+        className="fixed bottom-4 left-4 z-[9999] bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
+        size="lg"
+      >
+        <Sunrise className="w-5 h-5 mr-2" />
+        TESTAR TEMA
+      </Button>
+      
       <Tabs value={activeTab} onValueChange={handleTabChange} className="min-h-screen-safe flex flex-col">
         <PanelHeader
           isAudioEnabled={isAudioEnabled}
