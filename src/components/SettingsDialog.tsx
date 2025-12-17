@@ -260,7 +260,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                     Modo Noturno Automático
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Escuro 19h-6h, claro 6h-19h
+                    Claro 6:25-18:45, escuro 18:45-6:25
                   </p>
                 </div>
               </div>
@@ -278,6 +278,24 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                 }}
               />
             </div>
+            
+            {/* Test Theme Notification Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                const newTheme = theme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                toast('👁️🌓 Interface adaptada para melhor ergonomia visual!', {
+                  duration: 4000,
+                  position: 'top-center',
+                });
+              }}
+            >
+              <Sunrise className="w-4 h-4 mr-2" />
+              Testar Troca de Tema
+            </Button>
           </div>
 
           {/* Volume Controls Section */}
