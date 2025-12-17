@@ -42,28 +42,25 @@ export function ConnectionIndicator() {
   return (
     <div 
       className={cn(
-        "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300",
+        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300",
         isChecking && "bg-yellow-500/20 text-yellow-500",
         isConnected && !isChecking && "bg-green-500/20 text-green-500",
         !isConnected && !isChecking && "bg-red-500/20 text-red-500 animate-pulse"
       )}
       title={isConnected ? "Conectado ao servidor" : "Desconectado do servidor"}
     >
+      <span className={cn(
+        "w-2 h-2 rounded-full",
+        isChecking && "bg-yellow-500 animate-pulse",
+        isConnected && !isChecking && "bg-green-500",
+        !isConnected && !isChecking && "bg-red-500"
+      )} />
       {isChecking ? (
-        <>
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          <span className="hidden sm:inline">Conectando...</span>
-        </>
+        <span>Conectando...</span>
       ) : isConnected ? (
-        <>
-          <Wifi className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Online</span>
-        </>
+        <span>Online</span>
       ) : (
-        <>
-          <WifiOff className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Offline</span>
-        </>
+        <span>Offline</span>
       )}
     </div>
   );
