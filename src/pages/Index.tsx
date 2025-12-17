@@ -10,7 +10,9 @@ import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -105,6 +107,48 @@ const Index = () => {
   } = useCallPanel();
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
+
+  // Função para testar chamada de paciente (temporário)
+  const handleTestPatientTTS = async () => {
+    const testText = "Maria Silva. Por favor, dirija-se à sala de triagem.";
+    toast.info(`Testando voz Márcio: "${testText}"`);
+    
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: testText,
+            skipCache: true,
+            unitName: 'TestPatientCall'
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        toast.error('Erro na resposta TTS');
+        return;
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
+      
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      await audio.play();
+      toast.success('Áudio reproduzido com sucesso!');
+    } catch (error) {
+      console.error('Erro ao testar TTS:', error);
+      toast.error('Erro ao reproduzir áudio');
+    }
+  };
 
   // Pré-cachear todas as frases de destino ao fazer login
   useEffect(() => {
@@ -230,6 +274,19 @@ const Index = () => {
               onUpdatePriority={updatePatientPriority}
               onUpdateObservations={updatePatientObservations}
             />
+            
+            {/* Botão de teste temporário - REMOVER DEPOIS */}
+            <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
+              <p className="text-blue-600 dark:text-blue-400 text-sm mb-2 font-medium">🧪 Teste temporário - Voz Márcio (Chamada de Paciente)</p>
+              <Button 
+                onClick={handleTestPatientTTS}
+                variant="outline"
+                className="gap-2"
+              >
+                <Volume2 className="w-4 h-4" />
+                Testar Chamada de Paciente
+              </Button>
+            </div>
           </main>
           <InternalChat station="cadastro" />
         </TabsContent>
