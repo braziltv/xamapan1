@@ -49,7 +49,7 @@ export function ConnectionIndicator() {
       ) : isConnected ? (
         <>
           <Wifi className="w-3.5 h-3.5" />
-          <span>Conexão com o servidor Zeus ok</span>
+          <span>Online</span>
         </>
       ) : (
         <>
