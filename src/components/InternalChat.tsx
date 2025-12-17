@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, Send, X, ChevronDown } from 'lucide-react';
+import { MessageCircle, Send, X, ChevronDown, Smile } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import {
@@ -11,6 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface ChatMessage {
   id: string;
@@ -44,6 +49,21 @@ const RECIPIENT_LABELS: Record<string, string> = {
   medico: 'Médico',
 };
 
+// Sound frequencies for each station (distinct tones)
+const STATION_SOUNDS: Record<string, { freq: number; freq2?: number; type: OscillatorType; duration: number }> = {
+  cadastro: { freq: 523, freq2: 659, type: 'sine', duration: 150 }, // C5 + E5 (melodic)
+  triagem: { freq: 440, freq2: 554, type: 'triangle', duration: 120 }, // A4 + C#5 (alert)
+  medico: { freq: 392, freq2: 523, type: 'sine', duration: 180 }, // G4 + C5 (gentle)
+};
+
+const COMMON_EMOJIS = [
+  '👍', '👎', '👋', '🙏', '👏', '🤝',
+  '✅', '❌', '⚠️', '🔴', '🟢', '🟡',
+  '📋', '💊', '🩺', '🏥', '🚑', '⏰',
+  '😊', '😅', '🤔', '😰', '😤', '🙄',
+  '❗', '❓', '💬', '📢', '🔔', '✨',
+];
+
 export function InternalChat({ station }: InternalChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -51,9 +71,11 @@ export function InternalChat({ station }: InternalChatProps) {
   const [recipient, setRecipient] = useState('todos');
   const [unreadCount, setUnreadCount] = useState(0);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const presenceChannelRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';
 
   // Scroll to bottom when new messages arrive
@@ -106,8 +128,8 @@ export function InternalChat({ station }: InternalChatProps) {
           const isForMe = newMsg.recipient === 'todos' || newMsg.recipient === station;
           if (!isOpen && newMsg.sender_station !== station && isForMe) {
             setUnreadCount((prev) => prev + 1);
-            // Play notification sound
-            playNotificationSound();
+            // Play notification sound based on sender station
+            playNotificationSound(newMsg.sender_station);
           }
         }
       )
@@ -149,27 +171,52 @@ export function InternalChat({ station }: InternalChatProps) {
     };
   }, [unitName, station]);
 
-  const playNotificationSound = () => {
+  const playNotificationSound = (senderStation: string) => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const sound = STATION_SOUNDS[senderStation] || STATION_SOUNDS.cadastro;
       
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      // First tone
+      const oscillator1 = audioContext.createOscillator();
+      const gainNode1 = audioContext.createGain();
+      oscillator1.connect(gainNode1);
+      gainNode1.connect(audioContext.destination);
+      oscillator1.frequency.value = sound.freq;
+      oscillator1.type = sound.type;
+      gainNode1.gain.value = 0.15;
       
-      oscillator.frequency.value = 800;
-      oscillator.type = 'sine';
-      gainNode.gain.value = 0.1;
-      
-      oscillator.start();
+      oscillator1.start();
       setTimeout(() => {
-        oscillator.stop();
-        audioContext.close();
-      }, 100);
+        oscillator1.stop();
+        
+        // Second tone (if defined)
+        if (sound.freq2) {
+          const oscillator2 = audioContext.createOscillator();
+          const gainNode2 = audioContext.createGain();
+          oscillator2.connect(gainNode2);
+          gainNode2.connect(audioContext.destination);
+          oscillator2.frequency.value = sound.freq2;
+          oscillator2.type = sound.type;
+          gainNode2.gain.value = 0.12;
+          
+          oscillator2.start();
+          setTimeout(() => {
+            oscillator2.stop();
+            audioContext.close();
+          }, sound.duration);
+        } else {
+          audioContext.close();
+        }
+      }, sound.duration);
     } catch (e) {
       console.log('Audio notification failed:', e);
     }
+  };
+
+  const addEmoji = (emoji: string) => {
+    setNewMessage((prev) => prev + emoji);
+    setShowEmojiPicker(false);
+    inputRef.current?.focus();
   };
 
   const sendMessage = async () => {
@@ -312,9 +359,9 @@ export function InternalChat({ station }: InternalChatProps) {
 
           {/* Input */}
           <div className="p-2 border-t border-border bg-card space-y-2">
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 items-center">
               <Select value={recipient} onValueChange={setRecipient}>
-                <SelectTrigger className="w-28 h-8 text-xs">
+                <SelectTrigger className="w-24 h-8 text-xs">
                   <SelectValue placeholder="Para" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border border-border z-[60]">
@@ -324,11 +371,43 @@ export function InternalChat({ station }: InternalChatProps) {
                   <SelectItem value="medico" disabled={station === 'medico'}>Médico</SelectItem>
                 </SelectContent>
               </Select>
+              
+              <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    type="button"
+                  >
+                    <Smile className="w-4 h-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-64 p-2 bg-popover border border-border z-[60]" 
+                  side="top" 
+                  align="start"
+                >
+                  <div className="grid grid-cols-6 gap-1">
+                    {COMMON_EMOJIS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        onClick={() => addEmoji(emoji)}
+                        className="w-8 h-8 flex items-center justify-center text-lg hover:bg-muted rounded transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
               <Input
+                ref={inputRef}
                 value={newMessage}
                 onChange={(e) => handleTyping(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Digite uma mensagem..."
+                placeholder="Mensagem..."
                 className="flex-1 text-sm h-8"
               />
               <Button
