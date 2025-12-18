@@ -121,7 +121,7 @@ export function TriagePanel({
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 sm:p-4">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
             <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5" />
-            📞 Chamada Atual - Triagem
+            <span className="animate-bounce inline-block">📞</span> Chamada Atual - Triagem
           </h2>
         </div>
         <div className="p-4 sm:p-6">
@@ -210,7 +210,7 @@ export function TriagePanel({
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
           <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          ⏳ Fila de Espera ({waitingPatients.length})
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Fila de Espera ({waitingPatients.length})
         </h2>
         
         {waitingPatients.length === 0 ? (
