@@ -35,14 +35,15 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
       const unitName = localStorage.getItem('selectedUnitName') || '';
 
       // Insert a custom announcement into patient_calls
-      const { error } = await supabase.from('patient_calls').insert({
+      // This will trigger the TV display but won't appear in patient queues (filtered by call_type='custom')
+      const { data, error } = await supabase.from('patient_calls').insert({
         patient_name: text.trim(),
         call_type: 'custom',
         status: 'active',
         unit_name: unitName,
         priority: 'normal',
         destination: null,
-      });
+      }).select('id').single();
 
       if (error) {
         console.error('Error creating custom announcement:', error);
@@ -53,6 +54,15 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
       toast.success('Mensagem enviada para a TV!');
       setText('');
       setOpen(false);
+      
+      // Auto-delete the custom announcement after 30 seconds
+      // This prevents database clutter while ensuring TV has time to process
+      if (data?.id) {
+        setTimeout(async () => {
+          await supabase.from('patient_calls').delete().eq('id', data.id);
+          console.log('Custom announcement auto-deleted:', data.id);
+        }, 30000);
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error('Erro ao enviar mensagem');

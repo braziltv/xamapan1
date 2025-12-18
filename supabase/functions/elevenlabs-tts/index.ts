@@ -336,11 +336,11 @@ async function getOrGenerateAudio(
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
         voice_settings: {
-          stability: 0.55,
-          similarity_boost: 0.78,
-          style: 0.15,
-          use_speaker_boost: true,
-          speed: 0.92,
+          stability: 0.38,           // Mais variação = mais natural e humano
+          similarity_boost: 0.82,    // Alta clareza da voz mantendo naturalidade
+          style: 0.42,               // Expressividade aumentada para tom acolhedor
+          use_speaker_boost: true,   // Melhora clareza e pronúncia
+          speed: 0.88,               // Mais lento para dicção clara e natural
         },
       }),
     }
@@ -494,13 +494,14 @@ serve(async (req) => {
     // Configurações ajustadas para máxima naturalidade com sotaque BR e acentuação correta
     const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
 
-    // Configurações de voz otimizadas para português brasileiro natural
+    // Configurações de voz otimizadas para português brasileiro ULTRA NATURAL
+    // Ajustadas para soar o mais humano possível
     const brazilianVoiceSettings = {
-      stability: 0.55,           // Equilíbrio entre consistência e naturalidade
-      similarity_boost: 0.78,    // Mantém clareza da voz
-      style: 0.15,               // Leve expressividade natural
+      stability: 0.38,           // Mais variação = mais natural e humano
+      similarity_boost: 0.82,    // Alta clareza da voz mantendo naturalidade
+      style: 0.42,               // Expressividade aumentada para tom acolhedor
       use_speaker_boost: true,   // Melhora clareza e pronúncia
-      speed: 0.92,               // Levemente mais lento para melhor dicção
+      speed: 0.88,               // Mais lento para dicção clara e natural
     };
 
     // Handle concatenation mode

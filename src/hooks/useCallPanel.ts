@@ -132,6 +132,7 @@ export function useCallPanel() {
         .select('*')
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active'])
+        .neq('call_type', 'custom') // Exclude custom announcements from patient list
         .order('created_at', { ascending: true });
       
       if (error) {
@@ -202,6 +203,7 @@ export function useCallPanel() {
       .select('*')
       .eq('unit_name', unitName)
       .in('status', ['waiting', 'active'])
+      .neq('call_type', 'custom') // Exclude custom announcements from patient list
       .order('created_at', { ascending: true });
     
     if (error) {
@@ -277,6 +279,12 @@ export function useCallPanel() {
           }
 
           console.log('🔔 Patient sync - received INSERT:', call.patient_name, call.call_type);
+          
+          // Skip custom announcements - they're not real patients
+          if (call.call_type === 'custom') {
+            console.log('⏭️ Skipping custom announcement (not a patient)');
+            return;
+          }
           
           // Skip if already processed
           if (processedCallIdsRef.current.has(call.id)) {
@@ -360,6 +368,11 @@ export function useCallPanel() {
           }
 
           console.log('🔄 Patient sync - received UPDATE:', call.patient_name, call.status, call.call_type);
+          
+          // Skip custom announcements - they're not real patients
+          if (call.call_type === 'custom') {
+            return;
+          }
           
           // Keep local state in sync when a call moves between waiting/active/completed
           if (call.status === 'waiting' || call.status === 'active') {
