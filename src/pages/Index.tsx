@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
+import { useAutoLogout } from '@/hooks/useAutoLogout';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -125,7 +126,7 @@ const Index = () => {
     preCachePatientName(name);
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("selectedUnitId");
     localStorage.removeItem("selectedUnitName");
@@ -133,7 +134,10 @@ const Index = () => {
     setIsLoggedIn(false);
     setUnitName("");
     setIsTvMode(false);
-  };
+  }, []);
+
+  // Auto logout at 07:04 and 19:04 (except TV mode)
+  useAutoLogout({ isTvMode, onLogout: handleLogout });
 
   const handleLogin = (unitId: string, unitNameParam: string, tvMode?: boolean) => {
     setIsLoggedIn(true);
