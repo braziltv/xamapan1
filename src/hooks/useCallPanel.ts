@@ -908,15 +908,11 @@ export function useCallPanel() {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
-    // Update database first
+    // Complete ALL existing records for this patient first
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'triage',
-          destination: destination || 'Triagem',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
@@ -948,23 +944,42 @@ export function useCallPanel() {
     if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
   }, [createCall, triggerCallEvent, unitName, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
 
+  // Helper to clear patient from all current call states
+  const clearPatientFromAllCurrentCalls = useCallback((patientId: string) => {
+    if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
+    if (currentDoctorCall?.id === patientId) setCurrentDoctorCall(null);
+    if (currentEcgCall?.id === patientId) setCurrentEcgCall(null);
+    if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
+    if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
+    if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
+  }, [currentTriageCall, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
+
   // Send to triage queue WITHOUT TV announcement (registration uses this)
   const sendToTriageQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
     
-    // Sync to database for real-time updates across all modules
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'triage',
-          destination: 'Triagem',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'triage',
+          destination: 'Triagem',
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to Triage:', error);
@@ -975,32 +990,35 @@ export function useCallPanel() {
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting' as const, calledBy: 'cadastro' as const } : p
     ));
-    // Clear from all current calls
-    if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
-    if (currentDoctorCall?.id === patientId) setCurrentDoctorCall(null);
-    if (currentEcgCall?.id === patientId) setCurrentEcgCall(null);
-    if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
-    if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
-    if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
-  }, [unitName, currentTriageCall, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
+    clearPatientFromAllCurrentCalls(patientId);
+  }, [unitName, clearPatientFromAllCurrentCalls]);
 
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback(async (patientId: string, destination?: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
     
-    // FIRST update database, then update local state
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'doctor',
-          destination: destination || null,
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'doctor',
+          destination: destination || null,
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to Doctor:', error);
@@ -1011,29 +1029,19 @@ export function useCallPanel() {
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' } : p
     ));
-    // Clear from all current calls
-    if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
-    if (currentDoctorCall?.id === patientId) setCurrentDoctorCall(null);
-    if (currentEcgCall?.id === patientId) setCurrentEcgCall(null);
-    if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
-    if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
-    if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
-  }, [unitName, currentTriageCall, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
+    clearPatientFromAllCurrentCalls(patientId);
+  }, [unitName, clearPatientFromAllCurrentCalls]);
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback(async (patientId: string, destination?: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
-    // Update database first
+    // Complete ALL existing records for this patient first
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'doctor',
-          destination: destination || 'Consultório Médico',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
@@ -1210,33 +1218,32 @@ export function useCallPanel() {
     }
   }, [currentEnfermariaCall, createCall, triggerCallEvent]);
 
-  // Helper to clear patient from all current call states
-  const clearPatientFromAllCurrentCalls = useCallback((patientId: string) => {
-    if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
-    if (currentDoctorCall?.id === patientId) setCurrentDoctorCall(null);
-    if (currentEcgCall?.id === patientId) setCurrentEcgCall(null);
-    if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
-    if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
-    if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
-  }, [currentTriageCall, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
-
   // Send to service queues WITHOUT TV announcement - with database sync
   const sendToEcgQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
     
-    // FIRST update database, then update local state
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'ecg',
-          destination: 'Sala de Eletrocardiograma',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'ecg',
+          destination: 'Sala de Eletrocardiograma',
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to ECG:', error);
@@ -1256,16 +1263,26 @@ export function useCallPanel() {
     if (!patient) return;
     
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'curativos',
-          destination: 'Sala de Curativos',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'curativos',
+          destination: 'Sala de Curativos',
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to Curativos:', error);
@@ -1284,16 +1301,26 @@ export function useCallPanel() {
     if (!patient) return;
     
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'raiox',
-          destination: 'Sala de Raio X',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'raiox',
+          destination: 'Sala de Raio X',
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to Raio X:', error);
@@ -1312,16 +1339,26 @@ export function useCallPanel() {
     if (!patient) return;
     
     if (unitName) {
-      const { error } = await supabase
+      // Complete ALL existing records for this patient first
+      await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'enfermaria',
-          destination: 'Enfermaria',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
+      
+      // Insert a new record with the new queue
+      const { error } = await supabase
+        .from('patient_calls')
+        .insert({ 
+          patient_name: patient.name,
+          unit_name: unitName,
+          status: 'waiting', 
+          call_type: 'enfermaria',
+          destination: 'Enfermaria',
+          priority: patient.priority || 'normal',
+          observations: patient.observations || null,
+        });
       
       if (error) {
         console.error('Error forwarding to Enfermaria:', error);
@@ -1340,20 +1377,17 @@ export function useCallPanel() {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
-    // Update database first
+    // Complete ALL existing records for this patient first
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'ecg',
-          destination: 'Sala de Eletrocardiograma',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
     }
 
+    // createCall will insert a new active record
     createCall(patient.name, 'ecg', 'Sala de Eletrocardiograma');
     triggerCallEvent({ name: patient.name }, 'ecg', 'Sala de Eletrocardiograma');
 
@@ -1371,11 +1405,7 @@ export function useCallPanel() {
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'curativos',
-          destination: 'Sala de Curativos',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
@@ -1398,11 +1428,7 @@ export function useCallPanel() {
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'raiox',
-          destination: 'Sala de Raio X',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
@@ -1425,11 +1451,7 @@ export function useCallPanel() {
     if (unitName) {
       await supabase
         .from('patient_calls')
-        .update({ 
-          status: 'waiting', 
-          call_type: 'enfermaria',
-          destination: 'Enfermaria',
-        })
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
         .eq('patient_name', patient.name)
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
