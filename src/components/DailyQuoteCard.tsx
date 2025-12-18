@@ -691,9 +691,8 @@ const QUOTES = [
 ];
 
 const STORAGE_KEY = 'dailyQuote_dismissState';
-const FIRST_DISMISS_DELAY = 15 * 60 * 1000; // 15 minutes
-const SECOND_DISMISS_DELAY = 9 * 60 * 60 * 1000; // 9 hours
-const ANIMATION_CYCLE = 15000; // 15 seconds per animation cycle
+const DISMISS_DELAY = 60 * 60 * 1000; // 1 hour
+const QUOTE_ROTATION_INTERVAL = 60 * 60 * 1000; // 1 hour per quote
 
 interface DismissState {
   dismissCount: number;
@@ -744,15 +743,11 @@ export function DailyQuoteCard() {
         const now = Date.now();
         const elapsed = now - state.lastDismissTime;
 
-        if (state.dismissCount === 1 && elapsed >= FIRST_DISMISS_DELAY) {
-          // First dismiss expired, show with new quote
+        if (elapsed >= DISMISS_DELAY) {
+          // Dismiss expired, show with new quote
           const newIndex = getRandomQuoteIndex(state.lastQuoteIndex);
           setQuoteIndex(newIndex);
-          setIsHidden(false);
-        } else if (state.dismissCount >= 2 && elapsed >= SECOND_DISMISS_DELAY) {
-          // Second dismiss expired, reset and show
           localStorage.removeItem(STORAGE_KEY);
-          setQuoteIndex(getDailyQuoteIndex());
           setIsHidden(false);
         } else {
           // Still within dismiss period
@@ -830,9 +825,10 @@ export function DailyQuoteCard() {
 
     const interval = setInterval(() => {
       timers.forEach(clearTimeout);
+      setQuoteIndex(prev => getRandomQuoteIndex(prev));
       setAnimationKey(prev => prev + 1);
       timers = runAnimation();
-    }, ANIMATION_CYCLE);
+    }, QUOTE_ROTATION_INTERVAL);
 
     return () => {
       timers.forEach(clearTimeout);
@@ -859,14 +855,17 @@ export function DailyQuoteCard() {
         }
       `}
     >
-      {/* Close Button */}
+      {/* Close Button - More Visible */}
       <button
         onClick={handleDismiss}
-        className="absolute top-2 right-2 z-20 p-1 rounded-full bg-black/20 hover:bg-black/40 
-          text-white/70 hover:text-white transition-all duration-200 hover:scale-110"
-        title="Fechar (volta depois)"
+        className="absolute top-2 right-2 z-20 p-1.5 rounded-full 
+          bg-white/30 hover:bg-white/50 backdrop-blur-sm
+          text-white hover:text-white shadow-md
+          transition-all duration-200 hover:scale-110
+          border border-white/40"
+        title="Fechar (volta em 1 hora)"
       >
-        <X className="w-3 h-3" />
+        <X className="w-4 h-4" />
       </button>
 
       {/* Animated gradient overlay */}
