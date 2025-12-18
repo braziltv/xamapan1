@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -173,7 +174,7 @@ export function PatientRegistration({
       {/* Patient List */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-pulse inline-block">👥</span> Pacientes Cadastrados ({activePatients.length})
+          <span className="animate-pulse inline-block">👥</span> Pacientes Cadastrados <AnimatedCounter value={activePatients.length} />
         </h2>
         
         {activePatients.length === 0 ? (

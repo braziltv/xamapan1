@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
@@ -183,7 +184,7 @@ export function DoctorPanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Aguardando Consulta - {currentConsultorioLabel} ({waitingPatients.filter(p => p.destination === currentConsultorioLabel).length})
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Aguardando Consulta - {currentConsultorioLabel} <AnimatedCounter value={waitingPatients.filter(p => p.destination === currentConsultorioLabel).length} />
         </h2>
         
         {waitingPatients.filter(p => p.destination === currentConsultorioLabel).length === 0 ? (

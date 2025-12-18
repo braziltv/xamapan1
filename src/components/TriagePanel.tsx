@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -208,7 +209,7 @@ export function TriagePanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Fila de Espera ({waitingPatients.length})
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Fila de Espera <AnimatedCounter value={waitingPatients.length} />
         </h2>
         
         {waitingPatients.length === 0 ? (
