@@ -10,27 +10,27 @@ const corsHeaders = {
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
 // ========== CONFIGURAÇÕES GLOBAIS DE VOZ OTIMIZADAS PARA PT-BR ==========
-// Configurações refinadas para voz Márcio em português brasileiro
+// Configurações refinadas para máxima naturalidade em português brasileiro
 // Otimizado para anúncios de nomes de pacientes em salas de espera
 const OPTIMIZED_VOICE_SETTINGS = {
-  // Stability: 0.40 para entonação natural mas consistente em PT-BR
-  // Evita variações excessivas em nomes brasileiros
-  stability: 0.40,
+  // Stability: 0.30 para entonação bem natural e expressiva
+  // Permite variações naturais na fala como uma pessoa real
+  stability: 0.30,
   
-  // Similarity Boost: 0.85 para manter clareza e timbre característico
-  // Importante para pronúncia correta de vogais abertas/fechadas do PT-BR
-  similarity_boost: 0.85,
+  // Similarity Boost: 0.75 para voz clara mas com naturalidade
+  // Evita som muito "robótico" ou artificial
+  similarity_boost: 0.75,
   
-  // Style: 0.35 para tom profissional e acolhedor
-  // Ideal para ambiente hospitalar/clínico
-  style: 0.35,
+  // Style: 0.50 para tom acolhedor e humano
+  // Mais expressivo, ideal para chamar pessoas pelo nome
+  style: 0.50,
   
   // Speaker Boost: Essencial para clareza em ambientes ruidosos
   use_speaker_boost: true,
   
-  // Speed: 0.92 para dicção clara de nomes brasileiros
-  // Permite articulação adequada de sílabas tônicas
-  speed: 0.92,
+  // Speed: 0.88 para dicção mais pausada e clara
+  // Permite articulação natural de nomes brasileiros
+  speed: 0.88,
 };
 
 // ========== PRÉ-PROCESSAMENTO GLOBAL DE TEXTO PARA PT-BR ==========
@@ -57,8 +57,8 @@ function preprocessTextForNaturalSpeech(inputText: string): string {
   processed = processed.replace(/encaminhe-se/gi, '... encaminhe-se');
   
   // Adicionar micro-pausa entre nome e instrução para clareza
-  processed = processed.replace(/\.\s*Por favor/g, '... Por favor');
-  processed = processed.replace(/\.\s*Favor/g, '... Favor');
+  processed = processed.replace(/\.\s*Por favor/g, '... Por favor, ...');
+  processed = processed.replace(/\.\s*Favor/g, '... Favor, ...');
   
   // Melhorar pronúncia de nomes com acentos comuns
   // Garantir que acentos sejam preservados para pronúncia correta
