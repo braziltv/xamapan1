@@ -1590,26 +1590,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       </div>
 
-      {/* Audio Test Button - Discrete, bottom-left corner */}
-      <div className="fixed bottom-4 left-4 z-50 group">
+      {/* BOTÃO GRANDE DE TESTE - TEMPORÁRIO */}
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[200]">
         <button
           onClick={async () => {
+            console.log('[HourTest] Button clicked!');
             if (!currentTime) {
               console.log('[HourTest] No currentTime available');
+              alert('currentTime não disponível!');
               return;
             }
             const hour = currentTime.getHours();
             const minute = currentTime.getMinutes();
             console.log(`[HourTest] Manual test: ${hour}:${minute.toString().padStart(2, '0')}`);
+            alert(`Testando hora: ${hour}:${minute.toString().padStart(2, '0')}`);
             await playHourAnnouncement(hour, minute);
           }}
-          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-amber-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
-          title="Testar anúncio de hora"
+          className="w-64 h-64 rounded-3xl bg-amber-500 hover:bg-amber-400 border-8 border-amber-300 flex flex-col items-center justify-center shadow-2xl animate-pulse"
         >
-          <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Clock className="w-6 h-6 lg:w-8 lg:h-8 text-amber-400" />
-            <span className="text-[8px] lg:text-[10px] text-amber-400 font-medium">HORA</span>
-          </div>
+          <Clock className="w-24 h-24 text-white mb-4" />
+          <span className="text-3xl font-black text-white">TESTAR HORA</span>
+          <span className="text-lg text-amber-100 mt-2">Clique aqui!</span>
         </button>
       </div>
     </div>
