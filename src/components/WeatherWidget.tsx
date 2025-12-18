@@ -202,7 +202,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       <div className="w-px h-12 sm:h-14 md:h-16 lg:h-20 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0" />
       
       {/* Weather Main Card - With Animation */}
-      <div className={`flex items-center gap-3 sm:gap-4 md:gap-5 bg-gradient-to-br from-sky-600/40 to-blue-800/40 rounded-2xl px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 backdrop-blur-md border border-white/20 shadow-xl shrink-0 transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+      <div className={`flex items-center gap-3 sm:gap-4 md:gap-5 bg-gradient-to-br from-sky-600/40 to-blue-800/40 rounded-2xl px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 backdrop-blur-md border border-white/20 shadow-xl shrink-0 transition-all duration-300 ease-out ${isTransitioning ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
         {/* Weather Icon - Large & Prominent */}
         <div className="relative shrink-0">
           <div className="absolute inset-0 bg-yellow-400/40 blur-2xl rounded-full scale-150" />
@@ -249,7 +249,7 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
       </div>
       
       {/* City Name - Prominent Badge with Animation */}
-      <div className={`flex flex-col items-center bg-gradient-to-br from-emerald-600/50 to-teal-700/50 rounded-xl px-3 sm:px-4 md:px-5 py-2 sm:py-3 backdrop-blur-sm border border-white/20 shadow-lg shrink-0 transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+      <div className={`flex flex-col items-center bg-gradient-to-br from-emerald-600/50 to-teal-700/50 rounded-xl px-3 sm:px-4 md:px-5 py-2 sm:py-3 backdrop-blur-sm border border-white/20 shadow-lg shrink-0 transition-all duration-300 ease-out ${isTransitioning ? 'opacity-0 scale-95 translate-y-2 blur-sm' : 'opacity-100 scale-100 translate-y-0 blur-0'}`}>
         <MapPin className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-amber-300 animate-bounce shrink-0" />
         <span className="font-black text-white uppercase tracking-wider text-sm sm:text-base md:text-lg lg:text-xl whitespace-nowrap">
           {displayCity}
