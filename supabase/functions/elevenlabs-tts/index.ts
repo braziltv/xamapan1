@@ -495,13 +495,36 @@ serve(async (req) => {
     const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
 
     // Configurações de voz otimizadas para português brasileiro ULTRA NATURAL
-    // Ajustadas para soar o mais humano possível
+    // Ajustadas para soar o mais humano e natural possível
     const brazilianVoiceSettings = {
-      stability: 0.38,           // Mais variação = mais natural e humano
-      similarity_boost: 0.82,    // Alta clareza da voz mantendo naturalidade
-      style: 0.42,               // Expressividade aumentada para tom acolhedor
+      stability: 0.32,           // Mais variação = mais natural e humano (reduzido para mais expressão)
+      similarity_boost: 0.85,    // Alta clareza da voz mantendo naturalidade
+      style: 0.48,               // Expressividade aumentada para tom acolhedor e caloroso
       use_speaker_boost: true,   // Melhora clareza e pronúncia
-      speed: 0.88,               // Mais lento para dicção clara e natural
+      speed: 0.85,               // Mais lento para dicção clara, natural e acolhedora
+    };
+
+    // Função para preprocessar texto para fala mais natural em português brasileiro
+    const preprocessTextForNaturalSpeech = (inputText: string): string => {
+      let processed = inputText;
+      
+      // Adiciona pausas naturais após vírgulas e pontos
+      processed = processed.replace(/,/g, ', ');
+      processed = processed.replace(/\./g, '. ');
+      
+      // Expande abreviações comuns
+      processed = processed.replace(/\bDr\./gi, 'Doutor');
+      processed = processed.replace(/\bDra\./gi, 'Doutora');
+      processed = processed.replace(/\bSr\./gi, 'Senhor');
+      processed = processed.replace(/\bSra\./gi, 'Senhora');
+      
+      // Adiciona micro-pausas antes de destinos para soar mais natural
+      processed = processed.replace(/Por favor,?\s*dirija-se/gi, 'Por favor... dirija-se');
+      
+      // Limpa espaços extras
+      processed = processed.replace(/\s+/g, ' ').trim();
+      
+      return processed;
     };
 
     // Handle concatenation mode
@@ -513,10 +536,13 @@ serve(async (req) => {
         `Concatenation request (single-call): name="${name}", prefix="${prefix}", destination="${destination}"`
       );
 
-      const combinedText = [name, prefix, destination]
+      let combinedText = [name, prefix, destination]
         .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
         .map((v) => v.trim())
         .join('. ');
+      
+      // Aplica preprocessamento para fala mais natural
+      combinedText = preprocessTextForNaturalSpeech(combinedText);
 
       if (!combinedText) {
         throw new Error('Concatenation text is empty');
@@ -674,7 +700,7 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text,
+            text: preprocessTextForNaturalSpeech(text),
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
             voice_settings: brazilianVoiceSettings,
@@ -772,6 +798,8 @@ serve(async (req) => {
 
     console.log("Using ELEVENLABS_API_KEY");
 
+    const processedText = preprocessTextForNaturalSpeech(text);
+    
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
       {
@@ -781,15 +809,10 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text,
+          text: processedText,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-            use_speaker_boost: true,
-          },
+          voice_settings: brazilianVoiceSettings,
         }),
       }
     );
