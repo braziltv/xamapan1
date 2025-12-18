@@ -545,8 +545,8 @@ serve(async (req) => {
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     
-    // Victor Power voice - mesma voz do anúncio de horas, otimizada para português brasileiro
-    const selectedVoiceId = voiceId || "YNOujSUmHtgN6anjqXPf"; // Victor Power - voz unificada
+    // Matilda voice - voz feminina calorosa e natural para português brasileiro
+    const selectedVoiceId = voiceId || "XrExE9yKIg1WjnnlVkGX"; // Matilda - voz feminina unificada
     
     // Configurações de voz com suporte a velocidade customizada
     const voiceSettings = speed 
