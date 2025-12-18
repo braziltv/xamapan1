@@ -189,11 +189,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Anti-standby: Prevent TV from entering standby mode when idle
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
-    let activityInterval: NodeJS.Timeout | null = null;
-    let reloadTimeout: NodeJS.Timeout | null = null;
-    const lastActivityRef = { current: Date.now() };
-    const AUTO_RELOAD_INTERVAL = 2 * 60 * 1000; // 2 minutes auto reload
-    const ACTIVITY_INTERVAL = 30 * 1000; // Simulate activity every 30 seconds
+    let activityInterval: ReturnType<typeof setInterval> | null = null;
+    let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
+    let reloadCheckInterval: ReturnType<typeof setInterval> | null = null;
+    const AUTO_RELOAD_INTERVAL = 30 * 60 * 1000; // 30 minutes auto reload
+    const ACTIVITY_INTERVAL = 15 * 1000; // Simulate activity every 15 seconds (more frequent)
+    const RELOAD_CHECK_INTERVAL = 10 * 1000; // Check every 10 seconds if we should reload
+    let pendingReload = false;
+    let reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
 
     // Request Wake Lock to prevent screen from sleeping
     const requestWakeLock = async () => {
@@ -203,29 +206,46 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           console.log('🔒 Wake Lock ativado - TV não entrará em standby');
           
           wakeLock.addEventListener('release', () => {
-            console.log('🔓 Wake Lock liberado');
-            // Try to re-acquire wake lock
-            setTimeout(requestWakeLock, 1000);
+            console.log('🔓 Wake Lock liberado - tentando reativar...');
+            // Try to re-acquire wake lock immediately
+            requestWakeLock();
           });
         }
       } catch (err) {
         console.log('Wake Lock não disponível:', err);
+        // Retry after 5 seconds
+        setTimeout(requestWakeLock, 5000);
       }
     };
 
-    // Simulate user activity to prevent standby on older TVs
+    // Simulate user activity to prevent standby on older TVs - more aggressive
     const simulateActivity = () => {
-      // Dispatch synthetic mouse move event with a special flag to avoid showing cursor
+      // Multiple techniques to prevent standby
+      
+      // 1. Dispatch synthetic mouse move event
       const event = new MouseEvent('mousemove', {
-        bubbles: false, // Don't bubble to avoid triggering cursor show
+        bubbles: false,
         cancelable: true,
         clientX: Math.random() * window.innerWidth,
         clientY: Math.random() * window.innerHeight,
       });
-      // Dispatch to document body instead of window to avoid cursor handler
       document.body.dispatchEvent(event);
 
-      // Also dispatch a video play event if there's a video
+      // 2. Dispatch a synthetic scroll event
+      const scrollEvent = new WheelEvent('wheel', {
+        bubbles: false,
+        cancelable: true,
+        deltaY: 0,
+      });
+      document.body.dispatchEvent(scrollEvent);
+
+      // 3. Force a tiny DOM change (forces browser to stay active)
+      const antiStandbyEl = document.getElementById('anti-standby-pixel');
+      if (antiStandbyEl) {
+        antiStandbyEl.style.opacity = antiStandbyEl.style.opacity === '0.01' ? '0.02' : '0.01';
+      }
+
+      // 4. Keep video elements playing if any
       const videos = document.querySelectorAll('video');
       videos.forEach(video => {
         if (video.paused && video.readyState >= 2) {
@@ -233,52 +253,90 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         }
       });
 
+      // 5. Resume audio context if suspended
+      if (audioContextRef.current?.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {});
+      }
+
+      // 6. Resume speech synthesis
+      try {
+        window.speechSynthesis?.resume?.();
+      } catch {
+        // ignore
+      }
+
       console.log('📺 Atividade simulada para evitar standby');
     };
 
-    // Auto reload every 2 minutes (only if not speaking)
-    const autoReload = () => {
-      if (!isSpeakingRef.current) {
-        console.log('⏰ Recarregando página automaticamente (2 minutos)...');
+    // Check if we should reload now
+    const checkReload = () => {
+      const now = Date.now();
+      
+      // If we passed the scheduled reload time
+      if (now >= reloadScheduledAt) {
+        if (!isSpeakingRef.current && !pendingReload) {
+          console.log('⏰ Recarregando página automaticamente (30 minutos)...');
+          window.location.reload();
+        } else if (!pendingReload) {
+          pendingReload = true;
+          console.log('⏸️ Reload adiado - reproduzindo anúncio. Aguardando término...');
+        }
+      }
+      
+      // If pending reload and not speaking anymore
+      if (pendingReload && !isSpeakingRef.current) {
+        console.log('▶️ Anúncio terminou - executando reload pendente...');
         window.location.reload();
-      } else {
-        console.log('⏸️ Reload adiado - reproduzindo anúncio de paciente');
       }
     };
 
-    // Update last activity time when patient calls happen
-    const updateActivity = () => {
-      lastActivityRef.current = Date.now();
+    // Schedule next reload
+    const scheduleNextReload = () => {
+      reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
+      pendingReload = false;
+      console.log(`📅 Próximo reload agendado para ${new Date(reloadScheduledAt).toLocaleTimeString('pt-BR')}`);
     };
-
-    // Listen to patient call changes to reset idle timer
-    window.addEventListener('patientCallActivity', updateActivity);
-    
-    // Also reset on any user interaction
-    window.addEventListener('click', updateActivity);
-    window.addEventListener('touchstart', updateActivity);
-    window.addEventListener('keydown', updateActivity);
-
-    // Start wake lock
-    requestWakeLock();
 
     // Re-acquire wake lock when page becomes visible again
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        console.log('👁️ Página visível novamente - reativando proteções');
         requestWakeLock();
-        updateActivity();
+        simulateActivity();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Start activity simulation interval
+    // Handle page focus
+    const handleFocus = () => {
+      console.log('🎯 Página recebeu foco - reativando proteções');
+      requestWakeLock();
+      simulateActivity();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    // Start wake lock
+    requestWakeLock();
+
+    // Start activity simulation interval (every 15 seconds)
     activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
 
-    // Start auto reload interval (every 2 minutes)
-    reloadTimeout = setInterval(autoReload, AUTO_RELOAD_INTERVAL);
+    // Start reload check interval (every 10 seconds)
+    reloadCheckInterval = setInterval(checkReload, RELOAD_CHECK_INTERVAL);
+
+    // Schedule first reload
+    scheduleNextReload();
 
     // Initial activity simulation
     simulateActivity();
+
+    // Create anti-standby pixel element
+    if (!document.getElementById('anti-standby-pixel')) {
+      const pixel = document.createElement('div');
+      pixel.id = 'anti-standby-pixel';
+      pixel.style.cssText = 'position:fixed;bottom:0;right:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
+      document.body.appendChild(pixel);
+    }
 
     return () => {
       if (wakeLock) {
@@ -288,13 +346,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         clearInterval(activityInterval);
       }
       if (reloadTimeout) {
-        clearInterval(reloadTimeout);
+        clearTimeout(reloadTimeout);
       }
-      window.removeEventListener('patientCallActivity', updateActivity);
-      window.removeEventListener('click', updateActivity);
-      window.removeEventListener('touchstart', updateActivity);
-      window.removeEventListener('keydown', updateActivity);
+      if (reloadCheckInterval) {
+        clearInterval(reloadCheckInterval);
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      const pixel = document.getElementById('anti-standby-pixel');
+      if (pixel) pixel.remove();
     };
   }, []);
 
