@@ -1146,20 +1146,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             // Dispatch activity event to reset idle timer (anti-standby)
             window.dispatchEvent(new CustomEvent('patientCallActivity'));
             
+            // Valid call types for announcements
+            const validCallTypes = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria', 'custom'] as const;
+            type ValidCallType = typeof validCallTypes[number];
+            
             // Handle custom announcements (just speak the text, no destination display)
             if (call.call_type === 'custom') {
               console.log('Custom announcement:', call.patient_name);
               speakCustomTextRef.current(call.patient_name);
-            } else {
+            } else if (validCallTypes.includes(call.call_type as ValidCallType)) {
+              // Update display state based on call type
               if (call.call_type === 'triage') {
                 setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
               } else {
+                // For doctor and all services (ecg, curativos, raiox, enfermaria)
                 setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
               }
               
-              // Play audio announcement
-              console.log('🔊 About to call speakName...');
-              speakNameRef.current(call.patient_name, call.call_type, call.destination || undefined);
+              // Play audio announcement with correct service type
+              const callType = call.call_type as 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+              console.log('🔊 About to call speakName with type:', callType);
+              speakNameRef.current(call.patient_name, callType, call.destination || undefined);
+            } else {
+              console.log('⚠️ Unknown call type:', call.call_type);
             }
           }
         }
