@@ -546,26 +546,55 @@ export function useCallPanel() {
   }, [createCall, triggerCallEvent]);
 
   const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal') => {
+    const trimmedName = name.trim();
+    
+    // Check if patient already exists (not attended)
+    const existingPatient = patientsRef.current.find(p => 
+      p.name.toLowerCase() === trimmedName.toLowerCase() && p.status !== 'attended'
+    );
+    
+    if (existingPatient) {
+      console.log('⚠️ Patient already exists, skipping duplicate:', trimmedName);
+      return existingPatient;
+    }
+    
     const newPatient: Patient = {
       id: `patient-${Date.now()}`,
-      name: name.trim(),
+      name: trimmedName,
       status: 'waiting',
       priority,
       createdAt: getBrazilTime(),
     };
-    setPatients(prev => [...prev, newPatient]);
+    setPatients(prev => {
+      // Double-check to avoid race conditions
+      if (prev.some(p => p.name.toLowerCase() === trimmedName.toLowerCase() && p.status !== 'attended')) {
+        return prev;
+      }
+      return [...prev, newPatient];
+    });
     
     // Sync to database for multi-device synchronization
     if (unitName) {
-      await supabase
+      // Check if patient already exists in database
+      const { data: existingInDB } = await supabase
         .from('patient_calls')
-        .insert({
-          unit_name: unitName,
-          call_type: 'registration',
-          patient_name: name.trim(),
-          priority,
-          status: 'waiting',
-        });
+        .select('id')
+        .eq('unit_name', unitName)
+        .ilike('patient_name', trimmedName)
+        .in('status', ['waiting', 'active'])
+        .limit(1);
+      
+      if (!existingInDB || existingInDB.length === 0) {
+        await supabase
+          .from('patient_calls')
+          .insert({
+            unit_name: unitName,
+            call_type: 'registration',
+            patient_name: trimmedName,
+            priority,
+            status: 'waiting',
+          });
+      }
     }
     
     return newPatient;
