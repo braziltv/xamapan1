@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
@@ -73,6 +74,7 @@ export function DoctorPanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -347,11 +349,15 @@ export function DoctorPanel({
             <AlertDialogAction
               onClick={() => {
                 if (confirmFinish) {
+                  const message = confirmFinish.type === 'consultation' 
+                    ? 'Consulta Concluída!' 
+                    : 'Desistência Registrada!';
                   if (confirmFinish.type === 'consultation') {
                     onFinishConsultation(confirmFinish.id);
                   } else {
                     onFinishWithoutCall(confirmFinish.id);
                   }
+                  setSuccessMessage(message);
                   setConfirmFinish(null);
                 }
               }}
@@ -362,6 +368,13 @@ export function DoctorPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Success Animation */}
+      <SuccessAnimation 
+        show={!!successMessage} 
+        message={successMessage || ''} 
+        onComplete={() => setSuccessMessage(null)} 
+      />
     </div>
   );
 }

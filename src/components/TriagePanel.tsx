@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -79,6 +80,7 @@ export function TriagePanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -420,11 +422,15 @@ export function TriagePanel({
             <AlertDialogAction
               onClick={() => {
                 if (confirmFinish) {
+                  const message = confirmFinish.type === 'triage' 
+                    ? 'Triagem Finalizada!' 
+                    : 'Paciente Removido!';
                   if (confirmFinish.type === 'triage') {
                     onFinishTriage(confirmFinish.id);
                   } else {
                     onFinishWithoutCall(confirmFinish.id);
                   }
+                  setSuccessMessage(message);
                   setConfirmFinish(null);
                 }
               }}
@@ -435,6 +441,13 @@ export function TriagePanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Success Animation */}
+      <SuccessAnimation 
+        show={!!successMessage} 
+        message={successMessage || ''} 
+        onComplete={() => setSuccessMessage(null)} 
+      />
     </div>
   );
 }
