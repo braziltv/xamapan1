@@ -192,7 +192,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     let activityInterval: NodeJS.Timeout | null = null;
     let reloadTimeout: NodeJS.Timeout | null = null;
     const lastActivityRef = { current: Date.now() };
-    const IDLE_THRESHOLD = 5 * 60 * 1000; // 5 minutes before reload
+    const AUTO_RELOAD_INTERVAL = 2 * 60 * 1000; // 2 minutes auto reload
     const ACTIVITY_INTERVAL = 30 * 1000; // Simulate activity every 30 seconds
 
     // Request Wake Lock to prevent screen from sleeping
@@ -236,12 +236,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('📺 Atividade simulada para evitar standby');
     };
 
-    // Check for prolonged inactivity and reload if needed
-    const checkIdleAndReload = () => {
-      const idleTime = Date.now() - lastActivityRef.current;
-      if (idleTime >= IDLE_THRESHOLD) {
-        console.log('⏰ Recarregando página após inatividade prolongada...');
+    // Auto reload every 2 minutes (only if not speaking)
+    const autoReload = () => {
+      if (!isSpeakingRef.current) {
+        console.log('⏰ Recarregando página automaticamente (2 minutos)...');
         window.location.reload();
+      } else {
+        console.log('⏸️ Reload adiado - reproduzindo anúncio de paciente');
       }
     };
 
@@ -273,8 +274,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Start activity simulation interval
     activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
 
-    // Start idle check interval (check every minute)
-    reloadTimeout = setInterval(checkIdleAndReload, 60 * 1000);
+    // Start auto reload interval (every 2 minutes)
+    reloadTimeout = setInterval(autoReload, AUTO_RELOAD_INTERVAL);
 
     // Initial activity simulation
     simulateActivity();
