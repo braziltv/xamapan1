@@ -193,6 +193,60 @@ export function useCallPanel() {
   // Realtime sync for patient_calls - sync patients across devices
   const processedCallIdsRef = useRef<Set<string>>(new Set());
   
+  // Function to refresh patients from database
+  const refreshPatientsFromDB = useCallback(async () => {
+    if (!unitName) return;
+    
+    const { data, error } = await supabase
+      .from('patient_calls')
+      .select('*')
+      .eq('unit_name', unitName)
+      .in('status', ['waiting', 'active'])
+      .order('created_at', { ascending: true });
+    
+    if (error) {
+      console.error('Error refreshing patients:', error);
+      return;
+    }
+    
+    if (data) {
+      const dbPatients: Patient[] = data.map(call => {
+        let status: Patient['status'] = 'waiting';
+        
+        if (call.status === 'active') {
+          if (call.call_type === 'triage') status = 'in-triage';
+          else if (call.call_type === 'doctor') status = 'in-consultation';
+          else if (call.call_type === 'ecg') status = 'in-ecg';
+          else if (call.call_type === 'curativos') status = 'in-curativos';
+          else if (call.call_type === 'raiox') status = 'in-raiox';
+          else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
+        } else if (call.status === 'waiting') {
+          if (call.call_type === 'doctor') status = 'waiting-doctor';
+          else if (call.call_type === 'ecg') status = 'waiting-ecg';
+          else if (call.call_type === 'curativos') status = 'waiting-curativos';
+          else if (call.call_type === 'raiox') status = 'waiting-raiox';
+          else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+          else status = 'waiting';
+        }
+        
+        return {
+          id: `patient-${call.id}`,
+          name: call.patient_name,
+          status,
+          priority: (call.priority as 'normal' | 'priority' | 'emergency') || 'normal',
+          createdAt: new Date(call.created_at),
+          calledAt: call.status === 'active' ? new Date(call.created_at) : undefined,
+          calledBy: call.call_type === 'registration' ? undefined : call.call_type as any,
+          destination: call.destination || undefined,
+          observations: call.observations || undefined,
+        };
+      });
+      
+      // Replace local state with database state to ensure sync
+      setPatients(dbPatients);
+    }
+  }, [unitName]);
+  
   useEffect(() => {
     if (!unitName) return;
 
@@ -239,33 +293,19 @@ export function useCallPanel() {
             let status: Patient['status'] = 'waiting';
 
             if (call.status === 'active') {
-              if (call.call_type === 'triage') {
-                status = 'in-triage';
-              } else if (call.call_type === 'doctor') {
-                status = 'in-consultation';
-              } else if (call.call_type === 'ecg') {
-                status = 'in-ecg';
-              } else if (call.call_type === 'curativos') {
-                status = 'in-curativos';
-              } else if (call.call_type === 'raiox') {
-                status = 'in-raiox';
-              } else if (call.call_type === 'enfermaria') {
-                status = 'in-enfermaria';
-              }
+              if (call.call_type === 'triage') status = 'in-triage';
+              else if (call.call_type === 'doctor') status = 'in-consultation';
+              else if (call.call_type === 'ecg') status = 'in-ecg';
+              else if (call.call_type === 'curativos') status = 'in-curativos';
+              else if (call.call_type === 'raiox') status = 'in-raiox';
+              else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
             } else if (call.status === 'waiting') {
-              if (call.call_type === 'doctor') {
-                status = 'waiting-doctor';
-              } else if (call.call_type === 'ecg') {
-                status = 'waiting-ecg';
-              } else if (call.call_type === 'curativos') {
-                status = 'waiting-curativos';
-              } else if (call.call_type === 'raiox') {
-                status = 'waiting-raiox';
-              } else if (call.call_type === 'enfermaria') {
-                status = 'waiting-enfermaria';
-              } else {
-                status = 'waiting';
-              }
+              if (call.call_type === 'doctor') status = 'waiting-doctor';
+              else if (call.call_type === 'ecg') status = 'waiting-ecg';
+              else if (call.call_type === 'curativos') status = 'waiting-curativos';
+              else if (call.call_type === 'raiox') status = 'waiting-raiox';
+              else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+              else status = 'waiting';
             }
             
             // Add patient from another device
@@ -278,6 +318,7 @@ export function useCallPanel() {
               calledAt: call.status === 'active' ? new Date(call.created_at) : undefined,
               calledBy: call.call_type === 'registration' ? undefined : call.call_type,
               destination: call.destination,
+              observations: call.observations,
             };
             
             console.log('➕ Adding synced patient:', newPatient.name, 'status:', newPatient.status, 'call_type:', call.call_type);
@@ -292,19 +333,12 @@ export function useCallPanel() {
             
             // Set as current call if active
             if (call.status === 'active') {
-              if (call.call_type === 'triage') {
-                setCurrentTriageCall(newPatient);
-              } else if (call.call_type === 'doctor') {
-                setCurrentDoctorCall(newPatient);
-              } else if (call.call_type === 'ecg') {
-                setCurrentEcgCall(newPatient);
-              } else if (call.call_type === 'curativos') {
-                setCurrentCurativosCall(newPatient);
-              } else if (call.call_type === 'raiox') {
-                setCurrentRaioxCall(newPatient);
-              } else if (call.call_type === 'enfermaria') {
-                setCurrentEnfermariaCall(newPatient);
-              }
+              if (call.call_type === 'triage') setCurrentTriageCall(newPatient);
+              else if (call.call_type === 'doctor') setCurrentDoctorCall(newPatient);
+              else if (call.call_type === 'ecg') setCurrentEcgCall(newPatient);
+              else if (call.call_type === 'curativos') setCurrentCurativosCall(newPatient);
+              else if (call.call_type === 'raiox') setCurrentRaioxCall(newPatient);
+              else if (call.call_type === 'enfermaria') setCurrentEnfermariaCall(newPatient);
             }
           }
         }
@@ -356,6 +390,7 @@ export function useCallPanel() {
               calledAt: call.status === 'active' ? new Date() : undefined,
               calledBy: call.call_type === 'registration' ? undefined : call.call_type,
               destination: call.destination,
+              observations: call.observations,
             };
 
             setPatients((prev) => {
@@ -398,18 +433,56 @@ export function useCallPanel() {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'patient_calls',
+        },
+        (payload) => {
+          const call = payload.old as any;
+
+          const normalizedUnit = (unitName || '').trim().toLowerCase();
+          const callUnit = (call.unit_name || '').trim().toLowerCase();
+          if (!normalizedUnit || callUnit !== normalizedUnit) {
+            return;
+          }
+
+          console.log('🗑️ Patient sync - received DELETE:', call.patient_name);
+          
+          // Remove patient from local state
+          setPatients((prev) => prev.filter((p) => p.name !== call.patient_name));
+
+          // Clear current calls if this patient was being called
+          setCurrentTriageCall((prev) => (prev?.name === call.patient_name ? null : prev));
+          setCurrentDoctorCall((prev) => (prev?.name === call.patient_name ? null : prev));
+          setCurrentEcgCall((prev) => (prev?.name === call.patient_name ? null : prev));
+          setCurrentCurativosCall((prev) => (prev?.name === call.patient_name ? null : prev));
+          setCurrentRaioxCall((prev) => (prev?.name === call.patient_name ? null : prev));
+          setCurrentEnfermariaCall((prev) => (prev?.name === call.patient_name ? null : prev));
+        }
+      )
       .subscribe((status) => {
         console.log('📡 Patient sync subscription status:', status);
         if (status === 'SUBSCRIBED') {
           console.log('✅ Patient sync subscription active for:', unitName);
+          // Refresh from database when subscription is active to ensure sync
+          refreshPatientsFromDB();
         }
       });
+
+    // Periodic refresh every 30 seconds as backup
+    const refreshInterval = setInterval(() => {
+      refreshPatientsFromDB();
+    }, 30000);
 
     return () => {
       console.log('🔌 Cleaning up patient sync subscription');
       supabase.removeChannel(channel);
+      clearInterval(refreshInterval);
     };
-  }, [unitName]);
+  }, [unitName, refreshPatientsFromDB]);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
