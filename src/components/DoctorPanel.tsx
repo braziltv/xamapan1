@@ -2,10 +2,12 @@ import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { FrequentPatientBadge } from '@/components/FrequentPatientBadge';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 import { ElapsedTimeDisplay } from '@/components/ElapsedTimeDisplay';
+import { useFrequentPatients } from '@/hooks/useFrequentPatients';
 import {
   Select,
   SelectContent,
@@ -49,6 +51,7 @@ interface DoctorPanelProps {
   onRecall: (destination?: string) => void;
   onFinishWithoutCall: (id: string) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
+  unitName: string;
 }
 
 export function DoctorPanel({ 
@@ -58,7 +61,8 @@ export function DoctorPanel({
   onFinishConsultation,
   onRecall,
   onFinishWithoutCall,
-  onUpdateObservations
+  onUpdateObservations,
+  unitName
 }: DoctorPanelProps) {
   const consultorios = [
     { value: 'consultorio-1', label: 'Consultório 1' },
@@ -77,6 +81,9 @@ export function DoctorPanel({
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Hook para identificar pacientes frequentes
+  const { isFrequentPatient } = useFrequentPatients(unitName);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -228,6 +235,12 @@ export function DoctorPanel({
                             PRIORIDADE
                           </span>
                         )}
+                        {(() => {
+                          const frequentData = isFrequentPatient(patient.name);
+                          return frequentData ? (
+                            <FrequentPatientBadge visitCount={frequentData.visitCount} lastVisit={frequentData.lastVisit} />
+                          ) : null;
+                        })()}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>

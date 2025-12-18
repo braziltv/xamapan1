@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
+import { useFrequentPatients } from '@/hooks/useFrequentPatients';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { FrequentPatientBadge } from '@/components/FrequentPatientBadge';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -52,6 +54,7 @@ interface TriagePanelProps {
   onFinishWithoutCall: (id: string) => void;
   onSendToDoctorQueue: (id: string, destination?: string) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
+  unitName: string;
 }
 
 const SALAS = [
@@ -76,13 +79,17 @@ export function TriagePanel({
   onDirectPatient,
   onFinishWithoutCall,
   onSendToDoctorQueue,
-  onUpdateObservations
+  onUpdateObservations,
+  unitName
 }: TriagePanelProps) {
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'triage' | 'withdrawal' | 'default' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Hook para identificar pacientes frequentes
+  const { isFrequentPatient } = useFrequentPatients(unitName);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -253,6 +260,12 @@ export function TriagePanel({
                             PRIORIDADE
                           </span>
                         )}
+                        {(() => {
+                          const frequentData = isFrequentPatient(patient.name);
+                          return frequentData ? (
+                            <FrequentPatientBadge visitCount={frequentData.visitCount} lastVisit={frequentData.lastVisit} />
+                          ) : null;
+                        })()}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
