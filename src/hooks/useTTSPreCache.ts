@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 // Lista de todas as frases de destino que devem ser pré-cacheadas permanentemente
 const DESTINATION_PHRASES = [
@@ -14,16 +14,18 @@ const DESTINATION_PHRASES = [
   'Por favor, dirija-se ao Consultório Médico 2',
 ];
 
-const PRECACHE_KEY = 'tts_phrases_precached';
+const PRECACHE_KEY = 'tts_phrases_precached_google';
 
 export function useTTSPreCache() {
   const isPreCachingRef = useRef(false);
 
-  // Pré-cachear uma frase de destino (usa cache permanente)
+  // Pré-cachear uma frase de destino via Google Cloud TTS
   const preCacheDestinationPhrase = useCallback(async (phrase: string): Promise<boolean> => {
     try {
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
         {
           method: 'POST',
           headers: {
@@ -33,8 +35,7 @@ export function useTTSPreCache() {
           },
           body: JSON.stringify({ 
             text: phrase, 
-            isPermanentCache: true,
-            unitName: 'PreCache' 
+            voiceName: configuredVoice
           }),
         }
       );
@@ -44,9 +45,7 @@ export function useTTSPreCache() {
         return false;
       }
 
-      // Verificar se veio do cache ou foi gerado
-      const cacheStatus = response.headers.get('X-Cache');
-      console.log(`Pre-cache phrase "${phrase.substring(0, 30)}...": ${cacheStatus || 'OK'}`);
+      console.log(`Pre-cache phrase "${phrase.substring(0, 30)}...": OK (Google Cloud TTS)`);
       return true;
     } catch (error) {
       console.error(`Error pre-caching phrase: ${phrase}`, error);
@@ -54,11 +53,13 @@ export function useTTSPreCache() {
     }
   }, []);
 
-  // Pré-cachear o nome de um paciente (usa cache normal que será limpo após atendimento)
+  // Pré-cachear o nome de um paciente via Google Cloud TTS
   const preCachePatientName = useCallback(async (name: string): Promise<boolean> => {
     try {
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
         {
           method: 'POST',
           headers: {
@@ -68,8 +69,7 @@ export function useTTSPreCache() {
           },
           body: JSON.stringify({ 
             text: name, 
-            isPermanentCache: false, // Nome usa cache normal
-            unitName: localStorage.getItem('selectedUnitName') || 'Desconhecido'
+            voiceName: configuredVoice
           }),
         }
       );
@@ -79,8 +79,7 @@ export function useTTSPreCache() {
         return false;
       }
 
-      const cacheStatus = response.headers.get('X-Cache');
-      console.log(`Pre-cache patient name "${name}": ${cacheStatus || 'GENERATED'}`);
+      console.log(`Pre-cache patient name "${name}": OK (Google Cloud TTS)`);
       return true;
     } catch (error) {
       console.error(`Error pre-caching patient name: ${name}`, error);
@@ -98,12 +97,12 @@ export function useTTSPreCache() {
     // Verificar se já foi feito o pré-cache
     const alreadyCached = localStorage.getItem(PRECACHE_KEY);
     if (alreadyCached) {
-      console.log('Destination phrases already pre-cached');
+      console.log('Destination phrases already pre-cached (Google Cloud TTS)');
       return;
     }
 
     isPreCachingRef.current = true;
-    console.log('Starting pre-cache of all destination phrases...');
+    console.log('Starting pre-cache of all destination phrases (Google Cloud TTS)...');
 
     let successCount = 0;
     for (const phrase of DESTINATION_PHRASES) {
@@ -116,7 +115,6 @@ export function useTTSPreCache() {
     console.log(`Pre-cache complete: ${successCount}/${DESTINATION_PHRASES.length} phrases cached`);
     
     // Marcar como pré-cacheado se pelo menos 80% das frases foram cacheadas
-    // Isso evita travamentos se algumas chaves da API estiverem com problemas temporários
     if (successCount >= Math.floor(DESTINATION_PHRASES.length * 0.8)) {
       localStorage.setItem(PRECACHE_KEY, new Date().toISOString());
       console.log('Pre-cache flag set (sufficient phrases cached)');

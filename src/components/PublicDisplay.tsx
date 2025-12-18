@@ -437,7 +437,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
     localStorage.setItem('audioUnlocked', 'true');
     setAudioUnlocked(true);
-    console.log('Audio unlocked (ElevenLabs only mode)');
+    console.log('Audio unlocked (Google Cloud TTS mode)');
   }, [audioUnlocked]);
 
   // Play audio with amplification using Web Audio API (2.5x volume = 150% increase)
@@ -591,19 +591,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     []
   );
 
-  // ElevenLabs TTS via backend function - plays MP3 audio (works on any device)
-  // Calls API directly without relying on cache for reliability
+  // Google Cloud TTS via backend function - plays MP3 audio (works on any device)
+  // Calls API directly for reliability
   const speakWithConcatenatedTTS = useCallback(
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('Speaking with unified TTS (single API call):', { name: cleanName, destinationPhrase: cleanDestination });
+      console.log('Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
       const gain = 2.5 * ttsVolume;
+      
+      // Get configured voice from localStorage
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
 
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
         'Content-Type': 'application/json',
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -611,7 +614,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } as const;
 
       // Generate unified audio with name + destination in a single API call
-      // This produces more natural speech with proper prosody and pauses
       const response = await fetch(url, {
         method: 'POST',
         headers,
@@ -621,18 +623,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             prefix: '',
             destination: cleanDestination,
           },
-          unitName,
+          voiceName: configuredVoice,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Unified TTS error:', errorData);
-        throw new Error(errorData.error || `ElevenLabs unified TTS error: ${response.status}`);
+        console.error('Google Cloud TTS error:', errorData);
+        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
-      console.log('Unified audio blob received:', { size: audioBlob.size });
+      console.log('Google Cloud TTS audio received:', { size: audioBlob.size });
 
       const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -645,19 +647,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [unitName, playAmplifiedAudio]
+    [playAmplifiedAudio]
   );
 
-  const speakWithElevenLabs = useCallback(
+  const speakWithGoogleTTS = useCallback(
     async (text: string): Promise<void> => {
-      console.log('Speaking with ElevenLabs:', text);
+      console.log('Speaking with Google Cloud TTS:', text);
       
       // Get TTS volume from localStorage
       const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
       const gain = 2.5 * ttsVolume;
       
+      // Get configured voice from localStorage
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
         {
           method: 'POST',
           headers: {
@@ -665,13 +670,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text, unitName }),
+          body: JSON.stringify({ text, voiceName: configuredVoice }),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
@@ -684,7 +689,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [unitName, playAmplifiedAudio]
+    [playAmplifiedAudio]
   );
 
   // Test audio function
@@ -696,17 +701,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       const testText = 'Teste de áudio. Som funcionando corretamente.';
 
-      // Use only ElevenLabs API with local cache
+      // Use Google Cloud TTS
       try {
-        await speakWithElevenLabs(testText);
-        console.log('Audio test completed (ElevenLabs)');
+        await speakWithGoogleTTS(testText);
+        console.log('Audio test completed (Google Cloud TTS)');
       } catch (e) {
-        console.error('ElevenLabs audio test failed:', e);
+        console.error('Google Cloud TTS audio test failed:', e);
       }
     } catch (error) {
       console.error('Audio test failed:', error);
     }
-  }, [playNotificationSound, speakWithElevenLabs]);
+  }, [playNotificationSound, speakWithGoogleTTS]);
 
   // Play time notification sound (different from patient call notification - softer tone)
   const playTimeNotificationSound = useCallback(() => {
@@ -934,13 +939,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
   }, []);
 
-  // Gerar TTS para frase de destino (usa cache permanente com prefixo "phrase_")
+  // Gerar TTS para frase de destino via Google Cloud TTS
   const speakDestinationPhrase = useCallback(
     async (phrase: string): Promise<void> => {
       console.log('Speaking destination phrase:', phrase);
       
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
         {
           method: 'POST',
           headers: {
@@ -948,13 +955,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: phrase, unitName, isPermanentCache: true }),
+          body: JSON.stringify({ text: phrase, voiceName: configuredVoice }),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `ElevenLabs error: ${response.status}`);
+        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
@@ -967,7 +974,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         URL.revokeObjectURL(audioUrl);
       }
     },
-    [unitName, playAmplifiedAudio]
+    [playAmplifiedAudio]
   );
 
   // Speak custom text (no destination, just the raw text)
@@ -1002,8 +1009,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Play notification sound first (mandatory)
           await playNotificationSound();
 
-          // Use ElevenLabs API to speak just the custom text
-          await speakWithElevenLabs(text);
+          // Use Google Cloud TTS to speak just the custom text
+          await speakWithGoogleTTS(text);
           console.log(`Custom TTS iteration ${i + 1} completed`);
           
           // Small pause between repetitions (only if not the last iteration)
@@ -1018,7 +1025,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         isSpeakingRef.current = false;
       }
     },
-    [playNotificationSound, speakWithElevenLabs]
+    [playNotificationSound, speakWithGoogleTTS]
   );
 
   const speakName = useCallback(
@@ -1070,7 +1077,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Play notification sound first (mandatory)
           await playNotificationSound();
 
-          // Use ElevenLabs API with concatenated mode (Brazilian Portuguese)
+          // Use Google Cloud TTS with concatenated mode (Brazilian Portuguese)
           await speakWithConcatenatedTTS(name, destinationPhrase);
           console.log(`TTS iteration ${i + 1} completed`);
           
@@ -1079,9 +1086,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             await new Promise((resolve) => setTimeout(resolve, 800));
           }
         }
-        console.log('TTS completed (2x repetition - ElevenLabs Brazilian Portuguese)');
+        console.log('TTS completed (2x repetition - Google Cloud TTS Brazilian Portuguese)');
       } catch (e) {
-        console.error('ElevenLabs TTS failed:', e);
+        console.error('Google Cloud TTS failed:', e);
       } finally {
         isSpeakingRef.current = false;
       }

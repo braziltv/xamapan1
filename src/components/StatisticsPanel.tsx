@@ -153,7 +153,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   const [showClearCallsPassword, setShowClearCallsPassword] = useState(false);
   const [clearingCalls, setClearingCalls] = useState(false);
   
-  // Estado para uso de API keys do ElevenLabs
+  // Estado para uso de API keys do TTS
   const [apiKeyUsage, setApiKeyUsage] = useState<ApiKeyUsage[]>([]);
   
   // Estado para uso de nomes TTS
@@ -284,7 +284,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         aggregated: aggCount || 0
       });
 
-      // Carregar uso de API keys do ElevenLabs
+      // Carregar uso de API keys do TTS
       const { data: apiKeyData } = await supabase
         .from('api_key_usage')
         .select('api_key_index')
@@ -1848,7 +1848,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             className="gap-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
           >
             <Clock className="w-4 h-4" />
-            Anúncio de Horas (ElevenLabs)
+            Anúncio de Horas (Google TTS)
           </Button>
         </div>
       </div>
@@ -2517,7 +2517,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </Card>
       </div>
 
-      {/* Estatísticas TTS ElevenLabs */}
+      {/* Estatísticas TTS Google Cloud */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -2706,16 +2706,16 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-500" />
-              Anúncio de Horas (ElevenLabs)
+              Anúncio de Horas (Google Cloud TTS)
             </DialogTitle>
             <DialogDescription>
-              O sistema de anúncio de horas usa ElevenLabs TTS para gerar a frase completa do horário em tempo real.
+              O sistema de anúncio de horas usa Google Cloud TTS para gerar a frase completa do horário em tempo real.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
               <p className="text-sm text-blue-600 font-medium">
-                🎙️ ElevenLabs TTS - Frase completa gerada em tempo real
+                🎙️ Google Cloud TTS - Frase completa gerada em tempo real
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Ex: "duas horas e trinta e cinco minutos", "meio-dia e meia", "meia-noite"

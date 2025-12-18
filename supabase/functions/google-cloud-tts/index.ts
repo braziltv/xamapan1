@@ -129,9 +129,27 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice = 'female', voiceName, speakingRate = 1.0 } = await req.json();
+    const body = await req.json();
+    const { text, voice = 'female', voiceName, speakingRate = 1.0, concatenate } = body;
 
-    if (!text) {
+    // Modo concatenado: nome + destino em uma única frase natural
+    let finalText = text;
+    if (concatenate) {
+      const { name, prefix, destination } = concatenate;
+      // Construir frase: "Nome. Por favor, dirija-se ao/à Destino."
+      const cleanName = name?.trim() || '';
+      const cleanPrefix = prefix?.trim() || '';
+      const cleanDestination = destination?.trim() || '';
+      
+      if (cleanPrefix) {
+        finalText = `${cleanPrefix} ${cleanName}. ${cleanDestination}`;
+      } else {
+        finalText = `${cleanName}. ${cleanDestination}`;
+      }
+      console.log(`[google-cloud-tts] Concatenate mode: "${finalText}"`);
+    }
+
+    if (!finalText) {
       return new Response(
         JSON.stringify({ error: 'Text is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -152,7 +170,7 @@ serve(async (req) => {
     
     const selectedVoice = VOICES[selectedVoiceName];
 
-    console.log(`[google-cloud-tts] Gerando áudio para: "${text}" com voz ${selectedVoiceName}`);
+    console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName}`);
 
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
@@ -175,7 +193,7 @@ serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          input: { text },
+          input: { text: finalText },
           voice: selectedVoice,
           audioConfig: {
             audioEncoding: 'MP3',
