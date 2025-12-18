@@ -351,6 +351,342 @@ const QUOTES = [
     insight: "Ter uma direção clara é mais importante do que a velocidade ou a chegada imediata.",
     bgColor: "from-red-500 via-rose-600 to-pink-700",
     emoji: "🎯"
+  },
+  {
+    quote: "A sorte é o que acontece quando a preparação encontra a oportunidade.",
+    author: "Sêneca",
+    insight: "O sucesso não é aleatório, é o resultado de estar pronto para o momento certo.",
+    bgColor: "from-amber-500 via-orange-600 to-red-700",
+    emoji: "🎲"
+  },
+  {
+    quote: "Se você não sabe para onde ir, qualquer caminho serve.",
+    author: "Lewis Carroll",
+    insight: "A falta de objetivos claros nos torna reféns do acaso; a direção é mais importante que a velocidade.",
+    bgColor: "from-purple-500 via-violet-600 to-indigo-700",
+    emoji: "🧭"
+  },
+  {
+    quote: "A melhor vingança é um sucesso estrondoso.",
+    author: "Frank Sinatra",
+    insight: "Em vez de retribuir a negatividade, use-a como combustível para alcançar resultados inquestionáveis.",
+    bgColor: "from-blue-500 via-indigo-600 to-purple-700",
+    emoji: "🎤"
+  },
+  {
+    quote: "A criatividade exige coragem para abandonar as certezas.",
+    author: "Erich Fromm",
+    insight: "Inovar requer o desapego do que é seguro para abraçar o que é possível.",
+    bgColor: "from-pink-500 via-rose-600 to-red-700",
+    emoji: "🎨"
+  },
+  {
+    quote: "Quem olha para fora sonha; quem olha para dentro acorda.",
+    author: "Carl Jung",
+    insight: "O verdadeiro despertar e a clareza vêm do autoconhecimento, não da busca por validação externa.",
+    bgColor: "from-teal-500 via-cyan-600 to-blue-700",
+    emoji: "👁️"
+  },
+  {
+    quote: "Não é o que você olha que importa, é o que você vê.",
+    author: "Henry David Thoreau",
+    insight: "Nossa perspectiva é a lente que transforma fatos brutos em oportunidades ou problemas.",
+    bgColor: "from-emerald-500 via-green-600 to-teal-700",
+    emoji: "🔍"
+  },
+  {
+    quote: "Tudo o que você sempre quis está do outro lado do medo.",
+    author: "George Addair",
+    insight: "O medo é a fronteira final entre a sua realidade atual e a sua evolução.",
+    bgColor: "from-orange-500 via-red-600 to-rose-700",
+    emoji: "🚪"
+  },
+  {
+    quote: "A excelência não é um ato, mas um hábito.",
+    author: "Will Durant",
+    insight: "Somos o que fazemos repetidamente; a constância molda o caráter.",
+    bgColor: "from-violet-500 via-purple-600 to-indigo-700",
+    emoji: "🏅"
+  },
+  {
+    quote: "O homem que remove montanhas começa carregando pedras pequenas.",
+    author: "Provérbio Chinês",
+    insight: "Grandes feitos são a soma de pequenas tarefas executadas com disciplina.",
+    bgColor: "from-slate-500 via-gray-600 to-zinc-700",
+    emoji: "🏔️"
+  },
+  {
+    quote: "Se você quer ser feliz, seja.",
+    author: "Liev Tolstói",
+    insight: "A felicidade é uma decisão deliberada de focar no que é bom, agora mesmo.",
+    bgColor: "from-yellow-400 via-amber-500 to-orange-600",
+    emoji: "😊"
+  },
+  {
+    quote: "Não tente ser uma pessoa de sucesso. Tente ser uma pessoa de valor.",
+    author: "Albert Einstein",
+    insight: "O sucesso é uma consequência natural da utilidade e da integridade que você oferece ao mundo.",
+    bgColor: "from-cyan-500 via-teal-600 to-emerald-700",
+    emoji: "💎"
+  },
+  {
+    quote: "A vida se expande ou se encolhe de acordo com a nossa coragem.",
+    author: "Anaïs Nin",
+    insight: "Nossas experiências são proporcionais à nossa disposição de assumir riscos.",
+    bgColor: "from-fuchsia-500 via-pink-600 to-rose-700",
+    emoji: "🦋"
+  },
+  {
+    quote: "O passado não tem poder sobre o momento presente.",
+    author: "Eckhart Tolle",
+    insight: "Você é livre para recomeçar a cada segundo, independentemente do que aconteceu antes.",
+    bgColor: "from-blue-500 via-sky-600 to-cyan-700",
+    emoji: "🌅"
+  },
+  {
+    quote: "Seja humilde para admitir seus erros, inteligente para aprender com eles e maduro para corrigi-los.",
+    author: "Autor Desconhecido",
+    insight: "O erro é um degrau, não um abismo, para quem sabe usá-lo como lição.",
+    bgColor: "from-green-500 via-emerald-600 to-teal-700",
+    emoji: "🌿"
+  },
+  {
+    quote: "Para ganhar o que você nunca teve, você deve fazer o que você nunca fez.",
+    author: "Autor Desconhecido",
+    insight: "Resultados diferentes exigem comportamentos e estratégias diferentes.",
+    bgColor: "from-red-500 via-orange-600 to-amber-700",
+    emoji: "🚀"
+  },
+  {
+    quote: "A tragédia da vida não é que ela acabe tão cedo, mas que esperemos tanto para começá-la.",
+    author: "W. M. Lewis",
+    insight: "A urgência de viver plenamente deve superar a procrastinação existencial.",
+    bgColor: "from-purple-500 via-indigo-600 to-blue-700",
+    emoji: "⏳"
+  },
+  {
+    quote: "Quanto mais eu treino, mais sorte eu tenho.",
+    author: "Gary Player",
+    insight: "O acaso favorece quem se dedica à exaustão.",
+    bgColor: "from-lime-500 via-green-600 to-emerald-700",
+    emoji: "⛳"
+  },
+  {
+    quote: "As pessoas que são loucas o suficiente para achar que podem mudar o mundo são as que o fazem.",
+    author: "Steve Jobs",
+    insight: "A ousadia é o pré-requisito para qualquer transformação significativa.",
+    bgColor: "from-slate-600 via-gray-700 to-zinc-800",
+    emoji: "🍎"
+  },
+  {
+    quote: "Se você não construir o seu sonho, alguém vai te contratar para ajudar a construir o dele.",
+    author: "Tony Gaskins",
+    insight: "Priorize seus objetivos ou será apenas um recurso para os objetivos alheios.",
+    bgColor: "from-amber-500 via-yellow-600 to-lime-700",
+    emoji: "🏗️"
+  },
+  {
+    quote: "A paciência é amarga, mas seu fruto é doce.",
+    author: "Jean-Jacques Rousseau",
+    insight: "Suportar o tempo de espera é o preço para colher resultados duradouros.",
+    bgColor: "from-orange-400 via-amber-500 to-yellow-600",
+    emoji: "🍇"
+  },
+  {
+    quote: "Grandes mentes discutem ideias; mentes médias discutem eventos; mentes pequenas discutem pessoas.",
+    author: "Eleanor Roosevelt",
+    insight: "Eleve o nível das suas conversas para elevar o nível da sua vida.",
+    bgColor: "from-indigo-500 via-purple-600 to-violet-700",
+    emoji: "💬"
+  },
+  {
+    quote: "O fracasso é o tempero que dá sabor ao sucesso.",
+    author: "Truman Capote",
+    insight: "A vitória é mais valorizada quando conhecemos o custo da derrota.",
+    bgColor: "from-rose-500 via-red-600 to-orange-700",
+    emoji: "🌶️"
+  },
+  {
+    quote: "Não é o mais forte que sobrevive, nem o mais inteligente, mas o que melhor se adapta às mudanças.",
+    author: "Leon C. Megginson",
+    insight: "A flexibilidade é a maior vantagem competitiva em um mundo incerto.",
+    bgColor: "from-teal-500 via-emerald-600 to-green-700",
+    emoji: "🦎"
+  },
+  {
+    quote: "A liberdade é o que você faz com o que foi feito a você.",
+    author: "Jean-Paul Sartre",
+    insight: "Não somos vítimas do passado, somos os autores da nossa resposta a ele.",
+    bgColor: "from-sky-500 via-blue-600 to-indigo-700",
+    emoji: "🕊️"
+  },
+  {
+    quote: "Um homem que não lê não tem vantagem sobre o homem que não sabe ler.",
+    author: "Mark Twain",
+    insight: "O conhecimento disponível só tem valor se for ativamente buscado e aplicado.",
+    bgColor: "from-amber-500 via-orange-600 to-red-700",
+    emoji: "📚"
+  },
+  {
+    quote: "Nenhum mar calmo fez um marinheiro especialista.",
+    author: "Provérbio Inglês",
+    insight: "A maestria nasce da superação de tempestades, não da facilidade.",
+    bgColor: "from-blue-600 via-indigo-700 to-purple-800",
+    emoji: "⛵"
+  },
+  {
+    quote: "Se você cansar, aprenda a descansar, não a desistir.",
+    author: "Banksy",
+    insight: "A pausa é estratégica para a longevidade; a desistência é o fim da possibilidade.",
+    bgColor: "from-fuchsia-500 via-pink-600 to-rose-700",
+    emoji: "😴"
+  },
+  {
+    quote: "O entusiasmo é a base de todo progresso.",
+    author: "Henry Ford",
+    insight: "Sem paixão e energia, o talento permanece estagnado.",
+    bgColor: "from-yellow-500 via-amber-600 to-orange-700",
+    emoji: "🔥"
+  },
+  {
+    quote: "Você nunca é velho demais para estabelecer outro objetivo ou sonhar um novo sonho.",
+    author: "C.S. Lewis",
+    insight: "O crescimento não tem data de validade enquanto houver fôlego.",
+    bgColor: "from-green-500 via-teal-600 to-cyan-700",
+    emoji: "🌳"
+  },
+  {
+    quote: "Nada é tão permanente quanto uma mudança temporária.",
+    author: "Milton Friedman",
+    insight: "Cuidado com os hábitos que você adota 'só por agora', eles tendem a se enraizar.",
+    bgColor: "from-violet-500 via-purple-600 to-indigo-700",
+    emoji: "⚠️"
+  },
+  {
+    quote: "O maior risco é não correr nenhum risco.",
+    author: "Mark Zuckerberg",
+    insight: "Em um mundo que muda rápido, a inércia é o caminho mais curto para a obsolescência.",
+    bgColor: "from-blue-500 via-indigo-600 to-violet-700",
+    emoji: "📱"
+  },
+  {
+    quote: "Faça o que você pode, com o que você tem, onde você estiver.",
+    author: "Theodore Roosevelt",
+    insight: "A falta de recursos não justifica a falta de iniciativa.",
+    bgColor: "from-emerald-500 via-green-600 to-lime-700",
+    emoji: "🎖️"
+  },
+  {
+    quote: "A felicidade é um perfume que você não pode passar nos outros sem cair algumas gotas em você.",
+    author: "Ralph Waldo Emerson",
+    insight: "Fazer o bem ao próximo é a forma mais egoísta de ser feliz.",
+    bgColor: "from-pink-400 via-rose-500 to-fuchsia-600",
+    emoji: "🌸"
+  },
+  {
+    quote: "Trabalhe enquanto eles dormem, estude enquanto eles se divertem.",
+    author: "Atribuído a diversos empreendedores",
+    insight: "O sacrifício temporário gera um privilégio permanente.",
+    bgColor: "from-slate-600 via-gray-700 to-zinc-800",
+    emoji: "🌙"
+  },
+  {
+    quote: "Quem tem um 'porquê' suporta quase qualquer 'como'.",
+    author: "Friedrich Nietzsche",
+    insight: "Um propósito forte torna qualquer sacrifício suportável.",
+    bgColor: "from-red-500 via-rose-600 to-pink-700",
+    emoji: "❓"
+  },
+  {
+    quote: "O otimista vê a oportunidade em cada perigo; o pessimista vê o perigo em cada oportunidade.",
+    author: "Winston Churchill",
+    insight: "A atitude mental determina o que você extrai das circunstâncias.",
+    bgColor: "from-amber-400 via-yellow-500 to-lime-600",
+    emoji: "☀️"
+  },
+  {
+    quote: "A imaginação é mais importante que o conhecimento.",
+    author: "Albert Einstein",
+    insight: "O conhecimento é limitado ao que sabemos; a imaginação abrange tudo o que viremos a saber.",
+    bgColor: "from-purple-500 via-violet-600 to-indigo-700",
+    emoji: "💡"
+  },
+  {
+    quote: "Saber não é suficiente; devemos aplicar. Querer não é suficiente; devemos fazer.",
+    author: "Johann Wolfgang von Goethe",
+    insight: "A teoria sem prática é estéril; a intenção sem ação é ilusão.",
+    bgColor: "from-cyan-500 via-teal-600 to-emerald-700",
+    emoji: "⚙️"
+  },
+  {
+    quote: "O sucesso não é a chave para a felicidade. A felicidade é a chave para o sucesso.",
+    author: "Albert Schweitzer",
+    insight: "Se você ama o que faz, o sucesso será um efeito colateral inevitável.",
+    bgColor: "from-orange-500 via-amber-600 to-yellow-700",
+    emoji: "🔑"
+  },
+  {
+    quote: "A disciplina é a ponte entre metas e realizações.",
+    author: "Jim Rohn",
+    insight: "O desejo planeja, mas é a repetição diária que constrói.",
+    bgColor: "from-blue-500 via-sky-600 to-cyan-700",
+    emoji: "🌉"
+  },
+  {
+    quote: "Nós somos o que fazemos repetidamente.",
+    author: "Aristóteles",
+    insight: "A excelência é um estilo de vida cultivado, não um evento fortuito.",
+    bgColor: "from-indigo-500 via-purple-600 to-violet-700",
+    emoji: "🔄"
+  },
+  {
+    quote: "Cada dia é uma nova vida para um homem sábio.",
+    author: "Dale Carnegie",
+    insight: "Esqueça os erros de ontem e as preocupações de amanhã; foque no presente.",
+    bgColor: "from-rose-500 via-pink-600 to-fuchsia-700",
+    emoji: "🌄"
+  },
+  {
+    quote: "Mire na lua. Mesmo que você erre, cairá entre as estrelas.",
+    author: "Les Brown",
+    insight: "Ambições elevadas garantem um padrão de vida superior, mesmo que o objetivo final mude.",
+    bgColor: "from-slate-600 via-indigo-700 to-purple-800",
+    emoji: "🌙"
+  },
+  {
+    quote: "Para ser insubstituível, deve-se sempre ser diferente.",
+    author: "Coco Chanel",
+    insight: "A autenticidade é o que protege seu valor em um mercado de cópias.",
+    bgColor: "from-pink-500 via-fuchsia-600 to-purple-700",
+    emoji: "👗"
+  },
+  {
+    quote: "Sua imaginação é a prévia das próximas atrações da sua vida.",
+    author: "Albert Einstein",
+    insight: "O que você visualiza hoje prepara o terreno para o que você viverá amanhã.",
+    bgColor: "from-violet-500 via-purple-600 to-indigo-700",
+    emoji: "🎬"
+  },
+  {
+    quote: "A melhor maneira de prever o futuro é criá-lo.",
+    author: "Peter Drucker",
+    insight: "Deixe de ser um espectador do destino e assuma o protagonismo das suas ações.",
+    bgColor: "from-teal-500 via-cyan-600 to-blue-700",
+    emoji: "🔮"
+  },
+  {
+    quote: "Seus problemas são seus maiores tesouros.",
+    author: "Provérbio Budista",
+    insight: "São os conflitos que forçam o crescimento da alma e da inteligência.",
+    bgColor: "from-amber-500 via-orange-600 to-red-700",
+    emoji: "💰"
+  },
+  {
+    quote: "O silêncio é uma fonte de grande força.",
+    author: "Lao Tzu",
+    insight: "A quietude permite ouvir a intuição e processar a sabedoria antes de agir.",
+    bgColor: "from-emerald-500 via-teal-600 to-cyan-700",
+    emoji: "🤫"
   }
 ];
 
