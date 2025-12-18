@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 import { useBrazilTime, formatBrazilTime } from "@/hooks/useBrazilTime";
 import { HealthCrossIcon } from "./HealthCrossIcon";
 import { setManualThemeOverride } from "./AutoNightMode";
+import { SimpleCaptcha } from "./SimpleCaptcha";
 
 const HEALTH_UNITS = [
   { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
@@ -27,6 +28,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("");
   const [showTvUnitSelection, setShowTvUnitSelection] = useState(false);
+  const [captchaValid, setCaptchaValid] = useState(false);
   const { currentTime } = useBrazilTime();
   const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
@@ -43,9 +45,19 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TV user - show unit selection screen
+    // TV user - show unit selection screen (no captcha required)
     if (username === "tv" && password === "tv") {
       setShowTvUnitSelection(true);
+      return;
+    }
+    
+    // Regular login requires captcha
+    if (!captchaValid) {
+      toast({
+        title: "Verificação necessária",
+        description: "Por favor, resolva o cálculo de segurança.",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -243,6 +255,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </button>
               </div>
             </div>
+            
+            {/* CAPTCHA - only shown for regular login */}
+            <SimpleCaptcha onValidChange={setCaptchaValid} />
+            
             <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base">
               Entrar
             </Button>
