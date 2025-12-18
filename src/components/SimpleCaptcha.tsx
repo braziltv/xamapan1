@@ -60,9 +60,14 @@ export function SimpleCaptcha({ onValidChange }: SimpleCaptchaProps) {
           </span>
         </div>
         <Input
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={answer}
-          onChange={(e) => handleAnswerChange(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^0-9-]/g, '');
+            handleAnswerChange(value);
+          }}
           placeholder="?"
           className={`w-20 text-center font-mono text-lg ${
             answer && (isValid ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20')
