@@ -26,6 +26,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [announcingType, setAnnouncingType] = useState<'triage' | 'doctor' | null>(null);
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
+  const pollInitializedRef = useRef(false);
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
@@ -43,6 +44,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
+
+  const readVolume = (key: string, fallback = 1) => {
+    const raw = localStorage.getItem(key);
+    const v = raw == null ? NaN : parseFloat(raw);
+    if (!Number.isFinite(v)) return fallback;
+    return Math.min(1, Math.max(0, v));
+  };
 
   // Fetch news from database cache
   useEffect(() => {
@@ -523,16 +531,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Play notification sound effect (uses preloaded audio for faster playback)
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
-    
+
     return new Promise<void>((resolve, reject) => {
-      // Get volume from localStorage
-      const notificationVolume = parseFloat(localStorage.getItem('volume-notification') || '1');
+      // Get volume from localStorage (safe)
+      const notificationVolume = readVolume('volume-notification', 1);
       const gain = 2.5 * notificationVolume;
-      
+
       // Create new audio element each time to allow Web Audio API connection
       const audio = new Audio('/sounds/notification.mp3');
       audio.currentTime = 0;
-      
+
       playAmplifiedAudio(audio, gain)
         .then(() => {
           console.log('Notification sound finished');
@@ -629,7 +637,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('🔊 Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Get TTS volume from localStorage
-      const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
+      const ttsVolume = readVolume('volume-tts', 1);
       
       // Get configured voice from localStorage
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
@@ -1378,6 +1386,88 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       supabase.removeChannel(channel);
     };
   }, [unitName]);
+
+  // Fallback polling: algumas TVs não mantêm realtime/websocket ativo; então buscamos chamadas ativas periodicamente
+  useEffect(() => {
+    if (!unitName || !audioUnlocked) return;
+
+    // reset init marker on unit change
+    pollInitializedRef.current = false;
+
+    let disposed = false;
+
+    const poll = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('patient_calls')
+          .select('id, unit_name, call_type, patient_name, destination, status, created_at')
+          .eq('unit_name', unitName)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (disposed) return;
+
+        if (error) {
+          console.error('❌ Poll patient_calls error:', error);
+          return;
+        }
+
+        if (!data) return;
+
+        // First run: track current actives without speaking (avoid replay after reload)
+        if (!pollInitializedRef.current) {
+          data.forEach((c) => processedCallsRef.current.add(c.id));
+          pollInitializedRef.current = true;
+          console.log('🛰️ Poll initialized. Active calls tracked:', data.length);
+          return;
+        }
+
+        for (const call of data) {
+          if (processedCallsRef.current.has(call.id)) continue;
+          processedCallsRef.current.add(call.id);
+
+          console.log('🛰️ Poll detected new active call:', call.patient_name, call.call_type);
+
+          // Reset idle timer (anti-standby)
+          window.dispatchEvent(new CustomEvent('patientCallActivity'));
+
+          if (call.call_type === 'custom') {
+            speakCustomTextRef.current(call.patient_name);
+            continue;
+          }
+
+          const valid = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria'] as const;
+          if (!valid.includes(call.call_type as any)) continue;
+
+          const callType = call.call_type as typeof valid[number];
+
+          if (callType === 'triage') {
+            setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
+          } else {
+            setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
+          }
+
+          speakNameRef.current(call.patient_name, callType, call.destination || undefined);
+        }
+      } catch (e) {
+        console.error('❌ Poll patient_calls failed:', e);
+      }
+    };
+
+    // kick once
+    void poll();
+
+    const interval = window.setInterval(() => {
+      if (isSpeakingRef.current) return;
+      void poll();
+    }, 2000);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+    };
+  }, [unitName, audioUnlocked]);
 
   // Clock is managed by useBrazilTime hook
 
