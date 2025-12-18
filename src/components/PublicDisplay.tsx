@@ -528,30 +528,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     },
     []
   );
-  // Play notification sound effect (uses preloaded audio for faster playback)
+  // Play notification sound effect - simple method (same as useHourAudio which works on TV)
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
 
     return new Promise<void>((resolve, reject) => {
-      // Get volume from localStorage (safe)
-      const notificationVolume = readVolume('volume-notification', 1);
-      const gain = 2.5 * notificationVolume;
-
-      // Create new audio element each time to allow Web Audio API connection
-      const audio = new Audio('/sounds/notification.mp3');
-      audio.currentTime = 0;
-
-      playAmplifiedAudio(audio, gain)
-        .then(() => {
-          console.log('Notification sound finished');
+      try {
+        // Get volume from localStorage (safe)
+        const notificationVolume = readVolume('volume-notification', 1);
+        
+        const audio = new Audio('/sounds/notification.mp3');
+        audio.volume = Math.min(1.0, notificationVolume);
+        
+        audio.onended = () => {
+          console.log('✅ Notification sound finished');
           resolve();
-        })
-        .catch((err) => {
-          console.error('Failed to play notification sound:', err);
+        };
+        audio.onerror = (err) => {
+          console.error('❌ Notification sound error:', err);
+          reject(new Error('Notification sound failed'));
+        };
+        audio.play().catch((err) => {
+          console.error('❌ Notification sound play() failed:', err);
           reject(err);
         });
+      } catch (err) {
+        console.error('❌ Failed to create notification sound:', err);
+        reject(err);
+      }
     });
-  }, [playAmplifiedAudio]);
+  }, []);
 
 
   const speakWithWebSpeech = useCallback(
@@ -695,8 +701,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('Speaking with Google Cloud TTS:', text);
       
       // Get TTS volume from localStorage
-      const ttsVolume = parseFloat(localStorage.getItem('volume-tts') || '1');
-      const gain = 2.5 * ttsVolume;
+      const ttsVolume = readVolume('volume-tts', 1);
       
       // Get configured voice from localStorage
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
@@ -719,17 +724,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      try {
-        await playAmplifiedAudio(audio, gain);
-      } finally {
-        URL.revokeObjectURL(audioUrl);
-      }
+      // Use arrayBuffer() like useHourAudio does (works on TV)
+      const audioBuffer = await response.arrayBuffer();
+      await playSimpleAudio(audioBuffer, ttsVolume);
     },
-    [playAmplifiedAudio]
+    [playSimpleAudio]
   );
 
   // Test audio function
@@ -984,6 +983,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (phrase: string): Promise<void> => {
       console.log('Speaking destination phrase:', phrase);
       
+      const ttsVolume = readVolume('volume-tts', 1);
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
       const response = await fetch(
@@ -1004,17 +1004,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      try {
-        await playAmplifiedAudio(audio, 2.5);
-      } finally {
-        URL.revokeObjectURL(audioUrl);
-      }
+      // Use arrayBuffer() like useHourAudio does (works on TV)
+      const audioBuffer = await response.arrayBuffer();
+      await playSimpleAudio(audioBuffer, ttsVolume);
     },
-    [playAmplifiedAudio]
+    [playSimpleAudio]
   );
 
   // Speak custom text (no destination, just the raw text)
