@@ -270,32 +270,41 @@ export const BRAZILIAN_NAMES = {
   // Sobrenomes comuns brasileiros
   sobrenomes: [
     // A
-    "Abreu", "Adriano", "Aguiar", "Alencar", "Almeida", "Alves", "Amaral", "Amorim", "Andrade",
-    "Antunes", "Araújo", "Araujo", "Assis", "Assunção", "Azevedo",
+    "Abreu", "Adriano", "Aguiar", "Alencar", "Alencár", "Almeida", "Alves", "Alvêz", "Alvárenga",
+    "Alvaréz", "Amaral", "Amorim", "Âlcantara", "Âlvares", "Ângelis", "Andrade", "Antunes", 
+    "Araújo", "Araujo", "Arêas", "Árias", "Assis", "Assunção", "Avelár", "Ávila", "Azevedo",
     
     // B
-    "Baltazar", "Bandeira", "Baptista", "Barbosa", "Barreira", "Barreto", "Barros", "Bastos",
-    "Batista", "Bento", "Bernardes", "Bezerra", "Bittencourt", "Borges", "Braga", "Brandão",
-    "Brasil", "Brito", "Bueno",
+    "Baltazar", "Báltazar", "Bandeira", "Baptista", "Barbosa", "Barón", "Barreira", "Barreto",
+    "Bárrio", "Barros", "Barrosô", "Bastos", "Bastôs", "Batista", "Beirã", "Belém", "Bento",
+    "Bernardes", "Bezerra", "Bittencourt", "Borges", "Braga", "Brandão", "Bráulio", "Brasil",
+    "Brejão", "Brígido", "Brito", "Bueno",
     
     // C
-    "Cabral", "Caldas", "Caldeira", "Câmara", "Camargo", "Campos", "Cardoso", "Carneiro",
-    "Carvalho", "Castro", "Cavalcante", "Cavalcanti", "Cerqueira", "Chagas", "Chaves", "Coelho",
-    "Conceição", "Cordeiro", "Corrêa", "Correa", "Correia", "Costa", "Coutinho", "Cruz", "Cunha",
+    "Cabral", "Cação", "Caldas", "Caldeira", "Calçáda", "Calvêira", "Câmara", "Câmera", "Camargo",
+    "Campos", "Cândido", "Candeiâs", "Cantárino", "Carção", "Cárdenas", "Cardoso", "Cardôso",
+    "Carneiro", "Carrêra", "Carvalho", "Cássio", "Castêlo", "Castro", "Cavalcante", "Cavalcanti",
+    "Cerqueira", "Cerquêira", "Cézar", "Chagas", "Chaves", "Chavés", "Chavêz", "Cícero", "Coelho",
+    "Coêlho", "Coléte", "Conceição", "Cordeiro", "Corôa", "Corrêa", "Correa", "Correâ", "Correia",
+    "Côrrea", "Côrtes", "Costa", "Costêla", "Coutinho", "Cravô", "Cruz", "Cunha", "Cunhâ",
     
     // D
-    "Dantas", "Dias", "Domingues", "Dourado", "Duarte", "Durães",
+    "D'Ávila", "Damásio", "Dantas", "Delfíno", "Delgadô", "Dias", "Domingues", "Dóris", "Dourado",
+    "Dourádo", "Duarte", "Durães",
     
     // E
-    "Esteves", "Evangelista",
+    "Eirô", "Escóbar", "Espíndola", "Estêvão", "Esteves", "Evangelista", "Évora",
     
     // F
-    "Faria", "Farias", "Feitosa", "Fernandes", "Ferrari", "Ferraz", "Ferreira", "Figueiredo",
-    "Figueira", "Flores", "Fonseca", "Fontes", "França", "Franco", "Freire", "Freitas",
+    "Fábres", "Fagúndes", "Falcão", "Faria", "Farias", "Fariâs", "Feitosa", "Fernandes", "Ferrari",
+    "Ferraz", "Ferrazô", "Ferreira", "Fêrrer", "Figueiredo", "Fígueredo", "Figueira", "Figueirâ",
+    "Flores", "Flôres", "Fonseca", "Fontes", "Fontês", "França", "Frânça", "Franco", "Freire",
+    "Freitas", "Fróes",
     
     // G
-    "Galvão", "Galvao", "Garcia", "Gaspar", "Gomes", "Gonçalves", "Goncalves", "Gonzaga",
-    "Guedes", "Guerra", "Guimarães", "Guimaraes",
+    "Gálvez", "Galvão", "Galvao", "Garcia", "Gaspar", "Gavião", "Gênova", "Godói", "Góis", "Gomes",
+    "Gonçalves", "Goncalves", "Gonzaga", "Gracía", "Guedes", "Guédès", "Guerra", "Guimarã",
+    "Guimarães", "Guimaraes",
     
     // H
     "Henriques", "Hernandes", "Hipólito", "Holanda",
@@ -307,53 +316,60 @@ export const BRAZILIAN_NAMES = {
     "Jardim", "Jesus", "Jordão", "Jorge", "Júnior", "Junior",
     
     // L
-    "Lacerda", "Leal", "Leão", "Leite", "Lemes", "Lemos", "Lima", "Linhares", "Lira", "Lisboa",
-    "Lopes", "Loureiro", "Lourenço", "Lucas", "Luz",
+    "Lacerda", "Lagôa", "Leal", "Leão", "Leitão", "Leite", "Lemes", "Lemos", "Lima", "Linhares",
+    "Lira", "Lisboa", "Lobatô", "Lôbo", "Lopes", "Louçã", "Loureiro", "Lourenço", "Lucas", "Lúcio", "Luz",
     
     // M
-    "Macedo", "Machado", "Maciel", "Magalhães", "Magalhaes", "Maia", "Maldonado", "Malheiros",
-    "Mariano", "Marinho", "Marques", "Martins", "Matias", "Mattos", "Matos", "Medeiros", "Meireles",
-    "Mello", "Melo", "Mendes", "Mendonça", "Menezes", "Mesquita", "Miranda", "Monteiro", "Montenegro",
-    "Morais", "Moraes", "Moreira", "Mota", "Moura", "Muniz",
+    "Macêdo", "Macedo", "Machado", "Maciel", "Mação", "Madurêira", "Magalhães", "Magalhaes", "Maia",
+    "Maldonado", "Malheiros", "Marê", "Mariano", "Marinho", "Marques", "Martins", "Matias", "Mattos",
+    "Mattôs", "Matos", "Máximo", "Medeiros", "Meireles", "Meirêles", "Mello", "Melo", "Mendes",
+    "Mendonça", "Mendônça", "Menezes", "Mesquita", "Miranda", "Mônaco", "Monteiro", "Monteirô",
+    "Montenegro", "Morais", "Mórais", "Moraes", "Moreira", "Mota", "Moura", "Mourão", "Muniz",
     
     // N
-    "Nascimento", "Neves", "Nogueira", "Nóbrega", "Nunes",
+    "Nascimento", "Navegâs", "Negrão", "Neves", "Nóbrega", "Nogueira", "Norôes", "Nováes", "Núncio",
+    "Nunes",
     
     // O
-    "Oliveira", "Ortiz",
+    "Oliveira", "Olivêira", "Órnelas", "Ortiz",
     
     // P
-    "Pacheco", "Paes", "Paiva", "Pascoal", "Passos", "Paula", "Paulino", "Paz", "Peixoto",
-    "Penha", "Pereira", "Pessoa", "Pimentel", "Pinheiro", "Pinto", "Pires", "Pontes", "Porto",
+    "Pacheco", "Pachecô", "Pádua", "Páez", "Paes", "Paiva", "Paixão", "Pascoal", "Passos", "Paula",
+    "Paulino", "Paz", "Pedrêira", "Peixoto", "Peixôtto", "Penha", "Pereira", "Pessoa", "Pimentel",
+    "Pímentel", "Pinheiro", "Pinhêiro", "Pinto", "Pires", "Pontes", "Portêla", "Porto", "Póvoa",
     "Prado", "Proença",
     
     // Q
-    "Quaresma", "Queirós", "Queiroz", "Quintela",
+    "Quaresma", "Quaresmâ", "Queirôga", "Quéiroz", "Queirós", "Queiroz", "Quintela",
     
     // R
-    "Ramos", "Rangel", "Rebelo", "Rego", "Reis", "Resende", "Ribas", "Ribeiro", "Rios", "Rocha",
+    "Ramôa", "Ramos", "Rangel", "Rebelo", "Rego", "Rêgo", "Reis", "Réis", "Resende", "Resêndes",
+    "Rezêndes", "Ribas", "Ribeira", "Ribeirâ", "Ribeiro", "Rios", "Ríos", "Rocha", "Rôcha",
     "Rodrigues", "Rosa", "Rossi",
     
     // S
-    "Sá", "Sa", "Sacramento", "Sales", "Salgado", "Sampaio", "Sanches", "Santana", "Santiago",
-    "Santos", "Saraiva", "Sena", "Serafim", "Serra", "Serrano", "Silva", "Silveira", "Simões",
-    "Simões", "Soares", "Sousa", "Souza", "Siqueira",
+    "Sá", "Sa", "Sacramento", "Sáez", "Sales", "Salgado", "Salgádo", "Sálvio", "Sampaio", "Sampáio",
+    "Sanches", "Santana", "Santiago", "Santos", "Santôs", "Saraiva", "Sarmentô", "Sátiro", "Seabrâ",
+    "Sêcco", "Segádas", "Sena", "Sequeirâ", "Serafim", "Serpâ", "Serra", "Serrano", "Silva",
+    "Silveira", "Silvêrta", "Simões", "Soares", "Sobrâl", "Sousa", "Souza", "Siqueira",
     
     // T
-    "Tavares", "Teixeira", "Toledo", "Torres", "Trindade",
+    "Tavares", "Távora", "Teixeira", "Teixeirâ", "Téles", "Toledo", "Torres", "Tôrres", "Torrão",
+    "Trás-os-Montes", "Travassôs", "Trindade", "Tríndade",
     
     // U
-    "Urias",
+    "Úbeda", "Urias",
     
     // V
-    "Valente", "Varela", "Vargas", "Vasconcelos", "Vaz", "Veloso", "Ventura", "Viana", "Vicente",
-    "Vieira", "Vilela", "Vital",
+    "Valadãres", "Valdés", "Valença", "Valente", "Varela", "Vargas", "Várzea", "Vasconcelos", "Vaz",
+    "Vazé", "Veloso", "Velôso", "Ventura", "Viana", "Vianâ", "Vicente", "Vidál", "Viégas", "Viegâs",
+    "Vieira", "Vilela", "Vilhêna", "Viñólas", "Vital",
     
     // X
     "Xavier",
     
     // Z
-    "Zanetti", "Zimmermann"
+    "Zanetti", "Zanettí", "Zimmermann"
   ],
 
   // Nomes e sobrenomes regionais de Minas Gerais
