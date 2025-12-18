@@ -192,35 +192,6 @@ export function TriagePanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Menu Encaminhar para Médico - Consultórios */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm text-purple-600 hover:text-purple-700 border-purple-300 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                      <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Consultório
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-card border border-border z-50">
-                    <DropdownMenuLabel>Encaminhar para Médico</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => {
-                        onSendToDoctorQueue(currentCall.id, 'Consultório 1');
-                      }}
-                      className="cursor-pointer"
-                    >
-                      Consultório 1
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        onSendToDoctorQueue(currentCall.id, 'Consultório 2');
-                      }}
-                      className="cursor-pointer"
-                    >
-                      Consultório 2
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
                 {/* Menu Encaminhar para outros serviços */}
                 <DropdownMenu>
