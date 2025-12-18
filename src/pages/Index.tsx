@@ -350,6 +350,8 @@ const Index = () => {
               onRecall={recallEcg}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToDoctor={forwardToDoctor}
+              onSendToDoctorQueue={sendToDoctorQueue}
               soundKey="ecg"
             />
           </main>
@@ -370,6 +372,8 @@ const Index = () => {
               onRecall={recallCurativos}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToDoctor={forwardToDoctor}
+              onSendToDoctorQueue={sendToDoctorQueue}
               soundKey="curativos"
             />
           </main>
@@ -390,6 +394,8 @@ const Index = () => {
               onRecall={recallRaiox}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToDoctor={forwardToDoctor}
+              onSendToDoctorQueue={sendToDoctorQueue}
               soundKey="raiox"
             />
           </main>
@@ -410,6 +416,8 @@ const Index = () => {
               onRecall={recallEnfermaria}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToDoctor={forwardToDoctor}
+              onSendToDoctorQueue={sendToDoctorQueue}
               soundKey="enfermaria"
             />
           </main>
