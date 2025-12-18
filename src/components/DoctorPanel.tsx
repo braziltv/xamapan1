@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Phone, PhoneCall, Check, Users, Stethoscope, CheckCircle, AlertTriangle, AlertCircle, Circle, Volume2, VolumeX, FileText, Pencil } from 'lucide-react';
 import { Patient, PatientPriority } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
@@ -75,6 +76,7 @@ export function DoctorPanel({
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -347,19 +349,25 @@ export function DoctorPanel({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 if (confirmFinish) {
-                  const message = confirmFinish.type === 'consultation' 
-                    ? 'Consulta Concluída!' 
-                    : 'Desistência Registrada!';
-                  const animationType = confirmFinish.type === 'consultation' ? 'consultation' : 'withdrawal';
-                  if (confirmFinish.type === 'consultation') {
-                    onFinishConsultation(confirmFinish.id);
-                  } else {
-                    onFinishWithoutCall(confirmFinish.id);
-                  }
-                  setSuccessAnimation({ message, type: animationType });
+                  setIsLoading(true);
                   setConfirmFinish(null);
+                  try {
+                    await new Promise(resolve => setTimeout(resolve, 400));
+                    const message = confirmFinish.type === 'consultation' 
+                      ? 'Consulta Concluída!' 
+                      : 'Desistência Registrada!';
+                    const animationType = confirmFinish.type === 'consultation' ? 'consultation' : 'withdrawal';
+                    if (confirmFinish.type === 'consultation') {
+                      onFinishConsultation(confirmFinish.id);
+                    } else {
+                      onFinishWithoutCall(confirmFinish.id);
+                    }
+                    setSuccessAnimation({ message, type: animationType });
+                  } finally {
+                    setIsLoading(false);
+                  }
                 }
               }}
               className="bg-green-600 hover:bg-green-700"
@@ -377,6 +385,9 @@ export function DoctorPanel({
         type={successAnimation?.type || 'default'}
         onComplete={() => setSuccessAnimation(null)} 
       />
+
+      {/* Loading Overlay */}
+      <LoadingOverlay show={isLoading} message="Processando..." />
     </div>
   );
 }

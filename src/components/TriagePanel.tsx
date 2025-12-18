@@ -3,6 +3,7 @@ import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Phone, PhoneCall, Check, Users, Volume2, VolumeX, CheckCircle, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil } from 'lucide-react';
@@ -81,6 +82,7 @@ export function TriagePanel({
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'triage' | 'withdrawal' | 'default' } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -420,19 +422,25 @@ export function TriagePanel({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 if (confirmFinish) {
-                  const message = confirmFinish.type === 'triage' 
-                    ? 'Triagem Finalizada!' 
-                    : 'Paciente Removido!';
-                  const animationType = confirmFinish.type === 'triage' ? 'triage' : 'withdrawal';
-                  if (confirmFinish.type === 'triage') {
-                    onFinishTriage(confirmFinish.id);
-                  } else {
-                    onFinishWithoutCall(confirmFinish.id);
-                  }
-                  setSuccessAnimation({ message, type: animationType });
+                  setIsLoading(true);
                   setConfirmFinish(null);
+                  try {
+                    await new Promise(resolve => setTimeout(resolve, 400));
+                    const message = confirmFinish.type === 'triage' 
+                      ? 'Triagem Finalizada!' 
+                      : 'Paciente Removido!';
+                    const animationType = confirmFinish.type === 'triage' ? 'triage' : 'withdrawal';
+                    if (confirmFinish.type === 'triage') {
+                      onFinishTriage(confirmFinish.id);
+                    } else {
+                      onFinishWithoutCall(confirmFinish.id);
+                    }
+                    setSuccessAnimation({ message, type: animationType });
+                  } finally {
+                    setIsLoading(false);
+                  }
                 }
               }}
               className="bg-green-600 hover:bg-green-700"
@@ -450,6 +458,9 @@ export function TriagePanel({
         type={successAnimation?.type || 'default'}
         onComplete={() => setSuccessAnimation(null)} 
       />
+
+      {/* Loading Overlay */}
+      <LoadingOverlay show={isLoading} message="Processando..." />
     </div>
   );
 }
