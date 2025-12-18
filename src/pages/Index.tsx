@@ -375,6 +375,8 @@ const Index = () => {
               onRecall={recallEcg}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToTriage={forwardToTriage}
+              onSendToTriageQueue={sendToTriageQueue}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
               onForwardToEcg={forwardToEcg}
@@ -406,6 +408,8 @@ const Index = () => {
               onRecall={recallCurativos}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToTriage={forwardToTriage}
+              onSendToTriageQueue={sendToTriageQueue}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
               onForwardToEcg={forwardToEcg}
@@ -437,6 +441,8 @@ const Index = () => {
               onRecall={recallRaiox}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToTriage={forwardToTriage}
+              onSendToTriageQueue={sendToTriageQueue}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
               onForwardToEcg={forwardToEcg}
@@ -468,6 +474,8 @@ const Index = () => {
               onRecall={recallEnfermaria}
               onFinishWithoutCall={finishWithoutCall}
               onUpdateObservations={updatePatientObservations}
+              onForwardToTriage={forwardToTriage}
+              onSendToTriageQueue={sendToTriageQueue}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
               onForwardToEcg={forwardToEcg}
