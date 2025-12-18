@@ -801,23 +801,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Agendar primeiro anúncio de hora em 2 minutos após o áudio ser desbloqueado
   useEffect(() => {
-    if (!audioUnlocked || !isSynced || initialAnnouncementScheduledRef.current) return;
+    console.log('[HourAnnouncement] Effect check:', { audioUnlocked, isSynced, alreadyScheduled: initialAnnouncementScheduledRef.current });
+    
+    if (!audioUnlocked || !isSynced || initialAnnouncementScheduledRef.current) {
+      console.log('[HourAnnouncement] Skipping - conditions not met');
+      return;
+    }
 
     const currentHour = currentTime?.getHours();
     const isQuietHours = currentHour !== undefined && (currentHour >= 22 || currentHour < 6);
     
     if (isQuietHours) {
-      console.log('Initial hour announcement skipped - quiet hours');
+      console.log('[HourAnnouncement] Initial hour announcement skipped - quiet hours');
       return;
     }
 
     initialAnnouncementScheduledRef.current = true;
     
-    const delayMs = 2 * 60 * 1000; // 2 minutos
-    console.log('Scheduling initial hour announcement in 2 minutes...');
+    const delayMs = 30 * 1000; // 30 segundos para teste (era 2 minutos)
+    console.log('[HourAnnouncement] Scheduling initial hour announcement in 30 seconds...');
     
-    const timeout = setTimeout(() => {
-      if (!currentTime) return;
+    const timeout = setTimeout(async () => {
+      if (!currentTime) {
+        console.log('[HourAnnouncement] currentTime is null, aborting');
+        return;
+      }
       
       const hour = currentTime.getHours();
       const minute = currentTime.getMinutes();
@@ -825,17 +833,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Verificar se não está em horário de silêncio no momento do anúncio
       const isQuietNow = hour >= 22 || hour < 6;
       if (isQuietNow) {
-        console.log('Initial announcement cancelled - now in quiet hours');
+        console.log('[HourAnnouncement] Initial announcement cancelled - now in quiet hours');
         return;
       }
       
-      console.log(`Playing initial hour announcement: ${hour}:${minute.toString().padStart(2, '0')}`);
-      playHourAnnouncement(hour, minute);
+      console.log(`[HourAnnouncement] Playing initial hour announcement: ${hour}:${minute.toString().padStart(2, '0')}`);
+      console.log(`[HourAnnouncement] announcingType=${announcingType}, isSpeaking=${isSpeakingRef.current}`);
+      
+      await playHourAnnouncement(hour, minute);
       lastTimeAnnouncementRef.current = Date.now();
     }, delayMs);
 
     return () => clearTimeout(timeout);
-  }, [audioUnlocked, isSynced, currentTime, playHourAnnouncement]);
+  }, [audioUnlocked, isSynced, currentTime, playHourAnnouncement, announcingType]);
+  
 
   // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
