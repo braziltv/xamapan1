@@ -231,12 +231,20 @@ export function useCallPanel() {
           if (!patientExists) {
             // Determine status based on call_type
             let status: Patient['status'] = 'waiting';
-            if (call.call_type === 'triage' && call.status === 'active') {
-              status = 'in-triage';
-            } else if (call.call_type === 'doctor' && call.status === 'active') {
-              status = 'in-consultation';
-            } else if (call.status === 'waiting') {
-              status = 'waiting';
+            if (call.status === 'active') {
+              if (call.call_type === 'triage') {
+                status = 'in-triage';
+              } else if (call.call_type === 'doctor') {
+                status = 'in-consultation';
+              } else if (call.call_type === 'ecg') {
+                status = 'in-ecg';
+              } else if (call.call_type === 'curativos') {
+                status = 'in-curativos';
+              } else if (call.call_type === 'raiox') {
+                status = 'in-raiox';
+              } else if (call.call_type === 'enfermaria') {
+                status = 'in-enfermaria';
+              }
             }
             
             // Add patient from another device
@@ -251,7 +259,7 @@ export function useCallPanel() {
               destination: call.destination,
             };
             
-            console.log('➕ Adding synced patient:', newPatient.name, 'status:', newPatient.status);
+            console.log('➕ Adding synced patient:', newPatient.name, 'status:', newPatient.status, 'call_type:', call.call_type);
             
             setPatients(prev => {
               // Double-check to avoid duplicates
@@ -267,6 +275,14 @@ export function useCallPanel() {
                 setCurrentTriageCall(newPatient);
               } else if (call.call_type === 'doctor') {
                 setCurrentDoctorCall(newPatient);
+              } else if (call.call_type === 'ecg') {
+                setCurrentEcgCall(newPatient);
+              } else if (call.call_type === 'curativos') {
+                setCurrentCurativosCall(newPatient);
+              } else if (call.call_type === 'raiox') {
+                setCurrentRaioxCall(newPatient);
+              } else if (call.call_type === 'enfermaria') {
+                setCurrentEnfermariaCall(newPatient);
               }
             }
           }
@@ -282,7 +298,7 @@ export function useCallPanel() {
         },
         (payload) => {
           const call = payload.new as any;
-          console.log('🔄 Patient sync - received UPDATE:', call.patient_name, call.status);
+          console.log('🔄 Patient sync - received UPDATE:', call.patient_name, call.status, call.call_type);
           
           // If status changed to completed, remove patient from local state
           if (call.status === 'completed') {
@@ -291,6 +307,10 @@ export function useCallPanel() {
             // Also clear current calls if this patient was being called
             setCurrentTriageCall(prev => prev?.name === call.patient_name ? null : prev);
             setCurrentDoctorCall(prev => prev?.name === call.patient_name ? null : prev);
+            setCurrentEcgCall(prev => prev?.name === call.patient_name ? null : prev);
+            setCurrentCurativosCall(prev => prev?.name === call.patient_name ? null : prev);
+            setCurrentRaioxCall(prev => prev?.name === call.patient_name ? null : prev);
+            setCurrentEnfermariaCall(prev => prev?.name === call.patient_name ? null : prev);
           }
         }
       )
