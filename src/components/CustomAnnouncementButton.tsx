@@ -80,9 +80,9 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
             Áudio Avulso Na TV
           </DialogTitle>
           <DialogDescription>
-            Digite exatamente o que será anunciado na TV por voz. O texto será falado exatamente como digitado.
+            📢 Digite exatamente o que será anunciado na TV por voz. O texto será falado exatamente como digitado.
             <br />
-            <span className="text-amber-600 font-medium">💡 Dica: Use acentos corretamente (José, não Jose) para melhor pronúncia!</span>
+            <span className="text-amber-600 font-medium">✨ Dica: Use acentos corretamente (José, não Jose) para melhor pronúncia! 🎯🔊</span>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
