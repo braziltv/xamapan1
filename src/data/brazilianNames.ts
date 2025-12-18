@@ -344,21 +344,118 @@ export const BRAZILIAN_NAMES = {
     
     // Z
     "Zanetti", "Zimmermann"
-  ]
+  ],
+
+  // Nomes e sobrenomes regionais de Minas Gerais
+  regionaisMG: {
+    masculinos: [
+      // Nomes tradicionais do interior de MG
+      "Adelício", "Ademário", "Adézio", "Agenor", "Alcino", "Aldair", "Alécio", "Altino", "Alvino",
+      "Amâncio", "Amarildo", "Anacleto", "Anésio", "Aniceto", "Anísio", "Antonino", "Aparício",
+      "Aristeu", "Arquimedes", "Astolfo", "Atanásio", "Ataíde", "Atílio", "Audálio", "Aureliano",
+      "Avelino", "Azarias", "Baltasar", "Basílio", "Belarmino", "Belchior", "Belisário", "Belmiro",
+      "Boanerges", "Boaventura", "Bráz", "Caetano", "Calistro", "Candinho", "Casemiro", "Cassimiro",
+      "Cesário", "Chico", "Cipriano", "Claudemiro", "Clementino", "Clodoaldo", "Clóvis", "Cornélio",
+      "Crispim", "Custódio", "Demerval", "Deoclécio", "Deusdete", "Dimas", "Dionísio", "Divino",
+      "Domiciano", "Donizete", "Dorival", "Edézio", "Edvino", "Efigênio", "Eleutério", "Elídio",
+      "Eliezér", "Eliomar", "Elisário", "Eliziário", "Elvécio", "Emídio", "Epaminondas", "Ermínio",
+      "Erotildes", "Esmeraldo", "Espedito", "Estanislau", "Eustáquio", "Euzébio", "Expedito",
+      "Feliciano", "Felisberto", "Felismino", "Fermino", "Fidélis", "Filogônio", "Florêncio",
+      "Florentino", "Fortunato", "Francelino", "Fulgêncio", "Galdino", "Gaudêncio", "Genésio",
+      "Gerôncio", "Getulio", "Gilvander", "Gumercindo", "Herculano", "Hermenegildo", "Hermínio",
+      "Hilário", "Honório", "Idalécio", "Ildefonso", "Inocêncio", "Isauro", "Izaías", "Januário",
+      "Jeová", "Jeremias", "Joãozinho", "Joanino", "Joaquinzinho", "Jovelino", "Julinho", "Justino",
+      "Juvenal", "Lázaro", "Leopoldo", "Leovegíldo", "Leovegildo", "Lindolfo", "Lino", "Lorival",
+      "Lourival", "Lucídio", "Ludgério", "Lupércio", "Macário", "Malaquias", "Manézinho", "Manoelzinho",
+      "Marcelino", "Marcionílio", "Martiniano", "Matusalém", "Maximiano", "Melquíades", "Messias",
+      "Minervino", "Modestino", "Natalício", "Natalino", "Naziazeno", "Neném", "Nicácio", "Nicanor",
+      "Nicodemos", "Nivaldo", "Norberto", "Odirlei", "Olegário", "Olímpio", "Onésimo", "Onofre",
+      "Orestes", "Orozimbo", "Oséas", "Osório", "Osvino", "Otacílio", "Pacífico", "Pascoal",
+      "Paulinho", "Pedrinho", "Petronilho", "Policarpo", "Possidônio", "Prudêncio", "Querubino",
+      "Quirino", "Raimundinho", "Ramiro", "Reginaldo", "Reinaldo", "Ribamar", "Rosalvo", "Rosendo",
+      "Rufino", "Sabino", "Salustiano", "Sancho", "Saturnino", "Sebastiãozinho", "Secundino",
+      "Serafim", "Servílio", "Severiano", "Silvério", "Simplício", "Sinésio", "Sinfrônio", "Sisenando",
+      "Sizínio", "Teobaldo", "Teodomiro", "Teófilo", "Tertuliano", "Tibúrcio", "Tico", "Timóteo",
+      "Tito", "Tobias", "Tonho", "Toninho", "Turíbio", "Ubirajara", "Ubaldo", "Urbano", "Valdomiro",
+      "Venâncio", "Venceslau", "Vicentino", "Vigário", "Virgulino", "Waldecir", "Waldomiro",
+      "Zacarias", "Zé", "Zeca", "Zeferino", "Zenóbio", "Zezé", "Zezinho", "Zildo", "Zoroastro"
+    ],
+    femininas: [
+      // Nomes tradicionais do interior de MG
+      "Adalgisa", "Adelice", "Adelina", "Adelícia", "Adélia", "Agenora", "Albertina", "Alcídia",
+      "Alcina", "Aldina", "Almerinda", "Almira", "Altina", "Alvina", "Alzenir", "Amábile", "Amada",
+      "Amália", "Amarílis", "Ambrosina", "Amélia", "Anália", "Anastácia", "Angelita", "Anísia",
+      "Anunciação", "Aparecida", "Aquilina", "Argentina", "Arlete", "Arminda", "Ascensão", "Assunção",
+      "Augusta", "Aurelina", "Auristela", "Auxiliadora", "Avelina", "Azélia", "Basilícia", "Basília",
+      "Batistina", "Belarmina", "Belmira", "Benedita", "Benvinda", "Bernardete", "Bernardina",
+      "Blandina", "Brasília", "Caetana", "Cândida", "Carlinda", "Carmelita", "Carminha", "Casemira",
+      "Catarina", "Ceciliana", "Celestina", "Celina", "Cesarina", "Cidinha", "Cidalina", "Cidália",
+      "Cidinha", "Clarice", "Claudelina", "Clementina", "Cleusa", "Clotilde", "Corina", "Cremilda",
+      "Custódia", "Dalva", "Damiana", "Dejanira", "Delcina", "Delfina", "Delmira", "Deolinda",
+      "Deuzélia", "Deuza", "Divina", "Dolores", "Domingas", "Donana", "Doralice", "Dorotéia",
+      "Durvalina", "Edésia", "Edith", "Efigênia", "Eleutéria", "Elisabete", "Elvira", "Emerenciana",
+      "Emiliana", "Eponina", "Ermelinda", "Ernestina", "Escolástica", "Esmeraldina", "Esmeralda",
+      "Esperança", "Etelvina", "Euládia", "Eulália", "Eurides", "Eusébia", "Evangelina", "Expedita",
+      "Feliciana", "Felicidade", "Felícia", "Felisberta", "Felismina", "Fermina", "Filomena",
+      "Firmina", "Florentina", "Florinda", "Fortunata", "Francelina", "Francisca", "Fulgência",
+      "Galdina", "Generosa", "Geni", "Gentil", "Geraldina", "Gertrudes", "Gildete", "Glorinha",
+      "Gracinda", "Gumercinda", "Heliodora", "Hermenegilda", "Hermínia", "Hilária", "Honorina",
+      "Idalina", "Ifigênia", "Iná", "Inês", "Inocência", "Iraídes", "Iraci", "Iracema", "Isaura",
+      "Isidora", "Ismênia", "Izaura", "Januária", "Jesuína", "Joaninha", "Joaquina", "Jocelina",
+      "Josefina", "Josefinha", "Jovita", "Jovina", "Justina", "Laudelina", "Laurentina", "Laurinda",
+      "Lazarina", "Leocádia", "Leonídia", "Leontina", "Leopoldina", "Leozina", "Lindaura", "Lindinalva",
+      "Lourença", "Lucinéia", "Lucília", "Ludovina", "Luíza", "Lurdes", "Luzinete", "Madalena",
+      "Manuelina", "Marcelina", "Marcionília", "Margarida", "Marieta", "Mariinha", "Mariquinha",
+      "Martiniana", "Matilde", "Mavilde", "Maximiliana", "Messias", "Minervina", "Modesta",
+      "Nair", "Natalina", "Nazareth", "Nazaré", "Neném", "Neuza", "Noêmia", "Norberta", "Odete",
+      "Olegária", "Olímpia", "Ondina", "Ortência", "Otávia", "Otília", "Pacífica", "Palmira",
+      "Pascoalina", "Pedrinha", "Percília", "Perpétua", "Petronília", "Piedade", "Plácida",
+      "Policena", "Possidônia", "Prudência", "Querubina", "Quitéria", "Raimunda", "Ramira",
+      "Raquel", "Regina", "Rosaline", "Rosalina", "Rosalva", "Rosária", "Rufina", "Santina",
+      "Saturnina", "Sebastiana", "Secundina", "Serafina", "Severiana", "Silvéria", "Simplícia",
+      "Sirlene", "Socorro", "Sônia", "Teodorina", "Teolinda", "Teotônia", "Terezinha", "Tertuliana",
+      "Tiburtina", "Tomásia", "Umbelina", "Úrsula", "Valdete", "Valdomira", "Veridiana", "Vitalina",
+      "Wanda", "Zélia", "Zenaide", "Zenilda", "Zenóbia", "Zezé", "Zezinha", "Zilá", "Zilda", "Zulmira"
+    ],
+    sobrenomes: [
+      // Sobrenomes tradicionais de Minas Gerais
+      "Abranches", "Afonso", "Alcântara", "Alvarenga", "Ambrósio", "Andrade", "Antônio", "Araújo",
+      "Avelar", "Barbacena", "Barroso", "Basílio", "Bicalho", "Boaventura", "Botelho", "Braga",
+      "Bragança", "Brandão", "Bueno", "Caldas", "Câmara", "Camargos", "Cândido", "Carmo", "Carneiro",
+      "Cassiano", "Castilho", "Cerqueira", "Chaves", "Coimbra", "Couto", "Crisóstomo", "Custódio",
+      "Damasceno", "Diniz", "Drummond", "Durães", "Dutra", "Espírito Santo", "Esteves", "Fagundes",
+      "Faria", "Fonseca", "Furtado", "Gandra", "Gontijo", "Gouvêa", "Gouveia", "Greco", "Horta",
+      "Junqueira", "Lacerda", "Lafetá", "Laje", "Leão", "Lelé", "Lessa", "Lisboa", "Lobato",
+      "Lourenço", "Lúcio", "Lustosa", "Maciel", "Magalhães", "Maia", "Manso", "Mata", "Meireles",
+      "Mendonça", "Menezes", "Mesquita", "Moreira", "Mourão", "Murta", "Noronha", "Novaes",
+      "Nunes", "Otoni", "Paes", "Paiva", "Paula", "Pena", "Penido", "Pereira", "Pimenta",
+      "Pinheiro", "Pinto", "Pires", "Pontelo", "Praça", "Prado", "Procópio", "Queiroga", "Quintão",
+      "Rabelo", "Ramos", "Rangel", "Rego", "Reis", "Resende", "Ribas", "Ribeiro", "Rocha",
+      "Sacramento", "Salles", "Sampaio", "Sant'Ana", "Santana", "Santiago", "Santos", "São José",
+      "Sena", "Serafim", "Serra", "Silveira", "Simão", "Soares", "Souza", "Teixeira", "Toledo",
+      "Tolentino", "Torres", "Valadares", "Vale", "Valeriano", "Vasconcelos", "Veloso", "Versiani",
+      "Vianna", "Vieira", "Vilhena", "Xavier", "Ximenes", "Zacarias"
+    ]
+  }
 };
 
 // Lista completa de todos os nomes (sem duplicatas)
 export const ALL_NAMES = [
   ...new Set([
     ...BRAZILIAN_NAMES.masculinos,
-    ...BRAZILIAN_NAMES.femininos
+    ...BRAZILIAN_NAMES.femininos,
+    ...BRAZILIAN_NAMES.regionaisMG.masculinos,
+    ...BRAZILIAN_NAMES.regionaisMG.femininas
   ])
 ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 // Lista completa de sobrenomes
-export const ALL_SURNAMES = [...BRAZILIAN_NAMES.sobrenomes].sort((a, b) => 
-  a.localeCompare(b, 'pt-BR')
-);
+export const ALL_SURNAMES = [
+  ...new Set([
+    ...BRAZILIAN_NAMES.sobrenomes,
+    ...BRAZILIAN_NAMES.regionaisMG.sobrenomes
+  ])
+].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 // Função para buscar nomes que começam com o texto digitado
 export function searchNames(query: string, limit = 10): string[] {
