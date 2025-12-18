@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { searchNames, searchSurnames } from '@/data/brazilianNames';
 import { cn } from '@/lib/utils';
+import { correctAccents, suggestCorrection, hasAccents } from '@/utils/accentCorrection';
 
 interface NameAutocompleteProps {
   value: string;
@@ -21,6 +22,7 @@ export function NameAutocomplete({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [accentSuggestion, setAccentSuggestion] = useState<{ original: string; suggestion: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -48,8 +50,13 @@ export function NameAutocomplete({
     if (word.length < 1) {
       setSuggestions([]);
       setShowSuggestions(false);
+      setAccentSuggestion(null);
       return;
     }
+
+    // Verifica se há sugestão de acento para a palavra atual
+    const accentSug = suggestCorrection(word);
+    setAccentSuggestion(accentSug);
 
     // Primeiro nome: busca em nomes próprios
     // Demais palavras: busca em sobrenomes + nomes
@@ -64,7 +71,7 @@ export function NameAutocomplete({
     }
 
     setSuggestions(results);
-    setShowSuggestions(results.length > 0);
+    setShowSuggestions(results.length > 0 || accentSug !== null);
     setSelectedIndex(-1);
   }, [getCurrentWord]);
 
@@ -79,6 +86,7 @@ export function NameAutocomplete({
     onChange(newValue);
     setShowSuggestions(false);
     setSuggestions([]);
+    setAccentSuggestion(null);
     
     // Foca no input e move cursor para o final após seleção
     setTimeout(() => {
@@ -90,6 +98,31 @@ export function NameAutocomplete({
       }
     }, 10);
   }, [value, getCurrentWord, onChange]);
+
+  // Aplica correção de acentos ao nome completo
+  const applyAccentCorrection = useCallback(() => {
+    const { corrected } = correctAccents(value);
+    onChange(corrected);
+    setAccentSuggestion(null);
+  }, [value, onChange]);
+
+  // Auto-correção quando o usuário pressiona espaço
+  const handleChange = useCallback((newValue: string) => {
+    // Detecta se o usuário acabou de adicionar um espaço (terminou uma palavra)
+    const lastChar = newValue.slice(-1);
+    const prevLastChar = value.slice(-1);
+    
+    if (lastChar === ' ' && prevLastChar !== ' ' && newValue.length > value.length) {
+      // Auto-corrige a palavra anterior
+      const { corrected, hadCorrections } = correctAccents(newValue.trimEnd());
+      if (hadCorrections) {
+        onChange(corrected + ' ');
+        return;
+      }
+    }
+    
+    onChange(newValue);
+  }, [value, onChange]);
 
   // Handlers de teclado
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -156,7 +189,7 @@ export function NameAutocomplete({
         ref={inputRef}
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => value.length > 0 && updateSuggestions()}
         placeholder={placeholder}
@@ -167,37 +200,60 @@ export function NameAutocomplete({
         spellCheck={false}
       />
       
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && (suggestions.length > 0 || accentSuggestion) && (
         <div
           ref={suggestionsRef}
           className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto"
         >
-          <div className="p-1">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={suggestion}
-                type="button"
-                className={cn(
-                  "w-full text-left px-3 py-2 rounded-sm text-sm transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  index === selectedIndex && "bg-accent text-accent-foreground"
-                )}
-                onClick={() => selectSuggestion(suggestion)}
-                onMouseEnter={() => setSelectedIndex(index)}
-              >
-                <span className="font-medium">{suggestion}</span>
-                {/* Indicador se é variação acentuada */}
-                {suggestion.normalize("NFD").includes('\u0301') || 
-                 suggestion.normalize("NFD").includes('\u0300') ||
-                 suggestion.normalize("NFD").includes('\u0303') ||
-                 suggestion.normalize("NFD").includes('\u0302') ? (
-                  <span className="ml-2 text-xs text-muted-foreground">(acentuado)</span>
-                ) : null}
-              </button>
-            ))}
-          </div>
+          {/* Sugestão de correção de acento */}
+          {accentSuggestion && (
+            <div className="p-2 border-b border-border bg-amber-50 dark:bg-amber-900/20">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-amber-600 dark:text-amber-400">✨</span>
+                  <span className="text-muted-foreground">Corrigir:</span>
+                  <span className="line-through text-muted-foreground">{accentSuggestion.original}</span>
+                  <span className="text-foreground">→</span>
+                  <span className="font-semibold text-amber-700 dark:text-amber-300">{accentSuggestion.suggestion}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => selectSuggestion(accentSuggestion.suggestion)}
+                  className="px-2 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded transition-colors"
+                >
+                  Aplicar
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {suggestions.length > 0 && (
+            <div className="p-1">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className={cn(
+                    "w-full text-left px-3 py-2 rounded-sm text-sm transition-colors",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    index === selectedIndex && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => selectSuggestion(suggestion)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <span className="font-medium">{suggestion}</span>
+                  {/* Indicador se é variação acentuada */}
+                  {hasAccents(suggestion) && (
+                    <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">(acentuado)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+          
           <div className="border-t border-border px-3 py-1.5 text-xs text-muted-foreground bg-muted/50">
             ↑↓ navegar • Enter/Tab selecionar • Esc fechar
+            {accentSuggestion && <span className="ml-2">• Auto-corrige ao pressionar espaço</span>}
           </div>
         </div>
       )}
