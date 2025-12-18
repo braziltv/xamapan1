@@ -7,6 +7,7 @@ import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { NameAutocomplete } from '@/components/NameAutocomplete';
 import { UserPlus, Trash2, Users, Volume2, VolumeX, CheckCircle, Activity, Stethoscope, AlertTriangle, AlertCircle, Circle, FileText, Pencil, Heart, Bandage, Scan, BedDouble, ArrowRight } from 'lucide-react';
 import { Patient, PatientPriority, PatientStatus } from '@/types/patient';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
@@ -200,11 +201,10 @@ export function PatientRegistration({
         </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Input
-              type="text"
-              placeholder="Nome completo do paciente"
+            <NameAutocomplete
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={setName}
+              placeholder="Nome completo do paciente"
               className="flex-1 text-base"
             />
             <Select value={selectedPriority} onValueChange={(v) => setSelectedPriority(v as PatientPriority)}>
