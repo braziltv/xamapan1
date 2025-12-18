@@ -22,7 +22,7 @@ export interface Patient {
   priority: PatientPriority;
   createdAt: Date;
   calledAt?: Date;
-  calledBy?: 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+  calledBy?: 'cadastro' | 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
   destination?: string;
   observations?: string;
 }
@@ -31,5 +31,5 @@ export interface CallHistory {
   id: string;
   patient: Patient;
   calledAt: Date;
-  calledBy: 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+  calledBy: 'cadastro' | 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
 }

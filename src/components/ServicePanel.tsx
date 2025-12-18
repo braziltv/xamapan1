@@ -42,6 +42,16 @@ const PRIORITY_CONFIG = {
   normal: { label: 'Normal', color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/30', border: 'border-green-500', icon: Circle },
 };
 
+const ORIGIN_CONFIG: Record<string, { label: string; color: string }> = {
+  cadastro: { label: 'Cadastro', color: 'bg-slate-500' },
+  triage: { label: 'Triagem', color: 'bg-blue-500' },
+  doctor: { label: 'Médico', color: 'bg-green-600' },
+  ecg: { label: 'ECG', color: 'bg-cyan-500' },
+  curativos: { label: 'Curativos', color: 'bg-amber-500' },
+  raiox: { label: 'Raio X', color: 'bg-purple-500' },
+  enfermaria: { label: 'Enfermaria', color: 'bg-rose-500' },
+};
+
 interface ServicePanelProps {
   serviceName: string;
   serviceIcon: string;
@@ -274,9 +284,16 @@ export function ServicePanel({
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Encaminhado às {formatBrazilTime(patient.calledAt || patient.createdAt, 'HH:mm')}
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                        {patient.calledBy && ORIGIN_CONFIG[patient.calledBy] && (
+                          <span className={`px-2 py-0.5 text-[10px] font-medium text-white rounded ${ORIGIN_CONFIG[patient.calledBy].color}`}>
+                            Veio: {ORIGIN_CONFIG[patient.calledBy].label}
+                          </span>
+                        )}
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          Encaminhado às {formatBrazilTime(patient.calledAt || patient.createdAt, 'HH:mm')}
+                        </p>
+                      </div>
                       {/* Observações */}
                       {editingObservation?.id === patient.id ? (
                         <div className="mt-2 flex flex-col gap-2">
