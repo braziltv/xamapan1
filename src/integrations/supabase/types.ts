@@ -287,6 +287,7 @@ export type Database = {
         Args: { target_date: string; target_unit: string }
         Returns: undefined
       }
+      cleanup_duplicate_patients: { Args: never; Returns: number }
       compact_old_statistics: {
         Args: { days_to_keep?: number }
         Returns: number
