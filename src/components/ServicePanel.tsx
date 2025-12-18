@@ -64,6 +64,8 @@ interface ServicePanelProps {
   onRecall: (destination?: string) => void;
   onFinishWithoutCall: (id: string) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
+  onForwardToTriage?: (id: string) => void;
+  onSendToTriageQueue?: (id: string) => void;
   onForwardToDoctor?: (id: string, destination: string) => void;
   onSendToDoctorQueue?: (id: string, destination: string) => void;
   onForwardToEcg?: (id: string) => void;
@@ -89,6 +91,8 @@ export function ServicePanel({
   onRecall,
   onFinishWithoutCall,
   onUpdateObservations,
+  onForwardToTriage,
+  onSendToTriageQueue,
   onForwardToDoctor,
   onSendToDoctorQueue,
   onForwardToEcg,
@@ -211,6 +215,12 @@ export function ServicePanel({
                     <DropdownMenuLabel>Encaminhar Paciente</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
+                    {onForwardToTriage && (
+                      <DropdownMenuItem onClick={() => onForwardToTriage(currentCall.id)} className="cursor-pointer">
+                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                        Triagem (com voz)
+                      </DropdownMenuItem>
+                    )}
                     {onForwardToDoctor && (
                       <>
                         <DropdownMenuItem onClick={() => onForwardToDoctor(currentCall.id, 'Consultório 1')} className="cursor-pointer">
@@ -249,6 +259,11 @@ export function ServicePanel({
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
+                    {onSendToTriageQueue && (
+                      <DropdownMenuItem onClick={() => onSendToTriageQueue(currentCall.id)} className="cursor-pointer">
+                        Triagem (interno)
+                      </DropdownMenuItem>
+                    )}
                     {onSendToDoctorQueue && (
                       <>
                         <DropdownMenuItem onClick={() => onSendToDoctorQueue(currentCall.id, 'Consultório 1')} className="cursor-pointer">
