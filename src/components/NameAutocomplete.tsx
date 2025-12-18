@@ -106,23 +106,10 @@ export function NameAutocomplete({
     setAccentSuggestion(null);
   }, [value, onChange]);
 
-  // Auto-correção quando o usuário pressiona espaço
+  // Handler de mudança (sem auto-correção - apenas sugestão)
   const handleChange = useCallback((newValue: string) => {
-    // Detecta se o usuário acabou de adicionar um espaço (terminou uma palavra)
-    const lastChar = newValue.slice(-1);
-    const prevLastChar = value.slice(-1);
-    
-    if (lastChar === ' ' && prevLastChar !== ' ' && newValue.length > value.length) {
-      // Auto-corrige a palavra anterior
-      const { corrected, hadCorrections } = correctAccents(newValue.trimEnd());
-      if (hadCorrections) {
-        onChange(corrected + ' ');
-        return;
-      }
-    }
-    
     onChange(newValue);
-  }, [value, onChange]);
+  }, [onChange]);
 
   // Handlers de teclado
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -253,7 +240,6 @@ export function NameAutocomplete({
           
           <div className="border-t border-border px-3 py-1.5 text-xs text-muted-foreground bg-muted/50">
             ↑↓ navegar • Enter/Tab selecionar • Esc fechar
-            {accentSuggestion && <span className="ml-2">• Auto-corrige ao pressionar espaço</span>}
           </div>
         </div>
       )}
