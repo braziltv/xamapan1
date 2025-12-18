@@ -485,10 +485,10 @@ export function useCallPanel() {
         }
       });
 
-    // Periodic refresh every 2 seconds as backup
+    // Periodic refresh every 5 seconds for better real-time sync across modules
     const refreshInterval = setInterval(() => {
       refreshPatientsFromDB();
-    }, 30000);
+    }, 5000);
 
     return () => {
       console.log('🔌 Cleaning up patient sync subscription');
@@ -571,11 +571,24 @@ export function useCallPanel() {
     return newPatient;
   }, [unitName]);
 
-  const updatePatientPriority = useCallback((patientId: string, priority: 'normal' | 'priority' | 'emergency') => {
+  const updatePatientPriority = useCallback(async (patientId: string, priority: 'normal' | 'priority' | 'emergency') => {
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, priority } : p
     ));
-  }, []);
+    
+    // Sync to database for real-time updates across all modules
+    if (unitName) {
+      const patient = patientsRef.current.find(p => p.id === patientId);
+      if (patient) {
+        await supabase
+          .from('patient_calls')
+          .update({ priority })
+          .eq('patient_name', patient.name)
+          .eq('unit_name', unitName)
+          .in('status', ['waiting', 'active']);
+      }
+    }
+  }, [unitName]);
 
   const updatePatientObservations = useCallback(async (patientId: string, observations: string) => {
     setPatients(prev => prev.map(p => 
@@ -770,26 +783,55 @@ export function useCallPanel() {
   }, [createCall, triggerCallEvent]);
 
   // Send to triage queue WITHOUT TV announcement (registration uses this)
-  const sendToTriageQueue = useCallback((patientId: string) => {
+  const sendToTriageQueue = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting' as const } : p
+      p.id === patientId ? { ...p, status: 'waiting' as const, calledBy: 'cadastro' as const } : p
     ));
-  }, []);
+    
+    // Sync to database for real-time updates across all modules
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ 
+          status: 'waiting', 
+          call_type: 'triage',
+        })
+        .eq('patient_name', patient.name)
+        .eq('unit_name', unitName)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [unitName]);
 
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
-  const sendToDoctorQueue = useCallback((patientId: string, destination?: string) => {
+  const sendToDoctorQueue = useCallback(async (patientId: string, destination?: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination } : p
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' } : p
     ));
     // Clear current triage call if this patient was being triaged
     if (currentTriageCall?.id === patientId) {
       setCurrentTriageCall(null);
       completeCall('triage', 'completed');
     }
-  }, [currentTriageCall, completeCall]);
+    
+    // Sync to database for real-time updates across all modules
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ 
+          status: 'waiting', 
+          call_type: 'doctor',
+          destination: destination || null,
+        })
+        .eq('patient_name', patient.name)
+        .eq('unit_name', unitName)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentTriageCall, completeCall, unitName]);
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
-  const forwardToDoctor = useCallback((patientId: string, destination?: string) => {
+  const forwardToDoctor = useCallback(async (patientId: string, destination?: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
     if (!patient) return;
 
@@ -799,7 +841,7 @@ export function useCallPanel() {
 
     // Update patient in list
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination } : p
+      p.id === patientId ? { ...p, status: 'waiting-doctor' as const, calledAt: new Date(), destination, calledBy: 'doctor' } : p
     ));
   }, [createCall, triggerCallEvent]);
 
