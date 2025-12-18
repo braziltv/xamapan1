@@ -472,7 +472,7 @@ export function useCallPanel() {
         }
       });
 
-    // Periodic refresh every 30 seconds as backup
+    // Periodic refresh every 2 seconds as backup
     const refreshInterval = setInterval(() => {
       refreshPatientsFromDB();
     }, 30000);
