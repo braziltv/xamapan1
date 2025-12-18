@@ -3,6 +3,7 @@ import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { usePatientAddedSound } from '@/hooks/usePatientAddedSound';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -96,6 +97,7 @@ export function PatientRegistration({
   const [selectedPriority, setSelectedPriority] = useState<PatientPriority>('normal');
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string } | null>(null);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -113,14 +115,20 @@ export function PatientRegistration({
   ];
   const [currentTip] = useState(() => ACCENT_TIPS[Math.floor(Math.random() * ACCENT_TIPS.length)]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onAddPatient(name, selectedPriority);
-      setName('');
-      setSelectedPriority('normal');
-      playAddedSound();
-      toast.success('Paciente cadastrado com sucesso!');
+      setIsLoading(true);
+      try {
+        await new Promise(resolve => setTimeout(resolve, 300)); // Brief visual feedback
+        onAddPatient(name, selectedPriority);
+        setName('');
+        setSelectedPriority('normal');
+        playAddedSound();
+        toast.success('Paciente cadastrado com sucesso!');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -529,6 +537,9 @@ export function PatientRegistration({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Loading Overlay */}
+      <LoadingOverlay show={isLoading} message="Processando..." />
     </div>
   );
 }
