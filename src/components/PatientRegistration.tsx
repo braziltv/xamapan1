@@ -50,7 +50,7 @@ import {
 
 interface PatientRegistrationProps {
   patients: Patient[];
-  onAddPatient: (name: string, priority?: PatientPriority) => void;
+  onAddPatient: (name: string, priority?: PatientPriority) => Promise<{ isDuplicate: boolean }>;
   onRemovePatient: (id: string) => void;
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
@@ -171,11 +171,19 @@ export function PatientRegistration({
       setIsLoading(true);
       try {
         await new Promise(resolve => setTimeout(resolve, 300));
-        onAddPatient(name, selectedPriority);
-        setName('');
-        setSelectedPriority('normal');
-        playAddedSound();
-        toast.success('Paciente cadastrado com sucesso!');
+        const result = await onAddPatient(name, selectedPriority);
+        
+        if (result.isDuplicate) {
+          toast.warning(`Paciente "${name}" já está cadastrado na lista!`, {
+            description: 'Verifique a lista de pacientes aguardando.',
+            duration: 5000,
+          });
+        } else {
+          setName('');
+          setSelectedPriority('normal');
+          playAddedSound();
+          toast.success('Paciente cadastrado com sucesso!');
+        }
       } finally {
         setIsLoading(false);
       }

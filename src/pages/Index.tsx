@@ -149,10 +149,13 @@ const Index = () => {
   }, [isLoggedIn, preCacheAllDestinationPhrases]);
 
   // Wrapper para addPatient que também pré-cacheia o nome
-  const handleAddPatient = async (name: string, priority?: 'normal' | 'priority' | 'emergency') => {
-    addPatient(name, priority);
+  const handleAddPatient = async (name: string, priority?: 'normal' | 'priority' | 'emergency'): Promise<{ isDuplicate: boolean }> => {
+    const result = await addPatient(name, priority);
     // Pré-cachear o nome em background (não bloqueia)
-    preCachePatientName(name);
+    if (!result.isDuplicate) {
+      preCachePatientName(name);
+    }
+    return { isDuplicate: result.isDuplicate };
   };
 
   const handleLogout = useCallback(() => {

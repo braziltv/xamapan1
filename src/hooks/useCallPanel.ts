@@ -545,7 +545,7 @@ export function useCallPanel() {
     triggerCallEvent({ name: patientName }, 'triage', destination);
   }, [createCall, triggerCallEvent]);
 
-  const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal') => {
+  const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal'): Promise<{ patient: Patient; isDuplicate: boolean }> => {
     const trimmedName = name.trim();
     
     // Check if patient already exists (not attended)
@@ -555,7 +555,7 @@ export function useCallPanel() {
     
     if (existingPatient) {
       console.log('⚠️ Patient already exists, skipping duplicate:', trimmedName);
-      return existingPatient;
+      return { patient: existingPatient, isDuplicate: true };
     }
     
     const newPatient: Patient = {
@@ -597,7 +597,7 @@ export function useCallPanel() {
       }
     }
     
-    return newPatient;
+    return { patient: newPatient, isDuplicate: false };
   }, [unitName]);
 
   const updatePatientPriority = useCallback(async (patientId: string, priority: 'normal' | 'priority' | 'emergency') => {
