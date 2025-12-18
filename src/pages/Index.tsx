@@ -367,6 +367,7 @@ const Index = () => {
               serviceName="Sala de Eletrocardiograma"
               serviceIcon="💓"
               serviceColor="blue"
+              serviceKey="ecg"
               waitingPatients={waitingForEcg}
               currentCall={currentEcgCall}
               onCallPatient={callPatientToEcg}
@@ -376,6 +377,14 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
+              onSendToEcgQueue={sendToEcgQueue}
+              onSendToCurativosQueue={sendToCurativosQueue}
+              onSendToRaioxQueue={sendToRaioxQueue}
+              onSendToEnfermariaQueue={sendToEnfermariaQueue}
               soundKey="ecg"
             />
           </main>
@@ -389,6 +398,7 @@ const Index = () => {
               serviceName="Sala de Curativos"
               serviceIcon="🩹"
               serviceColor="amber"
+              serviceKey="curativos"
               waitingPatients={waitingForCurativos}
               currentCall={currentCurativosCall}
               onCallPatient={callPatientToCurativos}
@@ -398,6 +408,14 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
+              onSendToEcgQueue={sendToEcgQueue}
+              onSendToCurativosQueue={sendToCurativosQueue}
+              onSendToRaioxQueue={sendToRaioxQueue}
+              onSendToEnfermariaQueue={sendToEnfermariaQueue}
               soundKey="curativos"
             />
           </main>
@@ -411,6 +429,7 @@ const Index = () => {
               serviceName="Sala de Raio X"
               serviceIcon="📡"
               serviceColor="purple"
+              serviceKey="raiox"
               waitingPatients={waitingForRaiox}
               currentCall={currentRaioxCall}
               onCallPatient={callPatientToRaiox}
@@ -420,6 +439,14 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
+              onSendToEcgQueue={sendToEcgQueue}
+              onSendToCurativosQueue={sendToCurativosQueue}
+              onSendToRaioxQueue={sendToRaioxQueue}
+              onSendToEnfermariaQueue={sendToEnfermariaQueue}
               soundKey="raiox"
             />
           </main>
@@ -433,6 +460,7 @@ const Index = () => {
               serviceName="Enfermaria"
               serviceIcon="🛏️"
               serviceColor="rose"
+              serviceKey="enfermaria"
               waitingPatients={waitingForEnfermaria}
               currentCall={currentEnfermariaCall}
               onCallPatient={callPatientToEnfermaria}
@@ -442,6 +470,14 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
               onForwardToDoctor={forwardToDoctor}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
+              onSendToEcgQueue={sendToEcgQueue}
+              onSendToCurativosQueue={sendToCurativosQueue}
+              onSendToRaioxQueue={sendToRaioxQueue}
+              onSendToEnfermariaQueue={sendToEnfermariaQueue}
               soundKey="enfermaria"
             />
           </main>
