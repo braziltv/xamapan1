@@ -232,13 +232,9 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Reproduzir anúncio completo de hora:
+   * Reproduzir anúncio de hora:
    * 1. Som de notificação
    * 2. Anúncio: "Olá, boa noite. Hora certa, são XX horas e X minutos."
-   * 3. Pausa
-   * 4. Voz masculina grave: "Repita"
-   * 5. Breve pausa
-   * 6. Repetição do anúncio (SEM som de notificação)
    */
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
@@ -247,11 +243,8 @@ export const useHourAudio = () => {
       
       console.log(`[useHourAudio] Iniciando anúncio de hora via Google Cloud TTS: "${timeText}"`);
 
-      // Pré-gerar os áudios em paralelo para melhor performance
-      const [timeAudioBuffer, repitaAudioBuffer] = await Promise.all([
-        generateTTSAudio(timeText, 'female'),
-        generateTTSAudio('Repita.', 'male'),
-      ]);
+      // Gerar áudio da hora
+      const timeAudioBuffer = await generateTTSAudio(timeText, 'female');
 
       // 1. Som de notificação
       console.log('[useHourAudio] Passo 1: Som de notificação');
@@ -263,22 +256,8 @@ export const useHourAudio = () => {
       // 2. Anúncio da hora (voz feminina)
       console.log('[useHourAudio] Passo 2: Anúncio da hora');
       await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
-      
-      // 3. Pausa antes do "Repita"
-      await wait(800);
 
-      // 4. "Repita" (voz masculina)
-      console.log('[useHourAudio] Passo 3: Repita (voz masculina)');
-      await playAudioBuffer(repitaAudioBuffer, timeAnnouncementVolume);
-      
-      // 5. Breve pausa antes da repetição
-      await wait(400);
-
-      // 6. Repetição do anúncio (voz feminina) - SEM som de notificação
-      console.log('[useHourAudio] Passo 4: Repetição do anúncio');
-      await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
-
-      console.log('[useHourAudio] Anúncio completo finalizado via Google Cloud TTS');
+      console.log('[useHourAudio] Anúncio finalizado via Google Cloud TTS');
       return true;
     } catch (error) {
       console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
