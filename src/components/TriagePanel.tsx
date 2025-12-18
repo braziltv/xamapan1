@@ -230,10 +230,18 @@ export function TriagePanel({
                       Serviços
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-card border border-border z-50">
+                  <DropdownMenuContent className="bg-card border border-border z-50 max-h-[400px] overflow-y-auto">
                     <DropdownMenuLabel>Encaminhar para Serviço</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onDirectPatient(currentCall.name, 'Consultório 1')} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Consultório 1 (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDirectPatient(currentCall.name, 'Consultório 2')} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Consultório 2 (com voz)
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onForwardToEcg(currentCall.id)} className="cursor-pointer">
                       <Volume2 className="w-4 h-4 mr-2 text-green-600" />
                       ECG (com voz)
@@ -252,6 +260,12 @@ export function TriagePanel({
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onSendToDoctorQueue(currentCall.id, 'Consultório 1')} className="cursor-pointer">
+                      Consultório 1 (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToDoctorQueue(currentCall.id, 'Consultório 2')} className="cursor-pointer">
+                      Consultório 2 (interno)
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onSendToEcgQueue(currentCall.id)} className="cursor-pointer">
                       ECG (interno)
                     </DropdownMenuItem>
