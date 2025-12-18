@@ -961,7 +961,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   );
 
   const speakName = useCallback(
-    async (name: string, caller: 'triage' | 'doctor', destination?: string) => {
+    async (
+      name: string,
+      caller: 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria',
+      destination?: string
+    ) => {
       const now = Date.now();
       console.log('speakName called with:', { name, caller, destination, timestamp: now });
 
@@ -981,9 +985,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       isSpeakingRef.current = true;
 
       // Start visual alert; it will auto-stop after 10s in the effect below
-      setAnnouncingType(caller);
+      // (We keep the UI as triage vs non-triage for now)
+      setAnnouncingType(caller === 'triage' ? 'triage' : 'doctor');
 
-      const location = destination || (caller === 'triage' ? 'Triagem' : 'Consultório Médico');
+      const defaultLocationByCaller: Record<typeof caller, string> = {
+        triage: 'Triagem',
+        doctor: 'Consultório Médico',
+        ecg: 'Sala de Eletrocardiograma',
+        curativos: 'Sala de Curativos',
+        raiox: 'Sala do Raio X',
+        enfermaria: 'Enfermaria',
+      };
+
+      const location = destination || defaultLocationByCaller[caller];
       const destinationPhrase = getDestinationPhrase(location);
       console.log('TTS - Name:', name, 'Destination phrase:', destinationPhrase);
 
