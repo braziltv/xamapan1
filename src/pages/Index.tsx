@@ -293,6 +293,10 @@ const Index = () => {
               onFinishWithoutCall={finishWithoutCall}
               onForwardToTriage={forwardToTriage}
               onForwardToDoctor={forwardToDoctor}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
               onSendToTriageQueue={sendToTriageQueue}
               onSendToDoctorQueue={sendToDoctorQueue}
               onSendToEcgQueue={sendToEcgQueue}
