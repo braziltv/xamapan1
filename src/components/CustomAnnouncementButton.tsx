@@ -67,17 +67,17 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
         <Button
           variant="outline"
           size="sm"
-          className={`gap-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/20 border-amber-300 ${className}`}
+          className={`gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-300 ${className}`}
         >
           <Megaphone className="w-4 h-4" />
-          Chamada Avulsa
+          Áudio Avulso Na TV
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-amber-500" />
-            Chamada Avulsa na TV
+            <Megaphone className="w-5 h-5 text-red-500" />
+            Áudio Avulso Na TV
           </DialogTitle>
           <DialogDescription>
             Digite exatamente o que será anunciado na TV por voz. O texto será falado exatamente como digitado.
@@ -102,7 +102,7 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
           <Button
             onClick={handleSubmit}
             disabled={!text.trim() || isSubmitting}
-            className="bg-amber-600 hover:bg-amber-700"
+            className="bg-red-600 hover:bg-red-700"
           >
             {isSubmitting ? (
               <>Enviando...</>
