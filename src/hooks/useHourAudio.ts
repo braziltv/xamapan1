@@ -1,20 +1,27 @@
 /**
  * Hook para reprodução de áudios de hora via ElevenLabs TTS
- * Gera frase completa do horário em português brasileiro natural
+ * Gera anúncio completo com som de notificação, repetição e voz masculina
  */
+
+// Voice IDs do ElevenLabs
+const VOICE_FEMALE = 'Xb7hH8MSUJpSbSDYk0k2'; // Alice - voz feminina padrão
+const VOICE_MALE_DEEP = 'onwK4e9ZLuTAKqWW03F9'; // Brian - voz masculina grave
+
 export const useHourAudio = () => {
   
+  /**
+   * Gerar saudação baseada no horário
+   */
+  const getGreeting = (hour: number): string => {
+    if (hour >= 6 && hour < 12) return 'bom dia';
+    if (hour >= 12 && hour < 18) return 'boa tarde';
+    return 'boa noite';
+  };
+
   /**
    * Gerar texto da hora em português brasileiro natural
    */
   const getHourText = (hour: number, minute: number): string => {
-    // Determinar saudação baseada no horário
-    const getGreeting = (h: number): string => {
-      if (h >= 6 && h < 12) return 'Bom dia!';
-      if (h >= 12 && h < 18) return 'Boa tarde!';
-      return 'Boa noite!';
-    };
-
     // Converter hora para texto
     const hourTexts: Record<number, string> = {
       0: 'meia-noite',
@@ -119,75 +126,151 @@ export const useHourAudio = () => {
     const hourText = hourTexts[hour] || `${hour} horas`;
     const minuteText = getMinuteText(minute);
 
-    // Construir frase completa com saudação
+    // Construir frase: "Olá, boa noite. Hora certa, são XX horas e X minuto(s)."
     if (minute === 0) {
-      // Hora cheia - não adiciona "minutos"
-      return `${greeting} São ${hourText}.`;
+      return `Olá, ${greeting}. Hora certa, são ${hourText}.`;
     } else if (minute === 30) {
-      // Meia hora - usa "e meia"
-      return `${greeting} São ${hourText} ${minuteText}.`;
+      return `Olá, ${greeting}. Hora certa, são ${hourText} ${minuteText}.`;
     } else if (minute === 1) {
-      // Um minuto - singular
-      return `${greeting} São ${hourText} ${minuteText} minuto.`;
+      return `Olá, ${greeting}. Hora certa, são ${hourText} ${minuteText} minuto.`;
     } else {
-      // Outros minutos - adiciona "minutos" no final (plural)
-      return `${greeting} São ${hourText} ${minuteText} minutos.`;
+      return `Olá, ${greeting}. Hora certa, são ${hourText} ${minuteText} minutos.`;
     }
   };
 
   /**
-   * Reproduzir hora via ElevenLabs TTS (frase completa)
+   * Reproduzir áudio via ElevenLabs TTS com voz específica
+   */
+  const generateTTSAudio = async (text: string, voiceId: string): Promise<ArrayBuffer> => {
+    console.log(`[useHourAudio] Gerando TTS para: "${text}" com voz ${voiceId}`);
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ 
+          text, 
+          skipCache: true,
+          voiceId,
+          unitName: 'TimeAnnouncement'
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`TTS error: ${response.status}`);
+    }
+
+    return response.arrayBuffer();
+  };
+
+  /**
+   * Reproduzir buffer de áudio
+   */
+  const playAudioBuffer = (buffer: ArrayBuffer, volume: number): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const blob = new Blob([buffer], { type: 'audio/mpeg' });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.volume = volume;
+      
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Audio playback failed'));
+      };
+      audio.play().catch(reject);
+    });
+  };
+
+  /**
+   * Reproduzir som de notificação
+   */
+  const playNotificationSound = (volume: number): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio('/sounds/notification.mp3');
+      audio.volume = volume;
+      
+      audio.onended = () => resolve();
+      audio.onerror = () => reject(new Error('Notification sound failed'));
+      audio.play().catch(reject);
+    });
+  };
+
+  /**
+   * Aguardar um intervalo em ms
+   */
+  const wait = (ms: number): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+  /**
+   * Reproduzir anúncio completo de hora:
+   * 1. Som de notificação
+   * 2. Anúncio: "Olá, boa noite. Hora certa, são XX horas e X minutos."
+   * 3. Pausa curta
+   * 4. Voz masculina grave: "Repita"
+   * 5. Pausa curta
+   * 6. Som de notificação
+   * 7. Repetição do anúncio
    */
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
-      const text = getHourText(hour, minute);
+      const timeText = getHourText(hour, minute);
       
-      console.log(`[useHourAudio] Gerando TTS para: "${text}"`);
+      console.log(`[useHourAudio] Iniciando anúncio de hora: "${timeText}"`);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ 
-            text, 
-            skipCache: true, // Sempre gerar novo áudio
-            unitName: 'TimeAnnouncement'
-          }),
-        }
-      );
+      // Pré-gerar os áudios em paralelo para melhor performance
+      const [timeAudioBuffer, repitaAudioBuffer] = await Promise.all([
+        generateTTSAudio(timeText, VOICE_FEMALE),
+        generateTTSAudio('Repita.', VOICE_MALE_DEEP),
+      ]);
 
-      if (!response.ok) {
-        console.error('[useHourAudio] Erro na resposta TTS:', response.status);
-        return false;
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
+      // 1. Som de notificação
+      console.log('[useHourAudio] Passo 1: Som de notificação');
+      await playNotificationSound(timeAnnouncementVolume);
       
-      const audio = new Audio(audioUrl);
-      audio.volume = timeAnnouncementVolume;
-      
-      await new Promise<void>((resolve, reject) => {
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          resolve();
-        };
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          reject(new Error('Audio playback failed'));
-        };
-        audio.play().catch(reject);
-      });
+      // Pequena pausa após notificação
+      await wait(300);
 
+      // 2. Anúncio da hora (voz feminina)
+      console.log('[useHourAudio] Passo 2: Anúncio da hora');
+      await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
+      
+      // 3. Pausa antes do "Repita"
+      await wait(800);
+
+      // 4. "Repita" (voz masculina grave)
+      console.log('[useHourAudio] Passo 3: Repita (voz masculina)');
+      await playAudioBuffer(repitaAudioBuffer, timeAnnouncementVolume);
+      
+      // 5. Pausa antes da repetição
+      await wait(600);
+
+      // 6. Som de notificação novamente
+      console.log('[useHourAudio] Passo 4: Som de notificação (2)');
+      await playNotificationSound(timeAnnouncementVolume);
+      
+      // Pequena pausa após notificação
+      await wait(300);
+
+      // 7. Repetição do anúncio (voz feminina)
+      console.log('[useHourAudio] Passo 5: Repetição do anúncio');
+      await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
+
+      console.log('[useHourAudio] Anúncio completo finalizado');
       return true;
     } catch (error) {
-      console.error('[useHourAudio] Erro ao reproduzir hora:', error);
+      console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
       return false;
     }
   };
@@ -209,12 +292,13 @@ export const useHourAudio = () => {
       hasMinutosWord: true,
       missingHours: [],
       missingMinutes: [],
-      usingApi: true, // Indica que está usando API
+      usingApi: true,
     };
   };
 
   return {
     getHourText,
+    getGreeting,
     playHourAudio,
     checkAudiosExist,
   };
