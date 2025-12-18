@@ -9,64 +9,6 @@ const corsHeaders = {
 // Maximum size for permanent cache in bytes (200MB)
 const MAX_PERMANENT_CACHE_SIZE = 200 * 1024 * 1024;
 
-// ========== CONFIGURAÇÕES GLOBAIS DE VOZ OTIMIZADAS PARA PT-BR ==========
-// Configurações refinadas para máxima naturalidade em português brasileiro
-// Otimizado para anúncios de nomes de pacientes em salas de espera
-const OPTIMIZED_VOICE_SETTINGS = {
-  // Stability: 0.30 para entonação bem natural e expressiva
-  // Permite variações naturais na fala como uma pessoa real
-  stability: 0.30,
-  
-  // Similarity Boost: 0.75 para voz clara mas com naturalidade
-  // Evita som muito "robótico" ou artificial
-  similarity_boost: 0.75,
-  
-  // Style: 0.50 para tom acolhedor e humano
-  // Mais expressivo, ideal para chamar pessoas pelo nome
-  style: 0.50,
-  
-  // Speaker Boost: Essencial para clareza em ambientes ruidosos
-  use_speaker_boost: true,
-  
-  // Speed: 0.88 para dicção mais pausada e clara
-  // Permite articulação natural de nomes brasileiros
-  speed: 0.88,
-};
-
-// ========== PRÉ-PROCESSAMENTO GLOBAL DE TEXTO PARA PT-BR ==========
-function preprocessTextForNaturalSpeech(inputText: string): string {
-  let processed = inputText.trim();
-  
-  // Normalizar espaços múltiplos
-  processed = processed.replace(/\s+/g, ' ');
-  
-  // Adicionar pausas naturais após vírgulas
-  processed = processed.replace(/,\s*/g, ', ');
-  
-  // Melhorar pronúncia de abreviações comuns em PT-BR
-  processed = processed.replace(/\bDr\.\s*/gi, 'Doutor ');
-  processed = processed.replace(/\bDra\.\s*/gi, 'Doutora ');
-  processed = processed.replace(/\bSr\.\s*/gi, 'Senhor ');
-  processed = processed.replace(/\bSra\.\s*/gi, 'Senhora ');
-  processed = processed.replace(/\bProf\.\s*/gi, 'Professor ');
-  processed = processed.replace(/\bProfa\.\s*/gi, 'Professora ');
-  
-  // Pausas naturais antes de destinos importantes
-  processed = processed.replace(/dirija-se/gi, '... dirija-se');
-  processed = processed.replace(/compareça/gi, '... compareça');
-  processed = processed.replace(/encaminhe-se/gi, '... encaminhe-se');
-  
-  // Adicionar micro-pausa entre nome e instrução para clareza
-  processed = processed.replace(/\.\s*Por favor/g, '... Por favor, ...');
-  processed = processed.replace(/\.\s*Favor/g, '... Favor, ...');
-  
-  // Melhorar pronúncia de nomes com acentos comuns
-  // Garantir que acentos sejam preservados para pronúncia correta
-  processed = processed.normalize('NFC');
-  
-  return processed;
-}
-
 // Split a full name into individual parts (first name, last name, third name, etc.)
 // All parts are normalized to lowercase to avoid duplicate cache entries
 // Handles compound names: "da", "de", "do", "dos", "das" are joined with the following word
@@ -379,10 +321,8 @@ async function getOrGenerateAudio(
     }
   }
   
-  // Generate new audio with preprocessing
-  const processedText = preprocessTextForNaturalSpeech(text);
-  console.log(`Generating audio for: "${text}" -> "${processedText}"`);
-  
+  // Generate new audio
+  console.log(`Generating audio for: "${text}"`);
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
     {
@@ -392,10 +332,16 @@ async function getOrGenerateAudio(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text: processedText,
+        text,
         model_id: "eleven_multilingual_v2",
         output_format: "mp3_44100_128",
-        voice_settings: OPTIMIZED_VOICE_SETTINGS,
+        voice_settings: {
+          stability: 0.55,
+          similarity_boost: 0.78,
+          style: 0.15,
+          use_speaker_boost: true,
+          speed: 0.92,
+        },
       }),
     }
   );
@@ -537,24 +483,25 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache, speed } = await req.json();
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache } = await req.json();
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
       : null;
 
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    
-    // Matilda voice - voz feminina calorosa e natural para português brasileiro
-    const selectedVoiceId = voiceId || "XrExE9yKIg1WjnnlVkGX"; // Matilda - voz feminina unificada
-    
-    // Configurações de voz com suporte a velocidade customizada
-    const voiceSettings = speed 
-      ? { ...OPTIMIZED_VOICE_SETTINGS, speed: speed }
-      : OPTIMIZED_VOICE_SETTINGS;
-    
-    // NOTA: Configurações de voz (OPTIMIZED_VOICE_SETTINGS) e função 
-    // preprocessTextForNaturalSpeech definidas globalmente no início do arquivo
+    // Alice voice - voz feminina natural otimizada para português brasileiro
+    // Configurações ajustadas para máxima naturalidade com sotaque BR e acentuação correta
+    const selectedVoiceId = "Xb7hH8MSUJpSbSDYk0k2"; // Alice - sempre feminina
+
+    // Configurações de voz otimizadas para português brasileiro natural
+    const brazilianVoiceSettings = {
+      stability: 0.55,           // Equilíbrio entre consistência e naturalidade
+      similarity_boost: 0.78,    // Mantém clareza da voz
+      style: 0.15,               // Leve expressividade natural
+      use_speaker_boost: true,   // Melhora clareza e pronúncia
+      speed: 0.92,               // Levemente mais lento para melhor dicção
+    };
 
     // Handle concatenation mode
     // IMPORTANT: to avoid MP3 concatenation playback issues on TVs/browsers,
@@ -574,10 +521,6 @@ serve(async (req) => {
         throw new Error('Concatenation text is empty');
       }
 
-      // Aplicar pré-processamento para naturalidade
-      const processedText = preprocessTextForNaturalSpeech(combinedText);
-      console.log(`Texto processado: "${processedText}"`);
-
       const response = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
         {
@@ -587,10 +530,10 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: processedText,
+            text: combinedText,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: voiceSettings,
+            voice_settings: brazilianVoiceSettings,
           }),
         }
       );
@@ -721,10 +664,6 @@ serve(async (req) => {
         throw new Error("ELEVENLABS_API_KEY not configured");
       }
 
-      // Aplicar pré-processamento para naturalidade
-      const processedText = preprocessTextForNaturalSpeech(text);
-      console.log(`Direct API - Texto processado: "${processedText}"`);
-
       const response = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
         {
@@ -734,10 +673,10 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: processedText,
+            text,
             model_id: "eleven_multilingual_v2",
             output_format: "mp3_44100_128",
-            voice_settings: voiceSettings,
+            voice_settings: brazilianVoiceSettings,
           }),
         }
       );
@@ -832,10 +771,6 @@ serve(async (req) => {
 
     console.log("Using ELEVENLABS_API_KEY");
 
-    // Aplicar pré-processamento para naturalidade
-    const processedText = preprocessTextForNaturalSpeech(text);
-    console.log(`Cache MISS - Texto processado: "${processedText}"`);
-
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
       {
@@ -845,11 +780,15 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: processedText,
+          text,
           model_id: "eleven_multilingual_v2",
           output_format: "mp3_44100_128",
-          // USAR CONFIGURAÇÕES OTIMIZADAS (com speed customizado se fornecido)
-          voice_settings: voiceSettings,
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.3,
+            use_speaker_boost: true,
+          },
         }),
       }
     );

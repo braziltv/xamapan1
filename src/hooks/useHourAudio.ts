@@ -46,6 +46,7 @@ export const useHourAudio = () => {
     // Converter minuto para texto
     const getMinuteText = (m: number): string => {
       if (m === 0) return '';
+      if (m === 30) return 'e meia';
       if (m === 15) return 'e quinze';
       if (m === 45) return 'e quarenta e cinco';
       
@@ -122,11 +123,14 @@ export const useHourAudio = () => {
     if (minute === 0) {
       // Hora cheia - não adiciona "minutos"
       return `${greeting} São ${hourText}.`;
+    } else if (minute === 30) {
+      // Meia hora - usa "e meia"
+      return `${greeting} São ${hourText} ${minuteText}.`;
     } else if (minute === 1) {
       // Um minuto - singular
       return `${greeting} São ${hourText} ${minuteText} minuto.`;
     } else {
-      // Outros minutos (incluindo 30) - adiciona "minutos" no final (plural)
+      // Outros minutos - adiciona "minutos" no final (plural)
       return `${greeting} São ${hourText} ${minuteText} minutos.`;
     }
   };
@@ -139,11 +143,8 @@ export const useHourAudio = () => {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
       const text = getHourText(hour, minute);
       
-      console.log(`[useHourAudio] Gerando TTS para: "${text}" (volume: ${timeAnnouncementVolume})`);
+      console.log(`[useHourAudio] Gerando TTS para: "${text}"`);
 
-      // Matilda voice - voz feminina calorosa otimizada para português brasileiro
-      const MATILDA_VOICE_ID = 'XrExE9yKIg1WjnnlVkGX';
-      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -155,60 +156,33 @@ export const useHourAudio = () => {
           },
           body: JSON.stringify({ 
             text, 
-            voiceId: MATILDA_VOICE_ID,
-            skipCache: true,
-            unitName: 'TimeAnnouncement',
-            speed: 0.85
+            skipCache: true, // Sempre gerar novo áudio
+            unitName: 'TimeAnnouncement'
           }),
         }
       );
 
-      console.log(`[useHourAudio] Resposta TTS: status=${response.status}, contentType=${response.headers.get('content-type')}`);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[useHourAudio] Erro na resposta TTS:', response.status, errorText);
-        return false;
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType?.includes('audio')) {
-        console.error('[useHourAudio] Resposta não é áudio:', contentType);
+        console.error('[useHourAudio] Erro na resposta TTS:', response.status);
         return false;
       }
 
       const audioBlob = await response.blob();
-      console.log(`[useHourAudio] Audio blob recebido: size=${audioBlob.size}, type=${audioBlob.type}`);
-      
-      if (audioBlob.size < 1000) {
-        console.error('[useHourAudio] Audio blob muito pequeno, provavelmente inválido');
-        return false;
-      }
-
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
       audio.volume = timeAnnouncementVolume;
       
-      console.log('[useHourAudio] Iniciando reprodução...');
-      
       await new Promise<void>((resolve, reject) => {
         audio.onended = () => {
-          console.log('[useHourAudio] Reprodução concluída com sucesso');
           URL.revokeObjectURL(audioUrl);
           resolve();
         };
-        audio.onerror = (e) => {
-          console.error('[useHourAudio] Erro durante reprodução:', e);
+        audio.onerror = () => {
           URL.revokeObjectURL(audioUrl);
           reject(new Error('Audio playback failed'));
         };
-        audio.play().then(() => {
-          console.log('[useHourAudio] play() iniciado');
-        }).catch((err) => {
-          console.error('[useHourAudio] Erro ao chamar play():', err);
-          reject(err);
-        });
+        audio.play().catch(reject);
       });
 
       return true;

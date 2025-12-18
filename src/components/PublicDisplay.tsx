@@ -41,7 +41,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastTimeAnnouncementRef = useRef<number>(0); // timestamp da última chamada de hora
   const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
-  const initialAnnouncementScheduledRef = useRef<boolean>(false); // controla se já agendou primeiro anúncio
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
 
@@ -799,55 +798,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [currentTime, playHourAnnouncement]);
 
-  // Agendar primeiro anúncio de hora em 2 minutos após o áudio ser desbloqueado
-  useEffect(() => {
-    console.log('[HourAnnouncement] Effect check:', { audioUnlocked, isSynced, alreadyScheduled: initialAnnouncementScheduledRef.current });
-    
-    if (!audioUnlocked || !isSynced || initialAnnouncementScheduledRef.current) {
-      console.log('[HourAnnouncement] Skipping - conditions not met');
-      return;
-    }
-
-    const currentHour = currentTime?.getHours();
-    const isQuietHours = currentHour !== undefined && (currentHour >= 22 || currentHour < 6);
-    
-    if (isQuietHours) {
-      console.log('[HourAnnouncement] Initial hour announcement skipped - quiet hours');
-      return;
-    }
-
-    initialAnnouncementScheduledRef.current = true;
-    
-    const delayMs = 30 * 1000; // 30 segundos para teste (era 2 minutos)
-    console.log('[HourAnnouncement] Scheduling initial hour announcement in 30 seconds...');
-    
-    const timeout = setTimeout(async () => {
-      if (!currentTime) {
-        console.log('[HourAnnouncement] currentTime is null, aborting');
-        return;
-      }
-      
-      const hour = currentTime.getHours();
-      const minute = currentTime.getMinutes();
-      
-      // Verificar se não está em horário de silêncio no momento do anúncio
-      const isQuietNow = hour >= 22 || hour < 6;
-      if (isQuietNow) {
-        console.log('[HourAnnouncement] Initial announcement cancelled - now in quiet hours');
-        return;
-      }
-      
-      console.log(`[HourAnnouncement] Playing initial hour announcement: ${hour}:${minute.toString().padStart(2, '0')}`);
-      console.log(`[HourAnnouncement] announcingType=${announcingType}, isSpeaking=${isSpeakingRef.current}`);
-      
-      await playHourAnnouncement(hour, minute);
-      lastTimeAnnouncementRef.current = Date.now();
-    }, delayMs);
-
-    return () => clearTimeout(timeout);
-  }, [audioUnlocked, isSynced, currentTime, playHourAnnouncement, announcingType]);
-  
-
   // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
     if (!currentTime || !audioUnlocked || !isSynced) return;
@@ -1590,29 +1540,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       </div>
 
-      {/* BOTÃO GRANDE DE TESTE - TEMPORÁRIO */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[200]">
-        <button
-          onClick={async () => {
-            console.log('[HourTest] Button clicked!');
-            if (!currentTime) {
-              console.log('[HourTest] No currentTime available');
-              alert('currentTime não disponível!');
-              return;
-            }
-            const hour = currentTime.getHours();
-            const minute = currentTime.getMinutes();
-            console.log(`[HourTest] Manual test: ${hour}:${minute.toString().padStart(2, '0')}`);
-            alert(`Testando hora: ${hour}:${minute.toString().padStart(2, '0')}`);
-            await playHourAnnouncement(hour, minute);
-          }}
-          className="w-64 h-64 rounded-3xl bg-amber-500 hover:bg-amber-400 border-8 border-amber-300 flex flex-col items-center justify-center shadow-2xl animate-pulse"
-        >
-          <Clock className="w-24 h-24 text-white mb-4" />
-          <span className="text-3xl font-black text-white">TESTAR HORA</span>
-          <span className="text-lg text-amber-100 mt-2">Clique aqui!</span>
-        </button>
-      </div>
+      {/* Audio Test Button - Discrete */}
     </div>
   );
 }

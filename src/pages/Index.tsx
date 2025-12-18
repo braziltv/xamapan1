@@ -11,7 +11,6 @@ import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
