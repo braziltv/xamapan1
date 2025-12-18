@@ -55,6 +55,10 @@ interface PatientRegistrationProps {
   onFinishWithoutCall: (id: string) => void;
   onForwardToTriage: (id: string, destination?: string) => void;
   onForwardToDoctor: (id: string, destination?: string) => void;
+  onForwardToEcg: (id: string) => void;
+  onForwardToCurativos: (id: string) => void;
+  onForwardToRaiox: (id: string) => void;
+  onForwardToEnfermaria: (id: string) => void;
   onSendToTriageQueue?: (id: string) => void;
   onSendToDoctorQueue?: (id: string, destination?: string) => void;
   onSendToEcgQueue?: (id: string) => void;
@@ -129,6 +133,10 @@ export function PatientRegistration({
   onFinishWithoutCall,
   onForwardToTriage,
   onForwardToDoctor,
+  onForwardToEcg,
+  onForwardToCurativos,
+  onForwardToRaiox,
+  onForwardToEnfermaria,
   onSendToTriageQueue,
   onSendToDoctorQueue,
   onSendToEcgQueue,
@@ -434,7 +442,7 @@ export function PatientRegistration({
                             Eletrocardiograma
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="bg-card border border-border">
-                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Eletrocardiograma')} className="cursor-pointer">
+                            <DropdownMenuItem onClick={() => onForwardToEcg(patient.id)} className="cursor-pointer">
                               <Volume2 className="w-4 h-4 mr-2 text-green-600" />
                               Com voz na TV
                             </DropdownMenuItem>
@@ -454,7 +462,7 @@ export function PatientRegistration({
                             Curativos
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="bg-card border border-border">
-                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Curativos')} className="cursor-pointer">
+                            <DropdownMenuItem onClick={() => onForwardToCurativos(patient.id)} className="cursor-pointer">
                               <Volume2 className="w-4 h-4 mr-2 text-green-600" />
                               Com voz na TV
                             </DropdownMenuItem>
@@ -474,7 +482,7 @@ export function PatientRegistration({
                             Raio X
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="bg-card border border-border">
-                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Sala de Raio X')} className="cursor-pointer">
+                            <DropdownMenuItem onClick={() => onForwardToRaiox(patient.id)} className="cursor-pointer">
                               <Volume2 className="w-4 h-4 mr-2 text-green-600" />
                               Com voz na TV
                             </DropdownMenuItem>
@@ -494,7 +502,7 @@ export function PatientRegistration({
                             Enfermaria
                           </DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="bg-card border border-border">
-                            <DropdownMenuItem onClick={() => onDirectPatient(patient.name, 'Enfermaria')} className="cursor-pointer">
+                            <DropdownMenuItem onClick={() => onForwardToEnfermaria(patient.id)} className="cursor-pointer">
                               <Volume2 className="w-4 h-4 mr-2 text-green-600" />
                               Com voz na TV
                             </DropdownMenuItem>
