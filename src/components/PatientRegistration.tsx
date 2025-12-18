@@ -240,7 +240,7 @@ export function PatientRegistration({
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit" disabled={!name.trim()} className="w-full sm:w-auto">
+            <Button type="submit" disabled={!name.trim() || isLoading} className="w-full sm:w-auto">
               <UserPlus className="w-4 h-4 mr-2" />
               Cadastrar
             </Button>

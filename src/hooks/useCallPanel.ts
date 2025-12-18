@@ -16,6 +16,31 @@ const STORAGE_KEYS = {
   LAST_CALL_TIMESTAMP: 'callPanel_lastCallTimestamp',
 };
 
+const normalizePatientName = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
+
+const getStatusRank = (status: PatientStatus): number => {
+  switch (status) {
+    case 'in-triage':
+    case 'in-consultation':
+    case 'in-ecg':
+    case 'in-curativos':
+    case 'in-raiox':
+    case 'in-enfermaria':
+      return 3;
+    case 'waiting-doctor':
+    case 'waiting-ecg':
+    case 'waiting-curativos':
+    case 'waiting-raiox':
+    case 'waiting-enfermaria':
+      return 2;
+    case 'waiting':
+      return 1;
+    case 'attended':
+    default:
+      return 0;
+  }
+};
+
 export function useCallPanel() {
   const [unitName, setUnitName] = useState(() => {
     return localStorage.getItem('selectedUnitName') || '';
@@ -164,9 +189,9 @@ export function useCallPanel() {
         });
         
         setPatients(prev => {
-          // Merge: add DB patients that don't exist locally
-          const existingNames = new Set(prev.map(p => p.name));
-          const newPatients = dbPatients.filter(p => !existingNames.has(p.name));
+          // Merge: add DB patients that don't exist locally (normalized)
+          const existingKeys = new Set(prev.map(p => normalizePatientName(p.name)));
+          const newPatients = dbPatients.filter(p => !existingKeys.has(normalizePatientName(p.name)));
           return [...prev, ...newPatients];
         });
       }
@@ -244,11 +269,36 @@ export function useCallPanel() {
         };
       });
       
-      // Replace local state with database state to ensure sync
-      setPatients(dbPatients);
+      // Replace local state with database state to ensure sync (dedupe by name)
+      const byName = new Map<string, Patient>();
+      for (const p of dbPatients) {
+        const key = normalizePatientName(p.name);
+        const existing = byName.get(key);
+        if (!existing) {
+          byName.set(key, p);
+          continue;
+        }
+
+        const existingRank = getStatusRank(existing.status);
+        const candidateRank = getStatusRank(p.status);
+
+        if (candidateRank > existingRank) {
+          byName.set(key, p);
+          continue;
+        }
+
+        if (candidateRank === existingRank && p.createdAt < existing.createdAt) {
+          byName.set(key, p);
+        }
+      }
+
+      const dedupedPatients = Array.from(byName.values()).sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
+      setPatients(dedupedPatients);
     }
   }, [unitName]);
-  
+
   useEffect(() => {
     if (!unitName) return;
 
@@ -293,8 +343,11 @@ export function useCallPanel() {
           }
           processedCallIdsRef.current.add(call.id);
           
-          // Check if this patient already exists locally
-          const patientExists = patientsRef.current.some(p => p.name === call.patient_name && p.status !== 'attended');
+          // Check if this patient already exists locally (normalized)
+          const callNameKey = normalizePatientName(call.patient_name || '');
+          const patientExists = patientsRef.current.some(
+            (p) => normalizePatientName(p.name) === callNameKey && p.status !== 'attended'
+          );
           
           if (!patientExists) {
             // Determine status based on call_type
@@ -319,7 +372,7 @@ export function useCallPanel() {
             // Add patient from another device
             const newPatient: Patient = {
               id: `patient-${call.id}`,
-              name: call.patient_name,
+              name: (call.patient_name || '').trim().replace(/\s+/g, ' '),
               status,
               priority: call.priority || 'normal',
               createdAt: new Date(call.created_at),
@@ -333,7 +386,7 @@ export function useCallPanel() {
             
             setPatients(prev => {
               // Double-check to avoid duplicates
-              if (prev.some(p => p.name === call.patient_name && p.status !== 'attended')) {
+              if (prev.some(p => normalizePatientName(p.name) === callNameKey && p.status !== 'attended')) {
                 return prev;
               }
               return [...prev, newPatient];
@@ -546,11 +599,12 @@ export function useCallPanel() {
   }, [createCall, triggerCallEvent]);
 
   const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal'): Promise<{ patient: Patient; isDuplicate: boolean }> => {
-    const trimmedName = name.trim();
+    const trimmedName = name.trim().replace(/\s+/g, ' ');
+    const trimmedKey = normalizePatientName(trimmedName);
     
     // Check if patient already exists (not attended)
     const existingPatient = patientsRef.current.find(p => 
-      p.name.toLowerCase() === trimmedName.toLowerCase() && p.status !== 'attended'
+      normalizePatientName(p.name) === trimmedKey && p.status !== 'attended'
     );
     
     if (existingPatient) {
@@ -567,7 +621,7 @@ export function useCallPanel() {
     };
     setPatients(prev => {
       // Double-check to avoid race conditions
-      if (prev.some(p => p.name.toLowerCase() === trimmedName.toLowerCase() && p.status !== 'attended')) {
+      if (prev.some(p => normalizePatientName(p.name) === trimmedKey && p.status !== 'attended')) {
         return prev;
       }
       return [...prev, newPatient];
