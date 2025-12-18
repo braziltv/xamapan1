@@ -150,7 +150,7 @@ export function DoctorPanel({
         <div className="bg-gradient-to-r from-green-500 to-green-600 p-3 sm:p-4">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
             <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5" />
-            Chamada Atual - {currentConsultorioLabel}
+            🩺 Chamada Atual - {currentConsultorioLabel}
           </h2>
         </div>
         <div className="p-4 sm:p-6">
@@ -185,7 +185,7 @@ export function DoctorPanel({
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
           <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Aguardando Consulta - {currentConsultorioLabel} ({waitingPatients.filter(p => p.destination === currentConsultorioLabel).length})
+          ⏳ Aguardando Consulta - {currentConsultorioLabel} ({waitingPatients.filter(p => p.destination === currentConsultorioLabel).length})
         </h2>
         
         {waitingPatients.filter(p => p.destination === currentConsultorioLabel).length === 0 ? (

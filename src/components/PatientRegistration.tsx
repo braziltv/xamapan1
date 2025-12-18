@@ -126,7 +126,7 @@ export function PatientRegistration({
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
           <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Cadastrar Paciente
+          📝 Cadastrar Paciente
         </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -175,7 +175,7 @@ export function PatientRegistration({
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
           <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Pacientes Cadastrados ({activePatients.length})
+          👥 Pacientes Cadastrados ({activePatients.length})
         </h2>
         
         {activePatients.length === 0 ? (
