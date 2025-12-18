@@ -4,86 +4,121 @@
 export const BRAZILIAN_NAMES = {
   masculinos: [
     // A
-    "Adão", "Adilson", "Adriano", "Aécio", "Agnaldo", "Aguinaldo", "Alan", "Alberto", "Alceu", "Aldo",
-    "Alessandro", "Alex", "Alexandre", "Alexandro", "Álvaro", "Amauri", "Américo", "Amilton", "Anderson",
-    "André", "Ângelo", "Antônio", "Antonio", "Ariel", "Aristides", "Armando", "Arnaldo", "Arthur", "Artur",
+    "Abílio", "Abraão", "Acácio", "Adailton", "Adalberto", "Adão", "Adeilson", "Adelino", "Adelmo",
+    "Ademar", "Ademir", "Adilson", "Adonias", "Adriano", "Aécio", "Afonso", "Agnaldo", "Agostinho",
+    "Aguinaldo", "Ailton", "Airton", "Alan", "Alaor", "Alberto", "Alceu", "Alcides", "Aldo", "Alécio",
+    "Alessandro", "Alex", "Alexandre", "Alexandro", "Alfredo", "Alisson", "Álvaro", "Alves", "Amadeu",
+    "Amauri", "Américo", "Amilcar", "Amilton", "Amir", "Anderson", "André", "Andreson", "Ângelo",
+    "Aníbal", "Anselmo", "Antônio", "Antonio", "Aparecido", "Apolinário", "Aquiles", "Argemiro",
+    "Ari", "Ariel", "Ariosto", "Aristides", "Arlindo", "Armando", "Arnaldo", "Artur", "Arthur",
+    "Astrogildo", "Átila", "Augusto", "Aurélio", "Ayrton",
     
     // B
-    "Benedito", "Benjamin", "Bernardo", "Bráulio", "Breno", "Bruno", "Bryan",
+    "Baltazar", "Barnabé", "Bartolomeu", "Belchior", "Benedito", "Bené", "Benjamin", "Bento",
+    "Bernardino", "Bernardo", "Bonifácio", "Bráulio", "Breno", "Bruno", "Bryan", "Caetano",
     
     // C
-    "Caetano", "Caio", "Carlos", "Cauã", "Cauê", "Celso", "César", "Cesar", "Cézar", "Christian",
-    "Cícero", "Ciro", "Cláudio", "Claudio", "Cleber", "Cléber", "Cristiano", "Cristóvão",
+    "Caio", "Calixto", "Camilo", "Cândido", "Carlos", "Carmelo", "Casemiro", "Casimiro", "Cassiano",
+    "Cássio", "Cauã", "Cauê", "Célio", "Celso", "César", "Cesar", "Cézar", "Cícero", "Ciro",
+    "Cláudio", "Claudio", "Cleber", "Cléber", "Clécio", "Cleiton", "Clementino", "Cleyton",
+    "Cristiano", "Cristóvão",
     
     // D
-    "Daniel", "Danilo", "Dário", "Davi", "David", "Denis", "Dênis", "Diego", "Diogo", "Domingos", "Douglas",
+    "Dagoberto", "Damião", "Daniel", "Danilo", "Dante", "Dário", "Davi", "David", "Décio",
+    "Deivid", "Delmiro", "Denis", "Dênis", "Denival", "Deraldo", "Deusdete", "Diego", "Dilson",
+    "Dimas", "Diogo", "Dirceu", "Djair", "Domingos", "Donato", "Douglas", "Durval",
     
     // E
-    "Eder", "Éder", "Edgar", "Edgard", "Edilson", "Edimar", "Edison", "Édison", "Edivaldo", "Edmilson",
-    "Edmundo", "Edson", "Édson", "Eduardo", "Elias", "Élio", "Eliseu", "Emanuel", "Emerson", "Émerson",
-    "Emílio", "Enéas", "Enzo", "Erick", "Ernesto", "Estêvão", "Euclides", "Eugênio", "Evandro", "Everton", "Éverton",
+    "Eder", "Éder", "Edgar", "Edgard", "Edilberto", "Edilson", "Edimar", "Edinaldo", "Edison",
+    "Édison", "Edivaldo", "Edmar", "Edmilson", "Edmundo", "Ednaldo", "Edson", "Édson", "Eduardo",
+    "Edvaldo", "Elber", "Elcio", "Élcio", "Eleazar", "Eli", "Elias", "Eliézer", "Élio", "Eliseu",
+    "Elivaldo", "Elói", "Elton", "Elvécio", "Elvio", "Emanuel", "Emerson", "Émerson", "Emídio",
+    "Emílio", "Enéas", "Ênio", "Enzo", "Erasmo", "Erick", "Erivan", "Ernani", "Ernesto", "Eros",
+    "Estêvão", "Euclides", "Eugênio", "Eustáquio", "Evaldo", "Evandro", "Evaristo", "Everton", "Éverton",
+    "Expedito", "Ezequiel",
     
     // F
-    "Fábio", "Fabio", "Fabrício", "Felipe", "Felype", "Fernando", "Firmino", "Flávio", "Flavio",
-    "Francisco", "Frederico",
+    "Fabiano", "Fábio", "Fabio", "Fabrício", "Fabricio", "Fagner", "Fausto", "Felipe", "Felype",
+    "Fernandes", "Fernando", "Filipe", "Firmino", "Flávio", "Flavio", "Florêncio", "Florentino",
+    "Francisco", "Frederico", "Fúlvio",
     
     // G
-    "Gabriel", "Geraldo", "Gerson", "Gilberto", "Gilmar", "Gilson", "Giovanni", "Guilherme", "Gustavo",
+    "Gabriel", "Galeno", "Gaspar", "Genaro", "Genésio", "Genilson", "Geraldo", "Germano", "Gerson",
+    "Getúlio", "Gilberto", "Gildo", "Gilmar", "Gilson", "Giovani", "Giovanni", "Glauco", "Gonçalo",
+    "Gregório", "Guido", "Guilherme", "Gustavo",
     
     // H
-    "Haroldo", "Hélio", "Helio", "Henrique", "Hércules", "Hernani", "Hilton", "Hugo", "Humberto",
+    "Hamilton", "Haroldo", "Heitor", "Hélder", "Hélio", "Helio", "Henrique", "Heraldo", "Herbert",
+    "Hércules", "Hermes", "Hernani", "Hilário", "Hilton", "Homero", "Horácio", "Hugo", "Humberto",
     
     // I
-    "Igor", "Inácio", "Ítalo", "Ivan", "Ivonaldo",
+    "Ibraim", "Ícaro", "Idenilson", "Iderval", "Igor", "Ilton", "Inácio", "Irineu", "Isaías",
+    "Isidoro", "Israel", "Ítalo", "Ivan", "Ivanildo", "Ivo", "Ivonaldo",
     
     // J
-    "Jackson", "Jaime", "Jair", "Jairo", "Jardel", "Jean", "Jefferson", "Jerônimo", "Jessé", "Jesus",
-    "João", "Joao", "Joaquim", "Jocélio", "Joel", "Jonas", "Jonathan", "Jônatas", "Jorge", "José",
-    "Jose", "Josué", "Juan", "Júlio", "Julio", "Júnior", "Junior", "Juscelino",
+    "Jacinto", "Jackson", "Jacó", "Jader", "Jailson", "Jailton", "Jaime", "Jair", "Jairo",
+    "Janderson", "Jânio", "Jardel", "Jean", "Jefferson", "Jeremias", "Jerônimo", "Jessé", "Jesus",
+    "Joabson", "Joadir", "João", "Joao", "Joaquim", "Jocélio", "Joel", "Joelmir", "Joelson",
+    "Jonas", "Jônatas", "Jonathan", "Jordi", "Jorge", "Joselito", "Josemário", "José", "Jose",
+    "Josias", "Josimar", "Josinaldo", "Josué", "Josuel", "Juan", "Juarez", "Juca", "Júlio",
+    "Julio", "Júnior", "Junior", "Juscelino", "Juvenal",
     
     // K
-    "Kaio", "Kaique", "Kevin", "Kleber",
+    "Kaio", "Kaique", "Kauã", "Kevin", "Kleber",
     
     // L
-    "Leandro", "Leonardo", "Levi", "Lucas", "Luciano", "Lúcio", "Luis", "Luís", "Luiz",
+    "Laércio", "Laerte", "Lázaro", "Leandro", "Leonardo", "Leônidas", "Levi", "Lincoln", "Lindomar",
+    "Lindolfo", "Lino", "Lívio", "Lourival", "Lourenço", "Luan", "Lucas", "Luciano", "Lúcio",
+    "Luís", "Luis", "Luiz",
     
     // M
-    "Maciel", "Manoel", "Manuel", "Marcelo", "Márcio", "Marcio", "Marco", "Marcos", "Mário", "Mario",
-    "Marlon", "Mateus", "Matheus", "Maurício", "Mauricio", "Mauro", "Miguel", "Milton", "Moisés", "Moises",
+    "Maciel", "Magno", "Manoel", "Manuel", "Marcelo", "Marciano", "Márcio", "Marcio", "Marco",
+    "Marcos", "Mariano", "Mário", "Mario", "Marlon", "Martinho", "Mateus", "Matheus", "Maurício",
+    "Mauricio", "Mauro", "Max", "Maximiliano", "Messias", "Miguel", "Milton", "Misael", "Moacir",
+    "Moisés", "Moises", "Murilo",
     
     // N
-    "Nathan", "Natã", "Nelson", "Nélson", "Neto", "Newton", "Nicolas", "Nicolau", "Nilson", "Nilton",
+    "Nabor", "Naldo", "Napoleão", "Narciso", "Natã", "Natanael", "Nathan", "Nélio", "Nelson",
+    "Nélson", "Nenê", "Nestor", "Neto", "Newton", "Nicolas", "Nicolau", "Nilo", "Nilson", "Nilton",
+    "Nivaldo", "Norberto", "Noronha",
     
     // O
-    "Odair", "Odilon", "Orlando", "Oscar", "Óscar", "Osvaldo", "Otávio", "Otavio", "Otoniel",
+    "Odilon", "Odair", "Olavo", "Olímpio", "Olivio", "Omar", "Onofre", "Orlando", "Oscar", "Óscar",
+    "Osmar", "Osvaldo", "Otacílio", "Otávio", "Otavio", "Otoniel", "Otto",
     
     // P
-    "Pablo", "Patrick", "Paulo", "Pedro", "Peterson", "Plínio",
+    "Pablo", "Pascoal", "Patrick", "Paulo", "Pedro", "Percival", "Peterson", "Petrônio", "Plínio",
+    "Policarpo", "Porfírio", "Praxedes",
     
     // Q
-    "Quintino",
+    "Queiroz", "Quintino",
     
     // R
-    "Rafael", "Raimundo", "Raí", "Raul", "Reginaldo", "Reinaldo", "Renan", "Renato", "Ricardo",
-    "Robério", "Roberto", "Robson", "Rodolfo", "Rodrigo", "Rogério", "Rogerio", "Romário", "Romero",
-    "Ronaldo", "Ronei", "Roni", "Roque", "Rubem", "Rubens",
+    "Rafael", "Raimundo", "Raí", "Ramon", "Rangel", "Raphael", "Raul", "Reginaldo", "Reinaldo",
+    "Renan", "Renato", "Ricardo", "Rivaldo", "Rivânio", "Robério", "Roberto", "Robson", "Rodolfo",
+    "Rodrigo", "Rogério", "Rogerio", "Rômulo", "Romário", "Romero", "Ronaldo", "Ronei", "Roni",
+    "Ronildo", "Roque", "Rosaldo", "Rosário", "Rosembergue", "Rubem", "Rubens", "Rui", "Ryan",
     
     // S
-    "Samuel", "Sandro", "Saulo", "Sebastião", "Sergio", "Sérgio", "Severino", "Sidnei", "Sidney",
-    "Silvano", "Sílvio", "Silvio", "Simão", "Sirineu",
+    "Sabino", "Salomão", "Salvador", "Samuel", "Sandro", "Sansão", "Santiago", "Saul", "Saulo",
+    "Sebastião", "Serafim", "Sergio", "Sérgio", "Severino", "Sidnei", "Sidney", "Silas", "Silvano",
+    "Sílvio", "Silvio", "Simão", "Sirineu", "Solano",
     
     // T
-    "Tadeu", "Tales", "Téo", "Thiago", "Tiago", "Túlio", "Tulio",
+    "Tadeu", "Tales", "Tarcísio", "Téo", "Teodoro", "Thiago", "Tiago", "Tomás", "Tomé", "Túlio",
+    "Tulio",
     
     // U
-    "Ubiratan", "Ulisses", "Ulysses",
+    "Ubirajara", "Ubiratan", "Ulisses", "Ulysses", "Umberto",
     
     // V
-    "Valdemar", "Valdir", "Válter", "Valter", "Vanderlei", "Vicente", "Victor", "Vítor", "Vitor",
-    "Vinícius", "Vinicius", "Vladmir",
+    "Valdemar", "Valdenir", "Valdir", "Válter", "Valter", "Vanderlei", "Vander", "Vanildo",
+    "Venâncio", "Vicente", "Victor", "Vítor", "Vitor", "Vinícius", "Vinicius", "Virgílio",
+    "Virgínio", "Vitorino", "Vladmir",
     
     // W
-    "Wagner", "Wallace", "Walter", "Wanderley", "Washington", "Wellington", "Wesley", "Wilian", "Willian", "Wilson",
+    "Wagner", "Wallace", "Walter", "Wanderlei", "Wanderley", "Washington", "Wellington", "Wesley",
+    "Weverton", "Wilian", "Willian", "Wilson",
     
     // X
     "Xavier", "Ximenes",
@@ -92,120 +127,223 @@ export const BRAZILIAN_NAMES = {
     "Yago", "Yan", "Yuri",
     
     // Z
-    "Zacarias", "Zé", "Zeca"
+    "Zacarias", "Zé", "Zeca", "Zenildo", "Zenon"
   ],
   
   femininos: [
     // A
-    "Adriana", "Adriane", "Aída", "Aila", "Aléxia", "Alice", "Aline", "Amanda", "Amélia", "Ana",
-    "Anália", "Andréa", "Andrea", "Andréia", "Andreia", "Ângela", "Angela", "Angélica", "Angelica",
-    "Anita", "Antônia", "Antonia", "Aparecida", "Ariane", "Arlete", "Aurora",
+    "Abigail", "Ada", "Adélia", "Adelina", "Adilene", "Adriana", "Adriane", "Adriele", "Agda",
+    "Ágata", "Aída", "Aila", "Ailza", "Alaíde", "Alcione", "Alda", "Aldenir", "Aléxia", "Alice",
+    "Alícia", "Aline", "Alzira", "Amanda", "Amélia", "Ana", "Anália", "Anastácia", "Andréa",
+    "Andrea", "Andréia", "Andreia", "Andressa", "Ângela", "Angela", "Angélica", "Angelica",
+    "Angelina", "Anísia", "Anita", "Antônia", "Antonia", "Aparecida", "Ariane", "Ariela",
+    "Arlete", "Áurea", "Aurora",
     
     // B
-    "Bárbara", "Barbara", "Beatriz", "Benedita", "Berenice", "Betânia", "Bianca", "Brenda", "Bruna",
+    "Bárbara", "Barbara", "Beatriz", "Belém", "Benedita", "Berenice", "Bernadete", "Betânia",
+    "Bianca", "Branca", "Brenda", "Brígida", "Bruna", "Brunilda",
     
     // C
-    "Camila", "Carina", "Carla", "Carmen", "Cármen", "Carol", "Carolina", "Cássia", "Cassia",
-    "Catarina", "Cecília", "Cecilia", "Célia", "Celia", "Celina", "Charlene", "Christiane", "Cíntia",
-    "Cintia", "Clara", "Cláudia", "Claudia", "Cleide", "Cleuza", "Conceição", "Cristiane", "Cristina",
+    "Cacilda", "Camila", "Cândida", "Carina", "Carla", "Carlota", "Carmen", "Cármen", "Carol",
+    "Carolina", "Caroline", "Cássia", "Cassia", "Catarina", "Cecília", "Cecilia", "Célia", "Celia",
+    "Celina", "Celma", "Cenira", "Charlene", "Christiane", "Cíntia", "Cintia", "Clara", "Clarinda",
+    "Clarisse", "Cláudia", "Claudia", "Claudete", "Claudina", "Cleide", "Clementina", "Cleonice",
+    "Cleusa", "Cleuza", "Conceição", "Constância", "Corina", "Cremilda", "Creuza", "Cristiane",
+    "Cristina",
     
     // D
-    "Daiana", "Daiane", "Dalila", "Dalva", "Daniela", "Débora", "Debora", "Denise", "Diana", "Dione", "Dirce",
+    "Daiana", "Daiane", "Daise", "Dalila", "Dalva", "Damiana", "Daniela", "Daniella", "Danuza",
+    "Darlene", "Débora", "Debora", "Deise", "Deize", "Delfina", "Delmira", "Delza", "Denise",
+    "Diana", "Diene", "Dilma", "Dina", "Dinorá", "Dione", "Dirce", "Divina", "Dolores", "Domingas",
+    "Dora", "Doralice", "Doralina", "Dorotéia", "Dulce", "Dulcinéia",
     
     // E
-    "Edna", "Eduarda", "Elaine", "Elayne", "Eliane", "Eliene", "Elis", "Elisa", "Elisabete", "Elisabeth",
-    "Elizabete", "Elizete", "Eloá", "Elza", "Emília", "Emilia", "Érica", "Erica", "Ester", "Esther",
-    "Eunice", "Eva", "Evelyn", "Évellyn",
+    "Edileusa", "Edileuza", "Edina", "Edinéia", "Edite", "Edna", "Eduarda", "Elaine", "Elayne",
+    "Elba", "Elcilene", "Elda", "Elenice", "Eliete", "Eliana", "Eliane", "Eliene", "Elis", "Elisa",
+    "Elisabete", "Elisabeth", "Elisângela", "Elizabete", "Elizete", "Eloá", "Eloísa", "Elsa",
+    "Elza", "Emília", "Emilia", "Emiliana", "Eponina", "Érica", "Erica", "Ermelinda", "Ernestina",
+    "Esmeralda", "Ester", "Esther", "Eugênia", "Eulália", "Eunice", "Eva", "Evandra", "Evelyn",
+    "Évellyn", "Everilda",
     
     // F
-    "Fabiana", "Fábia", "Fátima", "Fatima", "Fernanda", "Flávia", "Flavia", "Franciele", "Francisca",
+    "Fabiana", "Fábia", "Fabíola", "Fátima", "Fatima", "Fernanda", "Filomena", "Flávia", "Flavia",
+    "Florência", "Florinda", "Franciele", "Francisca", "Francisquinha",
     
     // G
-    "Gabriela", "Gabrielle", "Geovana", "Gilda", "Gisele", "Gislaine", "Gislene", "Glória", "Gloria", "Graça", "Graziela",
+    "Gabriela", "Gabrielle", "Geni", "Geovana", "Gilda", "Gilmara", "Giovana", "Gisele", "Giselda",
+    "Gislaine", "Gislene", "Gláucia", "Glória", "Gloria", "Goretti", "Graça", "Graciela", "Graziela",
+    "Guiomar", "Guida",
     
     // H
-    "Helena", "Heloísa", "Heloisa",
+    "Haidée", "Heide", "Helena", "Helenice", "Heloísa", "Heloisa", "Henriqueta", "Hermínia", "Hilda",
     
     // I
-    "Iara", "Inês", "Ines", "Ingrid", "Ioná", "Iracema", "Irene", "Iris", "Íris", "Isabel", "Isabela",
-    "Isabele", "Isabella", "Isadora", "Ivana", "Ivete", "Ivone",
+    "Iara", "Iasmim", "Idalina", "Ieda", "Ilma", "Ilza", "Inês", "Ines", "Ingrid", "Ioná", "Iracema",
+    "Iraci", "Irene", "Irenilda", "Íris", "Iris", "Irma", "Isabel", "Isabela", "Isabele", "Isabella",
+    "Isadora", "Isaura", "Isis", "Ivana", "Ivanete", "Ivanilda", "Ivete", "Ivone", "Ivonete",
     
     // J
-    "Janaína", "Janaina", "Jandira", "Janete", "Jaqueline", "Jéssica", "Jessica", "Joana", "Joelma",
-    "Josefa", "Josélia", "Josiane", "Joyce", "Juliana", "Júlia", "Julia", "Jussara",
+    "Jacilda", "Jacinta", "Jacira", "Jaci", "Jacqueline", "Janaína", "Janaina", "Jandira", "Jane",
+    "Janete", "Jaqueline", "Jardilene", "Jéssica", "Jessica", "Joana", "Joanita", "Joaquina",
+    "Joelma", "Joice", "Jordânia", "Josefa", "Josefina", "Josélia", "Josiane", "Joyce", "Judith",
+    "Juliana", "Júlia", "Julia", "Julieta", "Jussara", "Justa", "Justina",
     
     // K
-    "Karina", "Karla", "Kátia", "Katia", "Kelly", "Késia", "Keyla",
+    "Karina", "Karla", "Kássia", "Kátia", "Katia", "Kelly", "Késia", "Keyla",
     
     // L
-    "Laís", "Lais", "Lara", "Larissa", "Laura", "Leandra", "Leda", "Letícia", "Leticia", "Lídia",
-    "Lidia", "Lígia", "Ligia", "Lilian", "Lina", "Lívia", "Livia", "Lorena", "Lourdes", "Luana",
-    "Lúcia", "Lucia", "Luciana", "Luciene", "Lucimar", "Luísa", "Luisa", "Luiza", "Lurdes",
+    "Laís", "Lais", "Lara", "Larissa", "Laura", "Laurinda", "Lea", "Leandra", "Leda", "Leila",
+    "Lêda", "Lenilda", "Lenice", "Leonice", "Leonor", "Letícia", "Leticia", "Lídia", "Lidia",
+    "Lígia", "Ligia", "Lilian", "Liliana", "Lina", "Linda", "Lindalva", "Lívia", "Livia", "Loide",
+    "Lorena", "Lourdes", "Luana", "Lúcia", "Lucia", "Luciana", "Luciene", "Lucila", "Lucimar",
+    "Lucinda", "Luísa", "Luisa", "Luiza", "Lurdes", "Luzimar",
     
     // M
-    "Madalena", "Maíra", "Manuela", "Mara", "Marcela", "Márcia", "Marcia", "Margarete", "Margarida",
-    "Maria", "Mariana", "Marilene", "Marilza", "Marina", "Marisa", "Mariza", "Marlene", "Marta",
-    "Mayara", "Meire", "Melissa", "Michele", "Michelle", "Milena", "Miriam", "Mônica", "Monica",
+    "Madalena", "Magali", "Magda", "Magna", "Maíra", "Manoela", "Manuela", "Mara", "Marcela",
+    "Márcia", "Marcia", "Marciléia", "Margarida", "Margarete", "Margarida", "Maria", "Mariana",
+    "Maricélia", "Marilena", "Marilene", "Marilza", "Marina", "Marines", "Marinês", "Marinete",
+    "Marise", "Marisa", "Maristela", "Mariza", "Marlene", "Marta", "Matilde", "Maura", "Mayara",
+    "Mayra", "Meire", "Melissa", "Mercês", "Michele", "Michelle", "Milena", "Milza", "Miriam",
+    "Mirian", "Mônica", "Monica", "Monique",
     
     // N
-    "Nadia", "Nádia", "Nair", "Naira", "Natália", "Natalia", "Natasha", "Neide", "Neusa", "Nídia",
-    "Nilza", "Noêmia", "Noemia", "Núbia", "Nubia",
+    "Nadia", "Nádia", "Nadja", "Nair", "Naira", "Nancy", "Naomi", "Natália", "Natalia", "Natasha",
+    "Nazaré", "Neide", "Neli", "Nelma", "Neusa", "Neuza", "Nídia", "Nilce", "Nilda", "Nilma",
+    "Nilza", "Noêmia", "Noemia", "Norma", "Núbia", "Nubia",
     
     // O
-    "Odete", "Olga", "Olívia", "Olivia", "Ozana",
+    "Odaléa", "Odete", "Odila", "Olga", "Olímpia", "Olinda", "Olívia", "Olivia", "Ondina", "Orlanda",
+    "Ozana",
     
     // P
-    "Paloma", "Pamela", "Pâmela", "Patrícia", "Patricia", "Paula", "Penha", "Poliana", "Priscila", "Priscilla",
+    "Paloma", "Pamela", "Pâmela", "Patrícia", "Patricia", "Paula", "Paulina", "Penha", "Perpétua",
+    "Piedade", "Pilar", "Poliana", "Priscila", "Priscilla",
     
     // Q
-    "Queila", "Quézia",
+    "Queila", "Quésia", "Quézia", "Quitéria",
     
     // R
-    "Rafaela", "Raissa", "Raíssa", "Raquel", "Rebeca", "Rebecca", "Regina", "Renata", "Rita", "Roberta",
-    "Rosa", "Rosana", "Rosane", "Rosângela", "Rose", "Roseane", "Roseli", "Roselene", "Rosemary", "Ruth",
+    "Rafaela", "Railda", "Raissa", "Raíssa", "Raquel", "Rebeca", "Rebecca", "Regina", "Renata",
+    "Rita", "Roberta", "Rosa", "Rosalina", "Rosana", "Rosane", "Rosângela", "Rose", "Roseane",
+    "Roselaine", "Roseli", "Roselene", "Rosemary", "Rosemeire", "Rosenilda", "Rosiane", "Rosilda",
+    "Rosimar", "Rosina", "Rosineide", "Ruth",
     
     // S
-    "Sabrina", "Samanta", "Samantha", "Sandra", "Sara", "Sarah", "Selma", "Sheila", "Shirley",
-    "Silvana", "Silvia", "Sílvia", "Simone", "Socorro", "Sofia", "Solange", "Sônia", "Sonia",
-    "Soraia", "Stefany", "Sueli", "Suely", "Suzana", "Suzane",
+    "Sabrina", "Samanta", "Samantha", "Sandra", "Sara", "Sarah", "Selma", "Sérgia", "Severina",
+    "Sheila", "Shirley", "Sibele", "Silvana", "Silvia", "Sílvia", "Simone", "Socorro", "Sofia",
+    "Solange", "Sônia", "Sonia", "Soraia", "Stefany", "Stela", "Sueli", "Suely", "Sulamita",
+    "Suzana", "Suzane", "Suzete",
     
     // T
-    "Tainá", "Taina", "Taís", "Tais", "Taísa", "Tamara", "Tânia", "Tania", "Tatiana", "Tatiane",
-    "Telma", "Teresa", "Tereza", "Thaís", "Thais", "Thalita", "Thayane",
+    "Tainá", "Taina", "Taís", "Tais", "Taísa", "Talita", "Tamara", "Tamires", "Tânia", "Tania",
+    "Tatiana", "Tatiane", "Telma", "Teodora", "Teresa", "Tereza", "Terezinha", "Thaís", "Thais",
+    "Thalita", "Thayane",
     
     // U
-    "Úrsula",
+    "Úrsula", "Ursula",
     
     // V
-    "Valéria", "Valeria", "Vanda", "Vanessa", "Vânia", "Vania", "Vera", "Verônica", "Veronica",
-    "Vitória", "Vitoria", "Viviane", "Vivian",
+    "Valéria", "Valeria", "Vanda", "Vanessa", "Vânia", "Vania", "Vera", "Veridiana", "Verônica",
+    "Veronica", "Violeta", "Virgínia", "Vitória", "Vitoria", "Viviane", "Vivian",
     
     // W
     "Wanda", "Wilma",
     
     // Y
-    "Yasmim", "Yasmin", "Yolanda",
+    "Yasmim", "Yasmin", "Yolanda", "Yara",
     
     // Z
-    "Zélia", "Zelia", "Zenaide", "Zilma", "Zuleide", "Zulmira"
+    "Zaíra", "Zélia", "Zelia", "Zelinda", "Zena", "Zenaide", "Zenilda", "Zilá", "Zilma", "Zilda",
+    "Zita", "Zoé", "Zuleica", "Zuleide", "Zulmira"
   ],
   
   // Sobrenomes comuns brasileiros
   sobrenomes: [
-    "Silva", "Santos", "Souza", "Sousa", "Oliveira", "Pereira", "Lima", "Carvalho", "Ferreira",
-    "Rodrigues", "Almeida", "Costa", "Gomes", "Martins", "Araújo", "Araujo", "Melo", "Barbosa",
-    "Ribeiro", "Alves", "Cardoso", "Nascimento", "Correia", "Corrêa", "Correa", "Pinto", "Vieira",
-    "Nunes", "Moreira", "Campos", "Castro", "Fernandes", "Dias", "Reis", "Andrade", "Moura",
-    "Teixeira", "Machado", "Lopes", "Miranda", "Mendes", "Freitas", "Peixoto", "Marques",
-    "Santana", "Rocha", "Neves", "Borges", "Ramos", "Batista", "Monteiro", "Cunha", "Leite",
-    "Duarte", "Farias", "Faria", "Medeiros", "Azevedo", "Aguiar", "Morais", "Moraes", "Jesus",
-    "Barros", "Pires", "Guimarães", "Guimaraes", "Bezerra", "Xavier", "Matos", "Coelho",
-    "Cruz", "Brito", "Viana", "Nogueira", "Paiva", "Amaral", "Sales", "Amorim", "Leal",
-    "Siqueira", "Tavares", "Carneiro", "Caldeira", "Cavalcante", "Cavalcanti", "Figueiredo",
-    "Franco", "Galvão", "Galvao", "Gonçalves", "Goncalves", "Lacerda", "Lemos", "Magalhães",
-    "Magalhaes", "Maia", "Menezes", "Montenegro", "Pacheco", "Pimentel", "Porto", "Queiroz",
-    "Queirós", "Resende", "Sampaio", "Sá", "Sa", "Sena", "Torres", "Trindade", "Vargas",
-    "Vasconcelos", "Vaz", "Veloso", "Ventura"
+    // A
+    "Abreu", "Adriano", "Aguiar", "Alencar", "Almeida", "Alves", "Amaral", "Amorim", "Andrade",
+    "Antunes", "Araújo", "Araujo", "Assis", "Assunção", "Azevedo",
+    
+    // B
+    "Baltazar", "Bandeira", "Baptista", "Barbosa", "Barreira", "Barreto", "Barros", "Bastos",
+    "Batista", "Bento", "Bernardes", "Bezerra", "Bittencourt", "Borges", "Braga", "Brandão",
+    "Brasil", "Brito", "Bueno",
+    
+    // C
+    "Cabral", "Caldas", "Caldeira", "Câmara", "Camargo", "Campos", "Cardoso", "Carneiro",
+    "Carvalho", "Castro", "Cavalcante", "Cavalcanti", "Cerqueira", "Chagas", "Chaves", "Coelho",
+    "Conceição", "Cordeiro", "Corrêa", "Correa", "Correia", "Costa", "Coutinho", "Cruz", "Cunha",
+    
+    // D
+    "Dantas", "Dias", "Domingues", "Dourado", "Duarte", "Durães",
+    
+    // E
+    "Esteves", "Evangelista",
+    
+    // F
+    "Faria", "Farias", "Feitosa", "Fernandes", "Ferrari", "Ferraz", "Ferreira", "Figueiredo",
+    "Figueira", "Flores", "Fonseca", "Fontes", "França", "Franco", "Freire", "Freitas",
+    
+    // G
+    "Galvão", "Galvao", "Garcia", "Gaspar", "Gomes", "Gonçalves", "Goncalves", "Gonzaga",
+    "Guedes", "Guerra", "Guimarães", "Guimaraes",
+    
+    // H
+    "Henriques", "Hernandes", "Hipólito", "Holanda",
+    
+    // I
+    "Inácio", "Irmão",
+    
+    // J
+    "Jardim", "Jesus", "Jordão", "Jorge", "Júnior", "Junior",
+    
+    // L
+    "Lacerda", "Leal", "Leão", "Leite", "Lemes", "Lemos", "Lima", "Linhares", "Lira", "Lisboa",
+    "Lopes", "Loureiro", "Lourenço", "Lucas", "Luz",
+    
+    // M
+    "Macedo", "Machado", "Maciel", "Magalhães", "Magalhaes", "Maia", "Maldonado", "Malheiros",
+    "Mariano", "Marinho", "Marques", "Martins", "Matias", "Mattos", "Matos", "Medeiros", "Meireles",
+    "Mello", "Melo", "Mendes", "Mendonça", "Menezes", "Mesquita", "Miranda", "Monteiro", "Montenegro",
+    "Morais", "Moraes", "Moreira", "Mota", "Moura", "Muniz",
+    
+    // N
+    "Nascimento", "Neves", "Nogueira", "Nóbrega", "Nunes",
+    
+    // O
+    "Oliveira", "Ortiz",
+    
+    // P
+    "Pacheco", "Paes", "Paiva", "Pascoal", "Passos", "Paula", "Paulino", "Paz", "Peixoto",
+    "Penha", "Pereira", "Pessoa", "Pimentel", "Pinheiro", "Pinto", "Pires", "Pontes", "Porto",
+    "Prado", "Proença",
+    
+    // Q
+    "Quaresma", "Queirós", "Queiroz", "Quintela",
+    
+    // R
+    "Ramos", "Rangel", "Rebelo", "Rego", "Reis", "Resende", "Ribas", "Ribeiro", "Rios", "Rocha",
+    "Rodrigues", "Rosa", "Rossi",
+    
+    // S
+    "Sá", "Sa", "Sacramento", "Sales", "Salgado", "Sampaio", "Sanches", "Santana", "Santiago",
+    "Santos", "Saraiva", "Sena", "Serafim", "Serra", "Serrano", "Silva", "Silveira", "Simões",
+    "Simões", "Soares", "Sousa", "Souza", "Siqueira",
+    
+    // T
+    "Tavares", "Teixeira", "Toledo", "Torres", "Trindade",
+    
+    // U
+    "Urias",
+    
+    // V
+    "Valente", "Varela", "Vargas", "Vasconcelos", "Vaz", "Veloso", "Ventura", "Viana", "Vicente",
+    "Vieira", "Vilela", "Vital",
+    
+    // X
+    "Xavier",
+    
+    // Z
+    "Zanetti", "Zimmermann"
   ]
 };
 
