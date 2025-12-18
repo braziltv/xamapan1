@@ -74,7 +74,7 @@ export function DoctorPanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -352,12 +352,13 @@ export function DoctorPanel({
                   const message = confirmFinish.type === 'consultation' 
                     ? 'Consulta Concluída!' 
                     : 'Desistência Registrada!';
+                  const animationType = confirmFinish.type === 'consultation' ? 'consultation' : 'withdrawal';
                   if (confirmFinish.type === 'consultation') {
                     onFinishConsultation(confirmFinish.id);
                   } else {
                     onFinishWithoutCall(confirmFinish.id);
                   }
-                  setSuccessMessage(message);
+                  setSuccessAnimation({ message, type: animationType });
                   setConfirmFinish(null);
                 }
               }}
@@ -371,9 +372,10 @@ export function DoctorPanel({
 
       {/* Success Animation */}
       <SuccessAnimation 
-        show={!!successMessage} 
-        message={successMessage || ''} 
-        onComplete={() => setSuccessMessage(null)} 
+        show={!!successAnimation} 
+        message={successAnimation?.message || ''} 
+        type={successAnimation?.type || 'default'}
+        onComplete={() => setSuccessAnimation(null)} 
       />
     </div>
   );

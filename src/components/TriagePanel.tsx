@@ -80,7 +80,7 @@ export function TriagePanel({
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('triage', waitingPatients);
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'triage' | 'withdrawal' | 'default' } | null>(null);
 
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
@@ -425,12 +425,13 @@ export function TriagePanel({
                   const message = confirmFinish.type === 'triage' 
                     ? 'Triagem Finalizada!' 
                     : 'Paciente Removido!';
+                  const animationType = confirmFinish.type === 'triage' ? 'triage' : 'withdrawal';
                   if (confirmFinish.type === 'triage') {
                     onFinishTriage(confirmFinish.id);
                   } else {
                     onFinishWithoutCall(confirmFinish.id);
                   }
-                  setSuccessMessage(message);
+                  setSuccessAnimation({ message, type: animationType });
                   setConfirmFinish(null);
                 }
               }}
@@ -444,9 +445,10 @@ export function TriagePanel({
 
       {/* Success Animation */}
       <SuccessAnimation 
-        show={!!successMessage} 
-        message={successMessage || ''} 
-        onComplete={() => setSuccessMessage(null)} 
+        show={!!successAnimation} 
+        message={successAnimation?.message || ''} 
+        type={successAnimation?.type || 'default'}
+        onComplete={() => setSuccessAnimation(null)} 
       />
     </div>
   );
