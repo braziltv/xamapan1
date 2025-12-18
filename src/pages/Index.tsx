@@ -188,29 +188,29 @@ const Index = () => {
                 className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
               >
                 <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate">📝 Cadastro</span>
+                <span className="truncate">Cadastro</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="triagem" 
                 className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
               >
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate">🏥 Triagem</span>
+                <span className="truncate">Triagem</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="medico" 
                 className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
               >
                 <Stethoscope className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate">🩺 Médico</span>
+                <span className="truncate">Médico</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="administrativo" 
                 className="gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-primary/10 flex-1 sm:flex-none min-w-0"
               >
                 <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                <span className="truncate hidden xs:inline">📊 Administrativo</span>
-                <span className="truncate xs:hidden">📊 Admin</span>
+                <span className="truncate hidden xs:inline">Administrativo</span>
+                <span className="truncate xs:hidden">Admin</span>
               </TabsTrigger>
               
               {/* Áudio Avulso Button - sempre visível na nav */}
