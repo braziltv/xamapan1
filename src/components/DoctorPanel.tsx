@@ -199,7 +199,8 @@ export function DoctorPanel({
               return (
                 <div
                   key={patient.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-muted transition-colors gap-3 ${priorityConfig.bg} border-l-4 ${priorityConfig.border}`}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg hover:bg-muted transition-all duration-300 gap-3 ${priorityConfig.bg} border-l-4 ${priorityConfig.border} animate-fade-in hover:scale-[1.01] hover:shadow-md`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div className="flex flex-col items-center gap-1 min-w-[3rem]">
