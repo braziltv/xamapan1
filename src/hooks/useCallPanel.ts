@@ -787,6 +787,70 @@ export function useCallPanel() {
     }
   }, [currentTriageCall, completeCall]);
 
+  // Forward to ECG WITH voice call on TV
+  const forwardToEcg = useCallback((patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+
+    createCall(patient.name, 'ecg', 'Sala de Eletrocardiograma');
+    triggerCallEvent({ name: patient.name }, 'ecg', 'Sala de Eletrocardiograma');
+
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-ecg' as const, calledAt: new Date(), calledBy: 'triage' as const, destination: 'Sala de Eletrocardiograma' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [createCall, triggerCallEvent, currentTriageCall]);
+
+  // Forward to Curativos WITH voice call on TV
+  const forwardToCurativos = useCallback((patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+
+    createCall(patient.name, 'curativos', 'Sala de Curativos');
+    triggerCallEvent({ name: patient.name }, 'curativos', 'Sala de Curativos');
+
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-curativos' as const, calledAt: new Date(), calledBy: 'triage' as const, destination: 'Sala de Curativos' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [createCall, triggerCallEvent, currentTriageCall]);
+
+  // Forward to Raio X WITH voice call on TV
+  const forwardToRaiox = useCallback((patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+
+    createCall(patient.name, 'raiox', 'Sala de Raio X');
+    triggerCallEvent({ name: patient.name }, 'raiox', 'Sala de Raio X');
+
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-raiox' as const, calledAt: new Date(), calledBy: 'triage' as const, destination: 'Sala de Raio X' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [createCall, triggerCallEvent, currentTriageCall]);
+
+  // Forward to Enfermaria WITH voice call on TV
+  const forwardToEnfermaria = useCallback((patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    if (!patient) return;
+
+    createCall(patient.name, 'enfermaria', 'Enfermaria');
+    triggerCallEvent({ name: patient.name }, 'enfermaria', 'Enfermaria');
+
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-enfermaria' as const, calledAt: new Date(), calledBy: 'triage' as const, destination: 'Enfermaria' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+    }
+  }, [createCall, triggerCallEvent, currentTriageCall]);
+
   // Sort by priority first (emergency > priority > normal), then by time
   const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
   
@@ -844,6 +908,10 @@ export function useCallPanel() {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    forwardToEcg,
+    forwardToCurativos,
+    forwardToRaiox,
+    forwardToEnfermaria,
     sendToTriageQueue,
     sendToDoctorQueue,
     sendToEcgQueue,

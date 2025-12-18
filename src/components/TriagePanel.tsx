@@ -51,6 +51,14 @@ interface TriagePanelProps {
   onDirectPatient: (patientName: string, destination: string) => void;
   onFinishWithoutCall: (id: string) => void;
   onSendToDoctorQueue: (id: string, destination?: string) => void;
+  onForwardToEcg: (id: string) => void;
+  onForwardToCurativos: (id: string) => void;
+  onForwardToRaiox: (id: string) => void;
+  onForwardToEnfermaria: (id: string) => void;
+  onSendToEcgQueue: (id: string) => void;
+  onSendToCurativosQueue: (id: string) => void;
+  onSendToRaioxQueue: (id: string) => void;
+  onSendToEnfermariaQueue: (id: string) => void;
   onUpdateObservations?: (id: string, observations: string) => void;
 }
 
@@ -76,6 +84,14 @@ export function TriagePanel({
   onDirectPatient,
   onFinishWithoutCall,
   onSendToDoctorQueue,
+  onForwardToEcg,
+  onForwardToCurativos,
+  onForwardToRaiox,
+  onForwardToEnfermaria,
+  onSendToEcgQueue,
+  onSendToCurativosQueue,
+  onSendToRaioxQueue,
+  onSendToEnfermariaQueue,
   onUpdateObservations
 }: TriagePanelProps) {
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'triage' | 'without' } | null>(null);
@@ -192,6 +208,51 @@ export function TriagePanel({
                       className="cursor-pointer"
                     >
                       Consultório 2
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Menu Encaminhar para outros serviços */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm text-blue-600 hover:text-blue-700 border-blue-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                      Serviços
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-card border border-border z-50">
+                    <DropdownMenuLabel>Encaminhar para Serviço</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onForwardToEcg(currentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      ECG (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToCurativos(currentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Curativos (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToRaiox(currentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Raio X (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onForwardToEnfermaria(currentCall.id)} className="cursor-pointer">
+                      <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                      Enfermaria (com voz)
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => onSendToEcgQueue(currentCall.id)} className="cursor-pointer">
+                      ECG (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToCurativosQueue(currentCall.id)} className="cursor-pointer">
+                      Curativos (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToRaioxQueue(currentCall.id)} className="cursor-pointer">
+                      Raio X (interno)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onSendToEnfermariaQueue(currentCall.id)} className="cursor-pointer">
+                      Enfermaria (interno)
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -372,6 +433,55 @@ export function TriagePanel({
                         className="cursor-pointer"
                       >
                         Consultório 2
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Encaminhar para serviços */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                      >
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden xs:inline">Serviços</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-card border border-border z-50">
+                      <DropdownMenuLabel>Encaminhar para Serviço</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-green-600">Com voz na TV</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => onForwardToEcg(patient.id)} className="cursor-pointer">
+                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                        ECG
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onForwardToCurativos(patient.id)} className="cursor-pointer">
+                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                        Curativos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onForwardToRaiox(patient.id)} className="cursor-pointer">
+                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                        Raio X
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onForwardToEnfermaria(patient.id)} className="cursor-pointer">
+                        <Volume2 className="w-4 h-4 mr-2 text-green-600" />
+                        Enfermaria
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">Interno (sem voz)</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => onSendToEcgQueue(patient.id)} className="cursor-pointer">
+                        ECG
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSendToCurativosQueue(patient.id)} className="cursor-pointer">
+                        Curativos
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSendToRaioxQueue(patient.id)} className="cursor-pointer">
+                        Raio X
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onSendToEnfermariaQueue(patient.id)} className="cursor-pointer">
+                        Enfermaria
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

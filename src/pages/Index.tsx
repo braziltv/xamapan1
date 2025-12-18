@@ -121,6 +121,10 @@ const Index = () => {
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
+    forwardToEcg,
+    forwardToCurativos,
+    forwardToRaiox,
+    forwardToEnfermaria,
     sendToTriageQueue,
     sendToDoctorQueue,
     sendToEcgQueue,
@@ -314,6 +318,14 @@ const Index = () => {
               onDirectPatient={directPatient}
               onFinishWithoutCall={finishWithoutCall}
               onSendToDoctorQueue={sendToDoctorQueue}
+              onForwardToEcg={forwardToEcg}
+              onForwardToCurativos={forwardToCurativos}
+              onForwardToRaiox={forwardToRaiox}
+              onForwardToEnfermaria={forwardToEnfermaria}
+              onSendToEcgQueue={sendToEcgQueue}
+              onSendToCurativosQueue={sendToCurativosQueue}
+              onSendToRaioxQueue={sendToRaioxQueue}
+              onSendToEnfermariaQueue={sendToEnfermariaQueue}
               onUpdateObservations={updatePatientObservations}
             />
           </main>
