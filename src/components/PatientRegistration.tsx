@@ -125,7 +125,6 @@ export function PatientRegistration({
       {/* Registration Form */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           <span className="animate-bounce inline-block">📝</span> Cadastrar Paciente
         </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -174,7 +173,6 @@ export function PatientRegistration({
       {/* Patient List */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           <span className="animate-pulse inline-block">👥</span> Pacientes Cadastrados ({activePatients.length})
         </h2>
         

@@ -2745,14 +2745,6 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             >
               Fechar
             </Button>
-            <Button
-              onClick={handleTestHourAnnouncement}
-              disabled={testingHourAudio || !currentTime}
-              className="gap-2 bg-blue-500 hover:bg-blue-600"
-            >
-              <Volume2 className="w-4 h-4" />
-              {testingHourAudio ? 'Gerando...' : 'Testar Hora Atual'}
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
