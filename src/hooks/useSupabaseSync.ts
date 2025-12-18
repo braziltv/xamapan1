@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+type CallType = 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+
 interface CallEvent {
   patient_name: string;
-  call_type: 'triage' | 'doctor';
+  call_type: CallType;
   destination?: string;
   unit_name: string;
 }
@@ -13,7 +15,7 @@ export function useSupabaseSync(unitName: string) {
 
   const createCall = useCallback(async (
     patientName: string,
-    callType: 'triage' | 'doctor',
+    callType: CallType,
     destination?: string
   ) => {
     // First, mark any existing active call of this type as completed
@@ -56,7 +58,7 @@ export function useSupabaseSync(unitName: string) {
   }, [unitName]);
 
   const completeCall = useCallback(async (
-    callType: 'triage' | 'doctor',
+    callType: CallType,
     completionType: 'completed' | 'withdrawal' = 'completed'
   ) => {
     // Get the active call to find the patient name

@@ -6,12 +6,13 @@ import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
 import { DoctorPanel } from '@/components/DoctorPanel';
+import { ServicePanel } from '@/components/ServicePanel';
 import { PublicDisplay } from '@/components/PublicDisplay';
 import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Megaphone } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
 
 const Index = () => {
@@ -83,8 +84,16 @@ const Index = () => {
     patients,
     waitingForTriage,
     waitingForDoctor,
+    waitingForEcg,
+    waitingForCurativos,
+    waitingForRaiox,
+    waitingForEnfermaria,
     currentTriageCall,
     currentDoctorCall,
+    currentEcgCall,
+    currentCurativosCall,
+    currentRaioxCall,
+    currentEnfermariaCall,
     history,
     isAudioEnabled,
     setIsAudioEnabled,
@@ -92,16 +101,32 @@ const Index = () => {
     removePatient,
     callPatientToTriage,
     callPatientToDoctor,
+    callPatientToEcg,
+    callPatientToCurativos,
+    callPatientToRaiox,
+    callPatientToEnfermaria,
     finishTriage,
     finishConsultation,
+    finishEcg,
+    finishCurativos,
+    finishRaiox,
+    finishEnfermaria,
     recallTriage,
     recallDoctor,
+    recallEcg,
+    recallCurativos,
+    recallRaiox,
+    recallEnfermaria,
     directPatient,
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
     sendToTriageQueue,
     sendToDoctorQueue,
+    sendToEcgQueue,
+    sendToCurativosQueue,
+    sendToRaioxQueue,
+    sendToEnfermariaQueue,
     updatePatientPriority,
     updatePatientObservations,
   } = useCallPanel();

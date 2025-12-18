@@ -83,8 +83,8 @@ const playPrioritySound = (priority: PatientPriority) => {
   }
 };
 
-export function useNewPatientSound(panelType: 'triage' | 'doctor', patients: Patient[]) {
-  const storageKey = panelType === 'triage' ? STORAGE_KEY_TRIAGE : STORAGE_KEY_DOCTOR;
+export function useNewPatientSound(panelType: string, patients: Patient[]) {
+  const storageKey = `${panelType}NewPatientSoundEnabled`;
   
   const [soundEnabled, setSoundEnabled] = useState(() => {
     const stored = localStorage.getItem(storageKey);

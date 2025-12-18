@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Patient, CallHistory } from '@/types/patient';
+import { Patient, CallHistory, PatientStatus } from '@/types/patient';
 import { useSupabaseSync } from './useSupabaseSync';
 import { supabase } from '@/integrations/supabase/client';
 import { getBrazilTime } from './useBrazilTime';
@@ -8,6 +8,10 @@ const STORAGE_KEYS = {
   PATIENTS: 'callPanel_patients',
   CURRENT_TRIAGE: 'callPanel_currentTriage',
   CURRENT_DOCTOR: 'callPanel_currentDoctor',
+  CURRENT_ECG: 'callPanel_currentEcg',
+  CURRENT_CURATIVOS: 'callPanel_currentCurativos',
+  CURRENT_RAIOX: 'callPanel_currentRaiox',
+  CURRENT_ENFERMARIA: 'callPanel_currentEnfermaria',
   HISTORY: 'callPanel_history',
   LAST_CALL_TIMESTAMP: 'callPanel_lastCallTimestamp',
 };
@@ -75,6 +79,27 @@ export function useCallPanel() {
     }
     return null;
   });
+
+  // Helper to create current call state from localStorage
+  const createCurrentCallState = (storageKey: string) => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed ? {
+          ...parsed,
+          createdAt: new Date(parsed.createdAt),
+          calledAt: parsed.calledAt ? new Date(parsed.calledAt) : undefined,
+        } : null;
+      } catch { return null; }
+    }
+    return null;
+  };
+
+  const [currentEcgCall, setCurrentEcgCall] = useState<Patient | null>(() => createCurrentCallState(STORAGE_KEYS.CURRENT_ECG));
+  const [currentCurativosCall, setCurrentCurativosCall] = useState<Patient | null>(() => createCurrentCallState(STORAGE_KEYS.CURRENT_CURATIVOS));
+  const [currentRaioxCall, setCurrentRaioxCall] = useState<Patient | null>(() => createCurrentCallState(STORAGE_KEYS.CURRENT_RAIOX));
+  const [currentEnfermariaCall, setCurrentEnfermariaCall] = useState<Patient | null>(() => createCurrentCallState(STORAGE_KEYS.CURRENT_ENFERMARIA));
 
   const [history, setHistory] = useState<CallHistory[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.HISTORY);
@@ -275,10 +300,26 @@ export function useCallPanel() {
   }, [currentDoctorCall]);
 
   useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_ECG, JSON.stringify(currentEcgCall));
+  }, [currentEcgCall]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_CURATIVOS, JSON.stringify(currentCurativosCall));
+  }, [currentCurativosCall]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_RAIOX, JSON.stringify(currentRaioxCall));
+  }, [currentRaioxCall]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_ENFERMARIA, JSON.stringify(currentEnfermariaCall));
+  }, [currentEnfermariaCall]);
+
+  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
   }, [history]);
 
-  const triggerCallEvent = useCallback((patient: Patient | { name: string }, caller: 'triage' | 'doctor', destination?: string) => {
+  const triggerCallEvent = useCallback((patient: Patient | { name: string }, caller: 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria', destination?: string) => {
     const callEvent = {
       patient,
       caller,
@@ -551,29 +592,231 @@ export function useCallPanel() {
     ));
   }, [createCall, triggerCallEvent]);
 
+  // Generic function to call patient to a service
+  const callPatientToService = useCallback((
+    patientId: string, 
+    serviceType: 'ecg' | 'curativos' | 'raiox' | 'enfermaria',
+    statusWaiting: PatientStatus,
+    statusInService: PatientStatus,
+    setCurrentCall: React.Dispatch<React.SetStateAction<Patient | null>>,
+    destination?: string
+  ) => {
+    setPatients(prev => {
+      const patient = prev.find(p => p.id === patientId);
+      if (!patient) return prev;
+
+      const updatedPatient: Patient = {
+        ...patient,
+        status: statusInService,
+        calledAt: new Date(),
+        calledBy: serviceType,
+        destination,
+      };
+
+      setCurrentCall(updatedPatient);
+      
+      setHistory(prevHistory => [{
+        id: `history-${Date.now()}`,
+        patient: updatedPatient,
+        calledAt: new Date(),
+        calledBy: serviceType,
+      }, ...prevHistory].slice(0, 20));
+
+      // Sync to Supabase
+      createCall(updatedPatient.name, serviceType, destination);
+      triggerCallEvent(updatedPatient, serviceType, destination);
+
+      return prev.map(p => p.id === patientId ? updatedPatient : p);
+    });
+  }, [createCall, triggerCallEvent]);
+
+  // ECG functions
+  const callPatientToEcg = useCallback((patientId: string, destination?: string) => {
+    callPatientToService(patientId, 'ecg', 'waiting-ecg', 'in-ecg', setCurrentEcgCall, destination || 'Sala de Eletrocardiograma');
+  }, [callPatientToService]);
+
+  const finishEcg = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    setPatients(prev => prev.filter(p => p.id !== patientId));
+    if (currentEcgCall?.id === patientId) {
+      setCurrentEcgCall(null);
+      completeCall('ecg', 'completed');
+    }
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentEcgCall, completeCall, unitName]);
+
+  const recallEcg = useCallback((destination?: string) => {
+    if (currentEcgCall) {
+      createCall(currentEcgCall.name, 'ecg', destination || 'Sala de Eletrocardiograma');
+      triggerCallEvent(currentEcgCall, 'ecg', destination || 'Sala de Eletrocardiograma');
+    }
+  }, [currentEcgCall, createCall, triggerCallEvent]);
+
+  // Curativos functions
+  const callPatientToCurativos = useCallback((patientId: string, destination?: string) => {
+    callPatientToService(patientId, 'curativos', 'waiting-curativos', 'in-curativos', setCurrentCurativosCall, destination || 'Sala de Curativos');
+  }, [callPatientToService]);
+
+  const finishCurativos = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    setPatients(prev => prev.filter(p => p.id !== patientId));
+    if (currentCurativosCall?.id === patientId) {
+      setCurrentCurativosCall(null);
+      completeCall('curativos', 'completed');
+    }
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentCurativosCall, completeCall, unitName]);
+
+  const recallCurativos = useCallback((destination?: string) => {
+    if (currentCurativosCall) {
+      createCall(currentCurativosCall.name, 'curativos', destination || 'Sala de Curativos');
+      triggerCallEvent(currentCurativosCall, 'curativos', destination || 'Sala de Curativos');
+    }
+  }, [currentCurativosCall, createCall, triggerCallEvent]);
+
+  // Raio X functions
+  const callPatientToRaiox = useCallback((patientId: string, destination?: string) => {
+    callPatientToService(patientId, 'raiox', 'waiting-raiox', 'in-raiox', setCurrentRaioxCall, destination || 'Sala de Raio X');
+  }, [callPatientToService]);
+
+  const finishRaiox = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    setPatients(prev => prev.filter(p => p.id !== patientId));
+    if (currentRaioxCall?.id === patientId) {
+      setCurrentRaioxCall(null);
+      completeCall('raiox', 'completed');
+    }
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentRaioxCall, completeCall, unitName]);
+
+  const recallRaiox = useCallback((destination?: string) => {
+    if (currentRaioxCall) {
+      createCall(currentRaioxCall.name, 'raiox', destination || 'Sala de Raio X');
+      triggerCallEvent(currentRaioxCall, 'raiox', destination || 'Sala de Raio X');
+    }
+  }, [currentRaioxCall, createCall, triggerCallEvent]);
+
+  // Enfermaria functions
+  const callPatientToEnfermaria = useCallback((patientId: string, destination?: string) => {
+    callPatientToService(patientId, 'enfermaria', 'waiting-enfermaria', 'in-enfermaria', setCurrentEnfermariaCall, destination || 'Enfermaria');
+  }, [callPatientToService]);
+
+  const finishEnfermaria = useCallback(async (patientId: string) => {
+    const patient = patientsRef.current.find(p => p.id === patientId);
+    setPatients(prev => prev.filter(p => p.id !== patientId));
+    if (currentEnfermariaCall?.id === patientId) {
+      setCurrentEnfermariaCall(null);
+      completeCall('enfermaria', 'completed');
+    }
+    if (unitName && patient) {
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('unit_name', unitName)
+        .eq('patient_name', patient.name)
+        .in('status', ['waiting', 'active']);
+    }
+  }, [currentEnfermariaCall, completeCall, unitName]);
+
+  const recallEnfermaria = useCallback((destination?: string) => {
+    if (currentEnfermariaCall) {
+      createCall(currentEnfermariaCall.name, 'enfermaria', destination || 'Enfermaria');
+      triggerCallEvent(currentEnfermariaCall, 'enfermaria', destination || 'Enfermaria');
+    }
+  }, [currentEnfermariaCall, createCall, triggerCallEvent]);
+
+  // Send to service queues WITHOUT TV announcement
+  const sendToEcgQueue = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-ecg' as PatientStatus, destination: 'Sala de Eletrocardiograma' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage', 'completed');
+    }
+  }, [currentTriageCall, completeCall]);
+
+  const sendToCurativosQueue = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-curativos' as PatientStatus, destination: 'Sala de Curativos' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage', 'completed');
+    }
+  }, [currentTriageCall, completeCall]);
+
+  const sendToRaioxQueue = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-raiox' as PatientStatus, destination: 'Sala de Raio X' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage', 'completed');
+    }
+  }, [currentTriageCall, completeCall]);
+
+  const sendToEnfermariaQueue = useCallback((patientId: string) => {
+    setPatients(prev => prev.map(p => 
+      p.id === patientId ? { ...p, status: 'waiting-enfermaria' as PatientStatus, destination: 'Enfermaria' } : p
+    ));
+    if (currentTriageCall?.id === patientId) {
+      setCurrentTriageCall(null);
+      completeCall('triage', 'completed');
+    }
+  }, [currentTriageCall, completeCall]);
+
   // Sort by priority first (emergency > priority > normal), then by time
   const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
   
-  const waitingForTriage = patients.filter(p => p.status === 'waiting')
-    .sort((a, b) => {
-      const priorityDiff = priorityOrder[a.priority || 'normal'] - priorityOrder[b.priority || 'normal'];
-      if (priorityDiff !== 0) return priorityDiff;
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    });
+  const sortByPriority = (a: Patient, b: Patient) => {
+    const priorityDiff = priorityOrder[a.priority || 'normal'] - priorityOrder[b.priority || 'normal'];
+    if (priorityDiff !== 0) return priorityDiff;
+    return a.createdAt.getTime() - b.createdAt.getTime();
+  };
 
-  const waitingForDoctor = patients.filter(p => p.status === 'waiting-doctor')
-    .sort((a, b) => {
-      const priorityDiff = priorityOrder[a.priority || 'normal'] - priorityOrder[b.priority || 'normal'];
-      if (priorityDiff !== 0) return priorityDiff;
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    });
+  const waitingForTriage = patients.filter(p => p.status === 'waiting').sort(sortByPriority);
+  const waitingForDoctor = patients.filter(p => p.status === 'waiting-doctor').sort(sortByPriority);
+  const waitingForEcg = patients.filter(p => p.status === 'waiting-ecg').sort(sortByPriority);
+  const waitingForCurativos = patients.filter(p => p.status === 'waiting-curativos').sort(sortByPriority);
+  const waitingForRaiox = patients.filter(p => p.status === 'waiting-raiox').sort(sortByPriority);
+  const waitingForEnfermaria = patients.filter(p => p.status === 'waiting-enfermaria').sort(sortByPriority);
 
   return {
     patients,
     waitingForTriage,
     waitingForDoctor,
+    waitingForEcg,
+    waitingForCurativos,
+    waitingForRaiox,
+    waitingForEnfermaria,
     currentTriageCall,
     currentDoctorCall,
+    currentEcgCall,
+    currentCurativosCall,
+    currentRaioxCall,
+    currentEnfermariaCall,
     history,
     isAudioEnabled,
     setIsAudioEnabled,
@@ -581,16 +824,32 @@ export function useCallPanel() {
     removePatient,
     callPatientToTriage,
     callPatientToDoctor,
+    callPatientToEcg,
+    callPatientToCurativos,
+    callPatientToRaiox,
+    callPatientToEnfermaria,
     finishTriage,
     finishConsultation,
+    finishEcg,
+    finishCurativos,
+    finishRaiox,
+    finishEnfermaria,
     recallTriage,
     recallDoctor,
+    recallEcg,
+    recallCurativos,
+    recallRaiox,
+    recallEnfermaria,
     directPatient,
     finishWithoutCall,
     forwardToTriage,
     forwardToDoctor,
     sendToTriageQueue,
     sendToDoctorQueue,
+    sendToEcgQueue,
+    sendToCurativosQueue,
+    sendToRaioxQueue,
+    sendToEnfermariaQueue,
     updatePatientPriority,
     updatePatientObservations,
   };
