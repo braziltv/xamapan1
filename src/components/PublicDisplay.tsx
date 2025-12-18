@@ -41,6 +41,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastTimeAnnouncementRef = useRef<number>(0); // timestamp da última chamada de hora
   const scheduledAnnouncementsRef = useRef<number[]>([]); // minutos agendados para anunciar
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
+  const initialAnnouncementScheduledRef = useRef<boolean>(false); // controla se já agendou primeiro anúncio
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
 
@@ -797,6 +798,44 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       delete (window as any).testarHora;
     };
   }, [currentTime, playHourAnnouncement]);
+
+  // Agendar primeiro anúncio de hora em 2 minutos após o áudio ser desbloqueado
+  useEffect(() => {
+    if (!audioUnlocked || !isSynced || initialAnnouncementScheduledRef.current) return;
+
+    const currentHour = currentTime?.getHours();
+    const isQuietHours = currentHour !== undefined && (currentHour >= 22 || currentHour < 6);
+    
+    if (isQuietHours) {
+      console.log('Initial hour announcement skipped - quiet hours');
+      return;
+    }
+
+    initialAnnouncementScheduledRef.current = true;
+    
+    const delayMs = 2 * 60 * 1000; // 2 minutos
+    console.log('Scheduling initial hour announcement in 2 minutes...');
+    
+    const timeout = setTimeout(() => {
+      if (!currentTime) return;
+      
+      const hour = currentTime.getHours();
+      const minute = currentTime.getMinutes();
+      
+      // Verificar se não está em horário de silêncio no momento do anúncio
+      const isQuietNow = hour >= 22 || hour < 6;
+      if (isQuietNow) {
+        console.log('Initial announcement cancelled - now in quiet hours');
+        return;
+      }
+      
+      console.log(`Playing initial hour announcement: ${hour}:${minute.toString().padStart(2, '0')}`);
+      playHourAnnouncement(hour, minute);
+      lastTimeAnnouncementRef.current = Date.now();
+    }, delayMs);
+
+    return () => clearTimeout(timeout);
+  }, [audioUnlocked, isSynced, currentTime, playHourAnnouncement]);
 
   // Announce time 3 times per hour at random moments (quiet hours: 23h-05h)
   useEffect(() => {
