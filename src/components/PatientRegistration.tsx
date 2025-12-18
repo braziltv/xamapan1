@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
+import { usePatientAddedSound } from '@/hooks/usePatientAddedSound';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { Button } from '@/components/ui/button';
@@ -99,6 +100,9 @@ export function PatientRegistration({
   // Auto-reload após 10 minutos de inatividade
   useInactivityReload();
 
+  // Som de notificação ao adicionar paciente
+  const { playAddedSound } = usePatientAddedSound();
+
   // Dicas aleatórias para acentuação
   const ACCENT_TIPS = [
     '💡 Dica: Acentue os nomes corretamente (ex: José, João, Luís) para melhor pronúncia no áudio!',
@@ -115,6 +119,7 @@ export function PatientRegistration({
       onAddPatient(name, selectedPriority);
       setName('');
       setSelectedPriority('normal');
+      playAddedSound();
       toast.success('Paciente cadastrado com sucesso!');
     }
   };
