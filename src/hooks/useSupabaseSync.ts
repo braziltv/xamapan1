@@ -18,16 +18,22 @@ export function useSupabaseSync(unitName: string) {
     callType: CallType,
     destination?: string
   ) => {
+    console.log('📞 Creating call:', { patientName, callType, destination, unitName });
+    
     // First, mark any existing active call of this type as completed
-    await supabase
+    const { error: updateError } = await supabase
       .from('patient_calls')
       .update({ status: 'completed', completed_at: new Date().toISOString() })
       .eq('unit_name', unitName)
       .eq('call_type', callType)
       .eq('status', 'active');
 
+    if (updateError) {
+      console.error('Error marking previous call as completed:', updateError);
+    }
+
     // Create new active call
-    const { error: callError } = await supabase
+    const { data: callData, error: callError } = await supabase
       .from('patient_calls')
       .insert({
         unit_name: unitName,
@@ -35,10 +41,14 @@ export function useSupabaseSync(unitName: string) {
         patient_name: patientName,
         destination: destination || null,
         status: 'active',
-      });
+      })
+      .select()
+      .single();
 
     if (callError) {
-      console.error('Error creating call:', callError);
+      console.error('❌ Error creating call:', callError);
+    } else {
+      console.log('✅ Call created successfully:', callData);
     }
 
     // Add to history

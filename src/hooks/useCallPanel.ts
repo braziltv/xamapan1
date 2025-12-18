@@ -196,8 +196,16 @@ export function useCallPanel() {
   useEffect(() => {
     if (!unitName) return;
 
+    console.log('📡 Setting up patient sync subscription for unit:', unitName);
+    
+    // Clear processed IDs on new subscription
+    processedCallIdsRef.current.clear();
+    
+    // Use unique channel name to avoid conflicts
+    const channelName = `patients-sync-${unitName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+
     const channel = supabase
-      .channel('patients-sync')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -208,9 +216,13 @@ export function useCallPanel() {
         },
         (payload) => {
           const call = payload.new as any;
+          console.log('🔔 Patient sync - received INSERT:', call.patient_name, call.call_type);
           
           // Skip if already processed
-          if (processedCallIdsRef.current.has(call.id)) return;
+          if (processedCallIdsRef.current.has(call.id)) {
+            console.log('⏭️ Skipping already processed call');
+            return;
+          }
           processedCallIdsRef.current.add(call.id);
           
           // Check if this patient already exists locally
@@ -238,6 +250,8 @@ export function useCallPanel() {
               calledBy: call.call_type === 'registration' ? undefined : call.call_type,
               destination: call.destination,
             };
+            
+            console.log('➕ Adding synced patient:', newPatient.name, 'status:', newPatient.status);
             
             setPatients(prev => {
               // Double-check to avoid duplicates
@@ -268,6 +282,7 @@ export function useCallPanel() {
         },
         (payload) => {
           const call = payload.new as any;
+          console.log('🔄 Patient sync - received UPDATE:', call.patient_name, call.status);
           
           // If status changed to completed, remove patient from local state
           if (call.status === 'completed') {
@@ -279,9 +294,15 @@ export function useCallPanel() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Patient sync subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Patient sync subscription active for:', unitName);
+        }
+      });
 
     return () => {
+      console.log('🔌 Cleaning up patient sync subscription');
       supabase.removeChannel(channel);
     };
   }, [unitName]);

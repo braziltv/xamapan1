@@ -1076,21 +1076,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     loadData();
   }, [unitName]);
 
-  // Subscribe to realtime updates
+  // Store callbacks in refs to avoid recreating the subscription
+  const speakNameRef = useRef(speakName);
+  const speakCustomTextRef = useRef(speakCustomText);
+  
   useEffect(() => {
+    speakNameRef.current = speakName;
+    speakCustomTextRef.current = speakCustomText;
+  }, [speakName, speakCustomText]);
+
+  // Subscribe to realtime updates - stable subscription without callback dependencies
+  useEffect(() => {
+    if (!unitName) {
+      console.log('No unit name, skipping realtime subscription');
+      return;
+    }
+
     console.log('Setting up realtime subscription for unit:', unitName);
     
+    // Clear processed calls on new subscription
+    processedCallsRef.current.clear();
+    
+    // Use unique channel name per unit to avoid conflicts
+    const channelName = `public-display-${unitName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+    
     const channel = supabase
-      .channel('public-display-calls')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
-          console.log('Received INSERT event:', payload);
+          console.log('🔔 Received INSERT event:', payload);
           const call = payload.new as any;
           
           // Skip empty unit_name calls
@@ -1098,18 +1119,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             console.log('Skipping call with empty unit_name');
             return;
           }
-          // If we have a unit filter, only accept matching calls
-          if (unitName && call.unit_name !== unitName) {
-            console.log('Skipping call for different unit:', call.unit_name, 'vs', unitName);
-            return;
-          }
+          
           if (processedCallsRef.current.has(call.id)) {
             console.log('Skipping already processed call:', call.id);
             return;
           }
           processedCallsRef.current.add(call.id);
 
-          console.log('Processing call:', call.patient_name, call.call_type, call.status);
+          console.log('📢 Processing call:', call.patient_name, call.call_type, call.status);
           
           if (call.status === 'active') {
             // Dispatch activity event to reset idle timer (anti-standby)
@@ -1118,7 +1135,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             // Handle custom announcements (just speak the text, no destination display)
             if (call.call_type === 'custom') {
               console.log('Custom announcement:', call.patient_name);
-              speakCustomText(call.patient_name);
+              speakCustomTextRef.current(call.patient_name);
             } else {
               if (call.call_type === 'triage') {
                 setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
@@ -1127,8 +1144,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }
               
               // Play audio announcement
-              console.log('About to call speakName...');
-              speakName(call.patient_name, call.call_type, call.destination || undefined);
+              console.log('🔊 About to call speakName...');
+              speakNameRef.current(call.patient_name, call.call_type, call.destination || undefined);
             }
           }
         }
@@ -1139,12 +1156,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'UPDATE',
           schema: 'public',
           table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const call = payload.new as any;
           
           if (!call.unit_name) return;
-          if (unitName && call.unit_name !== unitName) return;
 
           if (call.status === 'completed') {
             if (call.call_type === 'triage') {
@@ -1161,12 +1178,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const historyItem = payload.new as any;
           
           if (!historyItem.unit_name) return;
-          if (unitName && historyItem.unit_name !== unitName) return;
 
           setHistoryItems(prev => [{
             id: historyItem.id,
@@ -1182,6 +1199,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'DELETE',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const deletedItem = payload.old as any;
@@ -1193,12 +1211,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Realtime subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Successfully subscribed to realtime updates for unit:', unitName);
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Channel error - will retry...');
+        }
+      });
 
     return () => {
+      console.log('🔌 Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
-  }, [unitName, speakName]);
+  }, [unitName]);
 
   // Clock is managed by useBrazilTime hook
 
