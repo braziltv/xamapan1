@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
-
+import { useHourAudio } from '@/hooks/useHourAudio';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -11,7 +11,7 @@ import { StatisticsPanel } from '@/components/StatisticsPanel';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2 } from 'lucide-react';
+import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Volume2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -108,6 +108,7 @@ const Index = () => {
   } = useCallPanel();
 
   const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
+  const { playHourAudio, getHourText } = useHourAudio();
 
   // Função para testar chamada de paciente (temporário)
   const handleTestPatientTTS = async () => {
@@ -148,6 +149,22 @@ const Index = () => {
     } catch (error) {
       console.error('Erro ao testar TTS:', error);
       toast.error('Erro ao reproduzir áudio');
+    }
+  };
+
+  // Função para testar anúncio de hora (temporário)
+  const handleTestHourAnnouncement = async () => {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const text = getHourText(hour, minute);
+    toast.info(`Testando Matilda: "${text}"`);
+    
+    const success = await playHourAudio(hour, minute);
+    if (success) {
+      toast.success('Anúncio de hora reproduzido!');
+    } else {
+      toast.error('Erro ao reproduzir anúncio de hora');
     }
   };
 
@@ -276,17 +293,27 @@ const Index = () => {
               onUpdateObservations={updatePatientObservations}
             />
             
-            {/* Botão de teste temporário - REMOVER DEPOIS */}
+            {/* Botões de teste temporário - REMOVER DEPOIS */}
             <div className="mt-4 p-4 border border-dashed border-blue-500 rounded-lg bg-blue-500/10">
-              <p className="text-blue-600 dark:text-blue-400 text-sm mb-3 font-medium">🧪 Teste de Chamada de Paciente (Victor Power)</p>
-              <Button 
-                onClick={handleTestPatientTTS}
-                variant="outline"
-                className="gap-2"
-              >
-                <Volume2 className="w-4 h-4" />
-                Testar Chamada
-              </Button>
+              <p className="text-blue-600 dark:text-blue-400 text-sm mb-3 font-medium">🧪 Testes Temporários de Voz</p>
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  onClick={handleTestPatientTTS}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  Chamada (Victor Power)
+                </Button>
+                <Button 
+                  onClick={handleTestHourAnnouncement}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Clock className="w-4 h-4" />
+                  Hora (Matilda)
+                </Button>
+              </div>
             </div>
           </main>
           <InternalChat station="cadastro" />

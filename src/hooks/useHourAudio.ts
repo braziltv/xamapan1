@@ -141,8 +141,8 @@ export const useHourAudio = () => {
       
       console.log(`[useHourAudio] Gerando TTS para: "${text}"`);
 
-      // Voz Victor Power - Ebook otimizada para português brasileiro
-      const VICTOR_POWER_VOICE_ID = 'YNOujSUmHtgN6anjqXPf';
+      // Matilda voice - voz feminina calorosa otimizada para português brasileiro
+      const MATILDA_VOICE_ID = 'XrExE9yKIg1WjnnlVkGX';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
@@ -155,7 +155,7 @@ export const useHourAudio = () => {
           },
           body: JSON.stringify({ 
             text, 
-            voiceId: VICTOR_POWER_VOICE_ID,
+            voiceId: MATILDA_VOICE_ID,
             skipCache: true,
             unitName: 'TimeAnnouncement'
           }),
