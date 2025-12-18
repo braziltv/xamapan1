@@ -1590,7 +1590,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       </div>
 
-      {/* Audio Test Button - Discrete */}
+      {/* Audio Test Button - Discrete, bottom-left corner */}
+      <div className="fixed bottom-4 left-4 z-50 group">
+        <button
+          onClick={async () => {
+            if (!currentTime) {
+              console.log('[HourTest] No currentTime available');
+              return;
+            }
+            const hour = currentTime.getHours();
+            const minute = currentTime.getMinutes();
+            console.log(`[HourTest] Manual test: ${hour}:${minute.toString().padStart(2, '0')}`);
+            await playHourAnnouncement(hour, minute);
+          }}
+          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-amber-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+          title="Testar anúncio de hora"
+        >
+          <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Clock className="w-6 h-6 lg:w-8 lg:h-8 text-amber-400" />
+            <span className="text-[8px] lg:text-[10px] text-amber-400 font-medium">HORA</span>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
