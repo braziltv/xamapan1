@@ -8,6 +8,7 @@ import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useUnitSettings } from '@/hooks/useUnitSettings';
 import { useScheduledAnnouncements } from '@/hooks/useScheduledAnnouncements';
+import { useScheduledCommercialPhrases } from '@/hooks/useScheduledCommercialPhrases';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -49,7 +50,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
   
   // Voice setting - sync via database for cross-device updates (TV <-> operator)
-  const { voice: configuredVoice, commercialPhrases } = useUnitSettings(unitName || null);
+  const { voice: configuredVoice } = useUnitSettings(unitName || null);
+  
+  // Scheduled commercial phrases - uses new scheduled system
+  const { activePhrases: commercialPhrases } = useScheduledCommercialPhrases(unitName || null);
   
   // Also listen for localStorage changes as fallback for same-tab/window sync
   const [localVoice, setLocalVoice] = useState(() => 

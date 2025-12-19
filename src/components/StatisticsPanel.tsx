@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
 import { ScheduledAnnouncementsManager } from './ScheduledAnnouncementsManager';
+import { ScheduledCommercialPhrasesManager } from './ScheduledCommercialPhrasesManager';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,9 +71,6 @@ import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
-import { useUnitSettings } from '@/hooks/useUnitSettings';
-import { Textarea } from '@/components/ui/textarea';
-import { Megaphone, Save } from 'lucide-react';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -171,25 +169,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
   
-  // Estados para frases comerciais
-  const [phrase1, setPhrase1] = useState('');
-  const [phrase2, setPhrase2] = useState('');
-  const [phrase3, setPhrase3] = useState('');
-  const [savingPhrases, setSavingPhrases] = useState(false);
-  
   const { toast } = useToast();
   const { playHourAudio, checkAudiosExist } = useHourAudio();
   const { currentTime } = useBrazilTime();
-  const { commercialPhrases, updateCommercialPhrases } = useUnitSettings(currentUnitName || null);
-  
-  // Carregar frases comerciais do banco
-  useEffect(() => {
-    if (commercialPhrases.length > 0) {
-      setPhrase1(commercialPhrases[0] || '');
-      setPhrase2(commercialPhrases[1] || '');
-      setPhrase3(commercialPhrases[2] || '');
-    }
-  }, [commercialPhrases]);
 
   // Carregar dados do banco (detalhados + agregados)
   const loadDbHistory = useCallback(async () => {
@@ -1897,106 +1879,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </CardContent>
       </Card>
 
-      {/* Frases Comerciais para TV */}
-      <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-yellow-500/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2 text-amber-600 dark:text-amber-400">
-            <Megaphone className="w-5 h-5" />
-            Frases Comerciais (Rodapé da TV)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Digite até 3 frases que serão exibidas no rodapé da TV pública, junto com as notícias.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phrase1" className="text-sm font-medium">Frase 1</Label>
-              <Textarea
-                id="phrase1"
-                placeholder="Ex: Vacine-se! Campanha de vacinação disponível."
-                value={phrase1}
-                onChange={(e) => setPhrase1(e.target.value)}
-                className="min-h-[80px] resize-none"
-                maxLength={200}
-              />
-              <span className="text-xs text-muted-foreground">{phrase1.length}/200</span>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phrase2" className="text-sm font-medium">Frase 2</Label>
-              <Textarea
-                id="phrase2"
-                placeholder="Ex: Atendimento preferencial para idosos e gestantes."
-                value={phrase2}
-                onChange={(e) => setPhrase2(e.target.value)}
-                className="min-h-[80px] resize-none"
-                maxLength={200}
-              />
-              <span className="text-xs text-muted-foreground">{phrase2.length}/200</span>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phrase3" className="text-sm font-medium">Frase 3</Label>
-              <Textarea
-                id="phrase3"
-                placeholder="Ex: Mantenha sua carteira de vacinação em dia!"
-                value={phrase3}
-                onChange={(e) => setPhrase3(e.target.value)}
-                className="min-h-[80px] resize-none"
-                maxLength={200}
-              />
-              <span className="text-xs text-muted-foreground">{phrase3.length}/200</span>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button
-              onClick={async () => {
-                setSavingPhrases(true);
-                try {
-                  const success = await updateCommercialPhrases({
-                    phrase1: phrase1.trim(),
-                    phrase2: phrase2.trim(),
-                    phrase3: phrase3.trim(),
-                  });
-                  if (success) {
-                    toast({
-                      title: "Frases salvas",
-                      description: "As frases comerciais foram atualizadas e aparecerão no rodapé da TV.",
-                    });
-                  } else {
-                    toast({
-                      title: "Erro ao salvar",
-                      description: "Não foi possível salvar as frases. Tente novamente.",
-                      variant: "destructive",
-                    });
-                  }
-                } catch (error) {
-                  toast({
-                    title: "Erro ao salvar",
-                    description: "Ocorreu um erro inesperado.",
-                    variant: "destructive",
-                  });
-                } finally {
-                  setSavingPhrases(false);
-                }
-              }}
-              disabled={savingPhrases}
-              className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
-            >
-              {savingPhrases ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Salvar Frases
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Frases Comerciais Programadas para TV */}
+      <ScheduledCommercialPhrasesManager unitName={currentUnitName} />
 
       {/* Áudios de Propaganda Programados */}
       <ScheduledAnnouncementsManager unitName={currentUnitName} />

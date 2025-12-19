@@ -263,6 +263,51 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_commercial_phrases: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          display_order: number
+          end_time: string
+          id: string
+          is_active: boolean
+          phrase_content: string
+          start_time: string
+          unit_name: string
+          updated_at: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[]
+          display_order?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          phrase_content: string
+          start_time?: string
+          unit_name: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          display_order?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          phrase_content?: string
+          start_time?: string
+          unit_name?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       statistics_daily: {
         Row: {
           calls_by_destination: Json | null
