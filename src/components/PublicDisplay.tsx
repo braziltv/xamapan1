@@ -838,10 +838,43 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
 
-  // Generate a single announcement at the start of each hour (minute 0)
+  // Generate 4 random announcements per hour
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    console.log(`Hour ${hour} scheduled announcement at minute: 0`);
-    return [0]; // Apenas no início da hora
+    // Gerar 4 minutos aleatórios entre 0 e 59, garantindo pelo menos 10 min de distância
+    const announcements: number[] = [];
+    const usedMinutes = new Set<number>();
+    
+    // Primeiro anúncio: entre 0-14
+    const first = Math.floor(Math.random() * 15);
+    announcements.push(first);
+    for (let m = first - 9; m <= first + 9; m++) {
+      if (m >= 0 && m <= 59) usedMinutes.add(m);
+    }
+    
+    // Segundo anúncio: entre 15-29
+    let second = Math.floor(Math.random() * 15) + 15;
+    while (usedMinutes.has(second)) second = Math.floor(Math.random() * 15) + 15;
+    announcements.push(second);
+    for (let m = second - 9; m <= second + 9; m++) {
+      if (m >= 0 && m <= 59) usedMinutes.add(m);
+    }
+    
+    // Terceiro anúncio: entre 30-44
+    let third = Math.floor(Math.random() * 15) + 30;
+    while (usedMinutes.has(third)) third = Math.floor(Math.random() * 15) + 30;
+    announcements.push(third);
+    for (let m = third - 9; m <= third + 9; m++) {
+      if (m >= 0 && m <= 59) usedMinutes.add(m);
+    }
+    
+    // Quarto anúncio: entre 45-59
+    let fourth = Math.floor(Math.random() * 15) + 45;
+    while (usedMinutes.has(fourth)) fourth = Math.floor(Math.random() * 15) + 45;
+    announcements.push(fourth);
+    
+    announcements.sort((a, b) => a - b);
+    console.log(`Hour ${hour} scheduled announcements at minutes:`, announcements);
+    return announcements;
   }, []);
 
   // Expose test function on window for manual testing
