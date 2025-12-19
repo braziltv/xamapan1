@@ -4,6 +4,7 @@ import { searchNames, searchSurnames } from '@/data/brazilianNames';
 import { cn } from '@/lib/utils';
 import { correctAccents, suggestCorrection, hasAccents, getAccentCorrection } from '@/utils/accentCorrection';
 import { Undo2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NameAutocompleteProps {
   value: string;
@@ -243,7 +244,13 @@ export function NameAutocomplete({
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => value.length > 0 && updateSuggestions()}
-        onPaste={(e) => e.preventDefault()}
+        onPaste={(e) => {
+          e.preventDefault();
+          toast.warning('Colar não permitido', {
+            description: 'Por favor, digite o nome do paciente manualmente.',
+            duration: 3000,
+          });
+        }}
         placeholder={placeholder}
         className={cn("uppercase", className)}
         disabled={disabled}
