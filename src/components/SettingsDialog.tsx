@@ -24,7 +24,10 @@ interface VolumeSettings {
 // Vozes Google Cloud TTS disponíveis para pt-BR
 const GOOGLE_VOICES = {
   female: [
-    { id: 'pt-BR-Neural2-A', name: 'Neural2-A (Recomendada)', quality: 'premium' },
+    { id: 'pt-BR-Journey-F', name: 'Journey-F (Mais Natural)', quality: 'ultra' },
+    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra' },
+    { id: 'pt-BR-Studio-C', name: 'Studio-C (Profissional)', quality: 'premium' },
+    { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'premium' },
     { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium' },
     { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A', quality: 'high' },
     { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C', quality: 'high' },
@@ -32,7 +35,9 @@ const GOOGLE_VOICES = {
     { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard' },
   ],
   male: [
-    { id: 'pt-BR-Neural2-B', name: 'Neural2-B (Recomendada)', quality: 'premium' },
+    { id: 'pt-BR-Journey-D', name: 'Journey-D (Mais Natural)', quality: 'ultra' },
+    { id: 'pt-BR-Studio-B', name: 'Studio-B (Profissional)', quality: 'premium' },
+    { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'premium' },
     { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B', quality: 'high' },
     { id: 'pt-BR-Standard-B', name: 'Standard-B', quality: 'standard' },
   ]
