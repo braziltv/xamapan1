@@ -39,7 +39,6 @@ import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
-import { VoiceSelector } from '@/components/VoiceSelector';
 
 import {
   Tooltip,
@@ -162,9 +161,8 @@ export function DoctorPanel({
         </div>
       )}
 
-      {/* Sound Toggle & Voice Selector */}
-      <div className="flex justify-end gap-2 flex-wrap">
-        <VoiceSelector compact />
+      {/* Sound Toggle */}
+      <div className="flex justify-end">
         <Button 
           onClick={toggleSound} 
           variant="outline" 
