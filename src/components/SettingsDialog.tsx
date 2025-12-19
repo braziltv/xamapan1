@@ -511,7 +511,12 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                   value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Chirp3-HD-Achernar'} 
                   onValueChange={(value) => {
                     localStorage.setItem(PATIENT_CALL_VOICE_KEY, value);
-                    toast.success('Voz de chamada atualizada');
+                    // Dispatch storage event for cross-tab sync (same tab won't receive it natively)
+                    window.dispatchEvent(new StorageEvent('storage', {
+                      key: PATIENT_CALL_VOICE_KEY,
+                      newValue: value,
+                    }));
+                    toast.success('Voz atualizada! A próxima chamada usará a nova voz.');
                   }}
                 >
                   <SelectTrigger className="bg-background">
