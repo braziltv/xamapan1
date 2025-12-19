@@ -6,11 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { setManualThemeOverride } from './AutoNightMode';
 import { useUnitSettings } from '@/hooks/useUnitSettings';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SettingsDialogProps {
   trigger?: React.ReactNode;
@@ -78,13 +77,6 @@ const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
 
-// Password protection constants (same as AdminPasswordProtection)
-const DEFAULT_SETTINGS_PASSWORD = 'Paineiras@1';
-const SETTINGS_PASSWORD_STORAGE_KEY = 'adminPassword';
-const SETTINGS_AUTH_SESSION_KEY = 'settingsAuthenticated';
-const SETTINGS_AUTH_EXPIRY_KEY = 'settingsAuthExpiry';
-const SETTINGS_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
-
 export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
@@ -92,48 +84,6 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
   const [isTestingGoogleTTS, setIsTestingGoogleTTS] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
-  
-  // Password protection state
-  const [isSettingsAuthenticated, setIsSettingsAuthenticated] = useState(false);
-  const [settingsPassword, setSettingsPassword] = useState('');
-  const [showSettingsPassword, setShowSettingsPassword] = useState(false);
-  
-  // Check for existing valid session on dialog open
-  const checkSettingsSession = useCallback(() => {
-    const authenticated = localStorage.getItem(SETTINGS_AUTH_SESSION_KEY) === 'true';
-    const expiry = localStorage.getItem(SETTINGS_AUTH_EXPIRY_KEY);
-    
-    if (authenticated && expiry) {
-      const expiryTime = parseInt(expiry, 10);
-      if (Date.now() < expiryTime) {
-        setIsSettingsAuthenticated(true);
-        return;
-      } else {
-        // Session expired
-        localStorage.removeItem(SETTINGS_AUTH_SESSION_KEY);
-        localStorage.removeItem(SETTINGS_AUTH_EXPIRY_KEY);
-      }
-    }
-    setIsSettingsAuthenticated(false);
-  }, []);
-  
-  const handleSettingsPasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const storedPassword = localStorage.getItem(SETTINGS_PASSWORD_STORAGE_KEY) || DEFAULT_SETTINGS_PASSWORD;
-    
-    if (settingsPassword === storedPassword) {
-      // Create session
-      const expiry = Date.now() + SETTINGS_SESSION_DURATION;
-      localStorage.setItem(SETTINGS_AUTH_SESSION_KEY, 'true');
-      localStorage.setItem(SETTINGS_AUTH_EXPIRY_KEY, String(expiry));
-      setIsSettingsAuthenticated(true);
-      setSettingsPassword('');
-      toast.success('Acesso às configurações liberado');
-    } else {
-      toast.error('Senha incorreta');
-      setSettingsPassword('');
-    }
-  };
   
   // Sync voice settings via database
   const { voice: syncedVoice, updateVoice } = useUnitSettings(unitName || null);
@@ -420,12 +370,7 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
   const ptVoices = availableVoices.filter(v => v.lang.includes('pt'));
 
   return (
-    <Dialog onOpenChange={(open) => { 
-      if (open) {
-        loadVoices(); 
-        checkSettingsSession();
-      }
-    }}>
+    <Dialog onOpenChange={(open) => { if (open) loadVoices(); }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
@@ -441,45 +386,6 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
           </DialogTitle>
         </DialogHeader>
 
-        {!isSettingsAuthenticated ? (
-          <div className="py-8">
-            <div className="text-center mb-6">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Lock className="w-8 h-8 text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Digite a senha para acessar as configurações
-              </p>
-            </div>
-            <form onSubmit={handleSettingsPasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="settings-password">Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="settings-password"
-                    type={showSettingsPassword ? 'text' : 'password'}
-                    value={settingsPassword}
-                    onChange={(e) => setSettingsPassword(e.target.value)}
-                    placeholder="Digite a senha"
-                    className="pr-10"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSettingsPassword(!showSettingsPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showSettingsPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-              <Button type="submit" className="w-full gap-2">
-                <ShieldCheck className="w-4 h-4" />
-                Acessar Configurações
-              </Button>
-            </form>
-          </div>
-        ) : (
         <div className="space-y-6 py-4">
           {/* Auto Night Mode Section */}
           <div className="space-y-4">
@@ -919,7 +825,6 @@ export function SettingsDialog({ trigger, unitName }: SettingsDialogProps) {
             </div>
           )}
         </div>
-        )}
       </DialogContent>
     </Dialog>
   );

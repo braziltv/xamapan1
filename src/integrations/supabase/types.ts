@@ -197,117 +197,6 @@ export type Database = {
         }
         Relationships: []
       }
-      scheduled_announcements: {
-        Row: {
-          audio_cache_url: string | null
-          audio_generated_at: string | null
-          audio_type: string
-          created_at: string
-          custom_audio_url: string | null
-          days_of_week: number[]
-          end_time: string
-          id: string
-          interval_minutes: number
-          is_active: boolean
-          last_played_at: string | null
-          repeat_count: number
-          start_time: string
-          text_content: string
-          title: string
-          unit_name: string
-          updated_at: string
-          valid_from: string
-          valid_until: string
-        }
-        Insert: {
-          audio_cache_url?: string | null
-          audio_generated_at?: string | null
-          audio_type?: string
-          created_at?: string
-          custom_audio_url?: string | null
-          days_of_week?: number[]
-          end_time?: string
-          id?: string
-          interval_minutes?: number
-          is_active?: boolean
-          last_played_at?: string | null
-          repeat_count?: number
-          start_time?: string
-          text_content: string
-          title: string
-          unit_name: string
-          updated_at?: string
-          valid_from?: string
-          valid_until?: string
-        }
-        Update: {
-          audio_cache_url?: string | null
-          audio_generated_at?: string | null
-          audio_type?: string
-          created_at?: string
-          custom_audio_url?: string | null
-          days_of_week?: number[]
-          end_time?: string
-          id?: string
-          interval_minutes?: number
-          is_active?: boolean
-          last_played_at?: string | null
-          repeat_count?: number
-          start_time?: string
-          text_content?: string
-          title?: string
-          unit_name?: string
-          updated_at?: string
-          valid_from?: string
-          valid_until?: string
-        }
-        Relationships: []
-      }
-      scheduled_commercial_phrases: {
-        Row: {
-          created_at: string
-          days_of_week: number[]
-          display_order: number
-          end_time: string
-          id: string
-          is_active: boolean
-          phrase_content: string
-          start_time: string
-          unit_name: string
-          updated_at: string
-          valid_from: string
-          valid_until: string
-        }
-        Insert: {
-          created_at?: string
-          days_of_week?: number[]
-          display_order?: number
-          end_time?: string
-          id?: string
-          is_active?: boolean
-          phrase_content: string
-          start_time?: string
-          unit_name: string
-          updated_at?: string
-          valid_from?: string
-          valid_until?: string
-        }
-        Update: {
-          created_at?: string
-          days_of_week?: number[]
-          display_order?: number
-          end_time?: string
-          id?: string
-          is_active?: boolean
-          phrase_content?: string
-          start_time?: string
-          unit_name?: string
-          updated_at?: string
-          valid_from?: string
-          valid_until?: string
-        }
-        Relationships: []
-      }
       statistics_daily: {
         Row: {
           calls_by_destination: Json | null
@@ -370,27 +259,18 @@ export type Database = {
       }
       unit_settings: {
         Row: {
-          commercial_phrase_1: string | null
-          commercial_phrase_2: string | null
-          commercial_phrase_3: string | null
           created_at: string
           patient_call_voice: string | null
           unit_name: string
           updated_at: string
         }
         Insert: {
-          commercial_phrase_1?: string | null
-          commercial_phrase_2?: string | null
-          commercial_phrase_3?: string | null
           created_at?: string
           patient_call_voice?: string | null
           unit_name: string
           updated_at?: string
         }
         Update: {
-          commercial_phrase_1?: string | null
-          commercial_phrase_2?: string | null
-          commercial_phrase_3?: string | null
           created_at?: string
           patient_call_voice?: string | null
           unit_name?: string

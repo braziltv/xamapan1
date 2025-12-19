@@ -1,8 +1,5 @@
 project_id = "zxgmmdbffzmaxwfgdwlu"
 
-[functions.generate-announcement-audio]
-verify_jwt = false
-
 [functions.compact-statistics]
 verify_jwt = false
 

@@ -7,8 +7,6 @@ import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useUnitSettings } from '@/hooks/useUnitSettings';
-import { useScheduledAnnouncements } from '@/hooks/useScheduledAnnouncements';
-import { useScheduledCommercialPhrases } from '@/hooks/useScheduledCommercialPhrases';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -51,9 +49,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   
   // Voice setting - sync via database for cross-device updates (TV <-> operator)
   const { voice: configuredVoice } = useUnitSettings(unitName || null);
-  
-  // Scheduled commercial phrases - uses new scheduled system
-  const { activePhrases: commercialPhrases } = useScheduledCommercialPhrases(unitName || null);
   
   // Also listen for localStorage changes as fallback for same-tab/window sync
   const [localVoice, setLocalVoice] = useState(() => 
@@ -1068,73 +1063,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     [playNotificationSound, speakWithGoogleTTS]
   );
 
-  // Play scheduled announcement with configurable repeat count
-  // Uses cached audio URL if available, otherwise falls back to TTS generation
-  const playScheduledAnnouncement = useCallback(
-    async (announcement: { audio_cache_url: string | null; text_content: string; title: string }, repeatCount: number) => {
-      console.log('📢 Playing scheduled announcement:', { 
-        title: announcement.title, 
-        hasCachedAudio: !!announcement.audio_cache_url,
-        repeatCount 
-      });
-
-      // Prevent overlap
-      if (isSpeakingRef.current) {
-        console.log('⏸️ Already speaking, skipping scheduled announcement');
-        return;
-      }
-
-      isSpeakingRef.current = true;
-
-      try {
-        for (let i = 0; i < repeatCount; i++) {
-          console.log(`📢 Scheduled announcement iteration ${i + 1}/${repeatCount}`);
-
-          // Play notification sound first
-          await playNotificationSound();
-
-          // Use cached audio if available, otherwise generate via TTS
-          if (announcement.audio_cache_url) {
-            console.log('📢 Using cached audio:', announcement.audio_cache_url);
-            const audio = new Audio(announcement.audio_cache_url);
-            audio.volume = parseFloat(localStorage.getItem('volume-tts') || '1');
-            
-            await new Promise<void>((resolve, reject) => {
-              audio.onended = () => resolve();
-              audio.onerror = (e) => reject(e);
-              audio.play().catch(reject);
-            });
-          } else {
-            console.log('📢 No cached audio, using TTS');
-            await speakWithGoogleTTS(announcement.text_content);
-          }
-          
-          console.log(`✅ Scheduled announcement iteration ${i + 1} completed`);
-
-          // Small pause between repetitions (only if not the last iteration)
-          if (i < repeatCount - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 800));
-          }
-        }
-        console.log('✅ Scheduled announcement completed');
-      } catch (e) {
-        console.error('❌ Scheduled announcement failed:', e);
-      } finally {
-        isSpeakingRef.current = false;
-      }
-    },
-    [playNotificationSound, speakWithGoogleTTS]
-  );
-
-  // Initialize scheduled announcements hook
-  useScheduledAnnouncements({
-    unitName: unitName || null,
-    audioUnlocked,
-    isSpeaking: isSpeakingRef.current,
-    voice: activeVoice,
-    onPlayAnnouncement: playScheduledAnnouncement,
-  });
-
   const speakName = useCallback(
     async (
       name: string,
@@ -1889,39 +1817,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="animate-marquee whitespace-nowrap inline-flex items-center h-full">
               {(() => {
                 const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                // Add commercial phrases as special items
-                const commercialItems = commercialPhrases.map(phrase => ({
-                  title: phrase,
-                  source: 'Aviso',
-                  link: ''
-                }));
-                
-                const itemsWithExtras: typeof newsItems = [];
-                let commercialIndex = 0;
-                
+                const itemsWithCredits: typeof newsItems = [];
                 newsItems.forEach((item, index) => {
-                  itemsWithExtras.push(item);
-                  // Insert commercial phrase every 2 news items (if available)
-                  if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
-                    itemsWithExtras.push(commercialItems[commercialIndex]);
-                    commercialIndex++;
-                  }
-                  // Insert credits every 3 news items
+                  itemsWithCredits.push(item);
                   if ((index + 1) % 3 === 0) {
-                    itemsWithExtras.push(creditItem);
+                    itemsWithCredits.push(creditItem);
                   }
                 });
                 
-                // Add remaining commercial items at the end
-                while (commercialIndex < commercialItems.length) {
-                  itemsWithExtras.push(commercialItems[commercialIndex]);
-                  commercialIndex++;
-                }
-                
-                return itemsWithExtras.map((item, index) => (
+                return itemsWithCredits.map((item, index) => (
                   <span key={index} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
                     <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
-                      item.source === 'Aviso' ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-emerald-900 animate-pulse' :
                       item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
                       item.source === 'G1' ? 'bg-red-500 text-white' : 
                       item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1955,7 +1861,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       item.source === 'ESPN' ? 'bg-red-800 text-white' :
                       'bg-gray-500 text-white'
                     }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
-                      {item.source === 'Créditos' ? '⭐' : item.source === 'Aviso' ? '📢' : item.source}
+                      {item.source === 'Créditos' ? '⭐' : item.source}
                     </span>
                     <span>{item.title}</span>
                     <span className="text-slate-600 mx-[0.5vw]">•</span>
@@ -1964,39 +1870,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               })()}
               {(() => {
                 const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                // Add commercial phrases as special items
-                const commercialItems = commercialPhrases.map(phrase => ({
-                  title: phrase,
-                  source: 'Aviso',
-                  link: ''
-                }));
-                
-                const itemsWithExtras: typeof newsItems = [];
-                let commercialIndex = 0;
-                
+                const itemsWithCredits: typeof newsItems = [];
                 newsItems.forEach((item, index) => {
-                  itemsWithExtras.push(item);
-                  // Insert commercial phrase every 2 news items (if available)
-                  if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
-                    itemsWithExtras.push(commercialItems[commercialIndex]);
-                    commercialIndex++;
-                  }
-                  // Insert credits every 3 news items
+                  itemsWithCredits.push(item);
                   if ((index + 1) % 3 === 0) {
-                    itemsWithExtras.push(creditItem);
+                    itemsWithCredits.push(creditItem);
                   }
                 });
                 
-                // Add remaining commercial items at the end
-                while (commercialIndex < commercialItems.length) {
-                  itemsWithExtras.push(commercialItems[commercialIndex]);
-                  commercialIndex++;
-                }
-                
-                return itemsWithExtras.map((item, index) => (
+                return itemsWithCredits.map((item, index) => (
                   <span key={`dup-${index}`} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
                     <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
-                      item.source === 'Aviso' ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-emerald-900 animate-pulse' :
                       item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
                       item.source === 'G1' ? 'bg-red-500 text-white' : 
                       item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -2030,7 +1914,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       item.source === 'ESPN' ? 'bg-red-800 text-white' :
                       'bg-gray-500 text-white'
                     }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
-                      {item.source === 'Créditos' ? '⭐' : item.source === 'Aviso' ? '📢' : item.source}
+                      {item.source === 'Créditos' ? '⭐' : item.source}
                     </span>
                     <span>{item.title}</span>
                     <span className="text-slate-600 mx-[0.5vw]">•</span>
