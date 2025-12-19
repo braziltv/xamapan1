@@ -75,26 +75,43 @@ export function useUnitSettings(unitName: string | null) {
 
     console.log('📡 Setting up realtime subscription for unit_settings:', unitName);
     
+    // Use a simple channel name without special characters
+    const channelName = `unit-settings-${Date.now()}`;
+    
     const channel = supabase
-      .channel(`unit_settings_${unitName}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'unit_settings',
-          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
-          console.log('📡 Unit settings changed (realtime):', payload);
-          const newData = payload.new as { patient_call_voice?: string };
-          if (newData?.patient_call_voice) {
-            setSettings({ patient_call_voice: newData.patient_call_voice });
+          // Filter by unit_name in the callback to avoid filter encoding issues
+          const newData = payload.new as { unit_name?: string; patient_call_voice?: string };
+          if (newData?.unit_name === unitName) {
+            console.log('📡 Unit settings changed (realtime):', payload);
+            if (newData.patient_call_voice !== undefined) {
+              setSettings({ patient_call_voice: newData.patient_call_voice });
+              // Also update localStorage for immediate local fallback
+              localStorage.setItem('patientCallVoice', newData.patient_call_voice || DEFAULT_VOICE);
+              // Dispatch event for other components
+              window.dispatchEvent(new CustomEvent('voiceSettingChanged', { 
+                detail: { voice: newData.patient_call_voice || DEFAULT_VOICE } 
+              }));
+            }
           }
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Unit settings subscription status:', status);
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Unit settings subscription active');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Unit settings subscription error:', err);
+        } else {
+          console.log('📡 Unit settings subscription status:', status);
+        }
       });
 
     return () => {
