@@ -259,18 +259,27 @@ export type Database = {
       }
       unit_settings: {
         Row: {
+          commercial_phrase_1: string | null
+          commercial_phrase_2: string | null
+          commercial_phrase_3: string | null
           created_at: string
           patient_call_voice: string | null
           unit_name: string
           updated_at: string
         }
         Insert: {
+          commercial_phrase_1?: string | null
+          commercial_phrase_2?: string | null
+          commercial_phrase_3?: string | null
           created_at?: string
           patient_call_voice?: string | null
           unit_name: string
           updated_at?: string
         }
         Update: {
+          commercial_phrase_1?: string | null
+          commercial_phrase_2?: string | null
+          commercial_phrase_3?: string | null
           created_at?: string
           patient_call_voice?: string | null
           unit_name?: string
