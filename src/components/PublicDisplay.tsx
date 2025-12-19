@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
+import { useUnitSettings } from '@/hooks/useUnitSettings';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -46,23 +47,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
   
-  // Voice setting - sync across tabs/windows
-  const [configuredVoice, setConfiguredVoice] = useState(() => 
+  // Voice setting - sync via database for cross-device updates (TV <-> operator)
+  const { voice: configuredVoice } = useUnitSettings(unitName || null);
+  
+  // Also listen for localStorage changes as fallback for same-tab/window sync
+  const [localVoice, setLocalVoice] = useState(() => 
     localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A'
   );
   
-  // Listen for voice setting changes (custom event for immediate same-tab sync)
+  // Use database-synced voice (priority) or fallback to localStorage
+  const activeVoice = configuredVoice || localVoice;
+  
+  // Listen for localStorage changes (fallback for same-tab sync)
   useEffect(() => {
     const handleVoiceChange = (e: CustomEvent<{ voice: string }>) => {
       console.log('🔊 Voice setting changed (custom event):', e.detail.voice);
-      setConfiguredVoice(e.detail.voice);
+      setLocalVoice(e.detail.voice);
     };
     
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'patientCallVoice' || e.key === 'googleVoiceFemale') {
         const newVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
         console.log('🔊 Voice setting changed (storage):', newVoice);
-        setConfiguredVoice(newVoice);
+        setLocalVoice(newVoice);
       }
     };
     
@@ -73,6 +80,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+  
+  // Log when voice changes from database
+  useEffect(() => {
+    console.log('🔊 Active voice (synced from DB):', activeVoice);
+  }, [activeVoice]);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -657,8 +669,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
-      // Use configured voice from state (synced across tabs)
-      console.log('🎙️ Using voice:', configuredVoice);
+      // Use configured voice from state (synced via database)
+      console.log('🎙️ Using voice:', activeVoice);
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
@@ -667,7 +679,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice });
+      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: activeVoice });
 
       // Generate unified audio with name + destination in a single API call
       const response = await fetch(url, {
@@ -679,7 +691,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             prefix: '',
             destination: cleanDestination,
           },
-          voiceName: configuredVoice,
+          voiceName: activeVoice,
         }),
       });
 
@@ -705,7 +717,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       await playSimpleAudio(audioBuffer, ttsVolume);
       console.log('✅ Audio playback finished');
     },
-    [playSimpleAudio, configuredVoice]
+    [playSimpleAudio, activeVoice]
   );
 
   const speakWithGoogleTTS = useCallback(
@@ -715,8 +727,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
-      // Use configured voice from state (synced across tabs)
-      console.log('🎙️ Using voice:', configuredVoice);
+      // Use configured voice from state (synced via database)
+      console.log('🎙️ Using voice:', activeVoice);
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -727,7 +739,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text, voiceName: configuredVoice }),
+          body: JSON.stringify({ text, voiceName: activeVoice }),
         }
       );
 
@@ -740,7 +752,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audioBuffer = await response.arrayBuffer();
       await playSimpleAudio(audioBuffer, ttsVolume);
     },
-    [playSimpleAudio, configuredVoice]
+    [playSimpleAudio, activeVoice]
   );
 
   // Test audio function
@@ -974,7 +986,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('Speaking destination phrase:', phrase);
       
       const ttsVolume = readVolume('volume-tts', 1);
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -985,7 +996,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: phrase, voiceName: configuredVoice }),
+          body: JSON.stringify({ text: phrase, voiceName: activeVoice }),
         }
       );
 

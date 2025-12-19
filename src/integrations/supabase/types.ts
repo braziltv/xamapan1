@@ -257,6 +257,27 @@ export type Database = {
         }
         Relationships: []
       }
+      unit_settings: {
+        Row: {
+          created_at: string
+          patient_call_voice: string | null
+          unit_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          patient_call_voice?: string | null
+          unit_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          patient_call_voice?: string | null
+          unit_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       weather_cache: {
         Row: {
           city_name: string
