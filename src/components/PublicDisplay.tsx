@@ -752,56 +752,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithGoogleTTS]);
 
-  // Play time notification sound (different from patient call notification - softer tone)
-  const playTimeNotificationSound = useCallback(() => {
-    console.log('playTimeNotificationSound called');
-    
-    return new Promise<void>((resolve) => {
-      try {
-        // Get volume from localStorage
-        const timeNotificationVolume = parseFloat(localStorage.getItem('volume-time-notification') || '1');
-        
-        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (!audioContextRef.current) audioContextRef.current = audioContext;
-        
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-        
-        // Create a softer, distinct chime for time announcements (two ascending tones)
-        const playTone = (frequency: number, startTime: number, duration: number) => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.type = 'sine'; // Softer sine wave instead of triangle
-          oscillator.frequency.value = frequency;
-          
-          // Gentle envelope with volume control
-          const maxGain = 0.3 * timeNotificationVolume;
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-          gainNode.gain.linearRampToValueAtTime(maxGain, audioContext.currentTime + startTime + 0.05);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.start(audioContext.currentTime + startTime);
-          oscillator.stop(audioContext.currentTime + startTime + duration);
-        };
-        
-        // Two soft ascending tones (G5 -> C6) - different from patient notification
-        playTone(784, 0, 0.3);      // G5
-        playTone(1047, 0.25, 0.4);  // C6
-        
-        setTimeout(resolve, 700);
-      } catch (e) {
-        console.warn('Failed to play time notification:', e);
-        resolve();
-      }
-    });
-  }, []);
-
-  // Play hour announcement using pre-cached audio (concatenating hour + minute) - repeats 2x with notification before each
+  // Play hour announcement using OFFLINE audio files - repeats 2x WITHOUT notification sound
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
       console.log('Audio not unlocked, skipping hour announcement');
@@ -815,9 +766,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
 
     try {
-      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
+      console.log(`Playing OFFLINE hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
 
-      // Repeat the announcement 2 times, each with notification sound before
+      // Repeat the announcement 2 times WITHOUT notification sound
       for (let i = 0; i < 2; i++) {
         // Abort if a patient call starts mid-way
         if (announcingType || isSpeakingRef.current) {
@@ -827,12 +778,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         console.log(`Hour announcement iteration ${i + 1}/2`);
 
-        // Play distinct notification sound before hour announcement
-        await playTimeNotificationSound();
-
-        // Abort again after notification
+        // Abort again before playback
         if (announcingType || isSpeakingRef.current) {
-          console.log('Patient announcement started, aborting hour announcement after notification');
+          console.log('Patient announcement started, aborting hour announcement');
           return;
         }
 
@@ -853,7 +801,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
     }
-  }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
+  }, [audioUnlocked, playHourAudio, announcingType]);
 
   // Generate a single announcement at the start of each hour (minute 0)
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {

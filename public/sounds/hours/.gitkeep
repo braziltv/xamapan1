@@ -1,0 +1,12 @@
+# Pasta para arquivos de áudio de horas (OFFLINE)
+#
+# Estrutura esperada:
+# - HRS00.mp3 a HRS23.mp3 - horas com minutos (ex: "São 14 horas")
+# - HRS00_O.mp3 a HRS23_O.mp3 - horas inteiras/em ponto (ex: "São 14 horas em ponto")  
+# - MIN01.mp3 a MIN59.mp3 - minutos (ex: "e 30 minutos")
+#
+# Total de arquivos esperados:
+# - 24 arquivos HRS (HRS00 a HRS23)
+# - 24 arquivos HRS_O (HRS00_O a HRS23_O)
+# - 59 arquivos MIN (MIN01 a MIN59)
+# = 107 arquivos MP3
