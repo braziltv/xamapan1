@@ -138,8 +138,8 @@ export function NameAutocomplete({
 
   // Handler de mudança com correção automática ao digitar espaço
   const handleChange = useCallback((newValue: string) => {
-    // Converte automaticamente para maiúsculas
-    newValue = newValue.toUpperCase();
+    // Remove números e converte automaticamente para maiúsculas
+    newValue = newValue.replace(/[0-9]/g, '').toUpperCase();
     const oldValue = value;
     const oldWords = oldValue.split(' ');
     const newWords = newValue.split(' ');
