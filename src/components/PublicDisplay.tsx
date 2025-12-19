@@ -51,33 +51,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A'
   );
   
-  // Listen for localStorage changes (cross-tab sync for voice settings)
+  // Listen for voice setting changes (custom event for immediate same-tab sync)
   useEffect(() => {
+    const handleVoiceChange = (e: CustomEvent<{ voice: string }>) => {
+      console.log('🔊 Voice setting changed (custom event):', e.detail.voice);
+      setConfiguredVoice(e.detail.voice);
+    };
+    
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'patientCallVoice' || e.key === 'googleVoiceFemale') {
         const newVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
-        console.log('🔊 Voice setting changed:', newVoice);
+        console.log('🔊 Voice setting changed (storage):', newVoice);
         setConfiguredVoice(newVoice);
       }
     };
     
+    window.addEventListener('voiceSettingChanged', handleVoiceChange as EventListener);
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-  
-  // Also check localStorage periodically for same-tab updates
-  useEffect(() => {
-    const checkVoiceSetting = () => {
-      const currentVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
-      if (currentVoice !== configuredVoice) {
-        console.log('🔊 Voice setting updated (poll):', currentVoice);
-        setConfiguredVoice(currentVoice);
-      }
+    return () => {
+      window.removeEventListener('voiceSettingChanged', handleVoiceChange as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
     };
-    // Check every 2 seconds
-    const interval = setInterval(checkVoiceSetting, 2000);
-    return () => clearInterval(interval);
-  }, [configuredVoice]);
+  }, []);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);

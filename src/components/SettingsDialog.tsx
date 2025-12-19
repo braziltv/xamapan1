@@ -511,7 +511,9 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                   value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Chirp3-HD-Achernar'} 
                   onValueChange={(value) => {
                     localStorage.setItem(PATIENT_CALL_VOICE_KEY, value);
-                    // Dispatch storage event for cross-tab sync (same tab won't receive it natively)
+                    // Dispatch custom event for immediate same-tab sync
+                    window.dispatchEvent(new CustomEvent('voiceSettingChanged', { detail: { voice: value } }));
+                    // Also dispatch storage event for cross-tab sync
                     window.dispatchEvent(new StorageEvent('storage', {
                       key: PATIENT_CALL_VOICE_KEY,
                       newValue: value,
