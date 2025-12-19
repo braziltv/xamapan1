@@ -7,6 +7,7 @@ import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useUnitSettings } from '@/hooks/useUnitSettings';
+import { useScheduledAnnouncements } from '@/hooks/useScheduledAnnouncements';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -1062,6 +1063,54 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     },
     [playNotificationSound, speakWithGoogleTTS]
   );
+
+  // Play scheduled announcement with configurable repeat count
+  const playScheduledAnnouncement = useCallback(
+    async (text: string, repeatCount: number) => {
+      console.log('📢 Playing scheduled announcement:', { text, repeatCount });
+
+      // Prevent overlap
+      if (isSpeakingRef.current) {
+        console.log('⏸️ Already speaking, skipping scheduled announcement');
+        return;
+      }
+
+      isSpeakingRef.current = true;
+
+      try {
+        for (let i = 0; i < repeatCount; i++) {
+          console.log(`📢 Scheduled announcement iteration ${i + 1}/${repeatCount}`);
+
+          // Play notification sound first
+          await playNotificationSound();
+
+          // Use Google Cloud TTS with configured voice
+          await speakWithGoogleTTS(text);
+          console.log(`✅ Scheduled TTS iteration ${i + 1} completed`);
+
+          // Small pause between repetitions (only if not the last iteration)
+          if (i < repeatCount - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          }
+        }
+        console.log('✅ Scheduled announcement completed');
+      } catch (e) {
+        console.error('❌ Scheduled announcement failed:', e);
+      } finally {
+        isSpeakingRef.current = false;
+      }
+    },
+    [playNotificationSound, speakWithGoogleTTS]
+  );
+
+  // Initialize scheduled announcements hook
+  useScheduledAnnouncements({
+    unitName: unitName || null,
+    audioUnlocked,
+    isSpeaking: isSpeakingRef.current,
+    voice: activeVoice,
+    onPlayAnnouncement: playScheduledAnnouncement,
+  });
 
   const speakName = useCallback(
     async (

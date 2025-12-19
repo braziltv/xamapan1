@@ -197,6 +197,60 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_announcements: {
+        Row: {
+          created_at: string
+          days_of_week: number[]
+          end_time: string
+          id: string
+          interval_minutes: number
+          is_active: boolean
+          last_played_at: string | null
+          repeat_count: number
+          start_time: string
+          text_content: string
+          title: string
+          unit_name: string
+          updated_at: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[]
+          end_time?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_played_at?: string | null
+          repeat_count?: number
+          start_time?: string
+          text_content: string
+          title: string
+          unit_name: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[]
+          end_time?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_played_at?: string | null
+          repeat_count?: number
+          start_time?: string
+          text_content?: string
+          title?: string
+          unit_name?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       statistics_daily: {
         Row: {
           calls_by_destination: Json | null

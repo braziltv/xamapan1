@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
+import { ScheduledAnnouncementsManager } from './ScheduledAnnouncementsManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1995,6 +1996,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Áudios de Propaganda Programados */}
+      <ScheduledAnnouncementsManager unitName={currentUnitName} />
 
       {/* Filtros */}
       <Card>
