@@ -23,12 +23,15 @@ interface VolumeSettings {
 
 // Vozes Google Cloud TTS disponíveis para pt-BR
 // Organizadas por qualidade: Chirp 3 HD > Journey > Studio > Neural2 > WaveNet > Standard
+// NOTA: Chirp 3 HD usa nomes como Achernar, Fenrir, Kore etc. (nomes de estrelas/luas)
 export const GOOGLE_VOICES = {
   female: [
-    // Chirp 3 HD - Ultra realistas (última geração)
-    { id: 'pt-BR-Chirp3-HD-Acacia', name: 'Chirp 3 HD - Acacia', quality: 'ultra-hd', category: 'Chirp 3 HD' },
-    { id: 'pt-BR-Chirp3-HD-Lemon', name: 'Chirp 3 HD - Lemon', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    // Chirp 3 HD - Ultra realistas (última geração) - nomes reais da API Google
+    { id: 'pt-BR-Chirp3-HD-Achernar', name: 'Chirp 3 HD - Achernar', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Aoede', name: 'Chirp 3 HD - Aoede', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Kore', name: 'Chirp 3 HD - Kore', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Leda', name: 'Chirp 3 HD - Leda', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Zephyr', name: 'Chirp 3 HD - Zephyr', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     // Journey - Mais naturais
     { id: 'pt-BR-Journey-F', name: 'Journey-F (Muito Natural)', quality: 'ultra', category: 'Journey' },
     { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra', category: 'Journey' },
@@ -45,10 +48,12 @@ export const GOOGLE_VOICES = {
     { id: 'pt-BR-Standard-C', name: 'Standard-C', quality: 'standard', category: 'Standard' },
   ],
   male: [
-    // Chirp 3 HD - Ultra realistas (última geração)
-    { id: 'pt-BR-Chirp3-HD-Fennel', name: 'Chirp 3 HD - Fennel', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    // Chirp 3 HD - Ultra realistas (última geração) - nomes reais da API Google
+    { id: 'pt-BR-Chirp3-HD-Fenrir', name: 'Chirp 3 HD - Fenrir', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Orus', name: 'Chirp 3 HD - Orus', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Puck', name: 'Chirp 3 HD - Puck', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Charon', name: 'Chirp 3 HD - Charon', quality: 'ultra-hd', category: 'Chirp 3 HD' },
+    { id: 'pt-BR-Chirp3-HD-Achird', name: 'Chirp 3 HD - Achird', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     // Journey - Mais naturais
     { id: 'pt-BR-Journey-D', name: 'Journey-D (Muito Natural)', quality: 'ultra', category: 'Journey' },
     // Studio - Profissional
