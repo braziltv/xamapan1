@@ -138,6 +138,10 @@ export function NameAutocomplete({
 
   // Handler de mudança com correção automática ao digitar espaço
   const handleChange = useCallback((newValue: string) => {
+    // Verifica se há números e mostra aviso
+    if (/[0-9]/.test(newValue)) {
+      toast.warning('Números não são permitidos', { duration: 2000 });
+    }
     // Remove números e converte automaticamente para maiúsculas
     newValue = newValue.replace(/[0-9]/g, '').toUpperCase();
     const oldValue = value;
