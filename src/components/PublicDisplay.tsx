@@ -45,6 +45,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
+  
+  // Voice setting - sync across tabs/windows
+  const [configuredVoice, setConfiguredVoice] = useState(() => 
+    localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A'
+  );
+  
+  // Listen for localStorage changes (cross-tab sync for voice settings)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'patientCallVoice' || e.key === 'googleVoiceFemale') {
+        const newVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+        console.log('🔊 Voice setting changed:', newVoice);
+        setConfiguredVoice(newVoice);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+  
+  // Also check localStorage periodically for same-tab updates
+  useEffect(() => {
+    const checkVoiceSetting = () => {
+      const currentVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      if (currentVoice !== configuredVoice) {
+        console.log('🔊 Voice setting updated (poll):', currentVoice);
+        setConfiguredVoice(currentVoice);
+      }
+    };
+    // Check every 2 seconds
+    const interval = setInterval(checkVoiceSetting, 2000);
+    return () => clearInterval(interval);
+  }, [configuredVoice]);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -629,8 +662,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
-      // Get configured voice from localStorage - use patient call voice first, then fallback
-      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      // Use configured voice from state (synced across tabs)
+      console.log('🎙️ Using voice:', configuredVoice);
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
@@ -677,7 +710,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       await playSimpleAudio(audioBuffer, ttsVolume);
       console.log('✅ Audio playback finished');
     },
-    [playSimpleAudio]
+    [playSimpleAudio, configuredVoice]
   );
 
   const speakWithGoogleTTS = useCallback(
@@ -687,8 +720,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
-      // Get configured voice from localStorage - use patient call voice first, then fallback
-      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      // Use configured voice from state (synced across tabs)
+      console.log('🎙️ Using voice:', configuredVoice);
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -712,7 +745,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const audioBuffer = await response.arrayBuffer();
       await playSimpleAudio(audioBuffer, ttsVolume);
     },
-    [playSimpleAudio]
+    [playSimpleAudio, configuredVoice]
   );
 
   // Test audio function
