@@ -48,7 +48,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
   
   // Voice setting - sync via database for cross-device updates (TV <-> operator)
-  const { voice: configuredVoice } = useUnitSettings(unitName || null);
+  const { voice: configuredVoice, commercialPhrases } = useUnitSettings(unitName || null);
   
   // Also listen for localStorage changes as fallback for same-tab/window sync
   const [localVoice, setLocalVoice] = useState(() => 
@@ -1817,17 +1817,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             <div className="animate-marquee whitespace-nowrap inline-flex items-center h-full">
               {(() => {
                 const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                const itemsWithCredits: typeof newsItems = [];
+                // Add commercial phrases as special items
+                const commercialItems = commercialPhrases.map(phrase => ({
+                  title: phrase,
+                  source: 'Aviso',
+                  link: ''
+                }));
+                
+                const itemsWithExtras: typeof newsItems = [];
+                let commercialIndex = 0;
+                
                 newsItems.forEach((item, index) => {
-                  itemsWithCredits.push(item);
+                  itemsWithExtras.push(item);
+                  // Insert commercial phrase every 2 news items (if available)
+                  if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                    itemsWithExtras.push(commercialItems[commercialIndex]);
+                    commercialIndex++;
+                  }
+                  // Insert credits every 3 news items
                   if ((index + 1) % 3 === 0) {
-                    itemsWithCredits.push(creditItem);
+                    itemsWithExtras.push(creditItem);
                   }
                 });
                 
-                return itemsWithCredits.map((item, index) => (
+                // Add remaining commercial items at the end
+                while (commercialIndex < commercialItems.length) {
+                  itemsWithExtras.push(commercialItems[commercialIndex]);
+                  commercialIndex++;
+                }
+                
+                return itemsWithExtras.map((item, index) => (
                   <span key={index} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
                     <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
+                      item.source === 'Aviso' ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-emerald-900 animate-pulse' :
                       item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
                       item.source === 'G1' ? 'bg-red-500 text-white' : 
                       item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1861,7 +1883,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       item.source === 'ESPN' ? 'bg-red-800 text-white' :
                       'bg-gray-500 text-white'
                     }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
-                      {item.source === 'Créditos' ? '⭐' : item.source}
+                      {item.source === 'Créditos' ? '⭐' : item.source === 'Aviso' ? '📢' : item.source}
                     </span>
                     <span>{item.title}</span>
                     <span className="text-slate-600 mx-[0.5vw]">•</span>
@@ -1870,17 +1892,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               })()}
               {(() => {
                 const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                const itemsWithCredits: typeof newsItems = [];
+                // Add commercial phrases as special items
+                const commercialItems = commercialPhrases.map(phrase => ({
+                  title: phrase,
+                  source: 'Aviso',
+                  link: ''
+                }));
+                
+                const itemsWithExtras: typeof newsItems = [];
+                let commercialIndex = 0;
+                
                 newsItems.forEach((item, index) => {
-                  itemsWithCredits.push(item);
+                  itemsWithExtras.push(item);
+                  // Insert commercial phrase every 2 news items (if available)
+                  if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                    itemsWithExtras.push(commercialItems[commercialIndex]);
+                    commercialIndex++;
+                  }
+                  // Insert credits every 3 news items
                   if ((index + 1) % 3 === 0) {
-                    itemsWithCredits.push(creditItem);
+                    itemsWithExtras.push(creditItem);
                   }
                 });
                 
-                return itemsWithCredits.map((item, index) => (
+                // Add remaining commercial items at the end
+                while (commercialIndex < commercialItems.length) {
+                  itemsWithExtras.push(commercialItems[commercialIndex]);
+                  commercialIndex++;
+                }
+                
+                return itemsWithExtras.map((item, index) => (
                   <span key={`dup-${index}`} className="mx-[1.5vw] inline-flex items-center gap-[0.6vw] text-white/90 font-medium" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.6rem)' }}>
                     <span className={`px-[0.6vw] py-[0.3vh] rounded-lg font-bold ${
+                      item.source === 'Aviso' ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-emerald-900 animate-pulse' :
                       item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900' :
                       item.source === 'G1' ? 'bg-red-500 text-white' : 
                       item.source === 'O Globo' ? 'bg-blue-600 text-white' :
@@ -1914,7 +1958,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       item.source === 'ESPN' ? 'bg-red-800 text-white' :
                       'bg-gray-500 text-white'
                     }`} style={{ fontSize: 'clamp(0.7rem, 1vw, 1.1rem)' }}>
-                      {item.source === 'Créditos' ? '⭐' : item.source}
+                      {item.source === 'Créditos' ? '⭐' : item.source === 'Aviso' ? '📢' : item.source}
                     </span>
                     <span>{item.title}</span>
                     <span className="text-slate-600 mx-[0.5vw]">•</span>
