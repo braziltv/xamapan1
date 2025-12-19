@@ -629,7 +629,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const ttsVolume = readVolume('volume-tts', 1);
       
       // Get configured voice from localStorage - use patient call voice first, then fallback
-      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Journey-F';
+      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
@@ -687,7 +687,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const ttsVolume = readVolume('volume-tts', 1);
       
       // Get configured voice from localStorage - use patient call voice first, then fallback
-      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Journey-F';
+      const configuredVoice = localStorage.getItem('patientCallVoice') || localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,

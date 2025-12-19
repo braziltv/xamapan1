@@ -22,8 +22,9 @@ interface VolumeSettings {
 }
 
 // Vozes Google Cloud TTS disponíveis para pt-BR
-// Organizadas por qualidade: Chirp 3 HD > Journey > Studio > Neural2 > WaveNet > Standard
-// NOTA: Chirp 3 HD usa nomes como Achernar, Fenrir, Kore etc. (nomes de estrelas/luas)
+// TESTADAS E CONFIRMADAS - apenas vozes que funcionam com a API
+// Chirp 3 HD > Neural2 > WaveNet > Standard
+// NOTA: Journey e Studio NÃO existem para pt-BR
 export const GOOGLE_VOICES = {
   female: [
     // Chirp 3 HD - Ultra realistas (última geração) - nomes reais da API Google
@@ -32,11 +33,7 @@ export const GOOGLE_VOICES = {
     { id: 'pt-BR-Chirp3-HD-Kore', name: 'Chirp 3 HD - Kore', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Leda', name: 'Chirp 3 HD - Leda', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Zephyr', name: 'Chirp 3 HD - Zephyr', quality: 'ultra-hd', category: 'Chirp 3 HD' },
-    // Journey - Mais naturais
-    { id: 'pt-BR-Journey-F', name: 'Journey-F (Muito Natural)', quality: 'ultra', category: 'Journey' },
-    { id: 'pt-BR-Journey-O', name: 'Journey-O', quality: 'ultra', category: 'Journey' },
-    // Studio - Profissional
-    { id: 'pt-BR-Studio-C', name: 'Studio-C (Profissional)', quality: 'premium', category: 'Studio' },
+    { id: 'pt-BR-Chirp3-HD-Gacrux', name: 'Chirp 3 HD - Gacrux', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     // Neural2
     { id: 'pt-BR-Neural2-A', name: 'Neural2-A', quality: 'premium', category: 'Neural2' },
     { id: 'pt-BR-Neural2-C', name: 'Neural2-C', quality: 'premium', category: 'Neural2' },
@@ -54,10 +51,7 @@ export const GOOGLE_VOICES = {
     { id: 'pt-BR-Chirp3-HD-Puck', name: 'Chirp 3 HD - Puck', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Charon', name: 'Chirp 3 HD - Charon', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     { id: 'pt-BR-Chirp3-HD-Achird', name: 'Chirp 3 HD - Achird', quality: 'ultra-hd', category: 'Chirp 3 HD' },
-    // Journey - Mais naturais
-    { id: 'pt-BR-Journey-D', name: 'Journey-D (Muito Natural)', quality: 'ultra', category: 'Journey' },
-    // Studio - Profissional
-    { id: 'pt-BR-Studio-B', name: 'Studio-B (Profissional)', quality: 'premium', category: 'Studio' },
+    { id: 'pt-BR-Chirp3-HD-Schedar', name: 'Chirp 3 HD - Schedar', quality: 'ultra-hd', category: 'Chirp 3 HD' },
     // Neural2
     { id: 'pt-BR-Neural2-B', name: 'Neural2-B', quality: 'premium', category: 'Neural2' },
     // WaveNet
@@ -514,7 +508,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                   Usada nas chamadas de pacientes na TV
                 </p>
                 <Select 
-                  value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Journey-F'} 
+                  value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Chirp3-HD-Achernar'} 
                   onValueChange={(value) => {
                     localStorage.setItem(PATIENT_CALL_VOICE_KEY, value);
                     toast.success('Voz de chamada atualizada');
@@ -534,27 +528,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                       </SelectItem>
                     ))}
                     
-                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Journey (Muito Natural)</div>
-                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Journey').map(voice => (
-                      <SelectItem key={voice.id} value={voice.id}>
-                        <span className="flex items-center gap-2">
-                          {voice.name}
-                          <span className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-1.5 py-0.5 rounded">★</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                    
-                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Studio (Profissional)</div>
-                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Studio').map(voice => (
-                      <SelectItem key={voice.id} value={voice.id}>
-                        <span className="flex items-center gap-2">
-                          {voice.name}
-                          <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded">Pro</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                    
-                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Neural2</div>
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Neural2 (Alta Qualidade)</div>
                     {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Neural2').map(voice => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <span className="flex items-center gap-2">
@@ -580,6 +554,13 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                         <span className="flex items-center gap-2">{voice.name}</span>
                       </SelectItem>
                     ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Standard</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Standard').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">{voice.name}</span>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 
@@ -587,7 +568,7 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                   variant="outline"
                   size="sm"
                   onClick={async () => {
-                    const voice = localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Journey-F';
+                    const voice = localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Chirp3-HD-Achernar';
                     try {
                       const response = await fetch(
                         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,

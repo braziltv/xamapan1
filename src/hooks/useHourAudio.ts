@@ -142,8 +142,8 @@ export const useHourAudio = () => {
    */
   const generateTTSAudio = async (text: string, voice: 'female' | 'male'): Promise<ArrayBuffer> => {
     // Obter vozes configuradas pelo usuário
-    const configuredFemaleVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Journey-F';
-    const configuredMaleVoice = localStorage.getItem('googleVoiceMale') || 'pt-BR-Journey-D';
+    const configuredFemaleVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+    const configuredMaleVoice = localStorage.getItem('googleVoiceMale') || 'pt-BR-Neural2-B';
     
     const voiceName = voice === 'female' ? configuredFemaleVoice : configuredMaleVoice;
     

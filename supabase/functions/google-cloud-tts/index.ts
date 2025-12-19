@@ -102,12 +102,12 @@ async function getAccessToken(credentials: any): Promise<string> {
 }
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
+// TESTADAS E CONFIRMADAS - apenas vozes que funcionam com a API
 // Chirp 3 HD = vozes de última geração com qualidade ultra-realista (nomes de estrelas/luas)
-// Journey = vozes mais naturais e conversacionais (parecem humanas)
-// Studio = qualidade de estúdio profissional
 // Neural2 = alta qualidade neural
 // WaveNet = vozes com boa qualidade
 // Standard = vozes básicas
+// NOTA: Journey e Studio NÃO existem para pt-BR
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
   // Vozes Chirp 3 HD (ULTRA REALISTAS - última geração) - nomes reais da API Google
   'pt-BR-Chirp3-HD-Achernar': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Achernar', ssmlGender: 'FEMALE' },
@@ -115,18 +115,13 @@ const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: s
   'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
   'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Leda', ssmlGender: 'FEMALE' },
   'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Zephyr', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Gacrux': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Gacrux', ssmlGender: 'FEMALE' },
   'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Achird': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Achird', ssmlGender: 'MALE' },
-  // Vozes Journey (MAIS NATURAIS - parecem humanas)
-  'pt-BR-Journey-F': { languageCode: 'pt-BR', name: 'pt-BR-Journey-F', ssmlGender: 'FEMALE' },
-  'pt-BR-Journey-D': { languageCode: 'pt-BR', name: 'pt-BR-Journey-D', ssmlGender: 'MALE' },
-  'pt-BR-Journey-O': { languageCode: 'pt-BR', name: 'pt-BR-Journey-O', ssmlGender: 'FEMALE' },
-  // Vozes Studio (qualidade profissional)
-  'pt-BR-Studio-B': { languageCode: 'pt-BR', name: 'pt-BR-Studio-B', ssmlGender: 'MALE' },
-  'pt-BR-Studio-C': { languageCode: 'pt-BR', name: 'pt-BR-Studio-C', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Schedar': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Schedar', ssmlGender: 'MALE' },
   // Vozes Neural2 (alta qualidade)
   'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
   'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
@@ -141,10 +136,10 @@ const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: s
   'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
 };
 
-// Vozes padrão por gênero - Journey são as mais naturais
+// Vozes padrão por gênero - Neural2 são as mais naturais disponíveis para pt-BR
 const DEFAULT_VOICES = {
-  female: 'pt-BR-Journey-F',
-  male: 'pt-BR-Journey-D'
+  female: 'pt-BR-Neural2-A',
+  male: 'pt-BR-Neural2-B'
 };
 
 serve(async (req) => {
