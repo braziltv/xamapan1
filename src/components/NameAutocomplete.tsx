@@ -243,6 +243,7 @@ export function NameAutocomplete({
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => value.length > 0 && updateSuggestions()}
+        onPaste={(e) => e.preventDefault()}
         placeholder={placeholder}
         className={cn("uppercase", className)}
         disabled={disabled}
