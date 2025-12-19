@@ -498,7 +498,128 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
               Vozes Google Cloud TTS (pt-BR)
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Voz para Chamada de Pacientes */}
+              <div className="space-y-2 p-3 bg-muted/50 rounded-lg border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-green-500" />
+                  Voz para Chamada de Pacientes
+                </Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Usada nas chamadas de pacientes na TV
+                </p>
+                <Select 
+                  value={localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Journey-F'} 
+                  onValueChange={(value) => {
+                    localStorage.setItem(PATIENT_CALL_VOICE_KEY, value);
+                    toast.success('Voz de chamada atualizada');
+                  }}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] bg-card">
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted">Chirp 3 HD (Ultra Realista)</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Chirp 3 HD').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded">HD</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Journey (Muito Natural)</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Journey').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          <span className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-1.5 py-0.5 rounded">★</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Studio (Profissional)</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Studio').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded">Pro</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Neural2</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Neural2').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">WaveNet</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'WaveNet').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">
+                          {voice.name}
+                          <span className="text-xs bg-amber-500 text-white px-1.5 py-0.5 rounded">Alta</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                    
+                    <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted mt-1">Standard</div>
+                    {[...GOOGLE_VOICES.female, ...GOOGLE_VOICES.male].filter(v => v.category === 'Standard').map(voice => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <span className="flex items-center gap-2">{voice.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const voice = localStorage.getItem(PATIENT_CALL_VOICE_KEY) || 'pt-BR-Journey-F';
+                    try {
+                      const response = await fetch(
+                        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+                        {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                          },
+                          body: JSON.stringify({ 
+                            text: 'Maria da Silva. Por favor, dirija-se à Triagem.',
+                            voiceName: voice,
+                          }),
+                        }
+                      );
+                      if (!response.ok) throw new Error('Erro na API');
+                      const buffer = await response.arrayBuffer();
+                      const blob = new Blob([buffer], { type: 'audio/mpeg' });
+                      const url = URL.createObjectURL(blob);
+                      const audio = new Audio(url);
+                      audio.volume = volumes.tts;
+                      audio.onended = () => URL.revokeObjectURL(url);
+                      await audio.play();
+                      toast.success('Teste de voz reproduzido!');
+                    } catch (error) {
+                      toast.error('Erro ao testar voz');
+                    }
+                  }}
+                  className="w-full gap-2 mt-2"
+                >
+                  <Play className="w-4 h-4" />
+                  Testar Voz de Chamada
+                </Button>
+              </div>
+
+              {/* Vozes para Anúncio de Hora */}
               <div className="space-y-2">
                 <Label className="text-sm flex items-center gap-2">
                   <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
@@ -512,19 +633,25 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                     toast.success('Voz feminina atualizada');
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px] bg-card">
                     {GOOGLE_VOICES.female.map(voice => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <span className="flex items-center gap-2">
                           {voice.name}
+                          {voice.quality === 'ultra-hd' && (
+                            <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded">HD</span>
+                          )}
+                          {voice.quality === 'ultra' && (
+                            <span className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-1.5 py-0.5 rounded">★</span>
+                          )}
                           {voice.quality === 'premium' && (
-                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
+                            <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded">Pro</span>
                           )}
                           {voice.quality === 'high' && (
-                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
+                            <span className="text-xs bg-amber-500 text-white px-1.5 py-0.5 rounded">Alta</span>
                           )}
                         </span>
                       </SelectItem>
@@ -546,19 +673,25 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                     toast.success('Voz masculina atualizada');
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px] bg-card">
                     {GOOGLE_VOICES.male.map(voice => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <span className="flex items-center gap-2">
                           {voice.name}
+                          {voice.quality === 'ultra-hd' && (
+                            <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded">HD</span>
+                          )}
+                          {voice.quality === 'ultra' && (
+                            <span className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-1.5 py-0.5 rounded">★</span>
+                          )}
                           {voice.quality === 'premium' && (
-                            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">Premium</span>
+                            <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded">Pro</span>
                           )}
                           {voice.quality === 'high' && (
-                            <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">Alta</span>
+                            <span className="text-xs bg-amber-500 text-white px-1.5 py-0.5 rounded">Alta</span>
                           )}
                         </span>
                       </SelectItem>
@@ -581,13 +714,13 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Testar Vozes Google Cloud
+                    Testar Vozes de Hora
                   </>
                 )}
               </Button>
 
               <p className="text-xs text-muted-foreground">
-                Neural2 = melhor qualidade, Wavenet = alta qualidade, Standard = econômico
+                Chirp 3 HD = mais realista, Journey = natural, Studio = profissional, Neural2 = premium
               </p>
             </div>
           </div>
