@@ -1549,7 +1549,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             
             {/* Animated border glow on active */}
             {announcingType === 'triage' && (
-              <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400 animate-pulse" />
+              <>
+                <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400 animate-pulse" />
+                {/* Ripple waves */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible">
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border-2 border-cyan-400/60 animate-ripple-1" />
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border-2 border-cyan-300/40 animate-ripple-2" />
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border border-cyan-200/30 animate-ripple-3" />
+                </div>
+              </>
             )}
             
             {/* Header Strip */}
@@ -1618,7 +1626,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             
             {/* Animated border on active */}
             {announcingType === 'doctor' && (
-              <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400 animate-pulse" />
+              <>
+                <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400 animate-pulse" />
+                {/* Ripple waves */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible">
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border-2 border-emerald-400/60 animate-ripple-1" />
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border-2 border-emerald-300/40 animate-ripple-2" />
+                  <div className="absolute w-[120%] h-[120%] rounded-2xl border border-emerald-200/30 animate-ripple-3" />
+                </div>
+              </>
             )}
             
             {/* Header Strip */}
