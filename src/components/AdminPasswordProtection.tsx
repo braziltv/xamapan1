@@ -11,9 +11,8 @@ interface AdminPasswordProtectionProps {
   title?: string;
 }
 
-// Default admin password - can be changed in localStorage
-const DEFAULT_ADMIN_PASSWORD = '1234';
-const PASSWORD_STORAGE_KEY = 'adminPassword';
+// Fixed admin password
+const ADMIN_PASSWORD = 'Paineiras@1';
 const AUTH_SESSION_KEY = 'adminAuthenticated';
 const AUTH_EXPIRY_KEY = 'adminAuthExpiry';
 
@@ -49,16 +48,10 @@ export function AdminPasswordProtection({ children, title = 'Área Administrativ
     checkSession();
   }, []);
 
-  const getStoredPassword = (): string => {
-    return localStorage.getItem(PASSWORD_STORAGE_KEY) || DEFAULT_ADMIN_PASSWORD;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const storedPassword = getStoredPassword();
-    
-    if (password === storedPassword) {
+    if (password === ADMIN_PASSWORD) {
       // Create session
       const expiry = Date.now() + SESSION_DURATION;
       localStorage.setItem(AUTH_SESSION_KEY, 'true');
@@ -160,123 +153,5 @@ export function AdminPasswordProtection({ children, title = 'Área Administrativ
       </div>
       {children}
     </div>
-  );
-}
-
-// Component to change admin password
-export function ChangeAdminPassword() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPasswords, setShowPasswords] = useState(false);
-  const { toast } = useToast();
-
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const storedPassword = localStorage.getItem(PASSWORD_STORAGE_KEY) || DEFAULT_ADMIN_PASSWORD;
-    
-    if (currentPassword !== storedPassword) {
-      toast({
-        title: 'Senha atual incorreta',
-        description: 'A senha atual informada está incorreta.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    if (newPassword.length < 4) {
-      toast({
-        title: 'Senha muito curta',
-        description: 'A nova senha deve ter pelo menos 4 caracteres.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: 'Senhas não conferem',
-        description: 'A nova senha e a confirmação devem ser iguais.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    localStorage.setItem(PASSWORD_STORAGE_KEY, newPassword);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    
-    toast({
-      title: 'Senha alterada',
-      description: 'A senha administrativa foi alterada com sucesso.',
-    });
-  };
-
-  return (
-    <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2 text-amber-600 dark:text-amber-400">
-          <Lock className="w-5 h-5" />
-          Alterar Senha Administrativa
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleChangePassword} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Senha Atual</Label>
-              <Input
-                id="current-password"
-                type={showPasswords ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Senha atual"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Nova Senha</Label>
-              <Input
-                id="new-password"
-                type={showPasswords ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nova senha"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-              <Input
-                id="confirm-password"
-                type={showPasswords ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirme a nova senha"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button type="submit" className="gap-2 bg-amber-600 hover:bg-amber-700">
-              <Lock className="w-4 h-4" />
-              Alterar Senha
-            </Button>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showPasswords}
-                onChange={(e) => setShowPasswords(e.target.checked)}
-                className="rounded"
-              />
-              Mostrar senhas
-            </label>
-          </div>
-        </form>
-        <p className="text-xs text-muted-foreground mt-4">
-          Senha padrão: <code className="bg-muted px-1 rounded">1234</code>. 
-          Altere para uma senha segura.
-        </p>
-      </CardContent>
-    </Card>
   );
 }
