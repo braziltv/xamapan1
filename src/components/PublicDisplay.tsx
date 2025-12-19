@@ -1,5 +1,6 @@
 import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
+import { FloatingParticles } from './FloatingParticles';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
@@ -1479,6 +1480,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
           backgroundSize: '50px 50px'
         }} />
+        
+        {/* Floating particles */}
+        <FloatingParticles />
       </div>
 
       {/* Flash overlay during announcement */}
