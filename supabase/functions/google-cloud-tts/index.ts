@@ -102,41 +102,21 @@ async function getAccessToken(credentials: any): Promise<string> {
 }
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
-// TESTADAS E CONFIRMADAS - apenas vozes que funcionam com a API
-// Chirp 3 HD = vozes de última geração com qualidade ultra-realista (nomes de estrelas/luas)
-// Neural2 = alta qualidade neural
-// WaveNet = vozes com boa qualidade
-// Standard = vozes básicas
-// NOTA: Journey e Studio NÃO existem para pt-BR
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
-  // Vozes Chirp 3 HD (ULTRA REALISTAS - última geração) - nomes reais da API Google
-  'pt-BR-Chirp3-HD-Achernar': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Achernar', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Aoede', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Leda', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Zephyr', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Gacrux': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Gacrux', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Achird': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Achird', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Schedar': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Schedar', ssmlGender: 'MALE' },
-  // Vozes Neural2 (alta qualidade)
+  // Vozes Femininas
   'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
   'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  // Vozes Wavenet
   'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
   'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  // Vozes Standard
   'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
   'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
+  // Vozes Masculinas
+  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
+  'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+  'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
 };
 
-// Vozes padrão por gênero - Neural2 são as mais naturais disponíveis para pt-BR
+// Vozes padrão por gênero
 const DEFAULT_VOICES = {
   female: 'pt-BR-Neural2-A',
   male: 'pt-BR-Neural2-B'

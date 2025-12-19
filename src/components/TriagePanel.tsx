@@ -137,7 +137,6 @@ export function TriagePanel({
         </div>
       )}
 
-
       {/* Sound Toggle */}
       <div className="flex justify-end">
         <Button 
