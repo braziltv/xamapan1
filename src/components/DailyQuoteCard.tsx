@@ -692,7 +692,7 @@ const QUOTES = [
 
 const STORAGE_KEY = 'dailyQuote_dismissState';
 const DISMISS_DELAY = 60 * 60 * 1000; // 1 hour
-const QUOTE_ROTATION_INTERVAL = 60 * 60 * 1000; // 1 hour per quote
+const QUOTE_ROTATION_INTERVAL = 20 * 60 * 1000; // 20 minutes per quote
 
 interface DismissState {
   dismissCount: number;
