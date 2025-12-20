@@ -1110,19 +1110,59 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return;
     }
 
+    // Calculate and log next announcement time
+    const now = currentTime;
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const dayOfWeek = now.getDay();
+    const nowMs = now.getTime();
+
+    let nextAnnouncementInfo: { title: string; nextTime: Date; minutesUntil: number } | null = null;
+
+    for (const announcement of scheduledAnnouncements) {
+      if (!announcement.days_of_week.includes(dayOfWeek)) continue;
+
+      const [startH, startM] = announcement.start_time.split(':').map(Number);
+      const [endH, endM] = announcement.end_time.split(':').map(Number);
+      const intervalMs = announcement.interval_minutes * 60 * 1000;
+
+      // Check if we're before the start time today
+      if (currentHour < startH || (currentHour === startH && currentMinute < startM)) {
+        const nextTime = new Date(now);
+        nextTime.setHours(startH, startM, 0, 0);
+        const minutesUntil = Math.round((nextTime.getTime() - nowMs) / 60000);
+        if (!nextAnnouncementInfo || nextTime < nextAnnouncementInfo.nextTime) {
+          nextAnnouncementInfo = { title: announcement.title, nextTime, minutesUntil };
+        }
+      }
+      // Check if we're within the time window
+      else if ((currentHour > startH || (currentHour === startH && currentMinute >= startM)) &&
+               (currentHour < endH || (currentHour === endH && currentMinute <= endM))) {
+        const lastPlayed = lastAnnouncementPlayedRef.current[announcement.id] || 0;
+        const nextPlayMs = lastPlayed > 0 ? lastPlayed + intervalMs : nowMs;
+        const nextTime = new Date(nextPlayMs);
+        const minutesUntil = Math.max(0, Math.round((nextPlayMs - nowMs) / 60000));
+        if (!nextAnnouncementInfo || nextTime < nextAnnouncementInfo.nextTime) {
+          nextAnnouncementInfo = { title: announcement.title, nextTime, minutesUntil };
+        }
+      }
+    }
+
+    if (nextAnnouncementInfo) {
+      const nextTimeStr = nextAnnouncementInfo.nextTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      console.log(`📅 PRÓXIMO ANÚNCIO: "${nextAnnouncementInfo.title}" às ${nextTimeStr} (em ${nextAnnouncementInfo.minutesUntil} minutos)`);
+    } else {
+      console.log('📅 Nenhum anúncio programado para hoje');
+    }
+
     // Never overlap with patient calls
     if (announcingType || isSpeakingRef.current) {
       console.log('⏸️ Skipping - already speaking or announcing');
       return;
     }
 
-    // Use Brazil-synced time from useBrazilTime
-    const now = currentTime;
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
+    // Use the already declared variables from above
     const currentTimeStr = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
-    const dayOfWeek = now.getDay();
-    const nowMs = now.getTime();
 
     console.log('🕐 Current check:', { currentTimeStr, dayOfWeek, nowMs });
 
