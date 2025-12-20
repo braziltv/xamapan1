@@ -33,6 +33,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { saveErrorToHistory } from './ErrorHistoryPanel';
 
 interface ModuleError {
   module: string;
@@ -294,6 +295,11 @@ export function SystemMonitoringPanel() {
         });
       }
 
+      // Save errors to database for history
+      for (const err of errors) {
+        await saveErrorToHistory(err.module, err.label, err.error);
+      }
+
       setStatus({
         database: dbStatus as 'online' | 'offline',
         edgeFunctions: edgeFunctionStatuses,
@@ -304,12 +310,14 @@ export function SystemMonitoringPanel() {
       });
     } catch (error) {
       console.error('Error refreshing status:', error);
-      errors.push({
+      const systemError = {
         module: 'system',
         label: 'Sistema',
         error: error instanceof Error ? error.message : 'Erro geral do sistema',
         timestamp: new Date(),
-      });
+      };
+      errors.push(systemError);
+      await saveErrorToHistory(systemError.module, systemError.label, systemError.error);
       setStatus(prev => ({ ...prev, errors, lastUpdate: new Date() }));
       toast.error('Erro ao atualizar status do sistema');
     } finally {

@@ -347,6 +347,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_error_logs: {
+        Row: {
+          created_at: string
+          error_message: string
+          id: string
+          label: string
+          module: string
+          unit_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          id?: string
+          label: string
+          module: string
+          unit_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          id?: string
+          label?: string
+          module?: string
+          unit_name?: string | null
+        }
+        Relationships: []
+      }
       tts_name_usage: {
         Row: {
           id: string

@@ -71,6 +71,7 @@ import { useBrazilTime } from '@/hooks/useBrazilTime';
 import { MarketingPanel } from './MarketingPanel';
 import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 import { ActiveUsersPanel } from './ActiveUsersPanel';
+import { ErrorHistoryPanel } from './ErrorHistoryPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2660,6 +2661,19 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </CardHeader>
         <CardContent className="pt-4">
           <SystemMonitoringPanel />
+        </CardContent>
+      </Card>
+
+      {/* Error History Panel */}
+      <Card className="shadow-lg border-0 overflow-hidden">
+        <CardHeader className="pb-2 bg-gradient-to-r from-red-500/10 to-orange-500/10">
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            Histórico de Erros do Sistema
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <ErrorHistoryPanel />
         </CardContent>
       </Card>
 
