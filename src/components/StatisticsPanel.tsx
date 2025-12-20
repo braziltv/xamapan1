@@ -72,6 +72,7 @@ import { MarketingPanel } from './MarketingPanel';
 import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 import { ActiveUsersPanel } from './ActiveUsersPanel';
 import { ErrorHistoryPanel } from './ErrorHistoryPanel';
+import { UptimeHistoryPanel } from './UptimeHistoryPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2674,6 +2675,19 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         </CardHeader>
         <CardContent className="pt-4">
           <ErrorHistoryPanel />
+        </CardContent>
+      </Card>
+
+      {/* Uptime History Panel */}
+      <Card className="col-span-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Activity className="w-5 h-5 text-emerald-500" />
+            Histórico de Uptime das Edge Functions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <UptimeHistoryPanel />
         </CardContent>
       </Card>
 
