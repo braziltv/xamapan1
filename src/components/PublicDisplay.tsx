@@ -1917,27 +1917,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center gap-[1.5vw] relative z-10">
+          <div className="flex items-center justify-between relative z-10 w-full">
             {/* Left: Logo + Title */}
-            <div className="flex items-center gap-[0.8vw] shrink-0">
+            <div className="flex items-center gap-[0.8vw] shrink-0 min-w-0">
               <div className="w-[3.5vw] h-[3.5vw] min-w-[40px] min-h-[40px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
                 <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px]" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 shrink-0">
                 <h1 className="font-bold text-white leading-tight whitespace-nowrap" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)' }}>
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium" style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.95rem)' }}>
+                <p className="text-amber-300 leading-tight font-medium whitespace-nowrap" style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.95rem)' }}>
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
             </div>
             
             {/* Separator */}
-            <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+            <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0 mx-[1vw]" />
             
-            {/* Right: Weather + Clock */}
-            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
+            {/* Right: Weather + Clock - Allow overflow to scroll if needed */}
+            <div className="flex items-center justify-end overflow-x-auto shrink min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
