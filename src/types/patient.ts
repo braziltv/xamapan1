@@ -2,6 +2,7 @@ export type PatientPriority = 'normal' | 'priority' | 'emergency';
 
 export type PatientStatus = 
   | 'waiting' 
+  | 'waiting-triage'
   | 'in-triage' 
   | 'waiting-doctor' 
   | 'in-consultation' 
