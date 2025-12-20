@@ -27,6 +27,7 @@ const getStatusRank = (status: PatientStatus): number => {
     case 'in-raiox':
     case 'in-enfermaria':
       return 3;
+    case 'waiting-triage':
     case 'waiting-doctor':
     case 'waiting-ecg':
     case 'waiting-curativos':
@@ -248,11 +249,13 @@ export function useCallPanel() {
           else if (call.call_type === 'raiox') status = 'in-raiox';
           else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
         } else if (call.status === 'waiting') {
-          if (call.call_type === 'doctor') status = 'waiting-doctor';
+          if (call.call_type === 'triage') status = 'waiting-triage';
+          else if (call.call_type === 'doctor') status = 'waiting-doctor';
           else if (call.call_type === 'ecg') status = 'waiting-ecg';
           else if (call.call_type === 'curativos') status = 'waiting-curativos';
           else if (call.call_type === 'raiox') status = 'waiting-raiox';
           else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+          else if (call.call_type === 'registration') status = 'waiting';
           else status = 'waiting';
         }
         
@@ -361,11 +364,13 @@ export function useCallPanel() {
               else if (call.call_type === 'raiox') status = 'in-raiox';
               else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
             } else if (call.status === 'waiting') {
-              if (call.call_type === 'doctor') status = 'waiting-doctor';
+              if (call.call_type === 'triage') status = 'waiting-triage';
+              else if (call.call_type === 'doctor') status = 'waiting-doctor';
               else if (call.call_type === 'ecg') status = 'waiting-ecg';
               else if (call.call_type === 'curativos') status = 'waiting-curativos';
               else if (call.call_type === 'raiox') status = 'waiting-raiox';
               else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+              else if (call.call_type === 'registration') status = 'waiting';
               else status = 'waiting';
             }
             
@@ -439,11 +444,13 @@ export function useCallPanel() {
               else if (call.call_type === 'raiox') status = 'in-raiox';
               else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
             } else {
-              if (call.call_type === 'doctor') status = 'waiting-doctor';
+              if (call.call_type === 'triage') status = 'waiting-triage';
+              else if (call.call_type === 'doctor') status = 'waiting-doctor';
               else if (call.call_type === 'ecg') status = 'waiting-ecg';
               else if (call.call_type === 'curativos') status = 'waiting-curativos';
               else if (call.call_type === 'raiox') status = 'waiting-raiox';
               else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+              else if (call.call_type === 'registration') status = 'waiting';
               else status = 'waiting';
             }
 
@@ -924,7 +931,7 @@ export function useCallPanel() {
 
     const updatedPatient: Patient = {
       ...patient,
-      status: 'waiting' as const, // Keep as waiting so it shows in triage queue
+      status: 'waiting-triage' as const,
       calledAt: new Date(),
     };
     
@@ -988,7 +995,7 @@ export function useCallPanel() {
     }
     
     setPatients(prev => prev.map(p => 
-      p.id === patientId ? { ...p, status: 'waiting' as const, calledBy: 'cadastro' as const } : p
+      p.id === patientId ? { ...p, status: 'waiting-triage' as const, calledBy: 'cadastro' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
   }, [unitName, clearPatientFromAllCurrentCalls]);
@@ -1475,7 +1482,7 @@ export function useCallPanel() {
     return a.createdAt.getTime() - b.createdAt.getTime();
   };
 
-  const waitingForTriage = patients.filter(p => p.status === 'waiting').sort(sortByPriority);
+  const waitingForTriage = patients.filter(p => p.status === 'waiting-triage').sort(sortByPriority);
   const waitingForDoctor = patients.filter(p => p.status === 'waiting-doctor').sort(sortByPriority);
   const waitingForEcg = patients.filter(p => p.status === 'waiting-ecg').sort(sortByPriority);
   const waitingForCurativos = patients.filter(p => p.status === 'waiting-curativos').sort(sortByPriority);
