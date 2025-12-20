@@ -483,7 +483,22 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   try {
-    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache } = await req.json();
+    const body = await req.json();
+    
+    // Health check endpoint
+    if (body.healthCheck === true) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'healthy', 
+          service: 'elevenlabs-tts',
+          timestamp: new Date().toISOString(),
+          hasApiKey: !!Deno.env.get("ELEVENLABS_API_KEY")
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const { text, voiceId, unitName, clearCache, isPermanentCache, testAllKeys, concatenate, clearAllPhraseCache, skipCache } = body;
 
     const supabase = supabaseUrl && supabaseServiceKey 
       ? createClient(supabaseUrl, supabaseServiceKey) 
