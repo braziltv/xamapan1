@@ -34,6 +34,13 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 
+interface ModuleError {
+  module: string;
+  label: string;
+  error: string;
+  timestamp: Date;
+}
+
 interface SystemStatus {
   database: 'online' | 'offline' | 'checking';
   edgeFunctions: Record<string, 'online' | 'offline' | 'checking'>;
@@ -43,6 +50,7 @@ interface SystemStatus {
     tempFiles: number;
     hourFiles: number;
     totalSizeMB: number;
+    error?: string;
   };
   tables: {
     patientCalls: number;
@@ -57,8 +65,10 @@ interface SystemStatus {
     statisticsDaily: number;
     ttsNameUsage: number;
     apiKeyUsage: number;
+    errors: Record<string, string>;
   };
   lastUpdate: Date;
+  errors: ModuleError[];
 }
 
 const EDGE_FUNCTIONS = [
@@ -89,8 +99,10 @@ export function SystemMonitoringPanel() {
       statisticsDaily: 0,
       ttsNameUsage: 0,
       apiKeyUsage: 0,
+      errors: {},
     },
     lastUpdate: new Date(),
+    errors: [],
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCleaningCache, setIsCleaningCache] = useState(false);
@@ -139,57 +151,55 @@ export function SystemMonitoringPanel() {
       statisticsDaily: 0,
       ttsNameUsage: 0,
       apiKeyUsage: 0,
+      errors: {},
     };
 
-    const [
-      patientCallsResult,
-      callHistoryResult,
-      newsCacheResult,
-      weatherCacheResult,
-      scheduledAnnouncementsResult,
-      commercialPhrasesResult,
-      unitSettingsResult,
-      appointmentsResult,
-      chatMessagesResult,
-      statisticsDailyResult,
-      ttsNameUsageResult,
-      apiKeyUsageResult,
-    ] = await Promise.all([
-      supabase.from('patient_calls').select('*', { count: 'exact', head: true }),
-      supabase.from('call_history').select('*', { count: 'exact', head: true }),
-      supabase.from('news_cache').select('*', { count: 'exact', head: true }),
-      supabase.from('weather_cache').select('*', { count: 'exact', head: true }),
-      supabase.from('scheduled_announcements').select('*', { count: 'exact', head: true }),
-      supabase.from('scheduled_commercial_phrases').select('*', { count: 'exact', head: true }),
-      supabase.from('unit_settings').select('*', { count: 'exact', head: true }),
-      supabase.from('appointments').select('*', { count: 'exact', head: true }),
-      supabase.from('chat_messages').select('*', { count: 'exact', head: true }),
-      supabase.from('statistics_daily').select('*', { count: 'exact', head: true }),
-      supabase.from('tts_name_usage').select('*', { count: 'exact', head: true }),
-      supabase.from('api_key_usage').select('*', { count: 'exact', head: true }),
-    ]);
+    const tableQueries = [
+      { key: 'patientCalls', table: 'patient_calls', label: 'Pacientes' },
+      { key: 'callHistory', table: 'call_history', label: 'Histórico' },
+      { key: 'newsCache', table: 'news_cache', label: 'Notícias' },
+      { key: 'weatherCache', table: 'weather_cache', label: 'Clima' },
+      { key: 'scheduledAnnouncements', table: 'scheduled_announcements', label: 'Anúncios' },
+      { key: 'commercialPhrases', table: 'scheduled_commercial_phrases', label: 'Frases' },
+      { key: 'unitSettings', table: 'unit_settings', label: 'Configurações' },
+      { key: 'appointments', table: 'appointments', label: 'Agendamentos' },
+      { key: 'chatMessages', table: 'chat_messages', label: 'Chat' },
+      { key: 'statisticsDaily', table: 'statistics_daily', label: 'Estatísticas' },
+      { key: 'ttsNameUsage', table: 'tts_name_usage', label: 'TTS Nomes' },
+      { key: 'apiKeyUsage', table: 'api_key_usage', label: 'API Keys' },
+    ] as const;
 
-    counts.patientCalls = patientCallsResult.count || 0;
-    counts.callHistory = callHistoryResult.count || 0;
-    counts.newsCache = newsCacheResult.count || 0;
-    counts.weatherCache = weatherCacheResult.count || 0;
-    counts.scheduledAnnouncements = scheduledAnnouncementsResult.count || 0;
-    counts.commercialPhrases = commercialPhrasesResult.count || 0;
-    counts.unitSettings = unitSettingsResult.count || 0;
-    counts.appointments = appointmentsResult.count || 0;
-    counts.chatMessages = chatMessagesResult.count || 0;
-    counts.statisticsDaily = statisticsDailyResult.count || 0;
-    counts.ttsNameUsage = ttsNameUsageResult.count || 0;
-    counts.apiKeyUsage = apiKeyUsageResult.count || 0;
+    const results = await Promise.all(
+      tableQueries.map(async ({ key, table, label }) => {
+        const { count, error } = await supabase
+          .from(table)
+          .select('*', { count: 'exact', head: true });
+        return { key, count: count || 0, error: error?.message, label };
+      })
+    );
+
+    results.forEach(({ key, count, error }) => {
+      (counts as any)[key] = count;
+      if (error) {
+        counts.errors[key] = error;
+      }
+    });
 
     return counts;
   }, []);
 
   const loadStorageInfo = useCallback(async () => {
     try {
-      const { data: files } = await supabase.storage
+      const { data: files, error } = await supabase.storage
         .from('tts-cache')
         .list('', { limit: 1000 });
+
+      if (error) {
+        return { 
+          ttsCacheFiles: 0, permanentFiles: 0, tempFiles: 0, hourFiles: 0, totalSizeMB: 0,
+          error: error.message 
+        };
+      }
 
       if (!files) return { ttsCacheFiles: 0, permanentFiles: 0, tempFiles: 0, hourFiles: 0, totalSizeMB: 0 };
 
@@ -205,31 +215,84 @@ export function SystemMonitoringPanel() {
         hourFiles,
         totalSizeMB: parseFloat((totalSize / 1024 / 1024).toFixed(2)),
       };
-    } catch {
-      return { ttsCacheFiles: 0, permanentFiles: 0, tempFiles: 0, hourFiles: 0, totalSizeMB: 0 };
+    } catch (err) {
+      return { 
+        ttsCacheFiles: 0, permanentFiles: 0, tempFiles: 0, hourFiles: 0, totalSizeMB: 0,
+        error: err instanceof Error ? err.message : 'Erro desconhecido'
+      };
     }
   }, []);
 
   const refreshStatus = useCallback(async () => {
     setIsRefreshing(true);
+    const errors: ModuleError[] = [];
     
     try {
       // Check database
       const dbStatus = await checkDatabaseStatus();
+      if (dbStatus === 'offline') {
+        errors.push({
+          module: 'database',
+          label: 'Banco de Dados',
+          error: 'Não foi possível conectar ao banco de dados',
+          timestamp: new Date(),
+        });
+      }
       
       // Check edge functions in parallel
       const edgeFunctionStatuses: Record<string, 'online' | 'offline' | 'checking'> = {};
       await Promise.all(
         EDGE_FUNCTIONS.map(async (fn) => {
-          edgeFunctionStatuses[fn.name] = await checkEdgeFunction(fn.name);
+          const fnStatus = await checkEdgeFunction(fn.name);
+          edgeFunctionStatuses[fn.name] = fnStatus;
+          if (fnStatus === 'offline') {
+            errors.push({
+              module: fn.name,
+              label: fn.label,
+              error: 'Edge function não está respondendo',
+              timestamp: new Date(),
+            });
+          }
         })
       );
 
       // Load table counts
       const tableCounts = await loadTableCounts();
+      
+      // Add table errors
+      Object.entries(tableCounts.errors).forEach(([key, errorMsg]) => {
+        const tableLabels: Record<string, string> = {
+          patientCalls: 'Tabela Pacientes',
+          callHistory: 'Tabela Histórico',
+          newsCache: 'Tabela Notícias',
+          weatherCache: 'Tabela Clima',
+          scheduledAnnouncements: 'Tabela Anúncios',
+          commercialPhrases: 'Tabela Frases',
+          unitSettings: 'Tabela Configurações',
+          appointments: 'Tabela Agendamentos',
+          chatMessages: 'Tabela Chat',
+          statisticsDaily: 'Tabela Estatísticas',
+          ttsNameUsage: 'Tabela TTS',
+          apiKeyUsage: 'Tabela API Keys',
+        };
+        errors.push({
+          module: `table_${key}`,
+          label: tableLabels[key] || key,
+          error: errorMsg,
+          timestamp: new Date(),
+        });
+      });
 
       // Load storage info
       const storageInfo = await loadStorageInfo();
+      if (storageInfo.error) {
+        errors.push({
+          module: 'storage',
+          label: 'Armazenamento TTS',
+          error: storageInfo.error,
+          timestamp: new Date(),
+        });
+      }
 
       setStatus({
         database: dbStatus as 'online' | 'offline',
@@ -237,9 +300,17 @@ export function SystemMonitoringPanel() {
         storage: storageInfo,
         tables: tableCounts,
         lastUpdate: new Date(),
+        errors,
       });
     } catch (error) {
       console.error('Error refreshing status:', error);
+      errors.push({
+        module: 'system',
+        label: 'Sistema',
+        error: error instanceof Error ? error.message : 'Erro geral do sistema',
+        timestamp: new Date(),
+      });
+      setStatus(prev => ({ ...prev, errors, lastUpdate: new Date() }));
       toast.error('Erro ao atualizar status do sistema');
     } finally {
       setIsRefreshing(false);
@@ -348,6 +419,41 @@ export function SystemMonitoringPanel() {
         <Clock className="w-3 h-3" />
         Última atualização: {format(status.lastUpdate, "dd/MM/yyyy HH:mm:ss", { locale: ptBR })}
       </div>
+
+      {/* Error Panel */}
+      {status.errors.length > 0 && (
+        <Card className="border-destructive bg-destructive/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-4 h-4" />
+              Erros Detectados ({status.errors.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="max-h-40">
+              <div className="space-y-2">
+                {status.errors.map((err, idx) => (
+                  <div
+                    key={`${err.module}-${idx}`}
+                    className="flex items-start gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20"
+                  >
+                    <XCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-destructive">{err.label}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(err.timestamp, "HH:mm:ss", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{err.error}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
 
       {/* System Health Overview */}
       <Card>
