@@ -123,6 +123,9 @@ export function ErrorHistoryPanel() {
   useEffect(() => {
     loadErrorHistory();
 
+    // Auto-refresh every 30 seconds
+    const refreshInterval = setInterval(loadErrorHistory, 30000);
+
     // Subscribe to realtime updates
     const channel = supabase
       .channel('error-logs-changes')
@@ -140,6 +143,7 @@ export function ErrorHistoryPanel() {
       .subscribe();
 
     return () => {
+      clearInterval(refreshInterval);
       supabase.removeChannel(channel);
     };
   }, [loadErrorHistory]);

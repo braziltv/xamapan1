@@ -101,7 +101,22 @@ Deno.serve(async (req) => {
     const chatCount = chatDeleted?.length || 0
     console.log(`Deleted ${chatCount} old chat messages (> 24 hours)`)
 
-    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount + chatCount
+    // 6. Apagar logs de erros do sistema com mais de 15 dias
+    const { data: errorLogsDeleted, error: errorLogsError } = await supabase
+      .from('system_error_logs')
+      .delete()
+      .lt('created_at', fifteenDaysAgo)
+      .select('id')
+
+    if (errorLogsError) {
+      console.error('Error deleting old error logs:', errorLogsError)
+      throw errorLogsError
+    }
+
+    const errorLogsCount = errorLogsDeleted?.length || 0
+    console.log(`Deleted ${errorLogsCount} old system error logs (> 15 days)`)
+
+    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount + chatCount + errorLogsCount
 
     console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
 
@@ -113,6 +128,7 @@ Deno.serve(async (req) => {
         historyDeleted: historyCount,
         oldPatientsDeleted: oldPatientsCount,
         chatMessagesDeleted: chatCount,
+        errorLogsDeleted: errorLogsCount,
         totalDeleted,
         timestamp: new Date().toISOString()
       }),
