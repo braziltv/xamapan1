@@ -1048,10 +1048,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
 
-  // Generate a single announcement at the start of each hour (minute 0)
+  // Generate 3 random announcements per hour (spread across the hour)
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    console.log(`Hour ${hour} scheduled announcement at minute: 0`);
-    return [0]; // Apenas no início da hora
+    // Dividir a hora em 3 blocos de 20 minutos e escolher 1 minuto aleatório em cada bloco
+    // Bloco 1: minutos 0-19, Bloco 2: minutos 20-39, Bloco 3: minutos 40-59
+    const block1 = Math.floor(Math.random() * 20);        // 0-19
+    const block2 = 20 + Math.floor(Math.random() * 20);   // 20-39
+    const block3 = 40 + Math.floor(Math.random() * 20);   // 40-59
+    
+    const announcements = [block1, block2, block3].sort((a, b) => a - b);
+    console.log(`Hora ${hour}: anúncios agendados nos minutos ${announcements.join(', ')}`);
+    return announcements;
   }, []);
 
   // Expose test function on window for manual testing
@@ -1103,7 +1110,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Verificar se é momento de anunciar
     const shouldAnnounce = scheduledAnnouncementsRef.current.includes(minute) && second < 5;
     const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
-    const minGapMs = 10 * 60 * 1000; // 10 minutos em ms
+    const minGapMs = 5 * 60 * 1000; // 5 minutos em ms (permite 3 anúncios por hora)
 
     if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
       lastTimeAnnouncementRef.current = now;
