@@ -136,6 +136,118 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, []);
 
+  // Load commercial phrases from database
+  useEffect(() => {
+    const loadCommercialPhrases = async () => {
+      try {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+        const today = now.toISOString().split('T')[0];
+
+        let query = supabase
+          .from('scheduled_commercial_phrases')
+          .select('*')
+          .eq('is_active', true)
+          .lte('valid_from', today)
+          .gte('valid_until', today)
+          .lte('start_time', currentTime)
+          .gte('end_time', currentTime)
+          .contains('days_of_week', [dayOfWeek])
+          .order('display_order', { ascending: true });
+
+        // Filter by unit if set
+        if (unitName) {
+          query = query.eq('unit_name', unitName);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error loading commercial phrases:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          console.log('📢 Commercial phrases loaded:', data.length);
+          setCommercialPhrases(data.map(p => ({
+            id: p.id,
+            phrase_content: p.phrase_content,
+            start_time: p.start_time,
+            end_time: p.end_time,
+            days_of_week: p.days_of_week,
+            is_active: p.is_active,
+            display_order: p.display_order,
+          })));
+        } else {
+          setCommercialPhrases([]);
+        }
+      } catch (error) {
+        console.error('Error loading commercial phrases:', error);
+      }
+    };
+
+    loadCommercialPhrases();
+    // Reload every minute to check for schedule changes
+    const interval = setInterval(loadCommercialPhrases, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [unitName]);
+
+  // Load scheduled voice announcements from database
+  useEffect(() => {
+    const loadScheduledAnnouncements = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        let query = supabase
+          .from('scheduled_announcements')
+          .select('*')
+          .eq('is_active', true)
+          .lte('valid_from', today)
+          .gte('valid_until', today);
+
+        // Filter by unit if set
+        if (unitName) {
+          query = query.eq('unit_name', unitName);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error loading scheduled announcements:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          console.log('📢 Scheduled voice announcements loaded:', data.length);
+          setScheduledAnnouncements(data.map(a => ({
+            id: a.id,
+            title: a.title,
+            text_content: a.text_content,
+            start_time: a.start_time,
+            end_time: a.end_time,
+            days_of_week: a.days_of_week,
+            interval_minutes: a.interval_minutes,
+            repeat_count: a.repeat_count,
+            is_active: a.is_active,
+            last_played_at: a.last_played_at,
+          })));
+        } else {
+          setScheduledAnnouncements([]);
+        }
+      } catch (error) {
+        console.error('Error loading scheduled announcements:', error);
+      }
+    };
+
+    loadScheduledAnnouncements();
+    // Reload every 5 minutes
+    const interval = setInterval(loadScheduledAnnouncements, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [unitName]);
+
   // Countdown timer for next news update
   useEffect(() => {
     const countdownInterval = setInterval(() => {
@@ -974,6 +1086,89 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
 
+  // Play scheduled voice announcements (from Marketing panel)
+  useEffect(() => {
+    if (!currentTime || !audioUnlocked || !isSynced || scheduledAnnouncements.length === 0) return;
+
+    // Never overlap with patient calls
+    if (announcingType || isSpeakingRef.current) {
+      return;
+    }
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeStr = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
+    const dayOfWeek = now.getDay();
+    const nowMs = Date.now();
+
+    // Check each scheduled announcement
+    for (const announcement of scheduledAnnouncements) {
+      // Check if within time window
+      if (announcement.start_time > currentTimeStr || announcement.end_time < currentTimeStr) {
+        continue;
+      }
+
+      // Check if day of week is valid
+      if (!announcement.days_of_week.includes(dayOfWeek)) {
+        continue;
+      }
+
+      // Check interval since last played
+      const lastPlayed = lastAnnouncementPlayedRef.current[announcement.id] || 0;
+      const intervalMs = announcement.interval_minutes * 60 * 1000;
+
+      if (nowMs - lastPlayed >= intervalMs) {
+        // Time to play this announcement
+        lastAnnouncementPlayedRef.current[announcement.id] = nowMs;
+
+        console.log(`📢 Playing scheduled voice announcement: ${announcement.title}`);
+
+        // Update last_played_at in database
+        supabase
+          .from('scheduled_announcements')
+          .update({ last_played_at: now.toISOString() })
+          .eq('id', announcement.id)
+          .then(({ error }) => {
+            if (error) console.error('Error updating last_played_at:', error);
+          });
+
+        // Play the announcement (with delay to avoid conflicts)
+        setTimeout(async () => {
+          if (announcingType || isSpeakingRef.current) return;
+          
+          isSpeakingRef.current = true;
+          setAnnouncingType('triage');
+
+          try {
+            // Repeat according to repeat_count
+            for (let i = 0; i < announcement.repeat_count; i++) {
+              if (i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+              }
+              
+              // Play notification sound
+              await playNotificationSound();
+              
+              // Play the announcement text
+              await speakWithGoogleTTS(announcement.text_content);
+              
+              console.log(`📢 Announcement "${announcement.title}" iteration ${i + 1}/${announcement.repeat_count} completed`);
+            }
+          } catch (error) {
+            console.error('Error playing scheduled announcement:', error);
+          } finally {
+            isSpeakingRef.current = false;
+            setAnnouncingType(null);
+          }
+        }, 1500);
+
+        // Only play one announcement at a time
+        break;
+      }
+    }
+  }, [currentTime, audioUnlocked, isSynced, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS]);
+
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
     const destinationPhrases: Record<string, string> = {
@@ -1744,17 +1939,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="animate-marquee whitespace-nowrap inline-flex py-[0.3vh]">
                 {(() => {
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits: typeof newsItems = [];
+                  // Convert commercial phrases to news format
+                  const commercialItems = commercialPhrases.map(phrase => ({
+                    title: phrase.phrase_content,
+                    source: '📢 Informativo',
+                    link: '',
+                    isCommercial: true,
+                  }));
+                  
+                  const itemsWithExtras: Array<typeof newsItems[0] & { isCommercial?: boolean }> = [];
+                  let commercialIndex = 0;
+                  
                   newsItems.forEach((item, index) => {
-                    itemsWithCredits.push(item);
-                    if ((index + 1) % 3 === 0) {
-                      itemsWithCredits.push(creditItem);
+                    itemsWithExtras.push(item);
+                    
+                    // Insert commercial phrase every 2 news items (if available)
+                    if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                      itemsWithExtras.push(commercialItems[commercialIndex]);
+                      commercialIndex++;
+                    }
+                    
+                    // Insert credits every 5 items
+                    if ((index + 1) % 5 === 0) {
+                      itemsWithExtras.push(creditItem);
                     }
                   });
                   
-                  return itemsWithCredits.map((item, index) => (
+                  // Add remaining commercial items at the end
+                  while (commercialIndex < commercialItems.length) {
+                    itemsWithExtras.push(commercialItems[commercialIndex]);
+                    commercialIndex++;
+                  }
+                  
+                  return itemsWithExtras.map((item, index) => (
                     <span key={index} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -1790,7 +2010,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className="text-white">
+                      <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
                       <span className="text-slate-500 mx-[0.4vw]">•</span>
@@ -1799,17 +2019,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 })()}
                 {(() => {
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
-                  const itemsWithCredits: typeof newsItems = [];
+                  // Convert commercial phrases to news format
+                  const commercialItems = commercialPhrases.map(phrase => ({
+                    title: phrase.phrase_content,
+                    source: '📢 Informativo',
+                    link: '',
+                    isCommercial: true,
+                  }));
+                  
+                  const itemsWithExtras: Array<typeof newsItems[0] & { isCommercial?: boolean }> = [];
+                  let commercialIndex = 0;
+                  
                   newsItems.forEach((item, index) => {
-                    itemsWithCredits.push(item);
-                    if ((index + 1) % 3 === 0) {
-                      itemsWithCredits.push(creditItem);
+                    itemsWithExtras.push(item);
+                    
+                    // Insert commercial phrase every 2 news items (if available)
+                    if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                      itemsWithExtras.push(commercialItems[commercialIndex]);
+                      commercialIndex++;
+                    }
+                    
+                    // Insert credits every 5 items
+                    if ((index + 1) % 5 === 0) {
+                      itemsWithExtras.push(creditItem);
                     }
                   });
                   
-                  return itemsWithCredits.map((item, index) => (
+                  // Add remaining commercial items at the end
+                  while (commercialIndex < commercialItems.length) {
+                    itemsWithExtras.push(commercialItems[commercialIndex]);
+                    commercialIndex++;
+                  }
+                  
+                  return itemsWithExtras.map((item, index) => (
                     <span key={`dup-${index}`} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -1845,7 +2090,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className="text-white">
+                      <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
                       <span className="text-slate-500 mx-[0.4vw]">•</span>
