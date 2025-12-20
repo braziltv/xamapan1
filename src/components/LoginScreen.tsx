@@ -16,6 +16,8 @@ const HEALTH_UNITS = [
   { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
   { id: "psf-aguinalda", name: "PSF Aguinalda Angélica" },
   { id: "ubs-maria-alves", name: "UBS Maria Alves de Mendonça" },
+  { id: "cais-paineiras", name: "CAIS Paineiras" },
+  { id: "ubs-xama-pan", name: "UBS Xama-Pan" },
 ];
 
 interface LoginScreenProps {

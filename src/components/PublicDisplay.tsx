@@ -1203,6 +1203,53 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS]);
 
+  const playCommercialPhraseNow = useCallback(async () => {
+    try {
+      if (!audioUnlocked) {
+        console.log('Audio not unlocked, cannot play commercial phrase');
+        setTtsError({
+          message: 'Clique na tela para ativar o áudio antes de testar a frase comercial.',
+          timestamp: new Date(),
+        });
+        return;
+      }
+
+      if (!currentTime) return;
+
+      // Never overlap with patient calls or other announcements
+      if (announcingType || isSpeakingRef.current) return;
+
+      const now = currentTime;
+      const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:00`;
+      const dayOfWeek = now.getDay();
+
+      const eligible = commercialPhrases
+        .filter(p => p.is_active)
+        .filter(p => p.start_time <= currentTimeStr && p.end_time >= currentTimeStr)
+        .filter(p => p.days_of_week.includes(dayOfWeek))
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+
+      const phrase = eligible[0];
+
+      isSpeakingRef.current = true;
+      setAnnouncingType('triage');
+
+      await playNotificationSound();
+      await speakWithGoogleTTS(
+        phrase?.phrase_content || 'Nenhuma frase comercial ativa no momento.'
+      );
+    } catch (e) {
+      console.error('Error playing commercial phrase now:', e);
+      setTtsError({
+        message: e instanceof Error ? e.message : 'Erro desconhecido ao tocar frase comercial.',
+        timestamp: new Date(),
+      });
+    } finally {
+      isSpeakingRef.current = false;
+      setAnnouncingType(null);
+    }
+  }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS]);
+
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Mapeamento de destinos para frases corretas
     const destinationPhrases: Record<string, string> = {
@@ -1790,6 +1837,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TV Quick Test Button (shows when cursor is visible) */}
+      {cursorVisible && (
+        <button
+          type="button"
+          onClick={playCommercialPhraseNow}
+          className="fixed top-3 left-3 z-[60] p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/60 hover:text-white/90 transition-all opacity-40 hover:opacity-100"
+          title="Tocar frase comercial agora"
+        >
+          <Megaphone className="w-5 h-5" />
+        </button>
       )}
 
       {/* Animated background elements */}
