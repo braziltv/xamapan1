@@ -640,63 +640,43 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice });
 
-      try {
-        // Generate unified audio with name + destination in a single API call
-        const response = await fetch(url, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            concatenate: {
-              name: cleanName,
-              prefix: '',
-              destination: cleanDestination,
-            },
-            voiceName: configuredVoice,
-          }),
-        });
+      // Generate unified audio with name + destination in a single API call
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          concatenate: {
+            name: cleanName,
+            prefix: '',
+            destination: cleanDestination,
+          },
+          voiceName: configuredVoice,
+        }),
+      });
 
-        console.log('📡 TTS API response status:', response.status);
+      console.log('📡 TTS API response status:', response.status);
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('❌ Google Cloud TTS error:', errorData);
-          
-          // Try fallback to Web Speech API
-          console.log('🔄 Tentando fallback para Web Speech API...');
-          const fallbackText = `${cleanName}. ${cleanDestination}`;
-          await speakWithWebSpeech(fallbackText);
-          console.log('✅ Fallback Web Speech API concluído');
-          return;
-        }
-
-        // Use arrayBuffer() like useHourAudio does (this method works on TV)
-        const audioBuffer = await response.arrayBuffer();
-        console.log('✅ Google Cloud TTS audio received:', { size: audioBuffer.byteLength });
-
-        if (audioBuffer.byteLength === 0) {
-          console.error('❌ Audio buffer is empty! Trying fallback...');
-          const fallbackText = `${cleanName}. ${cleanDestination}`;
-          await speakWithWebSpeech(fallbackText);
-          return;
-        }
-
-        // Play using simple method (same as useHourAudio which works)
-        console.log('▶️ Playing audio with simple method...');
-        await playSimpleAudio(audioBuffer, ttsVolume);
-        console.log('✅ Audio playback finished');
-      } catch (error) {
-        console.error('❌ TTS failed, trying Web Speech fallback:', error);
-        try {
-          const fallbackText = `${cleanName}. ${cleanDestination}`;
-          await speakWithWebSpeech(fallbackText);
-          console.log('✅ Fallback Web Speech API concluído');
-        } catch (fallbackError) {
-          console.error('❌ Web Speech fallback also failed:', fallbackError);
-          throw error;
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Google Cloud TTS error:', errorData);
+        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
+
+      // Use arrayBuffer() like useHourAudio does (this method works on TV)
+      const audioBuffer = await response.arrayBuffer();
+      console.log('✅ Google Cloud TTS audio received:', { size: audioBuffer.byteLength });
+
+      if (audioBuffer.byteLength === 0) {
+        console.error('❌ Audio buffer is empty!');
+        throw new Error('Audio buffer is empty');
+      }
+
+      // Play using simple method (same as useHourAudio which works)
+      console.log('▶️ Playing audio with simple method...');
+      await playSimpleAudio(audioBuffer, ttsVolume);
+      console.log('✅ Audio playback finished');
     },
-    [playSimpleAudio, speakWithWebSpeech]
+    [playSimpleAudio]
   );
 
   const speakWithGoogleTTS = useCallback(
@@ -709,46 +689,30 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Get configured voice from localStorage
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ text, voiceName: configuredVoice }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('❌ Google Cloud TTS error:', errorData);
-          
-          // Fallback to Web Speech API
-          console.log('🔄 Tentando fallback para Web Speech API...');
-          await speakWithWebSpeech(text);
-          return;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text, voiceName: configuredVoice }),
         }
+      );
 
-        // Use arrayBuffer() like useHourAudio does (works on TV)
-        const audioBuffer = await response.arrayBuffer();
-        
-        if (audioBuffer.byteLength === 0) {
-          console.error('❌ Audio buffer vazio, usando fallback...');
-          await speakWithWebSpeech(text);
-          return;
-        }
-        
-        await playSimpleAudio(audioBuffer, ttsVolume);
-      } catch (error) {
-        console.error('❌ Google Cloud TTS falhou, usando Web Speech:', error);
-        await speakWithWebSpeech(text);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Google Cloud TTS error:', errorData);
+        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
       }
+
+      // Use arrayBuffer() like useHourAudio does (works on TV)
+      const audioBuffer = await response.arrayBuffer();
+      await playSimpleAudio(audioBuffer, ttsVolume);
     },
-    [playSimpleAudio, speakWithWebSpeech]
+    [playSimpleAudio]
   );
 
   // Test audio function
