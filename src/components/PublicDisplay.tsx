@@ -1096,10 +1096,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {
-    if (!currentTime || !audioUnlocked || scheduledAnnouncements.length === 0) return;
+    // Debug: log every check
+    console.log('🔍 Checking announcements:', {
+      hasCurrentTime: !!currentTime,
+      audioUnlocked,
+      announcementsCount: scheduledAnnouncements.length,
+      announcingType,
+      isSpeaking: isSpeakingRef.current
+    });
+
+    if (!currentTime || !audioUnlocked || scheduledAnnouncements.length === 0) {
+      console.log('⏸️ Skipping announcements check - conditions not met');
+      return;
+    }
 
     // Never overlap with patient calls
     if (announcingType || isSpeakingRef.current) {
+      console.log('⏸️ Skipping - already speaking or announcing');
       return;
     }
 
@@ -1110,15 +1123,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const currentTimeStr = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
     const dayOfWeek = now.getDay();
     const nowMs = now.getTime();
+
+    console.log('🕐 Current check:', { currentTimeStr, dayOfWeek, nowMs });
+
     // Check each scheduled announcement
     for (const announcement of scheduledAnnouncements) {
+      console.log('📋 Checking announcement:', announcement.title, {
+        start: announcement.start_time,
+        end: announcement.end_time,
+        days: announcement.days_of_week,
+        currentTimeStr,
+        dayOfWeek
+      });
+
       // Check if within time window
       if (announcement.start_time > currentTimeStr || announcement.end_time < currentTimeStr) {
+        console.log('⏭️ Outside time window');
         continue;
       }
 
       // Check if day of week is valid
       if (!announcement.days_of_week.includes(dayOfWeek)) {
+        console.log('⏭️ Wrong day of week');
         continue;
       }
 
