@@ -222,6 +222,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         if (data && data.length > 0) {
           console.log('📢 Scheduled voice announcements loaded:', data.length);
+          
+          // Sync lastAnnouncementPlayedRef with database last_played_at
+          data.forEach(a => {
+            if (a.last_played_at) {
+              const lastPlayedMs = new Date(a.last_played_at).getTime();
+              lastAnnouncementPlayedRef.current[a.id] = lastPlayedMs;
+            }
+          });
+          
           setScheduledAnnouncements(data.map(a => ({
             id: a.id,
             title: a.title,
