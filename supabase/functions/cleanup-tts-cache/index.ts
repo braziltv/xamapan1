@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const maxAgeDays = 30 // 30 dias para cache temporário
+    const maxAgeDays = 7 // 7 dias para cache temporário
     const cutoffTime = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000)
 
     console.log(`Starting TTS cache cleanup...`)
