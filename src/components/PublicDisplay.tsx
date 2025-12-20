@@ -1,4 +1,4 @@
-import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2 } from 'lucide-react';
+import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +16,11 @@ interface NewsItem {
   title: string;
   link: string;
   source: string;
+}
+
+interface TTSError {
+  message: string;
+  timestamp: Date;
 }
 
 export function PublicDisplay(_props: PublicDisplayProps) {
@@ -44,6 +49,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const currentScheduleHourRef = useRef<number>(-1); // hora atual do agendamento
   const isSpeakingRef = useRef<boolean>(false); // prevent duplicate TTS calls
   const lastSpeakCallRef = useRef<number>(0); // timestamp of last speakName call for debounce
+  const [ttsError, setTtsError] = useState<TTSError | null>(null);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -625,6 +631,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       const cleanDestination = destinationPhrase.trim();
       console.log('🔊 Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
 
+      // Clear previous error
+      setTtsError(null);
+
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
@@ -640,41 +649,51 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice });
 
-      // Generate unified audio with name + destination in a single API call
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          concatenate: {
-            name: cleanName,
-            prefix: '',
-            destination: cleanDestination,
-          },
-          voiceName: configuredVoice,
-        }),
-      });
+      try {
+        // Generate unified audio with name + destination in a single API call
+        const response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            concatenate: {
+              name: cleanName,
+              prefix: '',
+              destination: cleanDestination,
+            },
+            voiceName: configuredVoice,
+          }),
+        });
 
-      console.log('📡 TTS API response status:', response.status);
+        console.log('📡 TTS API response status:', response.status);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Google Cloud TTS error:', errorData);
-        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('❌ Google Cloud TTS error:', errorData);
+          const errorMessage = errorData.error || `Erro TTS: ${response.status}`;
+          setTtsError({ message: errorMessage, timestamp: new Date() });
+          throw new Error(errorMessage);
+        }
+
+        // Use arrayBuffer() like useHourAudio does (this method works on TV)
+        const audioBuffer = await response.arrayBuffer();
+        console.log('✅ Google Cloud TTS audio received:', { size: audioBuffer.byteLength });
+
+        if (audioBuffer.byteLength === 0) {
+          console.error('❌ Audio buffer is empty!');
+          setTtsError({ message: 'Buffer de áudio vazio', timestamp: new Date() });
+          throw new Error('Audio buffer is empty');
+        }
+
+        // Play using simple method (same as useHourAudio which works)
+        console.log('▶️ Playing audio with simple method...');
+        await playSimpleAudio(audioBuffer, ttsVolume);
+        console.log('✅ Audio playback finished');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido no TTS';
+        console.error('❌ TTS error:', errorMessage);
+        setTtsError({ message: errorMessage, timestamp: new Date() });
+        throw error;
       }
-
-      // Use arrayBuffer() like useHourAudio does (this method works on TV)
-      const audioBuffer = await response.arrayBuffer();
-      console.log('✅ Google Cloud TTS audio received:', { size: audioBuffer.byteLength });
-
-      if (audioBuffer.byteLength === 0) {
-        console.error('❌ Audio buffer is empty!');
-        throw new Error('Audio buffer is empty');
-      }
-
-      // Play using simple method (same as useHourAudio which works)
-      console.log('▶️ Playing audio with simple method...');
-      await playSimpleAudio(audioBuffer, ttsVolume);
-      console.log('✅ Audio playback finished');
     },
     [playSimpleAudio]
   );
@@ -683,34 +702,52 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (text: string): Promise<void> => {
       console.log('Speaking with Google Cloud TTS:', text);
       
+      // Clear previous error
+      setTtsError(null);
+      
       // Get TTS volume from localStorage
       const ttsVolume = readVolume('volume-tts', 1);
       
       // Get configured voice from localStorage
       const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text, voiceName: configuredVoice }),
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ text, voiceName: configuredVoice }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('❌ Google Cloud TTS error:', errorData);
+          const errorMessage = errorData.error || `Erro TTS: ${response.status}`;
+          setTtsError({ message: errorMessage, timestamp: new Date() });
+          throw new Error(errorMessage);
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Google Cloud TTS error:', errorData);
-        throw new Error(errorData.error || `Google Cloud TTS error: ${response.status}`);
+        // Use arrayBuffer() like useHourAudio does (works on TV)
+        const audioBuffer = await response.arrayBuffer();
+        
+        if (audioBuffer.byteLength === 0) {
+          setTtsError({ message: 'Buffer de áudio vazio', timestamp: new Date() });
+          throw new Error('Audio buffer is empty');
+        }
+        
+        await playSimpleAudio(audioBuffer, ttsVolume);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido no TTS';
+        console.error('❌ TTS error:', errorMessage);
+        setTtsError({ message: errorMessage, timestamp: new Date() });
+        throw error;
       }
-
-      // Use arrayBuffer() like useHourAudio does (works on TV)
-      const audioBuffer = await response.arrayBuffer();
-      await playSimpleAudio(audioBuffer, ttsVolume);
     },
     [playSimpleAudio]
   );
@@ -1471,6 +1508,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               ? 'bg-blue-500/30' 
               : 'bg-emerald-500/30'
           }`} />
+        </div>
+      )}
+
+      {/* TTS Error Indicator */}
+      {ttsError && (
+        <div className="fixed top-4 right-4 z-[60] max-w-md animate-scale-in">
+          <div className="bg-red-900/95 border-2 border-red-500 rounded-xl p-4 shadow-2xl shadow-red-500/30 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-red-300 font-bold text-sm mb-1">Erro no TTS</h3>
+                <p className="text-red-200 text-xs break-words">{ttsError.message}</p>
+                <p className="text-red-400/70 text-[10px] mt-1">
+                  {formatBrazilTime(ttsError.timestamp, 'HH:mm:ss')}
+                </p>
+              </div>
+              <button
+                onClick={() => setTtsError(null)}
+                className="w-6 h-6 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center shrink-0 transition-colors"
+              >
+                <X className="w-3 h-3 text-red-300" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
