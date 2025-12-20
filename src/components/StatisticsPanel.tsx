@@ -70,6 +70,7 @@ import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
 import { MarketingPanel } from './MarketingPanel';
 import { SystemMonitoringPanel } from './SystemMonitoringPanel';
+import { ActiveUsersPanel } from './ActiveUsersPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2633,6 +2634,19 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Users Panel */}
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2 bg-gradient-to-r from-green-500/10 to-blue-500/10">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="w-5 h-5 text-green-500" />
+            Usuários e Sessões Ativas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <ActiveUsersPanel />
         </CardContent>
       </Card>
 

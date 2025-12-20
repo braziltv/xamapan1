@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { useAutoLogout } from '@/hooks/useAutoLogout';
+import { useUserSession } from '@/hooks/useUserSession';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -26,6 +27,9 @@ const Index = () => {
   
   // Admin authentication
   const { isAdminAuthenticated, showPasswordDialog, setShowPasswordDialog, handleAuthSuccess, resetAuth } = useAdminAuth();
+  
+  // User session tracking
+  const { createSession, updateActivity, incrementCounter, endSession } = useUserSession();
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -54,6 +58,9 @@ const Index = () => {
     }
     
     setActiveTab(value);
+    
+    // Update session activity with current station
+    updateActivity(value);
     
     if (value === "display") {
       // Enter fullscreen when switching to public display
@@ -176,11 +183,16 @@ const Index = () => {
     // Pré-cachear o nome em background (não bloqueia)
     if (!result.isDuplicate) {
       preCachePatientName(name);
+      // Track registration in session
+      incrementCounter('registrations_count');
     }
     return { isDuplicate: result.isDuplicate };
   };
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    // End user session
+    await endSession();
+    
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("selectedUnitId");
     localStorage.removeItem("selectedUnitName");
@@ -189,15 +201,19 @@ const Index = () => {
     setUnitName("");
     setIsTvMode(false);
     resetAuth(); // Reset admin authentication on logout
-  }, [resetAuth]);
+  }, [resetAuth, endSession]);
 
   // Auto logout at 07:04 and 19:04 (except TV mode)
   useAutoLogout({ isTvMode, onLogout: handleLogout });
 
-  const handleLogin = (unitId: string, unitNameParam: string, tvMode?: boolean) => {
+  const handleLogin = async (unitId: string, unitNameParam: string, tvMode?: boolean) => {
     setIsLoggedIn(true);
     setUnitName(unitNameParam);
     setIsTvMode(tvMode || false);
+    
+    // Create user session
+    await createSession(unitNameParam, tvMode ? 'display' : 'cadastro', tvMode || false);
+    
     if (tvMode) {
       setActiveTab("display");
     }

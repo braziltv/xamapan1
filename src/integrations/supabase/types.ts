@@ -398,6 +398,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          is_tv_mode: boolean | null
+          last_activity_at: string
+          login_at: string
+          logout_at: string | null
+          messages_sent: number | null
+          registrations_count: number | null
+          station: string
+          tts_calls_count: number | null
+          unit_name: string
+          user_agent: string | null
+          voice_calls_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          is_tv_mode?: boolean | null
+          last_activity_at?: string
+          login_at?: string
+          logout_at?: string | null
+          messages_sent?: number | null
+          registrations_count?: number | null
+          station?: string
+          tts_calls_count?: number | null
+          unit_name: string
+          user_agent?: string | null
+          voice_calls_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          is_tv_mode?: boolean | null
+          last_activity_at?: string
+          login_at?: string
+          logout_at?: string | null
+          messages_sent?: number | null
+          registrations_count?: number | null
+          station?: string
+          tts_calls_count?: number | null
+          unit_name?: string
+          user_agent?: string | null
+          voice_calls_count?: number | null
+        }
+        Relationships: []
+      }
       weather_cache: {
         Row: {
           city_name: string
