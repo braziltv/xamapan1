@@ -121,6 +121,22 @@ export function SystemMonitoringPanel() {
     }
   }, []);
 
+  const sendTelegramAlert = useCallback(async (functionName: string, functionLabel: string, errorMessage: string) => {
+    try {
+      await supabase.functions.invoke('telegram-alert', {
+        body: {
+          type: 'health_check_failure',
+          functionName,
+          functionLabel,
+          errorMessage,
+        },
+      });
+      console.log(`📱 Telegram alert sent for ${functionName}`);
+    } catch (error) {
+      console.error('Error sending Telegram alert:', error);
+    }
+  }, []);
+
   const checkEdgeFunction = useCallback(async (functionName: string, functionLabel: string): Promise<'online' | 'offline'> => {
     const startTime = Date.now();
     let status: 'online' | 'offline' = 'offline';
@@ -180,8 +196,13 @@ export function SystemMonitoringPanel() {
         if (error) console.error('Error saving health check:', error);
       });
     
+    // Send Telegram alert if function is offline
+    if (status === 'offline' && errorMessage) {
+      sendTelegramAlert(functionName, functionLabel, errorMessage);
+    }
+    
     return status;
-  }, []);
+  }, [sendTelegramAlert]);
 
   const loadTableCounts = useCallback(async (): Promise<SystemStatus['tables']> => {
     const counts: SystemStatus['tables'] = {
