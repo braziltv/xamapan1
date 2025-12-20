@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.send-daily-statistics]
 verify_jwt = false
+
+[functions.whatsapp-alert]
+verify_jwt = false
