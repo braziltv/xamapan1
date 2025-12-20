@@ -12,6 +12,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Health check endpoint
+    const body = await req.json().catch(() => ({}));
+    if (body.healthCheck === true) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'healthy', 
+          service: 'cleanup-duplicates',
+          timestamp: new Date().toISOString()
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     console.log('🧹 Starting duplicate patient cleanup...');
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

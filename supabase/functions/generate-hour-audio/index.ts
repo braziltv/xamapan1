@@ -228,6 +228,7 @@ serve(async (req) => {
     let hour: number | undefined;
     let minute: number | undefined;
     let force = false;
+    let healthCheck = false;
     
     try {
       const body = await req.text();
@@ -237,10 +238,24 @@ serve(async (req) => {
         hour = parsed.hour;
         minute = parsed.minute;
         force = parsed.force || false;
+        healthCheck = parsed.healthCheck || false;
       }
     } catch {
       // Use defaults if parsing fails
       console.log('No body or invalid JSON, using defaults');
+    }
+    
+    // Health check endpoint
+    if (healthCheck === true) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'healthy', 
+          service: 'generate-hour-audio',
+          timestamp: new Date().toISOString(),
+          hasCredentials: !!Deno.env.get('GOOGLE_CLOUD_CREDENTIALS')
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

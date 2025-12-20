@@ -130,6 +130,20 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
+    
+    // Health check endpoint
+    if (body.healthCheck === true) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'healthy', 
+          service: 'google-cloud-tts',
+          timestamp: new Date().toISOString(),
+          hasCredentials: !!Deno.env.get('GOOGLE_CLOUD_CREDENTIALS')
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const { text, voice = 'female', voiceName, speakingRate = 1.0, concatenate } = body;
 
     // Modo concatenado: nome + destino em uma única frase natural

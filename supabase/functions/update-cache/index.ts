@@ -197,6 +197,21 @@ serve(async (req) => {
   }
   
   try {
+    // Health check endpoint
+    const body = await req.json().catch(() => ({}));
+    if (body.healthCheck === true) {
+      return new Response(
+        JSON.stringify({ 
+          status: 'healthy', 
+          service: 'update-cache',
+          timestamp: new Date().toISOString(),
+          cities: cities.length,
+          feeds: feeds.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
