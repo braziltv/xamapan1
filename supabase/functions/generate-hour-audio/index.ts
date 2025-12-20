@@ -223,7 +223,25 @@ serve(async (req) => {
   }
 
   try {
-    const { action, hour, minute, force } = await req.json();
+    // Parse body safely - default to generate-all if no body
+    let action = 'generate-all';
+    let hour: number | undefined;
+    let minute: number | undefined;
+    let force = false;
+    
+    try {
+      const body = await req.text();
+      if (body && body.trim()) {
+        const parsed = JSON.parse(body);
+        action = parsed.action || 'generate-all';
+        hour = parsed.hour;
+        minute = parsed.minute;
+        force = parsed.force || false;
+      }
+    } catch {
+      // Use defaults if parsing fails
+      console.log('No body or invalid JSON, using defaults');
+    }
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
