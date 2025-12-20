@@ -127,6 +127,17 @@ function formatDailyStatistics(payload: AlertPayload): string {
 ✅ Sistema funcionando normalmente.`;
 }
 
+function getInstitutionalHeader(): string {
+  return `⚠️ <b>Aviso Institucional</b>
+🗂️ Os relatórios a seguir foram elaborados pelo Aplicativo Xama Pan.
+💻 Programa criado por Kalebe Gomes.
+⏱️ As informações apresentadas correspondem aos dados disponíveis no momento da apuração.
+
+━━━━━━━━━━━━━━━━━━━━━
+
+`;
+}
+
 function formatDetailedDailyReport(payload: AlertPayload): string {
   const stats = payload.detailedStatistics;
   
@@ -153,7 +164,7 @@ function formatDetailedDailyReport(payload: AlertPayload): string {
     .map(([type, count]) => `  • ${type}: ${count}`)
     .join('\n') || '  Nenhum tipo registrado';
 
-  return `📊 <b>RELATÓRIO DIÁRIO DETALHADO</b>
+  return `${getInstitutionalHeader()}📊 <b>RELATÓRIO DIÁRIO DETALHADO</b>
 📅 <b>Data:</b> ${stats.date}
 
 ━━━━━━━━━━━━━━━━━━━━━
@@ -227,7 +238,7 @@ function formatWeeklyReport(payload: AlertPayload): string {
     .map(([dest, count]) => `  • ${dest}: ${count}`)
     .join('\n') || '  Nenhum destino registrado';
 
-  return `📊 <b>RELATÓRIO SEMANAL</b>
+  return `${getInstitutionalHeader()}📊 <b>RELATÓRIO SEMANAL</b>
 📅 <b>Período:</b> ${stats.startDate} a ${stats.endDate}
 
 ━━━━━━━━━━━━━━━━━━━━━
