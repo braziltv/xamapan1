@@ -153,8 +153,8 @@ export const useHourAudio = () => {
   /**
    * Reproduzir anúncio de hora usando áudios cacheados:
    * 1. Som de notificação
-   * 2. Áudio da hora (hour_XX.mp3)
-   * 3. Áudio do minuto se > 0 (minute_XX.mp3 + minutos.mp3)
+   * 2. Áudio da hora (h_XX.mp3)
+   * 3. Áudio do minuto se > 0 (m_XX.mp3 + minutos.mp3)
    */
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
@@ -162,12 +162,12 @@ export const useHourAudio = () => {
       
       console.log(`[useHourAudio] Iniciando anúncio de hora via cache: ${hour}h${minute.toString().padStart(2, '0')}min`);
 
-      // Buscar áudios do cache em paralelo
-      const hourFileName = `hour_${hour.toString().padStart(2, '0')}.mp3`;
+      // Buscar áudios do cache em paralelo (nomes: h_XX.mp3, m_XX.mp3)
+      const hourFileName = `h_${hour.toString().padStart(2, '0')}.mp3`;
       const fetchPromises: Promise<ArrayBuffer>[] = [fetchCachedAudio(hourFileName)];
       
       if (minute > 0) {
-        const minuteFileName = `minute_${minute.toString().padStart(2, '0')}.mp3`;
+        const minuteFileName = `m_${minute.toString().padStart(2, '0')}.mp3`;
         fetchPromises.push(fetchCachedAudio(minuteFileName));
         fetchPromises.push(fetchCachedAudio('minutos.mp3'));
       }
