@@ -121,7 +121,11 @@ export function SystemMonitoringPanel() {
     }
   }, []);
 
-  const checkEdgeFunction = useCallback(async (functionName: string): Promise<'online' | 'offline'> => {
+  const checkEdgeFunction = useCallback(async (functionName: string, functionLabel: string): Promise<'online' | 'offline'> => {
+    const startTime = Date.now();
+    let status: 'online' | 'offline' = 'offline';
+    let errorMessage: string | null = null;
+    
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -144,24 +148,39 @@ export function SystemMonitoringPanel() {
       
       if (response.ok) {
         const data = await response.json();
-        // Check if it's a proper health check response
         if (data.status === 'healthy') {
           console.log(`✅ ${functionName}: healthy`);
-          return 'online';
+          status = 'online';
         }
-      }
-      
-      // Function responded but not with health check format - still online
-      if (response.status !== 404) {
+      } else if (response.status !== 404) {
         console.log(`⚠️ ${functionName}: responded with status ${response.status}`);
-        return 'online';
+        status = 'online';
+      } else {
+        errorMessage = `HTTP ${response.status}`;
       }
-      
-      return 'offline';
     } catch (err) {
-      console.error(`❌ ${functionName}:`, err instanceof Error ? err.message : err);
-      return 'offline';
+      errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`❌ ${functionName}:`, errorMessage);
     }
+    
+    const responseTime = Date.now() - startTime;
+    
+    // Save to health history (fire and forget)
+    supabase
+      .from('edge_function_health_history')
+      .insert({
+        function_name: functionName,
+        function_label: functionLabel,
+        status,
+        response_time_ms: responseTime,
+        error_message: errorMessage,
+        checked_at: new Date().toISOString(),
+      })
+      .then(({ error }) => {
+        if (error) console.error('Error saving health check:', error);
+      });
+    
+    return status;
   }, []);
 
   const loadTableCounts = useCallback(async (): Promise<SystemStatus['tables']> => {
@@ -270,7 +289,7 @@ export function SystemMonitoringPanel() {
       const edgeFunctionStatuses: Record<string, 'online' | 'offline' | 'checking'> = {};
       await Promise.all(
         EDGE_FUNCTIONS.map(async (fn) => {
-          const fnStatus = await checkEdgeFunction(fn.name);
+          const fnStatus = await checkEdgeFunction(fn.name, fn.label);
           edgeFunctionStatuses[fn.name] = fnStatus;
           if (fnStatus === 'offline') {
             errors.push({

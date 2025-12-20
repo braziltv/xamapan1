@@ -134,6 +134,39 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_health_history: {
+        Row: {
+          checked_at: string
+          created_at: string
+          error_message: string | null
+          function_label: string
+          function_name: string
+          id: string
+          response_time_ms: number | null
+          status: string
+        }
+        Insert: {
+          checked_at?: string
+          created_at?: string
+          error_message?: string | null
+          function_label: string
+          function_name: string
+          id?: string
+          response_time_ms?: number | null
+          status: string
+        }
+        Update: {
+          checked_at?: string
+          created_at?: string
+          error_message?: string | null
+          function_label?: string
+          function_name?: string
+          id?: string
+          response_time_ms?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       news_cache: {
         Row: {
           created_at: string

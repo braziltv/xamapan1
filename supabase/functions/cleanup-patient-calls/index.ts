@@ -129,7 +129,24 @@ Deno.serve(async (req) => {
     const errorLogsCount = errorLogsDeleted?.length || 0
     console.log(`Deleted ${errorLogsCount} old system error logs (> 15 days)`)
 
-    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount + chatCount + errorLogsCount
+    // 7. Apagar histórico de health check com mais de 7 dias
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    
+    const { data: healthHistoryDeleted, error: healthHistoryError } = await supabase
+      .from('edge_function_health_history')
+      .delete()
+      .lt('checked_at', sevenDaysAgo)
+      .select('id')
+
+    if (healthHistoryError) {
+      console.error('Error deleting old health history:', healthHistoryError)
+      // Don't throw, just log - table might not exist yet
+    }
+
+    const healthHistoryCount = healthHistoryDeleted?.length || 0
+    console.log(`Deleted ${healthHistoryCount} old health history entries (> 7 days)`)
+
+    const totalDeleted = completedCount + inactiveCount + historyCount + oldPatientsCount + chatCount + errorLogsCount + healthHistoryCount
 
     console.log(`Cleanup complete. Total deleted: ${totalDeleted}`)
 
@@ -142,6 +159,7 @@ Deno.serve(async (req) => {
         oldPatientsDeleted: oldPatientsCount,
         chatMessagesDeleted: chatCount,
         errorLogsDeleted: errorLogsCount,
+        healthHistoryDeleted: healthHistoryCount,
         totalDeleted,
         timestamp: new Date().toISOString()
       }),
