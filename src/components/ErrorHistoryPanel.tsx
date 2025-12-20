@@ -10,8 +10,10 @@ import {
   RefreshCw,
   XCircle,
   BarChart3,
-  History
+  History,
+  Timer
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subHours, startOfHour } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -42,11 +44,15 @@ interface HourlyData {
   label: string;
 }
 
+const REFRESH_INTERVAL_SECONDS = 30;
+
 export function ErrorHistoryPanel() {
   const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([]);
   const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalErrors24h, setTotalErrors24h] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SECONDS);
 
   const loadErrorHistory = useCallback(async () => {
     setIsLoading(true);
@@ -93,6 +99,8 @@ export function ErrorHistoryPanel() {
       });
 
       setHourlyData(chartData);
+      setLastUpdate(new Date());
+      setCountdown(REFRESH_INTERVAL_SECONDS);
     } catch (error) {
       console.error('Error loading error history:', error);
       toast.error('Erro ao carregar histórico de erros');
@@ -124,7 +132,12 @@ export function ErrorHistoryPanel() {
     loadErrorHistory();
 
     // Auto-refresh every 30 seconds
-    const refreshInterval = setInterval(loadErrorHistory, 30000);
+    const refreshInterval = setInterval(loadErrorHistory, REFRESH_INTERVAL_SECONDS * 1000);
+
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => (prev > 0 ? prev - 1 : REFRESH_INTERVAL_SECONDS));
+    }, 1000);
 
     // Subscribe to realtime updates
     const channel = supabase
@@ -144,6 +157,7 @@ export function ErrorHistoryPanel() {
 
     return () => {
       clearInterval(refreshInterval);
+      clearInterval(countdownInterval);
       supabase.removeChannel(channel);
     };
   }, [loadErrorHistory]);
@@ -197,6 +211,28 @@ export function ErrorHistoryPanel() {
             <RefreshCw className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
+        </div>
+      </div>
+
+      {/* Last Update & Countdown */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+        <div className="flex items-center gap-2 text-sm">
+          <Clock className="w-4 h-4 text-muted-foreground" />
+          <span className="text-muted-foreground">Última atualização:</span>
+          <span className="font-medium">{format(lastUpdate, "HH:mm:ss", { locale: ptBR })}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm">
+            <Timer className="w-4 h-4 text-primary" />
+            <span className="text-muted-foreground">Próximo refresh:</span>
+            <span className="font-mono font-medium text-primary">{countdown}s</span>
+          </div>
+          <div className="w-24">
+            <Progress 
+              value={(countdown / REFRESH_INTERVAL_SECONDS) * 100} 
+              className="h-2"
+            />
+          </div>
         </div>
       </div>
 
