@@ -46,20 +46,21 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     e.preventDefault();
     
     // TV user - show unit selection screen (no captcha required)
-    if (username === "tv" && password === "tv") {
+    if (username === "tv") {
       setShowTvUnitSelection(true);
       return;
     }
     
+    // TEMP: Skip captcha and password validation for testing
     // Regular login requires captcha
-    if (!captchaValid) {
-      toast({
-        title: "Verificação necessária",
-        description: "Por favor, resolva o cálculo de segurança.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // if (!captchaValid) {
+    //   toast({
+    //     title: "Verificação necessária",
+    //     description: "Por favor, resolva o cálculo de segurança.",
+    //     variant: "destructive",
+    //   });
+    //   return;
+    // }
     
     if (!selectedUnit) {
       toast({
@@ -70,8 +71,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
     
-    // Regular user
-    if (username === "saude" && password === "saude@1") {
+    // TEMP: Allow login with just username for testing
+    if (username) {
       const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("selectedUnitId", selectedUnit);
@@ -85,7 +86,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     } else {
       toast({
         title: "Credenciais inválidas",
-        description: "Usuário ou senha incorretos.",
+        description: "Digite um usuário.",
         variant: "destructive",
       });
     }
