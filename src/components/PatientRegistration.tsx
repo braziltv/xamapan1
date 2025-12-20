@@ -92,7 +92,8 @@ const PRIORITY_CONFIG = {
 // Helper to get status display info
 const getStatusInfo = (status: PatientStatus, destination?: string) => {
   const statusMap: Record<string, { text: string; color: string }> = {
-    'waiting': { text: 'Aguardando triagem', color: 'text-amber-500' },
+    'waiting': { text: 'Aguardando cadastro', color: 'text-slate-500' },
+    'waiting-triage': { text: 'Na fila da triagem', color: 'text-amber-500' },
     'in-triage': { text: 'Em triagem', color: 'text-blue-500' },
     'waiting-doctor': { text: `Aguardando médico${destination ? ` - ${destination}` : ''}`, color: 'text-purple-500' },
     'in-consultation': { text: 'Em consulta', color: 'text-green-500' },
