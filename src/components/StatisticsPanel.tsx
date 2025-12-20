@@ -69,6 +69,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
 import { MarketingPanel } from './MarketingPanel';
+import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2632,6 +2633,19 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* System Monitoring Panel */}
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Database className="w-5 h-5 text-blue-500" />
+            Monitoramento do Sistema
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <SystemMonitoringPanel />
         </CardContent>
       </Card>
 
