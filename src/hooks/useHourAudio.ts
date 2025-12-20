@@ -1,9 +1,12 @@
 /**
- * Hook para reprodução de áudios de hora via Google Cloud TTS
- * Gera anúncio completo com som de notificação, repetição e voz masculina
+ * Hook para reprodução de áudios de hora usando cache do Supabase Storage
+ * Usa áudios pré-gerados armazenados em tts-cache/time/
  */
 
 import { toast } from "@/hooks/use-toast";
+
+// URL base do storage público do Supabase
+const STORAGE_BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tts-cache/time`;
 
 export const useHourAudio = () => {
   
@@ -17,10 +20,9 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Gerar texto da hora em português brasileiro natural
+   * Gerar texto da hora em português brasileiro natural (para exibição)
    */
   const getHourText = (hour: number, minute: number): string => {
-    // Converter hora para texto
     const hourTexts: Record<number, string> = {
       0: 'meia-noite',
       1: 'uma hora',
@@ -48,7 +50,6 @@ export const useHourAudio = () => {
       23: 'vinte e três horas',
     };
 
-    // Converter minuto para texto
     const getMinuteText = (m: number): string => {
       if (m === 0) return '';
       if (m === 30) return 'e meia';
@@ -56,65 +57,20 @@ export const useHourAudio = () => {
       if (m === 45) return 'e quarenta e cinco';
       
       const minuteTexts: Record<number, string> = {
-        1: 'e um',
-        2: 'e dois',
-        3: 'e três',
-        4: 'e quatro',
-        5: 'e cinco',
-        6: 'e seis',
-        7: 'e sete',
-        8: 'e oito',
-        9: 'e nove',
-        10: 'e dez',
-        11: 'e onze',
-        12: 'e doze',
-        13: 'e treze',
-        14: 'e quatorze',
-        15: 'e quinze',
-        16: 'e dezesseis',
-        17: 'e dezessete',
-        18: 'e dezoito',
-        19: 'e dezenove',
-        20: 'e vinte',
-        21: 'e vinte e um',
-        22: 'e vinte e dois',
-        23: 'e vinte e três',
-        24: 'e vinte e quatro',
-        25: 'e vinte e cinco',
-        26: 'e vinte e seis',
-        27: 'e vinte e sete',
-        28: 'e vinte e oito',
-        29: 'e vinte e nove',
-        30: 'e trinta',
-        31: 'e trinta e um',
-        32: 'e trinta e dois',
-        33: 'e trinta e três',
-        34: 'e trinta e quatro',
-        35: 'e trinta e cinco',
-        36: 'e trinta e seis',
-        37: 'e trinta e sete',
-        38: 'e trinta e oito',
-        39: 'e trinta e nove',
-        40: 'e quarenta',
-        41: 'e quarenta e um',
-        42: 'e quarenta e dois',
-        43: 'e quarenta e três',
-        44: 'e quarenta e quatro',
-        45: 'e quarenta e cinco',
-        46: 'e quarenta e seis',
-        47: 'e quarenta e sete',
-        48: 'e quarenta e oito',
-        49: 'e quarenta e nove',
-        50: 'e cinquenta',
-        51: 'e cinquenta e um',
-        52: 'e cinquenta e dois',
-        53: 'e cinquenta e três',
-        54: 'e cinquenta e quatro',
-        55: 'e cinquenta e cinco',
-        56: 'e cinquenta e seis',
-        57: 'e cinquenta e sete',
-        58: 'e cinquenta e oito',
-        59: 'e cinquenta e nove',
+        1: 'e um', 2: 'e dois', 3: 'e três', 4: 'e quatro', 5: 'e cinco',
+        6: 'e seis', 7: 'e sete', 8: 'e oito', 9: 'e nove', 10: 'e dez',
+        11: 'e onze', 12: 'e doze', 13: 'e treze', 14: 'e quatorze', 15: 'e quinze',
+        16: 'e dezesseis', 17: 'e dezessete', 18: 'e dezoito', 19: 'e dezenove', 20: 'e vinte',
+        21: 'e vinte e um', 22: 'e vinte e dois', 23: 'e vinte e três', 24: 'e vinte e quatro',
+        25: 'e vinte e cinco', 26: 'e vinte e seis', 27: 'e vinte e sete', 28: 'e vinte e oito',
+        29: 'e vinte e nove', 30: 'e trinta', 31: 'e trinta e um', 32: 'e trinta e dois',
+        33: 'e trinta e três', 34: 'e trinta e quatro', 35: 'e trinta e cinco', 36: 'e trinta e seis',
+        37: 'e trinta e sete', 38: 'e trinta e oito', 39: 'e trinta e nove', 40: 'e quarenta',
+        41: 'e quarenta e um', 42: 'e quarenta e dois', 43: 'e quarenta e três', 44: 'e quarenta e quatro',
+        45: 'e quarenta e cinco', 46: 'e quarenta e seis', 47: 'e quarenta e sete', 48: 'e quarenta e oito',
+        49: 'e quarenta e nove', 50: 'e cinquenta', 51: 'e cinquenta e um', 52: 'e cinquenta e dois',
+        53: 'e cinquenta e três', 54: 'e cinquenta e quatro', 55: 'e cinquenta e cinco',
+        56: 'e cinquenta e seis', 57: 'e cinquenta e sete', 58: 'e cinquenta e oito', 59: 'e cinquenta e nove',
       };
       
       return minuteTexts[m] || `e ${m}`;
@@ -124,7 +80,6 @@ export const useHourAudio = () => {
     const hourText = hourTexts[hour] || `${hour} horas`;
     const minuteText = getMinuteText(minute);
 
-    // Construir frase: "Olá, boa noite. Hora certa, são XX horas e X minuto(s)."
     if (minute === 0) {
       return `Olá, ${greeting}. Hora certa, são ${hourText}.`;
     } else if (minute === 30) {
@@ -137,54 +92,18 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Reproduzir áudio via Google Cloud TTS
-   * Usa as vozes configuradas pelo usuário ou fallback para padrão
+   * Buscar áudio do cache do storage
    */
-  const generateTTSAudio = async (text: string, voice: 'female' | 'male'): Promise<ArrayBuffer> => {
-    // Obter vozes configuradas pelo usuário
-    const configuredFemaleVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
-    const configuredMaleVoice = localStorage.getItem('googleVoiceMale') || 'pt-BR-Neural2-B';
+  const fetchCachedAudio = async (fileName: string): Promise<ArrayBuffer> => {
+    const url = `${STORAGE_BASE_URL}/${fileName}`;
+    console.log(`[useHourAudio] Buscando áudio do cache: ${url}`);
     
-    const voiceName = voice === 'female' ? configuredFemaleVoice : configuredMaleVoice;
+    const response = await fetch(url);
     
-    console.log(`[useHourAudio] Gerando TTS Google Cloud para: "${text}" com voz ${voiceName}`);
-
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ 
-          text, 
-          voiceName,
-          speakingRate: 1.0
-        }),
-      }
-    );
-
     if (!response.ok) {
-      let errorMessage = `Google Cloud TTS error: ${response.status}`;
-      try {
-        const errorBody = await response.json();
-        errorMessage = errorBody?.error || errorMessage;
-        
-        // Verificar se é erro de quota/autenticação
-        if (response.status === 401 || response.status === 403 || 
-            errorMessage.includes('quota') || errorMessage.includes('limit')) {
-          throw new Error('QUOTA_EXCEEDED');
-        }
-      } catch (parseError) {
-        if (parseError instanceof Error && parseError.message === 'QUOTA_EXCEEDED') {
-          throw parseError;
-        }
-      }
-      throw new Error(errorMessage);
+      throw new Error(`Áudio não encontrado no cache: ${fileName}`);
     }
-
+    
     return response.arrayBuffer();
   };
 
@@ -232,19 +151,31 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Reproduzir anúncio de hora:
+   * Reproduzir anúncio de hora usando áudios cacheados:
    * 1. Som de notificação
-   * 2. Anúncio: "Olá, boa noite. Hora certa, são XX horas e X minutos."
+   * 2. Áudio da hora (hour_XX.mp3)
+   * 3. Áudio do minuto se > 0 (minute_XX.mp3 + minutos.mp3)
    */
   const playHourAudio = async (hour: number, minute: number): Promise<boolean> => {
     try {
       const timeAnnouncementVolume = parseFloat(localStorage.getItem('volume-time-announcement') || '1');
-      const timeText = getHourText(hour, minute);
       
-      console.log(`[useHourAudio] Iniciando anúncio de hora via Google Cloud TTS: "${timeText}"`);
+      console.log(`[useHourAudio] Iniciando anúncio de hora via cache: ${hour}h${minute.toString().padStart(2, '0')}min`);
 
-      // Gerar áudio da hora
-      const timeAudioBuffer = await generateTTSAudio(timeText, 'female');
+      // Buscar áudios do cache em paralelo
+      const hourFileName = `hour_${hour.toString().padStart(2, '0')}.mp3`;
+      const fetchPromises: Promise<ArrayBuffer>[] = [fetchCachedAudio(hourFileName)];
+      
+      if (minute > 0) {
+        const minuteFileName = `minute_${minute.toString().padStart(2, '0')}.mp3`;
+        fetchPromises.push(fetchCachedAudio(minuteFileName));
+        fetchPromises.push(fetchCachedAudio('minutos.mp3'));
+      }
+      
+      const audioBuffers = await Promise.all(fetchPromises);
+      const hourBuffer = audioBuffers[0];
+      const minuteBuffer = minute > 0 ? audioBuffers[1] : null;
+      const minutosBuffer = minute > 0 ? audioBuffers[2] : null;
 
       // 1. Som de notificação
       console.log('[useHourAudio] Passo 1: Som de notificação');
@@ -253,31 +184,41 @@ export const useHourAudio = () => {
       // Pequena pausa após notificação
       await wait(300);
 
-      // 2. Anúncio da hora (voz feminina)
-      console.log('[useHourAudio] Passo 2: Anúncio da hora');
-      await playAudioBuffer(timeAudioBuffer, timeAnnouncementVolume);
+      // 2. Áudio da hora
+      console.log('[useHourAudio] Passo 2: Áudio da hora');
+      await playAudioBuffer(hourBuffer, timeAnnouncementVolume);
+      
+      // 3. Áudio do minuto (se necessário)
+      if (minuteBuffer && minutosBuffer && minute > 0) {
+        await wait(200);
+        console.log('[useHourAudio] Passo 3: Áudio do minuto');
+        await playAudioBuffer(minuteBuffer, timeAnnouncementVolume);
+        
+        // Palavra "minutos" (exceto para minute=30 que é "e meia")
+        if (minute !== 30) {
+          await wait(100);
+          await playAudioBuffer(minutosBuffer, timeAnnouncementVolume);
+        }
+      }
 
-      console.log('[useHourAudio] Anúncio finalizado via Google Cloud TTS');
+      console.log('[useHourAudio] Anúncio finalizado via cache');
       return true;
     } catch (error) {
       console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
       
-      // Verificar se é erro de quota exceeded
-      if (error instanceof Error && error.message === 'QUOTA_EXCEEDED') {
-        toast({
-          title: "Créditos TTS esgotados",
-          description: "A cota de texto-para-voz do Google Cloud foi excedida.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
+      toast({
+        title: "Erro no anúncio de hora",
+        description: "Não foi possível reproduzir o áudio do cache.",
+        variant: "destructive",
+        duration: 5000,
+      });
       
       return false;
     }
   };
 
   /**
-   * Verificar status (mantido para compatibilidade)
+   * Verificar status do cache
    */
   const checkAudiosExist = async (): Promise<{ 
     hours: number; 
@@ -293,7 +234,7 @@ export const useHourAudio = () => {
       hasMinutosWord: true,
       missingHours: [],
       missingMinutes: [],
-      usingApi: true,
+      usingApi: false, // Agora usando cache local
     };
   };
 
