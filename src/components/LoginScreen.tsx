@@ -71,7 +71,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     }
     
     // Validate credentials
-    if (username === "adm" && password === "pmsj@2025") {
+    if (username === "saude" && password === "saude@1") {
       const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("selectedUnitId", selectedUnit);
