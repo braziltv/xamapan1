@@ -34,6 +34,7 @@ interface ScheduledAnnouncement {
   repeat_count: number;
   is_active: boolean;
   last_played_at: string | null;
+  audio_cache_url?: string | null;
 }
 
 interface CommercialPhrase {
@@ -241,6 +242,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             repeat_count: a.repeat_count,
             is_active: a.is_active,
             last_played_at: a.last_played_at,
+            audio_cache_url: a.audio_cache_url,
           })));
         } else {
           setScheduledAnnouncements([]);
@@ -898,7 +900,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     [playSimpleAudio]
   );
 
-  // Test audio function
+  // Play cached audio from URL (for pre-generated announcement audio)
+  const playCachedAudio = useCallback(
+    (audioUrl: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const ttsVolume = readVolume('volume-tts', 1);
+        const audio = new Audio(audioUrl);
+        audio.volume = Math.min(1.0, ttsVolume);
+        
+        audio.onended = () => {
+          console.log('✅ Cached audio playback finished');
+          resolve();
+        };
+        audio.onerror = (err) => {
+          console.error('❌ Cached audio playback error:', err);
+          reject(new Error('Cached audio playback failed'));
+        };
+        audio.play().catch((err) => {
+          console.error('❌ Cached audio play() failed:', err);
+          reject(err);
+        });
+      });
+    },
+    []
+  );
+
   const testAudio = useCallback(async () => {
     console.log('Testing audio...');
     try {
@@ -1184,8 +1210,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               // Play notification sound
               await playNotificationSound();
               
-              // Play the announcement text
-              await speakWithGoogleTTS(announcement.text_content);
+              // Use cached audio if available, otherwise generate via TTS
+              if (announcement.audio_cache_url) {
+                console.log(`📢 Playing cached audio for "${announcement.title}"`);
+                await playCachedAudio(announcement.audio_cache_url);
+              } else {
+                console.log(`📢 Generating TTS for "${announcement.title}" (no cache)`);
+                await speakWithGoogleTTS(announcement.text_content);
+              }
               
               console.log(`📢 Announcement "${announcement.title}" iteration ${i + 1}/${announcement.repeat_count} completed`);
             }
@@ -1201,7 +1233,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         break;
       }
     }
-  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS]);
+  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio]);
 
   const playCommercialPhraseNow = useCallback(async () => {
     try {

@@ -58,6 +58,8 @@ interface VoiceAnnouncement {
   is_active: boolean;
   audio_type: string;
   unit_name: string;
+  audio_cache_url?: string | null;
+  audio_generated_at?: string | null;
 }
 
 interface CommercialPhrase {
@@ -209,6 +211,83 @@ export function MarketingPanel() {
     setVoiceDialogOpen(true);
   };
 
+  // Generate and cache audio for announcement
+  const generateAudioCache = async (announcementId: string, textContent: string): Promise<string | null> => {
+    try {
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      
+      // Generate audio via Google Cloud TTS
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            text: textContent, 
+            voiceName: configuredVoice
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Error generating audio cache:', response.status);
+        return null;
+      }
+
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+      
+      // Upload to storage with permanent prefix
+      const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('tts-cache')
+        .upload(cacheFileName, audioBlob, {
+          contentType: 'audio/mpeg',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error('Error uploading audio cache:', uploadError);
+        return null;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('tts-cache')
+        .getPublicUrl(cacheFileName);
+
+      console.log('📢 Audio cache generated:', cacheFileName);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error generating audio cache:', error);
+      return null;
+    }
+  };
+
+  // Delete cached audio for announcement
+  const deleteAudioCache = async (announcementId: string) => {
+    try {
+      const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
+      
+      const { error } = await supabase.storage
+        .from('tts-cache')
+        .remove([cacheFileName]);
+
+      if (error) {
+        console.error('Error deleting audio cache:', error);
+      } else {
+        console.log('🗑️ Audio cache deleted:', cacheFileName);
+      }
+    } catch (error) {
+      console.error('Error deleting audio cache:', error);
+    }
+  };
+
   // Save voice announcement
   const saveVoiceAnnouncement = async () => {
     if (!voiceForm.title.trim() || !voiceForm.text_content.trim()) {
@@ -223,9 +302,14 @@ export function MarketingPanel() {
 
     setSavingVoice(true);
     try {
-      const data = {
+      const textContent = voiceForm.text_content.trim();
+      const needsNewCache = !editingVoice || editingVoice.text_content !== textContent;
+      
+      let announcementId = editingVoice?.id;
+      
+      const data: any = {
         title: voiceForm.title.trim(),
-        text_content: voiceForm.text_content.trim(),
+        text_content: textContent,
         start_time: voiceForm.start_time,
         end_time: voiceForm.end_time,
         days_of_week: voiceForm.days_of_week,
@@ -245,14 +329,38 @@ export function MarketingPanel() {
           .eq('id', editingVoice.id);
 
         if (error) throw error;
-        toast.success('Anúncio atualizado com sucesso');
       } else {
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('scheduled_announcements')
-          .insert(data);
+          .insert(data)
+          .select('id')
+          .single();
 
         if (error) throw error;
-        toast.success('Anúncio criado com sucesso');
+        announcementId = insertedData.id;
+      }
+
+      // Generate audio cache if text changed or new announcement
+      if (needsNewCache && announcementId) {
+        toast.info('Gerando cache de áudio...');
+        const cacheUrl = await generateAudioCache(announcementId, textContent);
+        
+        if (cacheUrl) {
+          // Update with cache URL
+          await supabase
+            .from('scheduled_announcements')
+            .update({ 
+              audio_cache_url: cacheUrl,
+              audio_generated_at: new Date().toISOString()
+            })
+            .eq('id', announcementId);
+          
+          toast.success('Anúncio salvo com cache de áudio');
+        } else {
+          toast.success(editingVoice ? 'Anúncio atualizado (cache falhou)' : 'Anúncio criado (cache falhou)');
+        }
+      } else {
+        toast.success(editingVoice ? 'Anúncio atualizado' : 'Anúncio criado');
       }
 
       setVoiceDialogOpen(false);
@@ -270,13 +378,17 @@ export function MarketingPanel() {
     if (!confirm('Deseja realmente excluir este anúncio?')) return;
 
     try {
+      // Delete cached audio first
+      await deleteAudioCache(id);
+      
+      // Then delete from database
       const { error } = await supabase
         .from('scheduled_announcements')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-      toast.success('Anúncio excluído');
+      toast.success('Anúncio e cache de áudio excluídos');
       loadVoiceAnnouncements();
     } catch (error) {
       console.error('Error deleting voice announcement:', error);
