@@ -5,18 +5,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon } from "lucide-react";
+import { Eye, EyeOff, Tv, ArrowLeft, Clock, Shield, Sun, Moon, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useBrazilTime, formatBrazilTime } from "@/hooks/useBrazilTime";
 import { HealthCrossIcon } from "./HealthCrossIcon";
 import { setManualThemeOverride } from "./AutoNightMode";
 import { SimpleCaptcha } from "./SimpleCaptcha";
+import { supabase } from "@/integrations/supabase/client";
 
-const HEALTH_UNITS = [
-  { id: "pa-pedro-jose", name: "Pronto Atendimento Pedro José de Menezes" },
-  { id: "psf-aguinalda", name: "PSF Aguinalda Angélica" },
-  { id: "ubs-maria-alves", name: "UBS Maria Alves de Mendonça" },
-];
+interface HealthUnit {
+  id: string;
+  name: string;
+  display_name: string;
+}
 
 interface LoginScreenProps {
   onLogin: (unitId: string, unitName: string, isTvMode?: boolean) => void;
@@ -33,6 +34,37 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [userIp, setUserIp] = useState<string>("");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  
+  // Units from database
+  const [units, setUnits] = useState<HealthUnit[]>([]);
+  const [loadingUnits, setLoadingUnits] = useState(true);
+
+  // Fetch units from database
+  useEffect(() => {
+    const fetchUnits = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('units')
+          .select('id, name, display_name')
+          .eq('is_active', true)
+          .order('display_name');
+        
+        if (error) throw error;
+        setUnits(data || []);
+      } catch (error) {
+        console.error('Error fetching units:', error);
+        toast({
+          title: "Erro ao carregar unidades",
+          description: "Não foi possível carregar a lista de unidades.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingUnits(false);
+      }
+    };
+    
+    fetchUnits();
+  }, [toast]);
 
   // Fetch user IP
   useEffect(() => {
@@ -44,12 +76,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // TV user - show unit selection screen (no captcha required)
-    if (username === "tv") {
-      setShowTvUnitSelection(true);
-      return;
-    }
     
     // Regular login requires captcha
     if (!captchaValid) {
@@ -72,15 +98,15 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     
     // Validate credentials
     if (username === "saude" && password === "saude@1") {
-      const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
+      const unit = units.find(u => u.id === selectedUnit);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("selectedUnitId", selectedUnit);
-      localStorage.setItem("selectedUnitName", unit?.name || "");
+      localStorage.setItem("selectedUnitName", unit?.display_name || unit?.name || "");
       localStorage.setItem("isTvMode", "false");
-      onLogin(selectedUnit, unit?.name || "", false);
+      onLogin(selectedUnit, unit?.display_name || unit?.name || "", false);
       toast({
         title: "Login realizado com sucesso!",
-        description: `Bem-vindo ao sistema - ${unit?.name}`,
+        description: `Bem-vindo ao sistema - ${unit?.display_name || unit?.name}`,
       });
     } else {
       toast({
@@ -89,6 +115,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         variant: "destructive",
       });
     }
+  };
+  
+  const handleTvModeClick = () => {
+    setShowTvUnitSelection(true);
   };
 
   const handleTvUnitConfirm = () => {
@@ -101,15 +131,15 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    const unit = HEALTH_UNITS.find(u => u.id === selectedUnit);
+    const unit = units.find(u => u.id === selectedUnit);
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("selectedUnitId", selectedUnit);
-    localStorage.setItem("selectedUnitName", unit?.name || "");
+    localStorage.setItem("selectedUnitName", unit?.display_name || unit?.name || "");
     localStorage.setItem("isTvMode", "true");
-    onLogin(selectedUnit, unit?.name || "", true);
+    onLogin(selectedUnit, unit?.display_name || unit?.name || "", true);
     toast({
       title: "Modo TV ativado!",
-      description: `Conectado - ${unit?.name}`,
+      description: `Conectado - ${unit?.display_name || unit?.name}`,
     });
   };
 
@@ -137,18 +167,24 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
             <div className="space-y-2">
               <Label htmlFor="tv-unit" className="text-sm sm:text-base">Qual unidade exibir na TV?</Label>
-              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger className="h-10 sm:h-12 text-sm sm:text-base">
-                  <SelectValue placeholder="Selecione a unidade" />
-                </SelectTrigger>
-                <SelectContent className="bg-background max-w-[90vw]">
-                  {HEALTH_UNITS.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id} className="py-2 sm:py-3 text-sm sm:text-base">
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingUnits ? (
+                <div className="flex items-center justify-center h-12">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                  <SelectTrigger className="h-10 sm:h-12 text-sm sm:text-base">
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background max-w-[90vw]">
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id} className="py-2 sm:py-3 text-sm sm:text-base">
+                        {unit.display_name || unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="flex gap-2 sm:gap-3">
               <Button 
@@ -209,18 +245,24 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="unit" className="text-sm sm:text-base">Unidade de Saúde</Label>
-              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
-                  <SelectValue placeholder="Selecione a unidade" />
-                </SelectTrigger>
-                <SelectContent className="bg-background max-w-[90vw]">
-                  {HEALTH_UNITS.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id} className="text-sm sm:text-base py-2">
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {loadingUnits ? (
+                <div className="flex items-center justify-center h-11">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                  <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background max-w-[90vw]">
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id} className="text-sm sm:text-base py-2">
+                        {unit.display_name || unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="username" className="text-sm sm:text-base">Usuário</Label>
@@ -261,6 +303,26 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             
             <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base">
               Entrar
+            </Button>
+            
+            {/* TV Mode Button - No login required */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">ou</span>
+              </div>
+            </div>
+            
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={handleTvModeClick}
+              className="w-full h-10 sm:h-11 text-sm sm:text-base gap-2"
+            >
+              <Tv className="w-4 h-4" />
+              Painel TV (sem login)
             </Button>
           </form>
 
