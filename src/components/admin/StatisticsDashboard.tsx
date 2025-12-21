@@ -22,6 +22,7 @@ import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 
+
 interface CallData {
   call_type: string;
   destination: string | null;
@@ -83,11 +84,11 @@ export function StatisticsDashboard() {
   const [exporting, setExporting] = useState(false);
   const [callData, setCallData] = useState<CallData[]>([]);
   
-  // Refs para captura dos gráficos
-  const chartDailyRef = useRef<HTMLDivElement>(null);
-  const chartHourlyRef = useRef<HTMLDivElement>(null);
-  const chartTypeRef = useRef<HTMLDivElement>(null);
-  const chartDestRef = useRef<HTMLDivElement>(null);
+  // Refs para captura dos gráficos - tipagem explícita
+  const chartDailyRef = useRef<HTMLDivElement | null>(null);
+  const chartHourlyRef = useRef<HTMLDivElement | null>(null);
+  const chartTypeRef = useRef<HTMLDivElement | null>(null);
+  const chartDestRef = useRef<HTMLDivElement | null>(null);
   
   // Estados para estatísticas processadas
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
@@ -610,182 +611,190 @@ export function StatisticsDashboard() {
           {/* Gráficos principais */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Gráfico de linha - Evolução diária */}
-            <Card ref={chartDailyRef}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <TrendingUp className="w-5 h-5" />
-                  Evolução Diária
-                </CardTitle>
-                <CardDescription>Chamadas por dia no período selecionado</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {dailyStats.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={dailyStats}>
-                      <defs>
-                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="date" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                      <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Area 
-                        type="monotone" 
-                        dataKey="total" 
-                        name="Total"
-                        stroke="hsl(var(--primary))" 
-                        fill="url(#colorTotal)"
-                        strokeWidth={2}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="triage" 
-                        name="Triagem"
-                        stroke="hsl(142, 76%, 36%)" 
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="doctor" 
-                        name="Médico"
-                        stroke="hsl(262, 83%, 58%)" 
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                    Sem dados para o período selecionado
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div ref={chartDailyRef}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <TrendingUp className="w-5 h-5" />
+                    Evolução Diária
+                  </CardTitle>
+                  <CardDescription>Chamadas por dia no período selecionado</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {dailyStats.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={dailyStats}>
+                        <defs>
+                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="date" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                        <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Area 
+                          type="monotone" 
+                          dataKey="total" 
+                          name="Total"
+                          stroke="hsl(var(--primary))" 
+                          fill="url(#colorTotal)"
+                          strokeWidth={2}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="triage" 
+                          name="Triagem"
+                          stroke="hsl(142, 76%, 36%)" 
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="doctor" 
+                          name="Médico"
+                          stroke="hsl(262, 83%, 58%)" 
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                      Sem dados para o período selecionado
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Gráfico de barras - Por hora */}
-            <Card ref={chartHourlyRef}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Clock className="w-5 h-5" />
-                  Distribuição por Hora
-                </CardTitle>
-                <CardDescription>Volume de chamadas ao longo do dia</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={hourlyStats}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
-                    <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="count" 
-                      name="Chamadas"
-                      fill="hsl(var(--primary))" 
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Gráfico de pizza - Por tipo */}
-            <Card ref={chartTypeRef}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Activity className="w-5 h-5" />
-                  Por Tipo de Chamada
-                </CardTitle>
-                <CardDescription>Distribuição por módulo/tipo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {typeStats.length > 0 ? (
-                  <div className="flex flex-col md:flex-row items-center gap-4">
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={typeStats}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={2}
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {typeStats.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<CustomTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="flex flex-col gap-2 min-w-[150px]">
-                      {typeStats.slice(0, 6).map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span className="text-sm text-muted-foreground flex-1">{item.name}</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {item.value}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    Sem dados
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Gráfico de barras horizontal - Por destino */}
-            <Card ref={chartDestRef}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Users className="w-5 h-5" />
-                  Top Destinos
-                </CardTitle>
-                <CardDescription>Destinos mais frequentes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {destinationStats.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={destinationStats} layout="vertical">
+            <div ref={chartHourlyRef}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Clock className="w-5 h-5" />
+                    Distribuição por Hora
+                  </CardTitle>
+                  <CardDescription>Volume de chamadas ao longo do dia</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={hourlyStats}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                      <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        tick={{ fontSize: 11 }} 
-                        width={120}
-                        className="fill-muted-foreground"
-                      />
+                      <XAxis dataKey="hour" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                      <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
                       <Tooltip content={<CustomTooltip />} />
                       <Bar 
                         dataKey="count" 
                         name="Chamadas"
-                        fill="hsl(142, 76%, 36%)" 
-                        radius={[0, 4, 4, 0]}
+                        fill="hsl(var(--primary))" 
+                        radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                    Sem dados
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Gráfico de pizza - Por tipo */}
+            <div ref={chartTypeRef}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="w-5 h-5" />
+                    Por Tipo de Chamada
+                  </CardTitle>
+                  <CardDescription>Distribuição por módulo/tipo</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {typeStats.length > 0 ? (
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={typeStats}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            nameKey="name"
+                          >
+                            {typeStats.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomTooltip />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="flex flex-col gap-2 min-w-[150px]">
+                        {typeStats.slice(0, 6).map((item, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="text-sm text-muted-foreground flex-1">{item.name}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {item.value}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                      Sem dados
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Gráfico de barras horizontal - Por destino */}
+            <div ref={chartDestRef}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Users className="w-5 h-5" />
+                    Top Destinos
+                  </CardTitle>
+                  <CardDescription>Destinos mais frequentes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {destinationStats.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={destinationStats} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis type="number" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                        <YAxis 
+                          dataKey="name" 
+                          type="category" 
+                          tick={{ fontSize: 11 }} 
+                          width={120}
+                          className="fill-muted-foreground"
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar 
+                          dataKey="count" 
+                          name="Chamadas"
+                          fill="hsl(142, 76%, 36%)" 
+                          radius={[0, 4, 4, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                      Sem dados
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Tabela de resumo por tipo */}
