@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Tv, CheckCircle, Smartphone, Monitor, ArrowLeft, User } from 'lucide-react';
+import { Download, Tv, CheckCircle, Smartphone, Monitor, ArrowLeft, User, FileDown } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -316,6 +316,21 @@ const InstallPWA = () => {
                   {isInstalling ? 'Instalando...' : `Instalar ${modeInfo?.title}`}
                 </Button>
               )}
+
+              {/* Direct download shortcut */}
+              <a 
+                href={installMode === 'tv' ? '/install-tv.html' : '/install-full.html'}
+                download={installMode === 'tv' ? 'Xama-Pan-TV.html' : 'Xama-Pan-Full.html'}
+                className="w-full"
+              >
+                <Button 
+                  variant="outline"
+                  className="w-full h-12 gap-2"
+                >
+                  <FileDown className="h-5 w-5" />
+                  Baixar Atalho para Desktop
+                </Button>
+              </a>
 
               {/* Manual instructions for iOS and TV */}
               {(!deferredPrompt || deviceType === 'ios' || deviceType === 'tv') && (
