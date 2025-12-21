@@ -134,6 +134,54 @@ export type Database = {
         }
         Relationships: []
       }
+      destinations: {
+        Row: {
+          created_at: string
+          display_name: string
+          display_order: number
+          id: string
+          is_active: boolean
+          module_id: string | null
+          name: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          module_id?: string | null
+          name: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          module_id?: string | null
+          name?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destinations_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "destinations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       edge_function_health_history: {
         Row: {
           checked_at: string
@@ -167,6 +215,53 @@ export type Database = {
         }
         Relationships: []
       }
+      modules: {
+        Row: {
+          call_type: string
+          code: string
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          call_type: string
+          code: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          call_type?: string
+          code?: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news_cache: {
         Row: {
           created_at: string
@@ -190,6 +285,95 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      operator_permissions: {
+        Row: {
+          can_call: boolean
+          can_manage: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module_id: string
+          operator_id: string
+        }
+        Insert: {
+          can_call?: boolean
+          can_manage?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_id: string
+          operator_id: string
+        }
+        Update: {
+          can_call?: boolean
+          can_manage?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_id?: string
+          operator_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operator_permissions_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operators: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          password_hash: string
+          role: Database["public"]["Enums"]["user_role"]
+          unit_id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          password_hash: string
+          role?: Database["public"]["Enums"]["user_role"]
+          unit_id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          password_hash?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          unit_id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operators_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_calls: {
         Row: {
@@ -428,6 +612,60 @@ export type Database = {
         }
         Relationships: []
       }
+      tts_phrases: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          module_id: string | null
+          phrase_template: string
+          phrase_type: string
+          unit_id: string
+          updated_at: string
+          voice_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          module_id?: string | null
+          phrase_template: string
+          phrase_type?: string
+          unit_id: string
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          module_id?: string | null
+          phrase_template?: string
+          phrase_type?: string
+          unit_id?: string
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tts_phrases_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tts_phrases_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unit_settings: {
         Row: {
           commercial_phrase_1: string | null
@@ -454,6 +692,36 @@ export type Database = {
           created_at?: string
           patient_call_voice?: string | null
           unit_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      units: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          name: string
+          password: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          name: string
+          password?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          password?: string
           updated_at?: string
         }
         Relationships: []
@@ -549,7 +817,13 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "admin"
+        | "recepcao"
+        | "triagem"
+        | "medico"
+        | "enfermagem"
+        | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -676,6 +950,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: [
+        "admin",
+        "recepcao",
+        "triagem",
+        "medico",
+        "enfermagem",
+        "custom",
+      ],
+    },
   },
 } as const

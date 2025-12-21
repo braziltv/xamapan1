@@ -1,0 +1,145 @@
+import { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2 } from 'lucide-react';
+import { UnitsManager } from './UnitsManager';
+import { ModulesManager } from './ModulesManager';
+import { DestinationsManager } from './DestinationsManager';
+import { OperatorsManager } from './OperatorsManager';
+import { TTSPhrasesManager } from './TTSPhrasesManager';
+import { useUnits } from '@/hooks/useAdminData';
+
+export function SystemConfigPanel() {
+  const { units, loading } = useUnits();
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('units');
+
+  // Selecionar a primeira unidade automaticamente
+  useEffect(() => {
+    if (units.length > 0 && !selectedUnitId) {
+      setSelectedUnitId(units[0].id);
+    }
+  }, [units, selectedUnitId]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Settings2 className="w-6 h-6 text-primary" />
+          <h2 className="text-xl font-semibold">Configurações do Sistema</h2>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsTrigger value="units" className="flex items-center gap-2">
+            <Building2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Unidades</span>
+          </TabsTrigger>
+          <TabsTrigger value="modules" className="flex items-center gap-2">
+            <Layers className="w-4 h-4" />
+            <span className="hidden sm:inline">Módulos</span>
+          </TabsTrigger>
+          <TabsTrigger value="destinations" className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            <span className="hidden sm:inline">Destinos</span>
+          </TabsTrigger>
+          <TabsTrigger value="operators" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">Operadores</span>
+          </TabsTrigger>
+          <TabsTrigger value="tts" className="flex items-center gap-2">
+            <Volume2 className="w-4 h-4" />
+            <span className="hidden sm:inline">TTS</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Seletor de unidade (para abas que precisam) */}
+        {activeTab !== 'units' && (
+          <Card className="mb-4">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-4">
+                <Label className="whitespace-nowrap">Unidade:</Label>
+                <Select 
+                  value={selectedUnitId} 
+                  onValueChange={setSelectedUnitId}
+                  disabled={loading || units.length === 0}
+                >
+                  <SelectTrigger className="w-full max-w-md">
+                    <SelectValue placeholder="Selecione uma unidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.display_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {units.length === 0 && !loading && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Nenhuma unidade cadastrada. Vá para a aba "Unidades" para criar uma.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <TabsContent value="units">
+          <UnitsManager />
+        </TabsContent>
+
+        <TabsContent value="modules">
+          {selectedUnitId ? (
+            <ModulesManager unitId={selectedUnitId} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Selecione uma unidade para gerenciar os módulos.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="destinations">
+          {selectedUnitId ? (
+            <DestinationsManager unitId={selectedUnitId} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Selecione uma unidade para gerenciar os destinos.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="operators">
+          {selectedUnitId ? (
+            <OperatorsManager unitId={selectedUnitId} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Selecione uma unidade para gerenciar os operadores.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="tts">
+          {selectedUnitId ? (
+            <TTSPhrasesManager unitId={selectedUnitId} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Selecione uma unidade para gerenciar as frases TTS.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
