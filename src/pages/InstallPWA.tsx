@@ -135,7 +135,7 @@ const InstallPWA = () => {
   const getModeInfo = () => {
     if (installMode === 'tv') {
       return {
-        icon: <Tv className="h-16 w-16 text-primary" />,
+        icon: <img src="/pwa-tv-512x512.png" alt="Xama-Pan TV" className="h-20 w-20 rounded-xl shadow-lg" />,
         title: 'Xama-Pan TV',
         description: 'Exibição em tela cheia para TVs - apenas seleciona a unidade, sem login',
         features: [
@@ -149,7 +149,7 @@ const InstallPWA = () => {
     
     if (installMode === 'normal') {
       return {
-        icon: <User className="h-16 w-16 text-primary" />,
+        icon: <img src="/pwa-full-512x512.png" alt="Xama-Pan Full" className="h-20 w-20 rounded-xl shadow-lg" />,
         title: 'Xama-Pan Full',
         description: 'Acesso completo ao sistema com todas as funcionalidades',
         features: [
@@ -185,9 +185,11 @@ const InstallPWA = () => {
               className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <Tv className="h-8 w-8 text-primary" />
-                </div>
+                <img 
+                  src="/pwa-tv-192x192.png" 
+                  alt="Xama-Pan TV" 
+                  className="h-14 w-14 rounded-xl shadow-md group-hover:scale-105 transition-transform"
+                />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg mb-1">Xama-Pan TV</h3>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -217,9 +219,11 @@ const InstallPWA = () => {
               className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <User className="h-8 w-8 text-primary" />
-                </div>
+                <img 
+                  src="/pwa-full-192x192.png" 
+                  alt="Xama-Pan Full" 
+                  className="h-14 w-14 rounded-xl shadow-md group-hover:scale-105 transition-transform"
+                />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg mb-1">Xama-Pan Full</h3>
                   <p className="text-sm text-muted-foreground mb-2">
