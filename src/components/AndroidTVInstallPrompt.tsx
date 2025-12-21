@@ -13,21 +13,57 @@ export const AndroidTVInstallPrompt = () => {
   const [isAndroidTV, setIsAndroidTV] = useState(false);
 
   useEffect(() => {
-    // Detect Android TV
+    // Detect Smart TVs - expanded detection
     const userAgent = navigator.userAgent.toLowerCase();
     const isTV = 
-      userAgent.includes('android') && 
-      (userAgent.includes('tv') || 
-       userAgent.includes('large screen') ||
-       userAgent.includes('googletv') ||
-       userAgent.includes('aftb') || // Amazon Fire TV
-       userAgent.includes('aftt') ||
-       userAgent.includes('aftm') ||
-       userAgent.includes('bravia') || // Sony Bravia
-       userAgent.includes('philipstv') ||
-       userAgent.includes('samsungtv') ||
-       userAgent.includes('webos') || // LG WebOS
-       userAgent.includes('tizen')); // Samsung Tizen
+      // Android TV
+      (userAgent.includes('android') && userAgent.includes('tv')) ||
+      userAgent.includes('android tv') ||
+      userAgent.includes('googletv') ||
+      userAgent.includes('large screen') ||
+      // Amazon Fire TV
+      userAgent.includes('aftb') ||
+      userAgent.includes('aftt') ||
+      userAgent.includes('aftm') ||
+      userAgent.includes('afts') ||
+      userAgent.includes('aftss') ||
+      // Sony Bravia
+      userAgent.includes('bravia') ||
+      userAgent.includes('sony') && userAgent.includes('tv') ||
+      // LG WebOS
+      userAgent.includes('webos') ||
+      userAgent.includes('web0s') ||
+      userAgent.includes('netcast') ||
+      userAgent.includes('lgtv') ||
+      userAgent.includes('lg browser') ||
+      // Samsung Tizen
+      userAgent.includes('tizen') ||
+      userAgent.includes('samsung') && userAgent.includes('tv') ||
+      userAgent.includes('samsungtv') ||
+      userAgent.includes('smart-tv') ||
+      userAgent.includes('smarttv') ||
+      // Philips
+      userAgent.includes('philipstv') ||
+      userAgent.includes('philips') && userAgent.includes('tv') ||
+      userAgent.includes('nettv') ||
+      // Panasonic Viera
+      userAgent.includes('viera') ||
+      userAgent.includes('panasonic') && userAgent.includes('tv') ||
+      // Hisense VIDAA
+      userAgent.includes('vidaa') ||
+      userAgent.includes('hisense') ||
+      // TCL / Roku TV
+      userAgent.includes('roku') ||
+      userAgent.includes('tcl') && userAgent.includes('tv') ||
+      // Xbox / PlayStation (can be used as TV)
+      userAgent.includes('xbox') ||
+      userAgent.includes('playstation') ||
+      // Generic TV detection
+      userAgent.includes('tv browser') ||
+      userAgent.includes('hbbtv') ||
+      userAgent.includes('ce-html') ||
+      // Screen size detection for TV-like devices
+      (window.screen.width >= 1920 && userAgent.includes('android') && !userAgent.includes('mobile'));
 
     setIsAndroidTV(isTV);
 
