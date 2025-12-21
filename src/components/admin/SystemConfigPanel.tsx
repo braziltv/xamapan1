@@ -1,16 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, MessageCircle } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3 } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
 import { OperatorsManager } from './OperatorsManager';
 import { TTSPhrasesManager } from './TTSPhrasesManager';
 import { StatisticsDashboard } from './StatisticsDashboard';
-import { TelegramRecipientsManager } from './TelegramRecipientsManager';
 import { useUnits } from '@/hooks/useAdminData';
 
 export function SystemConfigPanel() {
@@ -25,10 +24,6 @@ export function SystemConfigPanel() {
     }
   }, [units, selectedUnitId]);
 
-  const selectedUnit = useMemo(() => {
-    return units.find(u => u.id === selectedUnitId);
-  }, [units, selectedUnitId]);
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -39,7 +34,7 @@ export function SystemConfigPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-7 mb-6">
+        <TabsList className="grid w-full grid-cols-6 mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -63,10 +58,6 @@ export function SystemConfigPanel() {
           <TabsTrigger value="tts" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             <span className="hidden sm:inline">TTS</span>
-          </TabsTrigger>
-          <TabsTrigger value="telegram" className="flex items-center gap-2">
-            <MessageCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Telegram</span>
           </TabsTrigger>
         </TabsList>
 
@@ -153,18 +144,6 @@ export function SystemConfigPanel() {
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 Selecione uma unidade para gerenciar as frases TTS.
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="telegram">
-          {selectedUnitId && selectedUnit ? (
-            <TelegramRecipientsManager unitId={selectedUnitId} unitName={selectedUnit.display_name} />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Selecione uma unidade para gerenciar os destinatários Telegram.
               </CardContent>
             </Card>
           )}
