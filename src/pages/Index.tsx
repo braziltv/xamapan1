@@ -3,6 +3,8 @@ import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { useAutoLogout } from '@/hooks/useAutoLogout';
 import { useUserSession } from '@/hooks/useUserSession';
+import { useAutoHideCursor } from '@/hooks/useAutoHideCursor';
+import { useAutoFullscreen } from '@/hooks/useAutoFullscreen';
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -31,6 +33,18 @@ const Index = () => {
   
   // User session tracking
   const { createSession, updateActivity, incrementCounter, endSession } = useUserSession();
+  
+  // Auto-hide cursor in TV mode (after 3 seconds of inactivity)
+  const { isCursorHidden } = useAutoHideCursor({ 
+    timeout: 3000, 
+    enabled: isTvMode && isLoggedIn 
+  });
+  
+  // Auto-fullscreen for PWA in TV mode
+  useAutoFullscreen({ 
+    enabled: isTvMode && isLoggedIn, 
+    targetRef: mainContainerRef 
+  });
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -227,16 +241,20 @@ const Index = () => {
   // TV Mode - show only PublicDisplay without any navigation
   if (isTvMode) {
     return (
-      <div ref={mainContainerRef} className="min-h-screen-safe h-screen-safe bg-background relative overflow-hidden">
+      <div 
+        ref={mainContainerRef} 
+        className={`min-h-screen-safe h-screen-safe bg-background relative overflow-hidden ${isCursorHidden ? 'cursor-none' : ''}`}
+        style={isCursorHidden ? { cursor: 'none' } : undefined}
+      >
         <PublicDisplay 
           currentTriageCall={currentTriageCall} 
           currentDoctorCall={currentDoctorCall}
           history={history} 
         />
-        {/* Discreet logout button for TV mode */}
+        {/* Discreet logout button for TV mode - only visible when cursor is active */}
         <button
           onClick={handleLogout}
-          className="absolute bottom-2 right-2 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white/70 transition-all opacity-30 hover:opacity-100 z-50 touch-target"
+          className={`absolute bottom-2 right-2 p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/30 hover:text-white/70 transition-all z-50 touch-target ${isCursorHidden ? 'opacity-0 pointer-events-none' : 'opacity-30 hover:opacity-100'}`}
           title="Sair do modo TV"
         >
           <LogOut className="w-4 h-4" />
