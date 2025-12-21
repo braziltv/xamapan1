@@ -1917,27 +1917,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center justify-between relative z-10 w-full gap-1 sm:gap-2 lg:gap-4">
-            {/* Left: Logo + Title - More compact on mobile */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 shrink-0 min-w-0">
+          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4">
+            {/* Left: Logo + Title - Fixed width to prevent overlap */}
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 shrink-0">
               <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 rounded-md sm:rounded-lg lg:rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
                 <HealthCrossIcon size={32} className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 xl:w-9 xl:h-9" />
               </div>
-              <div className="min-w-0 hidden xs:block sm:block">
+              <div className="hidden sm:block shrink-0">
                 <h1 className="font-bold text-white leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl">
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm truncate max-w-[80px] sm:max-w-[150px] lg:max-w-[250px] xl:max-w-none">
+                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm whitespace-nowrap">
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
             </div>
             
-            {/* Separator - Hidden on small screens */}
-            <div className="hidden lg:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+            {/* Separator */}
+            <div className="hidden sm:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
             
-            {/* Right: Weather + Clock - Takes remaining space, no overflow hidden to prevent clock truncation */}
-            <div className="flex items-center justify-end flex-1 min-w-0">
+            {/* Right: Weather + Clock - Takes remaining space with proper overflow handling */}
+            <div className="flex-1 flex items-center justify-end overflow-x-auto scrollbar-hide">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>

@@ -150,22 +150,22 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     if (!currentTime || !formatTime) return null;
     
     return (
-      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 xl:gap-3 shrink-0">
         {/* Main Time Display */}
-        <div className="flex items-baseline whitespace-nowrap">
-          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl">
+        <div className="flex items-baseline whitespace-nowrap shrink-0">
+          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl">
             {formatTime(currentTime, 'HH:mm')}
           </span>
-          <span className="font-mono font-bold text-amber-300 animate-pulse text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
+          <span className="font-mono font-bold text-amber-300 animate-pulse text-xs sm:text-sm md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl">
             :{formatTime(currentTime, 'ss')}
           </span>
         </div>
         {/* Date Display */}
-        <div className="text-center bg-white/10 rounded-md sm:rounded-lg lg:rounded-xl px-1.5 sm:px-2 lg:px-3 xl:px-4 py-0.5 sm:py-1 lg:py-1.5 xl:py-2">
-          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg">
+        <div className="text-center bg-white/10 rounded-md lg:rounded-lg px-1 sm:px-1.5 lg:px-2 xl:px-3 py-0.5 lg:py-1 shrink-0">
+          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm">
             {formatTime(currentTime, "EEEE")}
           </p>
-          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg">
+          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm">
             {formatTime(currentTime, "dd/MM/yyyy")}
           </p>
         </div>
@@ -203,12 +203,12 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 flex-nowrap justify-end">
-      {/* Clock Section - Always visible */}
+    <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 xl:gap-3 flex-nowrap justify-end shrink-0">
+      {/* Clock Section - Always visible, on the right */}
       <ClockSection />
       
       {/* Separator - Hidden on small screens */}
-      <div className="hidden sm:block w-px h-6 lg:h-8 xl:h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+      <div className="hidden md:block w-px h-5 lg:h-6 xl:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
       
       {/* City & Weather Icon - Hidden on very small screens */}
       <div className="hidden sm:flex items-center gap-1 lg:gap-2 shrink-0">
