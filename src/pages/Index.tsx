@@ -12,6 +12,7 @@ import { PublicDisplay } from '@/components/PublicDisplay';
 import { InternalChat } from '@/components/InternalChat';
 import LoginScreen from '@/components/LoginScreen';
 import { AdminPasswordDialog, useAdminAuth } from '@/components/AdminPasswordDialog';
+import { AndroidTVInstallPrompt } from '@/components/AndroidTVInstallPrompt';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble, Settings2 } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
@@ -240,6 +241,8 @@ const Index = () => {
         >
           <LogOut className="w-4 h-4" />
         </button>
+        {/* Android TV PWA install prompt */}
+        <AndroidTVInstallPrompt />
       </div>
     );
   }
