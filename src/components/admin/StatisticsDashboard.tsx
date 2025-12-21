@@ -14,9 +14,12 @@ import { ptBR } from 'date-fns/locale';
 import { 
   BarChart3, TrendingUp, Users, Clock, Activity, 
   Calendar, RefreshCw, Loader2, Building2,
-  Stethoscope, Heart, Pill
+  Stethoscope, Heart, Pill, FileDown
 } from 'lucide-react';
 import { useUnits } from '@/hooks/useAdminData';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'sonner';
 
 interface CallData {
   call_type: string;
@@ -206,6 +209,188 @@ export function StatisticsDashboard() {
     }
   };
 
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const now = new Date();
+      
+      // Header
+      doc.setFillColor(13, 148, 136); // Primary teal color
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Relatório de Estatísticas', pageWidth / 2, 18, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      const unitName = selectedUnit === 'all' 
+        ? 'Todas as Unidades' 
+        : units.find(u => u.id === selectedUnit)?.display_name || 'Unidade';
+      doc.text(unitName, pageWidth / 2, 28, { align: 'center' });
+      
+      const periodText = period === '1' ? 'Hoje' : `Últimos ${period} dias`;
+      doc.text(`Período: ${periodText}`, pageWidth / 2, 36, { align: 'center' });
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      let yPos = 55;
+      
+      // Summary section
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Resumo Geral', 14, yPos);
+      yPos += 10;
+      
+      // Summary cards as table
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Métrica', 'Valor']],
+        body: [
+          ['Total de Chamadas', totalCalls.toString()],
+          ['Média por Dia', avgPerDay.toString()],
+          ['Hora de Pico', peakHour || 'N/A'],
+          ['Principal Destino', topDestination || 'N/A'],
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [13, 148, 136], textColor: 255 },
+        styles: { fontSize: 10, cellPadding: 4 },
+        columnStyles: { 0: { fontStyle: 'bold' } },
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+      
+      // Statistics by type
+      if (typeStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Estatísticas por Tipo', 14, yPos);
+        yPos += 10;
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Tipo', 'Quantidade', 'Percentual']],
+          body: typeStats.map(type => [
+            type.name,
+            type.value.toString(),
+            `${((type.value / totalCalls) * 100).toFixed(1)}%`
+          ]),
+          theme: 'striped',
+          headStyles: { fillColor: [13, 148, 136], textColor: 255 },
+          styles: { fontSize: 10, cellPadding: 3 },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Check if we need a new page
+      if (yPos > 220) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Statistics by destination
+      if (destinationStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Top Destinos', 14, yPos);
+        yPos += 10;
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Destino', 'Chamadas']],
+          body: destinationStats.map(dest => [dest.name, dest.count.toString()]),
+          theme: 'striped',
+          headStyles: { fillColor: [13, 148, 136], textColor: 255 },
+          styles: { fontSize: 10, cellPadding: 3 },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Check if we need a new page
+      if (yPos > 180) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Daily evolution
+      if (dailyStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Evolução Diária', 14, yPos);
+        yPos += 10;
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Data', 'Total', 'Triagem', 'Médico', 'Serviços']],
+          body: dailyStats.map(day => [
+            day.date,
+            day.total.toString(),
+            day.triage.toString(),
+            day.doctor.toString(),
+            day.service.toString()
+          ]),
+          theme: 'striped',
+          headStyles: { fillColor: [13, 148, 136], textColor: 255 },
+          styles: { fontSize: 9, cellPadding: 2 },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+      
+      // Check if we need a new page
+      if (yPos > 150) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Hourly distribution
+      const peakHours = hourlyStats.filter(h => h.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
+      if (peakHours.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Distribuição por Hora (Top 10)', 14, yPos);
+        yPos += 10;
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Hora', 'Chamadas']],
+          body: peakHours.map(hour => [hour.hour, hour.count.toString()]),
+          theme: 'striped',
+          headStyles: { fillColor: [13, 148, 136], textColor: 255 },
+          styles: { fontSize: 10, cellPadding: 3 },
+        });
+      }
+      
+      // Footer on all pages
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(
+          `Gerado em ${format(now, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} - Página ${i} de ${pageCount}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        );
+      }
+      
+      // Save
+      const fileName = `relatorio-estatisticas-${format(now, 'yyyy-MM-dd-HHmm')}.pdf`;
+      doc.save(fileName);
+      
+      toast.success('Relatório PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao exportar relatório');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -266,6 +451,16 @@ export function StatisticsDashboard() {
 
           <Button variant="outline" size="icon" onClick={fetchData} disabled={loading}>
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+
+          <Button 
+            variant="default" 
+            onClick={exportToPDF} 
+            disabled={loading || totalCalls === 0}
+            className="gap-2"
+          >
+            <FileDown className="w-4 h-4" />
+            Exportar PDF
           </Button>
         </div>
       </div>
