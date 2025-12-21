@@ -610,7 +610,7 @@ export function StatisticsDashboard() {
           {/* Gráficos principais */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Gráfico de linha - Evolução diária */}
-            <Card>
+            <Card ref={chartDailyRef}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <TrendingUp className="w-5 h-5" />
@@ -668,7 +668,7 @@ export function StatisticsDashboard() {
             </Card>
 
             {/* Gráfico de barras - Por hora */}
-            <Card>
+            <Card ref={chartHourlyRef}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Clock className="w-5 h-5" />
@@ -695,7 +695,7 @@ export function StatisticsDashboard() {
             </Card>
 
             {/* Gráfico de pizza - Por tipo */}
-            <Card>
+            <Card ref={chartTypeRef}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Activity className="w-5 h-5" />
@@ -749,7 +749,7 @@ export function StatisticsDashboard() {
             </Card>
 
             {/* Gráfico de barras horizontal - Por destino */}
-            <Card>
+            <Card ref={chartDestRef}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Users className="w-5 h-5" />
