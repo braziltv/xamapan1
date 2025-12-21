@@ -27,9 +27,8 @@ interface WeatherWidgetProps {
 
 function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   const desc = description.toLowerCase();
-  // Responsive icon sizes: sm for small contexts, lg scales up for TV
   const iconClass = size === 'lg' 
-    ? 'w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 3xl:w-12 3xl:h-12 4k:w-16 4k:h-16' 
+    ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 4k:w-12 4k:h-12' 
     : 'w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) 
@@ -51,7 +50,6 @@ function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
 }
 
 export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTime }: WeatherWidgetProps) {
-  // Use internal time hook as fallback when props not provided
   const { currentTime: hookTime } = useBrazilTime();
   const currentTime = propTime || hookTime;
   const formatTime = propFormatTime || formatBrazilTime;
@@ -63,14 +61,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [initialLoading, setInitialLoading] = useState(true);
   const fetchingRef = useRef(false);
 
-  // Get available cities from cache
   const availableCities = Object.keys(weatherCache);
   const otherCities = availableCities.filter(c => c !== 'Paineiras');
-
-  // Get current weather from cache
   const currentWeather = weatherCache[displayCity];
 
-  // Load weather from database cache
   const loadWeatherFromDB = useCallback(async () => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
@@ -109,14 +103,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     fetchingRef.current = false;
   }, []);
 
-  // Initial load from database
   useEffect(() => {
     loadWeatherFromDB();
     const interval = setInterval(loadWeatherFromDB, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [loadWeatherFromDB]);
 
-  // Rotate display city every 10 seconds
   useEffect(() => {
     if (availableCities.length === 0) return;
     
@@ -140,7 +132,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     return () => clearInterval(interval);
   }, [availableCities.length, otherCities.length, weatherCache]);
 
-  // Alternate between min and max temp every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setShowMaxTemp(prev => !prev);
@@ -148,11 +139,9 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     return () => clearInterval(interval);
   }, []);
 
-  // Clock section component - safe formatting with fallback
   const safeFormatTime = (date: Date, format: string): string => {
     try {
       if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-        // Return placeholder based on format
         if (format === 'HH:mm') return '--:--';
         if (format === 'ss') return '--';
         if (format === 'EEEE') return '---';
@@ -166,156 +155,119 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Date section (DOMINGO 21/12/2025)
-  const renderDateSection = () => {
-    return (
-      <div className="w-full text-center bg-white/10 rounded-md lg:rounded-lg 3xl:rounded-xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-0.5 lg:py-1 3xl:py-2">
-        <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl">
+  // Compact date+clock for landscape mode
+  const renderDateTimeCompact = () => (
+    <div className="flex flex-col items-center gap-0.5 sm:gap-1 shrink-0">
+      <div className="text-center bg-white/10 rounded px-1.5 sm:px-2 lg:px-3 py-0.5">
+        <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
           {safeFormatTime(currentTime, 'EEEE')}
         </p>
-        <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl">
+        <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
           {safeFormatTime(currentTime, 'dd/MM/yyyy')}
         </p>
       </div>
-    );
-  };
-
-  // Clock section (HH:mm:ss) - aligned under date
-  const renderClockSection = () => {
-    return (
-      <div className="w-full flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 sm:px-3 lg:px-4 3xl:px-6 4k:px-8 py-1 sm:py-1.5 lg:py-2 3xl:py-3 4k:py-4 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-        <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_8px_rgba(6,182,212,0.7)] text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl">
+      <div className="flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
+        <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_6px_rgba(6,182,212,0.7)] text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl">
           {safeFormatTime(currentTime, 'HH:mm')}
         </span>
-        <span className="font-mono font-bold text-amber-300 animate-pulse text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl">
+        <span className="font-mono font-bold text-amber-300 animate-pulse text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
           :{safeFormatTime(currentTime, 'ss')}
         </span>
       </div>
-    );
-  };
-
-  const renderDateTimeStack = () => {
-    return (
-      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 w-[120px] sm:w-[140px] lg:w-[170px] xl:w-[200px] 3xl:w-[250px] 4k:w-[280px]">
-        {renderDateSection()}
-        {renderClockSection()}
-      </div>
-    );
-  };
+    </div>
+  );
 
   // Loading state
   if (initialLoading && !currentWeather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
-        {renderDateTimeStack()}
+        {renderDateTimeCompact()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/70 animate-pulse" />
         <span className="text-white/80 text-xs sm:text-sm">Carregando...</span>
       </div>
     );
   }
 
-  // Fallback weather data
   const weather = currentWeather || weatherCache['Paineiras'] || Object.values(weatherCache)[0];
 
   if (!weather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
-        {renderDateTimeStack()}
+        {renderDateTimeCompact()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/50" />
         <span className="text-white/60 text-xs sm:text-sm">Indisponível</span>
       </div>
     );
   }
 
-  // Get max/min from forecast if available
   const todayForecast = weather.forecast?.[0];
   const maxTemp = todayForecast?.maxTemp ?? weather.current.temperature + 5;
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-2 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8 flex-wrap sm:flex-nowrap justify-between">
-      {/* Date + Time (stacked) - FIRST to always be visible */}
-      {renderDateTimeStack()}
-
-      {/* City & Weather Icon */}
-      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 3xl:gap-4 shrink-0">
-        <div className="flex flex-col items-center justify-center">
-          <span className="font-bold text-white/70 uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[11px] xl:text-sm 3xl:text-base 4k:text-lg">
+    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 justify-end flex-nowrap overflow-visible">
+      {/* City + Weather Icon */}
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex flex-col items-center">
+          <span className="font-bold text-white/70 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
             Previsão
           </span>
-          <div className="flex items-center gap-1 text-amber-300">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-6 3xl:h-6 4k:w-7 4k:h-7 animate-bounce shrink-0" />
-            <span
-              className="font-bold text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl"
-              title={`${displayCity}-MG`}
-            >
+          <div className="flex items-center gap-0.5 text-amber-300">
+            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 3xl:w-4 3xl:h-4 animate-bounce shrink-0" />
+            <span className="font-bold whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-xs 3xl:text-sm 4k:text-base">
               {displayCity}-MG
             </span>
           </div>
         </div>
-
-        {/* Weather Icon with glow */}
         <div className="relative shrink-0">
-          <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
-          <div className="relative bg-white/10 rounded-lg lg:rounded-xl 3xl:rounded-2xl p-1.5 lg:p-2 3xl:p-3 4k:p-4 backdrop-blur-sm border border-white/10">
+          <div className="absolute inset-0 bg-yellow-400/20 blur-lg rounded-full" />
+          <div className="relative bg-white/10 rounded-lg p-1 lg:p-1.5 backdrop-blur-sm border border-white/10">
             {getWeatherIcon(weather.current.description, 'lg')}
           </div>
         </div>
       </div>
 
       {/* Current Temperature */}
-      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 3xl:px-5 4k:px-6 py-0.5 sm:py-1 3xl:py-2 backdrop-blur-sm border border-white/10">
-        <span className="font-bold text-emerald-300 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base">
+      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-lg px-1 sm:px-1.5 lg:px-2 py-0.5 backdrop-blur-sm border border-white/10 shrink-0">
+        <span className="font-bold text-emerald-300 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
           Agora
         </span>
         <div className="flex items-baseline">
-          <span className="font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums text-base sm:text-lg lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl">
+          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
             {weather.current.temperature}
           </span>
-          <span className="font-bold text-emerald-300 text-[10px] sm:text-xs lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
-            °C
-          </span>
+          <span className="font-bold text-emerald-300 text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">°C</span>
         </div>
         {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
-          <span className="text-white/70 whitespace-nowrap text-[6px] sm:text-[7px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
-            Sensação: <span className="font-bold text-amber-300 tabular-nums">{weather.current.feelsLike}°</span>
+          <span className="text-white/70 whitespace-nowrap text-[5px] sm:text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs">
+            Sens: <span className="font-bold text-amber-300 tabular-nums">{weather.current.feelsLike}°</span>
           </span>
         )}
       </div>
 
-      {/* Max/Min Temperature Display */}
-      <div className="flex flex-col items-center">
-        <span
-          className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}
-        >
-          {showMaxTemp ? 'Máxima' : 'Mínima'}
+      {/* Max/Min Temperature */}
+      <div className="flex flex-col items-center shrink-0">
+        <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
+          {showMaxTemp ? 'Máx' : 'Mín'}
         </span>
         <div className="flex items-baseline">
-          <span className="font-black text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] tabular-nums text-base sm:text-lg lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl">
+          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
             {showMaxTemp ? maxTemp : minTemp}
           </span>
-          <span className="font-bold text-amber-300 text-[10px] sm:text-xs lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
-            °C
-          </span>
+          <span className="font-bold text-amber-300 text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">°C</span>
         </div>
       </div>
 
       {/* Humidity */}
-      <div className="hidden xs:flex sm:flex flex-col items-center bg-white/10 rounded-lg 3xl:rounded-xl px-1 sm:px-1.5 lg:px-2 xl:px-3 3xl:px-4 4k:px-5 py-0.5 lg:py-1 3xl:py-2 backdrop-blur-sm">
-        <Droplets className="w-3 h-3 lg:w-4 lg:h-4 xl:w-5 xl:h-5 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0" />
-        <span className="font-bold text-white tabular-nums text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl">
+      <div className="flex flex-col items-center bg-white/10 rounded-lg px-1 sm:px-1.5 lg:px-2 py-0.5 backdrop-blur-sm shrink-0">
+        <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 3xl:w-5 3xl:h-5 text-cyan-400 shrink-0" />
+        <span className="font-bold text-white tabular-nums text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
           {weather.current.humidity}%
-        </span>
-        <span className="text-white/60 text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
-          Umidade
         </span>
       </div>
 
-      {/* Separator */}
-      <div className="hidden md:block w-px h-6 lg:h-8 xl:h-10 3xl:h-14 4k:h-20 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-
-      {/* Forecast Cards */}
-      <div className="hidden md:flex gap-1 lg:gap-2 xl:gap-3 3xl:gap-4 4k:gap-6">
+      {/* Forecast Cards - visible on md+ */}
+      <div className="hidden md:flex gap-1 lg:gap-1.5 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           const today = currentTime;
@@ -326,18 +278,18 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           return (
             <div
               key={index}
-              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-lg lg:rounded-xl 3xl:rounded-2xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-1 lg:py-1.5 3xl:py-3 4k:py-4 flex flex-col items-center backdrop-blur-sm border border-white/20`}
+              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-lg px-1 lg:px-1.5 py-0.5 lg:py-1 flex flex-col items-center backdrop-blur-sm border border-white/20`}
             >
-              <span className="font-bold text-white text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+              <span className="font-bold text-white text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
                 {dayName}
               </span>
-              <div className="my-0.5 lg:my-1 3xl:my-2">{getWeatherIcon(day.icon || 'cloud', 'lg')}</div>
-              <div className="flex items-center gap-0.5 lg:gap-1 3xl:gap-2">
-                <span className="text-cyan-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+              <div className="my-0.5">{getWeatherIcon(day.icon || 'cloud', 'sm')}</div>
+              <div className="flex items-center gap-0.5">
+                <span className="text-cyan-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
                   {day.minTemp}°
                 </span>
-                <span className="text-white/50 font-bold text-[7px] lg:text-[9px] 3xl:text-xs 4k:text-sm">/</span>
-                <span className="text-orange-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                <span className="text-white/50 font-bold text-[6px] lg:text-[7px]">/</span>
+                <span className="text-orange-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
                   {day.maxTemp}°
                 </span>
               </div>
@@ -346,6 +298,11 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
+      {/* Separator */}
+      <div className="w-px h-6 sm:h-8 lg:h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+
+      {/* Date + Clock */}
+      {renderDateTimeCompact()}
     </div>
   );
 }
