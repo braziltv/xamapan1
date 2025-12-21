@@ -1,22 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Tv, CheckCircle, Smartphone, Monitor, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Download, Tv, CheckCircle, Smartphone, Monitor, ArrowLeft, User } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+type InstallMode = 'select' | 'tv' | 'normal';
+
 const InstallPWA = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
   const [deviceType, setDeviceType] = useState<'android' | 'ios' | 'desktop' | 'tv'>('desktop');
+  const [installMode, setInstallMode] = useState<InstallMode>('select');
 
   useEffect(() => {
+    // Check if mode is specified in URL
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'tv' || modeParam === 'normal') {
+      setInstallMode(modeParam);
+    }
+
     // Detect device type
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes('android') && userAgent.includes('tv')) {
@@ -51,7 +61,7 @@ const InstallPWA = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [searchParams]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -64,6 +74,12 @@ const InstallPWA = () => {
       
       if (outcome === 'accepted') {
         setIsInstalled(true);
+        // Save the install mode for auto-launch
+        if (installMode === 'tv') {
+          localStorage.setItem('pwaInstallMode', 'tv');
+        } else if (installMode === 'normal') {
+          localStorage.setItem('pwaInstallMode', 'normal');
+        }
       }
     } catch (error) {
       console.error('Installation failed:', error);
@@ -116,16 +132,143 @@ const InstallPWA = () => {
     return null;
   };
 
+  const getModeInfo = () => {
+    if (installMode === 'tv') {
+      return {
+        icon: <Tv className="h-16 w-16 text-primary" />,
+        title: 'Modo TV',
+        description: 'Exibição em tela cheia para TVs - apenas seleciona a unidade, sem login',
+        features: [
+          'Tela cheia automática',
+          'Mouse oculta após inatividade',
+          'Só pede a unidade (sem senha)',
+          'Ideal para TVs de espera'
+        ]
+      };
+    }
+    
+    if (installMode === 'normal') {
+      return {
+        icon: <User className="h-16 w-16 text-primary" />,
+        title: 'Modo Normal',
+        description: 'Acesso completo ao sistema com todas as funcionalidades',
+        features: [
+          'Login com usuário e senha',
+          'Acesso a todas as abas',
+          'Cadastro, triagem, médico, etc.',
+          'Chat interno e configurações'
+        ]
+      };
+    }
+
+    return null;
+  };
+
+  // Mode Selection Screen
+  if (installMode === 'select') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-lg w-full">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Download className="h-16 w-16 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Instalar Aplicativo</CardTitle>
+            <CardDescription>
+              Escolha o modo de instalação do aplicativo
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* TV Mode Option */}
+            <button
+              onClick={() => setInstallMode('tv')}
+              className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <Tv className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">Modo TV</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Para TVs de sala de espera
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Só pede a unidade (sem senha)
+                    </li>
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Tela cheia automática
+                    </li>
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Mouse oculta após inatividade
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </button>
+
+            {/* Normal Mode Option */}
+            <button
+              onClick={() => setInstallMode('normal')}
+              className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <User className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg mb-1">Modo Normal</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Para operação do sistema
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Login com usuário e senha
+                    </li>
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Acesso completo ao sistema
+                    </li>
+                    <li className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                      Todas as funcionalidades
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </button>
+
+            <Button 
+              onClick={() => navigate('/')} 
+              variant="outline" 
+              className="w-full mt-4"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar ao Sistema
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const modeInfo = getModeInfo();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
       <Card className="max-w-lg w-full">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            {getDeviceIcon()}
+            {modeInfo?.icon || getDeviceIcon()}
           </div>
-          <CardTitle className="text-2xl">Instalar App de Chamada TV</CardTitle>
+          <CardTitle className="text-2xl">Instalar {modeInfo?.title}</CardTitle>
           <CardDescription>
-            Instale o aplicativo para usar no modo TV sem precisar de navegador
+            {modeInfo?.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -147,24 +290,14 @@ const InstallPWA = () => {
             <>
               {/* Features list */}
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <h3 className="font-semibold">Benefícios do PWA:</h3>
+                <h3 className="font-semibold">Recursos do {modeInfo?.title}:</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Abre em tela cheia sem navegador
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Funciona offline (recursos em cache)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Carrega mais rápido
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Ícone na tela inicial como app nativo
-                  </li>
+                  {modeInfo?.features.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      {feature}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -176,7 +309,7 @@ const InstallPWA = () => {
                   disabled={isInstalling}
                 >
                   <Download className="mr-2 h-5 w-5" />
-                  {isInstalling ? 'Instalando...' : 'Instalar Aplicativo'}
+                  {isInstalling ? 'Instalando...' : `Instalar ${modeInfo?.title}`}
                 </Button>
               )}
 
@@ -198,14 +331,23 @@ const InstallPWA = () => {
                 </div>
               )}
 
-              <Button 
-                onClick={() => navigate('/')} 
-                variant="outline" 
-                className="w-full"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar ao Sistema
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setInstallMode('select')} 
+                  variant="outline" 
+                  className="flex-1"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Trocar Modo
+                </Button>
+                <Button 
+                  onClick={() => navigate('/')} 
+                  variant="outline" 
+                  className="flex-1"
+                >
+                  Voltar ao Sistema
+                </Button>
+              </div>
             </>
           )}
         </CardContent>
