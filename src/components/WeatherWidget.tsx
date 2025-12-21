@@ -233,17 +233,20 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full min-w-0 flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-6 4k:gap-8 flex-nowrap justify-end">
+    <div className="w-full flex items-center gap-2 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8 flex-wrap sm:flex-nowrap justify-between">
+      {/* Date + Time (stacked) - FIRST to always be visible */}
+      {renderDateTimeStack()}
+
       {/* City & Weather Icon */}
-      <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 min-w-0">
-        <div className="flex flex-col items-center justify-center min-w-0">
-          <span className="font-bold text-white/70 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base">
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 3xl:gap-4 shrink-0">
+        <div className="flex flex-col items-center justify-center">
+          <span className="font-bold text-white/70 uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[11px] xl:text-sm 3xl:text-base 4k:text-lg">
             Previsão
           </span>
-          <div className="flex items-center gap-0.5 text-amber-300 min-w-0">
-            <MapPin className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3.5 lg:h-3.5 3xl:w-5 3xl:h-5 4k:w-6 4k:h-6 animate-bounce shrink-0" />
+          <div className="flex items-center gap-1 text-amber-300">
+            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-6 3xl:h-6 4k:w-7 4k:h-7 animate-bounce shrink-0" />
             <span
-              className="font-bold truncate max-w-[50px] sm:max-w-[70px] lg:max-w-[100px] 3xl:max-w-[150px] text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg"
+              className="font-bold text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl"
               title={`${displayCity}-MG`}
             >
               {displayCity}-MG
@@ -254,7 +257,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         {/* Weather Icon with glow */}
         <div className="relative shrink-0">
           <div className="absolute inset-0 bg-yellow-400/30 blur-xl rounded-full" />
-          <div className="relative bg-white/10 rounded-lg lg:rounded-xl 3xl:rounded-2xl p-1 lg:p-1.5 3xl:p-2 4k:p-3 backdrop-blur-sm border border-white/10">
+          <div className="relative bg-white/10 rounded-lg lg:rounded-xl 3xl:rounded-2xl p-1.5 lg:p-2 3xl:p-3 4k:p-4 backdrop-blur-sm border border-white/10">
             {getWeatherIcon(weather.current.description, 'lg')}
           </div>
         </div>
@@ -343,11 +346,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Separator */}
-      <div className="w-px h-5 sm:h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-
-      {/* Date + Time (stacked) - keep visible even if space is tight */}
-      {renderDateTimeStack()}
     </div>
   );
 }
