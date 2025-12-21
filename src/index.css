@@ -151,10 +151,23 @@
   /* Full height accounting for safe areas */
   .min-h-screen-safe {
     min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   
   .h-screen-safe {
     height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  /* Dynamic viewport height support */
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-dvh {
+    height: 100vh;
+    height: 100dvh;
   }
 
   /* Landscape mode optimizations */
@@ -183,47 +196,101 @@
     }
   }
 
-  /* Touch-friendly targets */
+  /* Touch-friendly targets - Mobile First */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
 
-  /* Responsive text that scales with viewport */
+  /* Responsive text that scales with viewport - Enhanced */
   .text-responsive-xs {
     font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+    line-height: 1.4;
   }
   
   .text-responsive-sm {
     font-size: clamp(0.75rem, 2vw, 0.875rem);
+    line-height: 1.4;
   }
   
   .text-responsive-base {
     font-size: clamp(0.875rem, 2.5vw, 1rem);
+    line-height: 1.5;
   }
   
   .text-responsive-lg {
     font-size: clamp(1rem, 3vw, 1.25rem);
+    line-height: 1.5;
   }
   
   .text-responsive-xl {
     font-size: clamp(1.25rem, 4vw, 1.5rem);
+    line-height: 1.4;
   }
   
   .text-responsive-2xl {
     font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.3;
   }
   
   .text-responsive-3xl {
     font-size: clamp(1.75rem, 6vw, 2.5rem);
+    line-height: 1.2;
   }
 
-  /* Responsive spacing */
+  .text-responsive-4xl {
+    font-size: clamp(2rem, 7vw, 3rem);
+    line-height: 1.1;
+  }
+
+  .text-responsive-5xl {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    line-height: 1.1;
+  }
+
+  /* TV Display specific text sizing */
+  .text-tv-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.2;
+  }
+
+  .text-tv-name {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1.1;
+  }
+
+  .text-tv-clock {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1;
+  }
+
+  .text-tv-ticker {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    line-height: 1.3;
+  }
+
+  /* Responsive spacing - Enhanced */
   .gap-responsive {
     gap: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .gap-responsive-lg {
+    gap: clamp(1rem, 3vw, 2rem);
   }
   
   .p-responsive {
     padding: clamp(0.5rem, 2vw, 1.5rem);
+  }
+
+  .p-responsive-sm {
+    padding: clamp(0.25rem, 1vw, 0.75rem);
+  }
+
+  .p-responsive-lg {
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+
+  .m-responsive {
+    margin: clamp(0.5rem, 2vw, 1.5rem);
   }
 
   /* Container with max width and auto margins */
@@ -244,6 +311,17 @@
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
 
+  /* Auto-fit grid for flexible layouts */
+  .grid-auto-fit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+
+  .grid-auto-fill {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  }
+
   /* Flex responsive utilities */
   .flex-responsive {
     @apply flex flex-col sm:flex-row;
@@ -251,6 +329,24 @@
   
   .flex-responsive-reverse {
     @apply flex flex-col-reverse sm:flex-row;
+  }
+
+  /* Card responsive sizing */
+  .card-responsive {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6;
+  }
+
+  .card-responsive-sm {
+    @apply p-2 sm:p-3 md:p-4;
+  }
+
+  /* Button responsive sizing */
+  .btn-responsive {
+    @apply h-9 px-3 text-sm sm:h-10 sm:px-4 sm:text-base;
+  }
+
+  .btn-responsive-lg {
+    @apply h-10 px-4 text-sm sm:h-11 sm:px-5 md:h-12 md:px-6 md:text-base;
   }
 
   /* Hide scrollbar but allow scrolling */
@@ -263,6 +359,26 @@
     display: none;
   }
 
+  /* Custom thin scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
   /* Better focus states for accessibility */
   .focus-visible-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
@@ -272,6 +388,7 @@
     text-wrap: balance;
   }
 
+  /* Animation utilities */
   .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
@@ -288,12 +405,44 @@
     animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
+  /* Gradient utilities */
   .gradient-health {
     background: linear-gradient(135deg, hsl(var(--health-blue)) 0%, hsl(var(--health-green)) 100%);
   }
 
   .gradient-panel {
     background: linear-gradient(180deg, hsl(var(--panel-bg)) 0%, hsl(210 40% 95%) 100%);
+  }
+
+  .gradient-dark {
+    background: linear-gradient(180deg, hsl(210 50% 12%) 0%, hsl(210 50% 8%) 100%);
+  }
+
+  /* TV Mode specific utilities */
+  .tv-card {
+    @apply rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden backdrop-blur-sm;
+  }
+
+  .tv-glass {
+    @apply bg-slate-800/60 backdrop-blur-md border border-white/10;
+  }
+
+  .tv-header {
+    @apply px-3 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-4;
+  }
+
+  .tv-content {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  /* Aspect ratio utilities for TV */
+  .aspect-tv {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Safe area for TV displays */
+  .tv-safe-area {
+    padding: max(1vw, 8px);
   }
 }
 

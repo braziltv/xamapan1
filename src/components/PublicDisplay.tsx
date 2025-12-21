@@ -1837,13 +1837,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return (
       <div 
         onClick={unlockAudio}
-        className={`h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer ${!cursorVisible ? 'cursor-none' : ''}`}
+        className={`h-dvh w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center cursor-pointer p-4 ${!cursorVisible ? 'cursor-none' : ''}`}
         style={{ cursor: cursorVisible ? 'pointer' : 'none' }}
       >
-        <div className="text-center space-y-6 animate-pulse">
-          <HealthCrossIcon size={96} className="mx-auto" />
-          <h1 className="text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
-          <p className="text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
+        <div className="text-center space-y-4 sm:space-y-6 animate-pulse max-w-lg mx-auto px-4">
+          <HealthCrossIcon size={96} className="mx-auto w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Clique para Ativar Áudio</h1>
+          <p className="text-base sm:text-lg lg:text-xl text-slate-400">Toque na tela para habilitar as chamadas de pacientes</p>
         </div>
       </div>
     );
@@ -1852,7 +1852,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   return (
     <div 
       ref={containerRef}
-      className={`h-[100dvh] w-[100dvw] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-[1vw] relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      className={`h-dvh w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
       {/* Flash overlay during announcement */}
@@ -1868,22 +1868,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* TTS Error Indicator */}
       {ttsError && (
-        <div className="fixed top-4 right-4 z-[60] max-w-md animate-scale-in">
-          <div className="bg-red-900/95 border-2 border-red-500 rounded-xl p-4 shadow-2xl shadow-red-500/30 backdrop-blur-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+        <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-[60] max-w-[90vw] sm:max-w-md animate-scale-in">
+          <div className="bg-red-900/95 border-2 border-red-500 rounded-lg sm:rounded-xl p-2 sm:p-4 shadow-2xl shadow-red-500/30 backdrop-blur-sm">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-red-300 font-bold text-sm mb-1">Erro no TTS</h3>
-                <p className="text-red-200 text-xs break-words">{ttsError.message}</p>
-                <p className="text-red-400/70 text-[10px] mt-1">
+                <h3 className="text-red-300 font-bold text-xs sm:text-sm mb-1">Erro no TTS</h3>
+                <p className="text-red-200 text-[10px] sm:text-xs break-words line-clamp-2">{ttsError.message}</p>
+                <p className="text-red-400/70 text-[8px] sm:text-[10px] mt-1">
                   {formatBrazilTime(ttsError.timestamp, 'HH:mm:ss')}
                 </p>
               </div>
               <button
                 onClick={() => setTtsError(null)}
-                className="w-6 h-6 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center shrink-0 transition-colors"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center shrink-0 transition-colors"
               >
                 <X className="w-3 h-3 text-red-300" />
               </button>
@@ -1897,88 +1897,88 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <button
           type="button"
           onClick={playCommercialPhraseNow}
-          className="fixed top-3 left-3 z-[60] p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/60 hover:text-white/90 transition-all opacity-40 hover:opacity-100"
+          className="fixed top-2 left-2 sm:top-3 sm:left-3 z-[60] p-1.5 sm:p-2 rounded-full bg-white/5 hover:bg-white/20 text-white/60 hover:text-white/90 transition-all opacity-40 hover:opacity-100"
           title="Tocar frase comercial agora"
         >
-          <Megaphone className="w-5 h-5" />
+          <Megaphone className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       )}
 
-      {/* Animated background elements */}
+      {/* Animated background elements - Responsive */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[2vh] left-[2vw] w-[15vw] h-[15vw] bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-[2vh] right-[2vw] w-[12vw] h-[12vw] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-[2%] left-[2%] w-[20vw] h-[20vw] max-w-[200px] max-h-[200px] bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-[2%] right-[2%] w-[15vw] h-[15vw] max-w-[150px] max-h-[150px] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
-      {/* Header - Unified gradient bar */}
-      <div className="relative z-10 mb-[0.5vh] shrink-0">
-        <div className="bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-indigo-900/95 backdrop-blur-xl rounded-2xl px-[1.5vw] py-[0.8vh] shadow-2xl border border-white/20 relative overflow-hidden">
+      {/* Header - Responsive gradient bar */}
+      <div className="relative z-10 mb-1 sm:mb-2 shrink-0">
+        <div className="bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-indigo-900/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 shadow-2xl border border-white/20 relative overflow-hidden">
           {/* Decorative glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center justify-between relative z-10 w-full">
+          <div className="flex items-center justify-between relative z-10 w-full gap-2 sm:gap-4">
             {/* Left: Logo + Title */}
-            <div className="flex items-center gap-[0.8vw] shrink-0 min-w-0">
-              <div className="w-[3.5vw] h-[3.5vw] min-w-[40px] min-h-[40px] rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
-                <HealthCrossIcon size={32} className="w-[2.5vw] h-[2.5vw] min-w-[28px] min-h-[28px]" />
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-lg sm:rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
+                <HealthCrossIcon size={32} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
               </div>
-              <div className="min-w-0 shrink-0">
-                <h1 className="font-bold text-white leading-tight whitespace-nowrap" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)' }}>
+              <div className="min-w-0">
+                <h1 className="font-bold text-white leading-tight whitespace-nowrap text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl">
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium whitespace-nowrap" style={{ fontSize: 'clamp(0.55rem, 0.85vw, 0.95rem)' }}>
+                <p className="text-amber-300 leading-tight font-medium text-[10px] sm:text-xs lg:text-sm xl:text-base truncate max-w-[120px] sm:max-w-[200px] lg:max-w-[300px] xl:max-w-none">
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
             </div>
             
-            {/* Separator */}
-            <div className="w-px h-[4vh] bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0 mx-[1vw]" />
+            {/* Separator - Hidden on small screens */}
+            <div className="hidden sm:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
             
-            {/* Right: Weather + Clock - Allow overflow to scroll if needed */}
-            <div className="flex items-center justify-end overflow-x-auto shrink min-w-0">
+            {/* Right: Weather + Clock */}
+            <div className="flex items-center justify-end shrink min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Landscape optimized with viewport units */}
-      <div className="relative z-10 flex-1 grid grid-cols-12 gap-[0.8vw] min-h-0 pb-[5vh]">
-        {/* Current Calls - Side by side */}
-        <div className="col-span-9 grid grid-cols-2 gap-[0.8vw]">
+      {/* Main Content - Responsive grid layout */}
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 lg:gap-4 min-h-0 pb-12 sm:pb-14 lg:pb-16">
+        {/* Current Calls - Stacked on mobile, side by side on larger screens */}
+        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
           {/* Triage Call */}
-          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`tv-glass tv-card flex flex-col transition-all duration-300 ${
             announcingType === 'triage' 
               ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
-              : 'border border-slate-700'
+              : 'border border-slate-700/50'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-[1vw] py-[0.8vh] shrink-0">
-              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
-                <Activity className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 shrink-0">
+              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base lg:text-lg xl:text-xl">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
                 <span>TRIAGEM</span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px]">
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl ${
                     announcingType === 'triage' 
                       ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentTriageCall.name}>
+                  }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-blue-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
+                  <p className="text-blue-400 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg">
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
+                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -1986,36 +1986,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
 
           {/* Doctor Call */}
-          <div className={`bg-slate-800/50 rounded-[1vw] overflow-hidden backdrop-blur-sm flex flex-col transition-all duration-300 ${
+          <div className={`tv-glass tv-card flex flex-col transition-all duration-300 ${
             announcingType === 'doctor' 
               ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
-              : 'border border-slate-700'
+              : 'border border-slate-700/50'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-[1vw] py-[0.8vh] shrink-0">
-              <p className="text-white font-bold flex items-center gap-[0.5vw]" style={{ fontSize: 'clamp(1rem, 1.8vw, 2rem)' }}>
-                <Stethoscope className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] shrink-0" />
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 shrink-0">
+              <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base lg:text-lg xl:text-xl">
+                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
                 <span>CONSULTÓRIO</span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] text-red-400 animate-bounce ml-auto shrink-0" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400 animate-bounce ml-auto shrink-0" />
                 )}
               </p>
             </div>
-            <div className="p-[1vw] flex items-center justify-center flex-1 min-h-0">
+            <div className="p-2 sm:p-3 lg:p-4 xl:p-6 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px]">
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal ${
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl ${
                     announcingType === 'doctor' 
                       ? 'text-red-400 animate-pulse drop-shadow-[0_0_30px_rgba(239,68,68,0.8)]' 
                       : 'text-white'
-                  }`} style={{ fontSize: 'clamp(2rem, 5vw, 6rem)', wordBreak: 'break-word' }} key={currentDoctorCall.name}>
+                  }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-emerald-400 mt-[0.5vh] font-semibold" style={{ fontSize: 'clamp(0.8rem, 1.3vw, 1.5rem)' }}>
+                  <p className="text-emerald-400 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg">
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
+                <p className="text-slate-500 text-center text-xs sm:text-sm lg:text-base">
                   Aguardando próxima chamada...
                 </p>
               )}
@@ -2023,47 +2023,47 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* Right Column: History Panel */}
-        <div className="col-span-3 bg-slate-800/50 rounded-[1vw] border border-slate-700 p-[0.8vw] backdrop-blur-sm flex flex-col min-h-0">
-          <h3 className="font-bold text-white mb-[0.5vh] flex items-center gap-[0.4vw] shrink-0" style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1.2rem)' }}>
-            <Clock className="w-[1.2vw] h-[1.2vw] min-w-[16px] min-h-[16px] text-primary shrink-0" />
+        {/* Right Column: History Panel - Hidden on very small screens, shown on sm+ */}
+        <div className="hidden sm:flex lg:col-span-3 tv-glass tv-card border border-slate-700/50 p-2 sm:p-3 lg:p-4 flex-col min-h-0 max-h-[200px] sm:max-h-none">
+          <h3 className="font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base">
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
             <span>Últimas Chamadas</span>
           </h3>
-          <div className="space-y-[0.5vh] flex-1 overflow-y-auto">
+          <div className="space-y-1 sm:space-y-1.5 lg:space-y-2 flex-1 overflow-y-auto scrollbar-thin">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-[1vh]" style={{ fontSize: 'clamp(0.7rem, 0.9vw, 1rem)' }}>
+              <p className="text-slate-500 text-center py-2 sm:py-4 text-[10px] sm:text-xs lg:text-sm">
                 Nenhuma chamada ainda
               </p>
             ) : (
-              historyItems.map((item, index) => (
+              historyItems.slice(0, 8).map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-[0.6vw] rounded-lg ${
+                  className={`p-1.5 sm:p-2 lg:p-2.5 rounded-md sm:rounded-lg ${
                     index === 0 
-                      ? 'bg-primary/20 border-2 border-primary/40 ring-2 ring-primary/20 animate-call-entrance' 
+                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-call-entrance' 
                       : 'bg-slate-700/50'
                   } transition-all`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center gap-[0.4vw]">
-                    <div className={`w-[2vw] h-[2vw] min-w-[24px] min-h-[24px] rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
+                        <Activity className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                       ) : (
-                        <Stethoscope className="w-[1vw] h-[1vw] min-w-[12px] min-h-[12px] text-white" />
+                        <Stethoscope className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white truncate" style={{ fontSize: 'clamp(0.7rem, 1vw, 1rem)' }}>
+                      <p className="font-semibold text-white truncate text-[10px] sm:text-xs lg:text-sm">
                         {item.name}
                       </p>
-                      <p className="text-slate-400" style={{ fontSize: 'clamp(0.6rem, 0.8vw, 0.8rem)' }}>
+                      <p className="text-slate-400 text-[8px] sm:text-[10px] lg:text-xs">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-slate-400 font-mono shrink-0" style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.9rem)' }}>
+                    <span className="text-slate-400 font-mono shrink-0 text-[9px] sm:text-[10px] lg:text-xs">
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>
@@ -2077,12 +2077,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
-          <div className="flex items-stretch h-[5vh] min-h-[40px]">
+          <div className="flex items-stretch h-10 sm:h-12 lg:h-14">
             {/* Scrolling News Section - Dark background full width */}
             <div className="flex-1 bg-slate-900 overflow-hidden flex items-center relative">
-              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
-              <div className="animate-marquee whitespace-nowrap inline-flex py-[0.3vh]">
+              <div className="absolute left-0 top-0 bottom-0 w-4 sm:w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-4 sm:w-8 bg-gradient-to-l from-slate-900 to-transparent z-10" />
+              <div className="animate-marquee whitespace-nowrap inline-flex py-1">
                 {(() => {
                   const creditItem = { title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', source: 'Créditos', link: '' };
                   // Convert commercial phrases to news format
@@ -2118,8 +2118,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                   return itemsWithExtras.map((item, index) => (
-                    <span key={index} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
+                    <span key={index} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2153,13 +2153,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-[0.4vw]">•</span>
+                      <span className="text-slate-500 mx-1 sm:mx-2">•</span>
                     </span>
                   ));
                 })()}
@@ -2198,8 +2198,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                   return itemsWithExtras.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-[1vw] inline-flex items-center gap-[0.5vw] text-white font-medium tracking-wide" style={{ fontSize: 'clamp(1rem, 1.6vw, 1.8rem)', fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-[0.5vw] py-[0.25vh] rounded-md font-bold inline-block ${
+                    <span key={`dup-${index}`} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2233,13 +2233,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Lance' ? 'bg-red-500' :
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
-                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`} style={{ fontSize: 'clamp(0.65rem, 1vw, 1rem)' }}>
+                      } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-[0.4vw]">•</span>
+                      <span className="text-slate-500 mx-1 sm:mx-2">•</span>
                     </span>
                   ));
                 })()}
@@ -2252,28 +2252,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border-4 border-red-500 rounded-3xl p-8 lg:p-12 xl:p-16 max-w-2xl w-full shadow-2xl shadow-red-500/20 animate-scale-in">
-            <div className="text-center space-y-6 lg:space-y-8">
+          <div className="bg-slate-800 border-2 sm:border-4 border-red-500 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-8 lg:p-12 max-w-lg w-full shadow-2xl shadow-red-500/20 animate-scale-in">
+            <div className="text-center space-y-4 sm:space-y-6">
               {/* Warning Icon */}
-              <div className="w-24 h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 mx-auto rounded-full bg-red-500/20 border-4 border-red-500 flex items-center justify-center">
-                <LogOut className="w-12 h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 text-red-500" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto rounded-full bg-red-500/20 border-2 sm:border-4 border-red-500 flex items-center justify-center">
+                <LogOut className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-red-500" />
               </div>
               
               {/* Title */}
-              <h2 className="text-3xl lg:text-4xl xl:text-5xl font-black text-white">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white">
                 SAIR DO MODO TV?
               </h2>
               
               {/* Description */}
-              <p className="text-lg lg:text-xl xl:text-2xl text-slate-300">
+              <p className="text-sm sm:text-base lg:text-lg text-slate-300">
                 Você será redirecionado para a tela de login.
               </p>
               
               {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2 sm:pt-4">
                 <button
                   onClick={() => setShowExitConfirm(false)}
-                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-slate-700 hover:bg-slate-600 border-2 border-slate-500 rounded-2xl transition-all duration-200 hover:scale-105"
+                  className="flex-1 py-2.5 sm:py-3 lg:py-4 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105"
                 >
                   CANCELAR
                 </button>
@@ -2290,9 +2290,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     // Redirect to login
                     window.location.href = '/';
                   }}
-                  className="flex-1 py-4 lg:py-6 px-8 text-xl lg:text-2xl xl:text-3xl font-bold text-white bg-red-600 hover:bg-red-500 border-2 border-red-400 rounded-2xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-3"
+                  className="flex-1 py-2.5 sm:py-3 lg:py-4 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white bg-red-600 hover:bg-red-500 border border-red-400 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
                 >
-                  <LogOut className="w-6 h-6 lg:w-8 lg:h-8" />
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   SAIR
                 </button>
               </div>
@@ -2302,15 +2302,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Hidden Exit Button - Only visible on hover */}
-      <div className="fixed bottom-4 right-4 z-50 group">
+      <div className="fixed bottom-12 sm:bottom-14 lg:bottom-16 right-2 sm:right-4 z-50 group">
         <button
           onClick={() => setShowExitConfirm(true)}
-          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+          className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
           title="Sair do modo TV"
         >
-          <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <LogOut className="w-6 h-6 lg:w-8 lg:h-8 text-red-400" />
-            <span className="text-[8px] lg:text-[10px] text-red-400 font-medium">SAIR</span>
+          <div className="flex flex-col items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400" />
+            <span className="text-[7px] sm:text-[8px] lg:text-[9px] text-red-400 font-medium">SAIR</span>
           </div>
         </button>
       </div>
