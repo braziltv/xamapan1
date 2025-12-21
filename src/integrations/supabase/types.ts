@@ -591,6 +591,53 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_recipients: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          receives_alerts: boolean
+          receives_daily_report: boolean
+          receives_weekly_report: boolean
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          receives_alerts?: boolean
+          receives_daily_report?: boolean
+          receives_weekly_report?: boolean
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          receives_alerts?: boolean
+          receives_daily_report?: boolean
+          receives_weekly_report?: boolean
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_recipients_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tts_name_usage: {
         Row: {
           id: string
