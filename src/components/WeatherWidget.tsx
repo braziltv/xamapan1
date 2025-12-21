@@ -163,27 +163,30 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
+  // Date section (DOMINGO 21/12/2025)
+  const renderDateSection = () => {
+    return (
+      <div className="text-center bg-white/10 rounded-md lg:rounded-lg px-1.5 sm:px-2 lg:px-3 xl:px-4 py-0.5 lg:py-1 shrink-0">
+        <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base">
+          {safeFormatTime(currentTime, "EEEE")}
+        </p>
+        <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base">
+          {safeFormatTime(currentTime, "dd/MM/yyyy")}
+        </p>
+      </div>
+    );
+  };
+
+  // Clock section (HH:mm:ss) - BETWEEN date and weather
   const renderClockSection = () => {
     return (
-      <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 xl:gap-3 shrink-0">
-        {/* Main Time Display */}
-        <div className="flex items-baseline whitespace-nowrap shrink-0">
-          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl">
-            {safeFormatTime(currentTime, 'HH:mm')}
-          </span>
-          <span className="font-mono font-bold text-amber-300 animate-pulse text-xs sm:text-sm md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl">
-            :{safeFormatTime(currentTime, 'ss')}
-          </span>
-        </div>
-        {/* Date Display */}
-        <div className="text-center bg-white/10 rounded-md lg:rounded-lg px-1 sm:px-1.5 lg:px-2 xl:px-3 py-0.5 lg:py-1 shrink-0">
-          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm">
-            {safeFormatTime(currentTime, "EEEE")}
-          </p>
-          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm">
-            {safeFormatTime(currentTime, "dd/MM/yyyy")}
-          </p>
-        </div>
+      <div className="flex items-baseline whitespace-nowrap shrink-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-lg lg:rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+        <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_8px_rgba(6,182,212,0.7)] text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl">
+          {safeFormatTime(currentTime, 'HH:mm')}
+        </span>
+        <span className="font-mono font-bold text-amber-300 animate-pulse text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl">
+          :{safeFormatTime(currentTime, 'ss')}
+        </span>
       </div>
     );
   };
@@ -192,9 +195,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   if (initialLoading && !currentWeather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
+        {renderDateSection()}
+        {renderClockSection()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/70 animate-pulse" />
         <span className="text-white/80 text-xs sm:text-sm">Carregando...</span>
-        {renderClockSection()}
       </div>
     );
   }
@@ -205,9 +209,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   if (!weather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
+        {renderDateSection()}
+        {renderClockSection()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/50" />
         <span className="text-white/60 text-xs sm:text-sm">Indisponível</span>
-        {renderClockSection()}
       </div>
     );
   }
@@ -219,7 +224,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 flex-nowrap justify-end shrink-0">
-      {/* Clock Section */}
+      {/* Date Section (DOMINGO 21/12/2025) */}
+      {renderDateSection()}
+      
+      {/* Clock Section (HH:mm:ss) - BETWEEN date and weather */}
       {renderClockSection()}
       
       {/* Separator */}
