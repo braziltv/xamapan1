@@ -18,7 +18,10 @@ import {
   History,
   Clock,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Smartphone,
+  Monitor,
+  Tv
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -231,6 +234,50 @@ export function SystemTestPanel() {
         return { success: true, message: `${data?.length || 0} sessões ativas` };
       }
     },
+    // Session Filtering Test
+    {
+      name: 'Filtro de Sessões por Unidade',
+      category: 'Tabela: User Sessions',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).single();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
+        
+        const { data, error } = await supabase.from('user_sessions')
+          .select('*')
+          .eq('unit_name', units.name)
+          .eq('is_active', true);
+        if (error) return { success: false, message: 'Erro ao filtrar sessões', error: error.message };
+        return { success: true, message: `${data?.length || 0} sessões ativas na unidade ${units.name}` };
+      }
+    },
+    // Session IP and User Agent Test
+    {
+      name: 'Dados de Conexão (IP/User Agent)',
+      category: 'Tabela: User Sessions',
+      fn: async () => {
+        const { data, error } = await supabase.from('user_sessions')
+          .select('ip_address, user_agent')
+          .eq('is_active', true)
+          .limit(5);
+        if (error) return { success: false, message: 'Erro ao ler dados de conexão', error: error.message };
+        const withIP = data?.filter(s => s.ip_address).length || 0;
+        const withUA = data?.filter(s => s.user_agent).length || 0;
+        return { success: true, message: `${withIP} com IP, ${withUA} com User Agent` };
+      }
+    },
+    // Session Statistics Test
+    {
+      name: 'Estatísticas de Sessões por Unidade',
+      category: 'Tabela: User Sessions',
+      fn: async () => {
+        const { data, error } = await supabase.from('user_sessions')
+          .select('unit_name, is_active');
+        if (error) return { success: false, message: 'Erro ao calcular estatísticas', error: error.message };
+        const units = [...new Set(data?.map(s => s.unit_name))];
+        const active = data?.filter(s => s.is_active).length || 0;
+        return { success: true, message: `${units.length} unidades, ${active} sessões ativas` };
+      }
+    },
     // Statistics Tests
     {
       name: 'Leitura de Estatísticas Diárias',
@@ -330,6 +377,88 @@ export function SystemTestPanel() {
         });
       }
     },
+    // PWA Installation Tests
+    {
+      name: 'Página de Instalação PWA',
+      category: 'PWA',
+      fn: async () => {
+        try {
+          const response = await fetch('/install');
+          if (response.ok) {
+            return { success: true, message: 'Página de instalação acessível' };
+          }
+          return { success: false, message: 'Página não acessível', error: `Status: ${response.status}` };
+        } catch (err) {
+          return { success: false, message: 'Erro ao acessar página', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+        }
+      }
+    },
+    {
+      name: 'Link Instalação Modo TV',
+      category: 'PWA',
+      fn: async () => {
+        try {
+          const response = await fetch('/install?mode=tv');
+          if (response.ok) {
+            return { success: true, message: 'Modo TV acessível via /install?mode=tv' };
+          }
+          return { success: false, message: 'Link não acessível', error: `Status: ${response.status}` };
+        } catch (err) {
+          return { success: false, message: 'Erro ao acessar link', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+        }
+      }
+    },
+    {
+      name: 'Link Instalação Modo Normal',
+      category: 'PWA',
+      fn: async () => {
+        try {
+          const response = await fetch('/install?mode=normal');
+          if (response.ok) {
+            return { success: true, message: 'Modo Normal acessível via /install?mode=normal' };
+          }
+          return { success: false, message: 'Link não acessível', error: `Status: ${response.status}` };
+        } catch (err) {
+          return { success: false, message: 'Erro ao acessar link', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+        }
+      }
+    },
+    {
+      name: 'Ícones PWA TV',
+      category: 'PWA',
+      fn: async () => {
+        try {
+          const [res192, res512] = await Promise.all([
+            fetch('/pwa-tv-192x192.png'),
+            fetch('/pwa-tv-512x512.png')
+          ]);
+          if (res192.ok && res512.ok) {
+            return { success: true, message: 'Ícones TV 192x192 e 512x512 disponíveis' };
+          }
+          return { success: false, message: 'Alguns ícones não encontrados', error: `192: ${res192.status}, 512: ${res512.status}` };
+        } catch (err) {
+          return { success: false, message: 'Erro ao verificar ícones', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+        }
+      }
+    },
+    {
+      name: 'Ícones PWA Full',
+      category: 'PWA',
+      fn: async () => {
+        try {
+          const [res192, res512] = await Promise.all([
+            fetch('/pwa-full-192x192.png'),
+            fetch('/pwa-full-512x512.png')
+          ]);
+          if (res192.ok && res512.ok) {
+            return { success: true, message: 'Ícones Full 192x192 e 512x512 disponíveis' };
+          }
+          return { success: false, message: 'Alguns ícones não encontrados', error: `192: ${res192.status}, 512: ${res512.status}` };
+        } catch (err) {
+          return { success: false, message: 'Erro ao verificar ícones', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+        }
+      }
+    },
   ];
 
   const runAllTests = async () => {
@@ -392,6 +521,8 @@ export function SystemTestPanel() {
     if (category.includes('Chat')) return <MessageSquare className="w-4 h-4" />;
     if (category.includes('TTS') || category.includes('Announcements')) return <Volume2 className="w-4 h-4" />;
     if (category.includes('Edge')) return <RefreshCw className="w-4 h-4" />;
+    if (category.includes('PWA')) return <Smartphone className="w-4 h-4" />;
+    if (category.includes('Sessions')) return <Monitor className="w-4 h-4" />;
     return <Database className="w-4 h-4" />;
   };
 
