@@ -250,14 +250,27 @@ export function SystemTestPanel() {
       category: 'Edge Functions',
       fn: async () => {
         try {
-          const { data, error } = await supabase.functions.invoke('google-cloud-tts', {
-            body: { text: 'Teste', voice: 'pt-BR-Neural2-A' }
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+            },
+            body: JSON.stringify({ text: 'Teste', voiceName: 'pt-BR-Neural2-A' })
           });
-          if (error) return { success: false, message: 'Erro no TTS', error: error.message };
-          if (data?.audioContent) {
-            return { success: true, message: `Áudio gerado: ${Math.round(data.audioContent.length / 1024)}KB` };
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            return { success: false, message: 'Erro no TTS', error: errorText };
           }
-          return { success: false, message: 'Resposta inválida do TTS', error: 'Sem audioContent' };
+          
+          const contentType = response.headers.get('Content-Type');
+          if (contentType?.includes('audio')) {
+            const blob = await response.blob();
+            return { success: true, message: `Áudio gerado: ${Math.round(blob.size / 1024)}KB` };
+          }
+          
+          return { success: false, message: 'Resposta inesperada', error: `Content-Type: ${contentType}` };
         } catch (err) {
           return { success: false, message: 'Falha ao chamar TTS', error: err instanceof Error ? err.message : 'Erro desconhecido' };
         }
@@ -279,21 +292,41 @@ export function SystemTestPanel() {
       category: 'Realtime',
       fn: async () => {
         return new Promise((resolve) => {
-          const channel = supabase.channel('test-channel');
+          const channelName = `test-${Date.now()}`;
+          const channel = supabase.channel(channelName);
+          let resolved = false;
+          
           const timeout = setTimeout(() => {
-            channel.unsubscribe();
-            resolve({ success: false, message: 'Timeout na conexão', error: 'Conexão demorou mais de 5s' });
+            if (!resolved) {
+              resolved = true;
+              supabase.removeChannel(channel);
+              resolve({ success: false, message: 'Timeout na conexão', error: 'Conexão demorou mais de 5s' });
+            }
           }, 5000);
           
-          channel.subscribe((status) => {
-            clearTimeout(timeout);
-            channel.unsubscribe();
-            if (status === 'SUBSCRIBED') {
-              resolve({ success: true, message: 'Canal subscrito com sucesso' });
-            } else {
-              resolve({ success: false, message: `Status: ${status}`, error: 'Não conseguiu subscrever' });
-            }
-          });
+          channel
+            .on('presence', { event: 'sync' }, () => {
+              // Presence sync event
+            })
+            .subscribe((status) => {
+              if (resolved) return;
+              
+              if (status === 'SUBSCRIBED') {
+                resolved = true;
+                clearTimeout(timeout);
+                // Wait a moment then cleanup
+                setTimeout(() => {
+                  supabase.removeChannel(channel);
+                }, 100);
+                resolve({ success: true, message: 'Canal subscrito com sucesso' });
+              } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                resolved = true;
+                clearTimeout(timeout);
+                supabase.removeChannel(channel);
+                resolve({ success: false, message: `Status: ${status}`, error: 'Erro na conexão do canal' });
+              }
+              // For other statuses (SUBSCRIBING, etc), just wait
+            });
         });
       }
     },
