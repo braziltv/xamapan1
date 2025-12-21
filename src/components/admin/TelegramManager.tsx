@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Send, 
   Plus, 
@@ -22,7 +24,9 @@ import {
   MessageCircle,
   CheckCircle,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  BarChart3,
+  Play
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -45,15 +49,21 @@ interface TelegramManagerProps {
   unitId: string;
 }
 
+type ReportType = 'daily' | 'weekly' | 'test_message';
+
 export function TelegramManager({ unitId }: TelegramManagerProps) {
   const { units } = useUnits();
   const [recipients, setRecipients] = useState<TelegramRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [editingRecipient, setEditingRecipient] = useState<TelegramRecipient | null>(null);
   const [isSendingTest, setIsSendingTest] = useState(false);
+  const [isSendingReport, setIsSendingReport] = useState(false);
   const [testMessage, setTestMessage] = useState('🔔 Mensagem de teste do Xama Pan!\n\nSe você recebeu esta mensagem, a integração com o Telegram está funcionando corretamente.');
+  const [selectedReportUnit, setSelectedReportUnit] = useState<string>(unitId);
+  const [selectedReportType, setSelectedReportType] = useState<ReportType>('daily');
   const [formData, setFormData] = useState({
     name: '',
     chat_id: '',
@@ -197,6 +207,34 @@ export function TelegramManager({ unitId }: TelegramManagerProps) {
     }
   };
 
+  const sendReport = async () => {
+    setIsSendingReport(true);
+    
+    try {
+      const selectedUnit = units.find(u => u.id === selectedReportUnit);
+      const unitDisplayName = selectedUnit?.display_name || 'Todas as Unidades';
+
+      if (selectedReportType === 'daily' || selectedReportType === 'weekly') {
+        // Trigger the daily statistics function which sends both reports
+        const response = await supabase.functions.invoke('send-daily-statistics', {
+          body: { unitFilter: selectedReportUnit !== 'all' ? selectedUnit?.name : null }
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+
+        toast.success(`Relatório ${selectedReportType === 'daily' ? 'diário' : 'semanal'} enviado para ${unitDisplayName}!`);
+        setReportDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar relatório:', error);
+      toast.error('Erro ao enviar relatório');
+    } finally {
+      setIsSendingReport(false);
+    }
+  };
+
   const toggleRecipientStatus = async (recipient: TelegramRecipient) => {
     const { error } = await supabase
       .from('telegram_recipients')
@@ -231,9 +269,13 @@ export function TelegramManager({ unitId }: TelegramManagerProps) {
             Integração Telegram
           </CardTitle>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setReportDialogOpen(true)}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Enviar Relatório
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setTestDialogOpen(true)}>
               <MessageCircle className="w-4 h-4 mr-2" />
-              Teste Global
+              Teste
             </Button>
             <Button onClick={handleOpenCreate} size="sm">
               <Plus className="w-4 h-4 mr-2" />
@@ -507,6 +549,93 @@ export function TelegramManager({ unitId }: TelegramManagerProps) {
                 <>
                   <Send className="w-4 h-4 mr-2" />
                   Enviar Teste
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Report Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Enviar Relatório
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Escolha a unidade e o tipo de relatório que deseja enviar via Telegram.
+            </p>
+            
+            <div className="space-y-2">
+              <Label>Unidade</Label>
+              <Select value={selectedReportUnit} onValueChange={setSelectedReportUnit}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a unidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Unidades</SelectItem>
+                  {units.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de Relatório</Label>
+              <Tabs value={selectedReportType} onValueChange={(v) => setSelectedReportType(v as ReportType)}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="daily" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Diário
+                  </TabsTrigger>
+                  <TabsTrigger value="weekly" className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Semanal
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div className="bg-muted/50 p-3 rounded-md text-sm">
+              <p className="font-medium mb-1">O que será enviado:</p>
+              {selectedReportType === 'daily' ? (
+                <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>Total de chamadas do dia</li>
+                  <li>Chamadas por hora</li>
+                  <li>Chamadas por destino</li>
+                  <li>Sessões ativas e concluídas</li>
+                </ul>
+              ) : (
+                <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>Total de chamadas da semana</li>
+                  <li>Chamadas por dia da semana</li>
+                  <li>Top destinos</li>
+                  <li>Dia mais movimentado</li>
+                </ul>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={sendReport} disabled={isSendingReport}>
+              {isSendingReport ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Enviar Relatório
                 </>
               )}
             </Button>
