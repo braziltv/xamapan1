@@ -51,7 +51,7 @@ interface WeeklyStatistics {
 }
 
 interface AlertPayload {
-  type: 'health_check_failure' | 'daily_statistics' | 'detailed_daily_report' | 'weekly_report' | 'cleanup_report';
+  type: 'health_check_failure' | 'daily_statistics' | 'detailed_daily_report' | 'weekly_report' | 'cleanup_report' | 'test_message';
   functionName?: string;
   functionLabel?: string;
   errorMessage?: string;
@@ -63,10 +63,14 @@ interface AlertPayload {
     patientCallsDeleted: number;
     statisticsCompacted: number;
   };
+  message?: string;
+  chatId?: string;
 }
 
-async function sendTelegramMessage(message: string): Promise<boolean> {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+async function sendTelegramMessage(message: string, customChatId?: string): Promise<boolean> {
+  const chatId = customChatId || TELEGRAM_CHAT_ID;
+  
+  if (!TELEGRAM_BOT_TOKEN || !chatId) {
     console.error('Telegram credentials not configured');
     return false;
   }
@@ -77,7 +81,7 @@ async function sendTelegramMessage(message: string): Promise<boolean> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
+        chat_id: chatId,
         text: message,
         parse_mode: 'HTML',
       }),
@@ -321,6 +325,9 @@ serve(async (req) => {
       case 'cleanup_report':
         message = formatCleanupReport(payload);
         break;
+      case 'test_message':
+        message = payload.message || '🔔 Mensagem de teste do Xama Pan!';
+        break;
       default:
         return new Response(
           JSON.stringify({ error: 'Invalid alert type' }),
@@ -328,7 +335,7 @@ serve(async (req) => {
         );
     }
 
-    const success = await sendTelegramMessage(message);
+    const success = await sendTelegramMessage(message, payload.chatId);
 
     return new Response(
       JSON.stringify({ success, message: success ? 'Alert sent' : 'Failed to send alert' }),
