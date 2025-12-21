@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Select,
   SelectContent,
@@ -42,7 +43,8 @@ import {
   Bandage,
   Scan,
   Bed,
-  BookOpen
+  BookOpen,
+  Settings2
 } from 'lucide-react';
 import { exportTutorialPDF } from '@/utils/exportTutorialPDF';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -73,6 +75,7 @@ import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 import { ActiveUsersPanel } from './ActiveUsersPanel';
 import { ErrorHistoryPanel } from './ErrorHistoryPanel';
 import { UptimeHistoryPanel } from './UptimeHistoryPanel';
+import { SystemConfigPanel } from './admin/SystemConfigPanel';
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -170,6 +173,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   
   // Estado para verificar cache de horas
   const [regenCacheDialogOpen, setRegenCacheDialogOpen] = useState(false);
+  
+  // Estado para abas do painel administrativo
+  const [adminTab, setAdminTab] = useState<'statistics' | 'config'>('statistics');
   
   const { toast } = useToast();
   const { playHourAudio, checkAudiosExist } = useHourAudio();
@@ -1277,7 +1283,7 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <Tabs value={adminTab} onValueChange={(v) => setAdminTab(v as 'statistics' | 'config')} className="space-y-6">
       {/* Modal de senha para comparação */}
       <Dialog open={compareDialogOpen} onOpenChange={(open) => {
         setCompareDialogOpen(open);
@@ -1725,8 +1731,24 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
         className="hidden"
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">Administrativo</h2>
+      {/* Header com Abas */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-2xl font-bold text-foreground">Administrativo</h2>
+          <TabsList className="grid w-full sm:w-auto grid-cols-2 h-10">
+            <TabsTrigger value="statistics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span>Estatísticas</span>
+            </TabsTrigger>
+            <TabsTrigger value="config" className="flex items-center gap-2">
+              <Settings2 className="w-4 h-4" />
+              <span>Configurações</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        
+        {/* Botões de Ação - só aparecem na aba de estatísticas */}
+        {adminTab === 'statistics' && (
         <div className="flex flex-wrap gap-2">
           <Button onClick={exportToPDF} className="gap-2">
             <FileDown className="w-4 h-4" />
@@ -1856,8 +1878,11 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             Anúncio de Horas (Google TTS)
           </Button>
         </div>
+        )}
       </div>
 
+      {/* Aba de Estatísticas */}
+      <TabsContent value="statistics" className="space-y-6 mt-0">
       {/* Info de armazenamento */}
       <Card className="bg-muted/30">
         <CardContent className="py-3">
@@ -2808,6 +2833,12 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </TabsContent>
+
+      {/* Aba de Configurações do Sistema */}
+      <TabsContent value="config" className="mt-0">
+        <SystemConfigPanel />
+      </TabsContent>
+    </Tabs>
   );
 }
