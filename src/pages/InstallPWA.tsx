@@ -136,7 +136,7 @@ const InstallPWA = () => {
     if (installMode === 'tv') {
       return {
         icon: <Tv className="h-16 w-16 text-primary" />,
-        title: 'Modo TV',
+        title: 'Xama-Pan TV',
         description: 'Exibição em tela cheia para TVs - apenas seleciona a unidade, sem login',
         features: [
           'Tela cheia automática',
@@ -150,7 +150,7 @@ const InstallPWA = () => {
     if (installMode === 'normal') {
       return {
         icon: <User className="h-16 w-16 text-primary" />,
-        title: 'Modo Normal',
+        title: 'Xama-Pan Full',
         description: 'Acesso completo ao sistema com todas as funcionalidades',
         features: [
           'Login com usuário e senha',
@@ -179,7 +179,7 @@ const InstallPWA = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* TV Mode Option */}
+            {/* Xama-Pan TV Option */}
             <button
               onClick={() => setInstallMode('tv')}
               className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
@@ -189,7 +189,7 @@ const InstallPWA = () => {
                   <Tv className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1">Modo TV</h3>
+                  <h3 className="font-semibold text-lg mb-1">Xama-Pan TV</h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     Para TVs de sala de espera
                   </p>
@@ -211,7 +211,7 @@ const InstallPWA = () => {
               </div>
             </button>
 
-            {/* Normal Mode Option */}
+            {/* Xama-Pan Full Option */}
             <button
               onClick={() => setInstallMode('normal')}
               className="w-full p-4 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
@@ -221,7 +221,7 @@ const InstallPWA = () => {
                   <User className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1">Modo Normal</h3>
+                  <h3 className="font-semibold text-lg mb-1">Xama-Pan Full</h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     Para operação do sistema
                   </p>
