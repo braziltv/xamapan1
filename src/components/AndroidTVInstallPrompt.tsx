@@ -59,7 +59,7 @@ export const AndroidTVInstallPrompt = () => {
   };
 
   const handleInstall = () => {
-    navigate('/install');
+    navigate('/install?mode=tv');
   };
 
   if (!showPrompt || !isAndroidTV) return null;
