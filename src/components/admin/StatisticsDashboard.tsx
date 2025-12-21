@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,6 +19,7 @@ import {
 import { useUnits } from '@/hooks/useAdminData';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 
 interface CallData {
@@ -79,7 +80,14 @@ export function StatisticsDashboard() {
   const [selectedUnit, setSelectedUnit] = useState<string>('all');
   const [period, setPeriod] = useState<string>('7');
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [callData, setCallData] = useState<CallData[]>([]);
+  
+  // Refs para captura dos gráficos
+  const chartDailyRef = useRef<HTMLDivElement>(null);
+  const chartHourlyRef = useRef<HTMLDivElement>(null);
+  const chartTypeRef = useRef<HTMLDivElement>(null);
+  const chartDestRef = useRef<HTMLDivElement>(null);
   
   // Estados para estatísticas processadas
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
@@ -209,11 +217,36 @@ export function StatisticsDashboard() {
     }
   };
 
-  const exportToPDF = () => {
+  const captureChart = async (ref: React.RefObject<HTMLDivElement>): Promise<string | null> => {
+    if (!ref.current) return null;
+    try {
+      const canvas = await html2canvas(ref.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+      });
+      return canvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Erro ao capturar gráfico:', error);
+      return null;
+    }
+  };
+
+  const exportToPDF = async () => {
+    setExporting(true);
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const now = new Date();
+      
+      // Capturar todos os gráficos em paralelo
+      const [dailyChart, hourlyChart, typeChart, destChart] = await Promise.all([
+        captureChart(chartDailyRef),
+        captureChart(chartHourlyRef),
+        captureChart(chartTypeRef),
+        captureChart(chartDestRef),
+      ]);
       
       // Header
       doc.setFillColor(13, 148, 136); // Primary teal color
@@ -263,11 +296,83 @@ export function StatisticsDashboard() {
       
       yPos = (doc as any).lastAutoTable.finalY + 15;
       
-      // Statistics by type
+      // Gráfico de Evolução Diária
+      if (dailyChart && dailyStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Evolução Diária', 14, yPos);
+        yPos += 5;
+        
+        const imgWidth = pageWidth - 28;
+        const imgHeight = 70;
+        doc.addImage(dailyChart, 'PNG', 14, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 10;
+      }
+      
+      // Check if we need a new page
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Gráfico de Distribuição por Hora
+      if (hourlyChart) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Distribuição por Hora', 14, yPos);
+        yPos += 5;
+        
+        const imgWidth = pageWidth - 28;
+        const imgHeight = 70;
+        doc.addImage(hourlyChart, 'PNG', 14, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 10;
+      }
+      
+      // New page for remaining charts
+      doc.addPage();
+      yPos = 20;
+      
+      // Gráfico por Tipo de Chamada
+      if (typeChart && typeStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Por Tipo de Chamada', 14, yPos);
+        yPos += 5;
+        
+        const imgWidth = pageWidth - 28;
+        const imgHeight = 70;
+        doc.addImage(typeChart, 'PNG', 14, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 10;
+      }
+      
+      // Check if we need a new page
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Gráfico Top Destinos
+      if (destChart && destinationStats.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Top Destinos', 14, yPos);
+        yPos += 5;
+        
+        const imgWidth = pageWidth - 28;
+        const imgHeight = 70;
+        doc.addImage(destChart, 'PNG', 14, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 10;
+      }
+      
+      // New page for tables
+      doc.addPage();
+      yPos = 20;
+      
+      // Statistics by type table
       if (typeStats.length > 0) {
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('Estatísticas por Tipo', 14, yPos);
+        doc.text('Detalhamento por Tipo', 14, yPos);
         yPos += 10;
         
         autoTable(doc, {
@@ -286,23 +391,26 @@ export function StatisticsDashboard() {
         yPos = (doc as any).lastAutoTable.finalY + 15;
       }
       
-      // Check if we need a new page
-      if (yPos > 220) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      // Statistics by destination
+      // Statistics by destination table
       if (destinationStats.length > 0) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('Top Destinos', 14, yPos);
+        doc.text('Detalhamento por Destino', 14, yPos);
         yPos += 10;
         
         autoTable(doc, {
           startY: yPos,
-          head: [['Destino', 'Chamadas']],
-          body: destinationStats.map(dest => [dest.name, dest.count.toString()]),
+          head: [['Destino', 'Chamadas', 'Percentual']],
+          body: destinationStats.map(dest => [
+            dest.name, 
+            dest.count.toString(),
+            `${((dest.count / totalCalls) * 100).toFixed(1)}%`
+          ]),
           theme: 'striped',
           headStyles: { fillColor: [13, 148, 136], textColor: 255 },
           styles: { fontSize: 10, cellPadding: 3 },
@@ -311,17 +419,16 @@ export function StatisticsDashboard() {
         yPos = (doc as any).lastAutoTable.finalY + 15;
       }
       
-      // Check if we need a new page
-      if (yPos > 180) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      // Daily evolution
+      // Daily evolution table
       if (dailyStats.length > 0) {
+        if (yPos > 180) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('Evolução Diária', 14, yPos);
+        doc.text('Evolução Diária - Detalhes', 14, yPos);
         yPos += 10;
         
         autoTable(doc, {
@@ -337,32 +444,6 @@ export function StatisticsDashboard() {
           theme: 'striped',
           headStyles: { fillColor: [13, 148, 136], textColor: 255 },
           styles: { fontSize: 9, cellPadding: 2 },
-        });
-        
-        yPos = (doc as any).lastAutoTable.finalY + 15;
-      }
-      
-      // Check if we need a new page
-      if (yPos > 150) {
-        doc.addPage();
-        yPos = 20;
-      }
-      
-      // Hourly distribution
-      const peakHours = hourlyStats.filter(h => h.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
-      if (peakHours.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Distribuição por Hora (Top 10)', 14, yPos);
-        yPos += 10;
-        
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Hora', 'Chamadas']],
-          body: peakHours.map(hour => [hour.hour, hour.count.toString()]),
-          theme: 'striped',
-          headStyles: { fillColor: [13, 148, 136], textColor: 255 },
-          styles: { fontSize: 10, cellPadding: 3 },
         });
       }
       
@@ -384,10 +465,12 @@ export function StatisticsDashboard() {
       const fileName = `relatorio-estatisticas-${format(now, 'yyyy-MM-dd-HHmm')}.pdf`;
       doc.save(fileName);
       
-      toast.success('Relatório PDF exportado com sucesso!');
+      toast.success('Relatório PDF com gráficos exportado com sucesso!');
     } catch (error) {
       console.error('Erro ao exportar PDF:', error);
       toast.error('Erro ao exportar relatório');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -456,11 +539,11 @@ export function StatisticsDashboard() {
           <Button 
             variant="default" 
             onClick={exportToPDF} 
-            disabled={loading || totalCalls === 0}
+            disabled={loading || exporting || totalCalls === 0}
             className="gap-2"
           >
-            <FileDown className="w-4 h-4" />
-            Exportar PDF
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+            {exporting ? 'Exportando...' : 'Exportar PDF'}
           </Button>
         </div>
       </div>
