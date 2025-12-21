@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Download, Tv, User } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -11,10 +12,13 @@ import { OperatorsManager } from './OperatorsManager';
 import { TTSPhrasesManager } from './TTSPhrasesManager';
 import { StatisticsDashboard } from './StatisticsDashboard';
 import { SystemTestPanel } from './SystemTestPanel';
+import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
+import { useNavigate } from 'react-router-dom';
 
 export function SystemConfigPanel() {
   const { units, loading } = useUnits();
+  const navigate = useNavigate();
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -27,18 +31,44 @@ export function SystemConfigPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Settings2 className="w-6 h-6 text-primary" />
           <h2 className="text-xl font-semibold">Configurações do Sistema</h2>
         </div>
+        
+        {/* Links de instalação PWA */}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/install?mode=tv')}
+            className="gap-2"
+          >
+            <Tv className="w-4 h-4" />
+            <span className="hidden sm:inline">Instalar</span> Xama-Pan TV
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/install?mode=normal')}
+            className="gap-2"
+          >
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Instalar</span> Xama-Pan Full
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-7 mb-6">
+        <TabsList className="grid w-full grid-cols-8 mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
+          </TabsTrigger>
+          <TabsTrigger value="sessions" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">Sessões</span>
           </TabsTrigger>
           <TabsTrigger value="units" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
@@ -67,7 +97,7 @@ export function SystemConfigPanel() {
         </TabsList>
 
         {/* Seletor de unidade (para abas que precisam) */}
-        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && (
+        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && activeTab !== 'sessions' && (
           <Card className="mb-4">
             <CardContent className="py-4">
               <div className="flex items-center gap-4">
@@ -100,6 +130,10 @@ export function SystemConfigPanel() {
 
         <TabsContent value="dashboard">
           <StatisticsDashboard />
+        </TabsContent>
+
+        <TabsContent value="sessions">
+          <ActiveUsersPanel />
         </TabsContent>
 
         <TabsContent value="units">
