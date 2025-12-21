@@ -150,20 +150,22 @@ export function WeatherWidget({ currentTime, formatTime }: WeatherWidgetProps) {
     if (!currentTime || !formatTime) return null;
     
     return (
-      <div className="flex items-center gap-[0.8vw] shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
+        {/* Main Time Display */}
         <div className="flex items-baseline whitespace-nowrap">
-          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 3rem)' }}>
+          <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl">
             {formatTime(currentTime, 'HH:mm')}
           </span>
-          <span className="font-mono font-bold text-amber-300 animate-pulse" style={{ fontSize: 'clamp(1rem, 1.5vw, 2rem)' }}>
+          <span className="font-mono font-bold text-amber-300 animate-pulse text-xl sm:text-2xl lg:text-3xl xl:text-4xl">
             :{formatTime(currentTime, 'ss')}
           </span>
         </div>
-        <div className="text-center bg-white/10 rounded-lg px-[0.6vw] py-[0.3vh]">
-          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.9rem)' }}>
+        {/* Date Display */}
+        <div className="text-center bg-white/10 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2">
+          <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-xs sm:text-sm lg:text-base xl:text-lg">
             {formatTime(currentTime, "EEEE")}
           </p>
-          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.9rem)' }}>
+          <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg">
             {formatTime(currentTime, "dd/MM/yyyy")}
           </p>
         </div>
