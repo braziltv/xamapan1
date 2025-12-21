@@ -1917,27 +1917,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/20 to-blue-500/10 rounded-lg sm:rounded-xl lg:rounded-2xl" />
           <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           
-          <div className="flex items-center justify-between relative z-10 w-full gap-2 sm:gap-4">
-            {/* Left: Logo + Title */}
-            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 min-w-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-lg sm:rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
-                <HealthCrossIcon size={32} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+          <div className="flex items-center justify-between relative z-10 w-full gap-1 sm:gap-2 lg:gap-4">
+            {/* Left: Logo + Title - More compact on mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 shrink-0 min-w-0">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 rounded-md sm:rounded-lg lg:rounded-xl bg-white/90 flex items-center justify-center shadow-lg shrink-0">
+                <HealthCrossIcon size={32} className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 xl:w-9 xl:h-9" />
               </div>
-              <div className="min-w-0">
-                <h1 className="font-bold text-white leading-tight whitespace-nowrap text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl">
+              <div className="min-w-0 hidden xs:block sm:block">
+                <h1 className="font-bold text-white leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl">
                   Painel de Chamadas
                 </h1>
-                <p className="text-amber-300 leading-tight font-medium text-[10px] sm:text-xs lg:text-sm xl:text-base truncate max-w-[120px] sm:max-w-[200px] lg:max-w-[300px] xl:max-w-none">
+                <p className="text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm truncate max-w-[80px] sm:max-w-[150px] lg:max-w-[250px] xl:max-w-none">
                   {unitName || 'Unidade de Saúde'}
                 </p>
               </div>
             </div>
             
             {/* Separator - Hidden on small screens */}
-            <div className="hidden sm:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+            <div className="hidden lg:block w-px h-6 lg:h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
             
-            {/* Right: Weather + Clock */}
-            <div className="flex items-center justify-end shrink min-w-0">
+            {/* Right: Weather + Clock - Takes remaining space, no overflow hidden to prevent clock truncation */}
+            <div className="flex items-center justify-end flex-1 min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
