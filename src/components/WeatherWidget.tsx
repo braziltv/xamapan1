@@ -169,21 +169,21 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   // Date section (DOMINGO 21/12/2025)
   const renderDateSection = () => {
     return (
-      <div className="text-center bg-white/10 rounded-md lg:rounded-lg 3xl:rounded-xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-0.5 lg:py-1 3xl:py-2 shrink-0">
+      <div className="w-full text-center bg-white/10 rounded-md lg:rounded-lg 3xl:rounded-xl px-1.5 sm:px-2 lg:px-3 xl:px-4 3xl:px-6 4k:px-8 py-0.5 lg:py-1 3xl:py-2">
         <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl">
-          {safeFormatTime(currentTime, "EEEE")}
+          {safeFormatTime(currentTime, 'EEEE')}
         </p>
         <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl">
-          {safeFormatTime(currentTime, "dd/MM/yyyy")}
+          {safeFormatTime(currentTime, 'dd/MM/yyyy')}
         </p>
       </div>
     );
   };
 
-  // Clock section (HH:mm:ss) - BETWEEN date and weather
+  // Clock section (HH:mm:ss) - aligned under date
   const renderClockSection = () => {
     return (
-      <div className="flex items-baseline whitespace-nowrap shrink-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 sm:px-3 lg:px-4 3xl:px-6 4k:px-8 py-1 sm:py-1.5 lg:py-2 3xl:py-3 4k:py-4 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+      <div className="w-full flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 sm:px-3 lg:px-4 3xl:px-6 4k:px-8 py-1 sm:py-1.5 lg:py-2 3xl:py-3 4k:py-4 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
         <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_8px_rgba(6,182,212,0.7)] text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl">
           {safeFormatTime(currentTime, 'HH:mm')}
         </span>
@@ -194,12 +194,20 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     );
   };
 
+  const renderDateTimeStack = () => {
+    return (
+      <div className="flex flex-col items-center gap-1 sm:gap-1.5 3xl:gap-2 shrink-0 min-w-[120px] sm:min-w-[140px] lg:min-w-[180px] xl:min-w-[210px] 3xl:min-w-[260px] 4k:min-w-[320px]">
+        {renderDateSection()}
+        {renderClockSection()}
+      </div>
+    );
+  };
+
   // Loading state
   if (initialLoading && !currentWeather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
-        {renderDateSection()}
-        {renderClockSection()}
+        {renderDateTimeStack()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/70 animate-pulse" />
         <span className="text-white/80 text-xs sm:text-sm">Carregando...</span>
       </div>
@@ -212,8 +220,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   if (!weather) {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
-        {renderDateSection()}
-        {renderClockSection()}
+        {renderDateTimeStack()}
         <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white/50" />
         <span className="text-white/60 text-xs sm:text-sm">Indisponível</span>
       </div>
@@ -227,15 +234,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-6 4k:gap-8 flex-nowrap justify-end shrink-0">
-      {/* Date Section (DOMINGO 21/12/2025) */}
-      {renderDateSection()}
-      
-      {/* Clock Section (HH:mm:ss) - BETWEEN date and weather */}
-      {renderClockSection()}
-      
+      {/* Date + Time (stacked) */}
+      {renderDateTimeStack()}
+
       {/* Separator */}
       <div className="w-px h-5 sm:h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
-      
+
       {/* City & Weather Icon */}
       <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 shrink-0">
         <div className="flex flex-col items-center justify-center">
