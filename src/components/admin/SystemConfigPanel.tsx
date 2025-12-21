@@ -3,18 +3,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2 } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3 } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
 import { OperatorsManager } from './OperatorsManager';
 import { TTSPhrasesManager } from './TTSPhrasesManager';
+import { StatisticsDashboard } from './StatisticsDashboard';
 import { useUnits } from '@/hooks/useAdminData';
 
 export function SystemConfigPanel() {
   const { units, loading } = useUnits();
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('units');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // Selecionar a primeira unidade automaticamente
   useEffect(() => {
@@ -33,7 +34,11 @@ export function SystemConfigPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </TabsTrigger>
           <TabsTrigger value="units" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             <span className="hidden sm:inline">Unidades</span>
@@ -57,7 +62,7 @@ export function SystemConfigPanel() {
         </TabsList>
 
         {/* Seletor de unidade (para abas que precisam) */}
-        {activeTab !== 'units' && (
+        {activeTab !== 'units' && activeTab !== 'dashboard' && (
           <Card className="mb-4">
             <CardContent className="py-4">
               <div className="flex items-center gap-4">
@@ -87,6 +92,10 @@ export function SystemConfigPanel() {
             </CardContent>
           </Card>
         )}
+
+        <TabsContent value="dashboard">
+          <StatisticsDashboard />
+        </TabsContent>
 
         <TabsContent value="units">
           <UnitsManager />
