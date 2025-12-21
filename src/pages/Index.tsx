@@ -47,6 +47,23 @@ const Index = () => {
   });
 
   useEffect(() => {
+    // Check for permanent TV configuration first
+    const tvPermanentUnitId = localStorage.getItem("tv_permanent_unit_id");
+    const tvPermanentUnitName = localStorage.getItem("tv_permanent_unit_name");
+    
+    if (tvPermanentUnitId && tvPermanentUnitName) {
+      // Auto-start TV mode with saved configuration
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("selectedUnitId", tvPermanentUnitId);
+      localStorage.setItem("selectedUnitName", tvPermanentUnitName);
+      localStorage.setItem("isTvMode", "true");
+      setIsLoggedIn(true);
+      setUnitName(tvPermanentUnitName);
+      setIsTvMode(true);
+      setActiveTab("display");
+      return;
+    }
+    
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     const storedUnitName = localStorage.getItem("selectedUnitName") || "";
     const tvMode = localStorage.getItem("isTvMode") === "true";

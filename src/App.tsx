@@ -9,6 +9,8 @@ import { AndroidTVInstallPrompt } from "@/components/AndroidTVInstallPrompt";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import InstallPWA from "./pages/InstallPWA";
+import TVSetup from "./pages/TVSetup";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -23,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/install" element={<InstallPWA />} />
+            <Route path="/tv-setup" element={<TVSetup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
