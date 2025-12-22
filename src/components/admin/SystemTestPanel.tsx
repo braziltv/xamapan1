@@ -21,7 +21,8 @@ import {
   RefreshCw,
   Smartphone,
   Monitor,
-  Tv
+  Tv,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -45,6 +46,12 @@ export function SystemTestPanel() {
     setResults(prev => prev.map(r => 
       r.name === name ? { ...r, ...updates } : r
     ));
+  };
+
+  const clearResults = () => {
+    setResults([]);
+    setStartTime(null);
+    setEndTime(null);
   };
 
   const runTest = async (
@@ -549,24 +556,37 @@ export function SystemTestPanel() {
               Execute testes completos em todas as funcionalidades do sistema
             </p>
           </div>
-          <Button 
-            onClick={runAllTests} 
-            disabled={isRunning}
-            size="lg"
-            className="gap-2"
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Executando...
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                Executar Todos os Testes
-              </>
+          <div className="flex items-center gap-2">
+            {results.length > 0 && !isRunning && (
+              <Button 
+                onClick={clearResults} 
+                variant="outline"
+                size="lg"
+                className="gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Limpar Resultados
+              </Button>
             )}
-          </Button>
+            <Button 
+              onClick={runAllTests} 
+              disabled={isRunning}
+              size="lg"
+              className="gap-2"
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Executando...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Executar Todos os Testes
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
 
         {results.length > 0 && (
