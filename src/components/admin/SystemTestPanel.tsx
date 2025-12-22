@@ -101,9 +101,29 @@ export function SystemTestPanel() {
 
   // Load test history and sessions on mount
   useEffect(() => {
+    cleanupOldTestHistory();
     loadTestHistory();
     loadUserSessions();
   }, []);
+
+  // Cleanup test history older than 7 days
+  const cleanupOldTestHistory = async () => {
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const { error } = await supabase
+        .from('test_history')
+        .delete()
+        .lt('executed_at', sevenDaysAgo.toISOString());
+      
+      if (error) {
+        console.error('Error cleaning up old test history:', error);
+      }
+    } catch (err) {
+      console.error('Error in cleanupOldTestHistory:', err);
+    }
+  };
 
   const loadTestHistory = async () => {
     setLoadingHistory(true);
