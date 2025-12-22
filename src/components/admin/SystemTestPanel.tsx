@@ -1352,6 +1352,16 @@ export function SystemTestPanel() {
   const errorCount = results.filter(r => r.status === 'error').length;
   const totalDuration = results.reduce((sum, r) => sum + (r.duration || 0), 0);
 
+  // Edge Functions specific stats
+  const edgeFunctionResults = results.filter(r => r.category === '⚡ Edge Functions');
+  const efSuccessCount = edgeFunctionResults.filter(r => r.status === 'success').length;
+  const efErrorCount = edgeFunctionResults.filter(r => r.status === 'error').length;
+  const efPendingCount = edgeFunctionResults.filter(r => r.status === 'pending' || r.status === 'running').length;
+  const efTotalDuration = edgeFunctionResults.reduce((sum, r) => sum + (r.duration || 0), 0);
+  const efAvgDuration = edgeFunctionResults.length > 0 ? efTotalDuration / edgeFunctionResults.filter(r => r.duration).length : 0;
+  const efSlowest = edgeFunctionResults.reduce((max, r) => (r.duration || 0) > (max.duration || 0) ? r : max, { name: '', duration: 0 });
+  const efFastest = edgeFunctionResults.filter(r => r.duration).reduce((min, r) => (r.duration || Infinity) < (min.duration || Infinity) ? r : min, { name: '', duration: Infinity });
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="tests" className="w-full">
@@ -1445,6 +1455,120 @@ export function SystemTestPanel() {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Edge Functions Dashboard */}
+                {edgeFunctionResults.length > 0 && (
+                  <Card className="mb-6 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <RefreshCw className="w-5 h-5 text-primary" />
+                        Dashboard de Edge Functions
+                        <Badge variant="outline" className="ml-2">
+                          {efSuccessCount + efErrorCount}/{edgeFunctionResults.length} testadas
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* EF Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <div className="bg-background rounded-lg p-3 border text-center">
+                          <div className="text-xl font-bold text-primary">{edgeFunctionResults.length}</div>
+                          <div className="text-xs text-muted-foreground">Total EFs</div>
+                        </div>
+                        <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/30 text-center">
+                          <div className="text-xl font-bold text-green-600">{efSuccessCount}</div>
+                          <div className="text-xs text-green-600">Online</div>
+                        </div>
+                        <div className="bg-red-500/10 rounded-lg p-3 border border-red-500/30 text-center">
+                          <div className="text-xl font-bold text-red-600">{efErrorCount}</div>
+                          <div className="text-xs text-red-600">Offline</div>
+                        </div>
+                        <div className="bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30 text-center">
+                          <div className="text-xl font-bold text-yellow-600">{efPendingCount}</div>
+                          <div className="text-xs text-yellow-600">Pendentes</div>
+                        </div>
+                        <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/30 text-center">
+                          <div className="text-xl font-bold text-blue-600">{efAvgDuration > 0 ? Math.round(efAvgDuration) : '-'}ms</div>
+                          <div className="text-xs text-blue-600">Média</div>
+                        </div>
+                        <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/30 text-center">
+                          <div className="text-xl font-bold text-purple-600">{(efTotalDuration / 1000).toFixed(1)}s</div>
+                          <div className="text-xs text-purple-600">Total</div>
+                        </div>
+                      </div>
+
+                      {/* EF Visual Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {edgeFunctionResults.map((ef) => {
+                          const efName = ef.name.replace('EF: ', '').replace(' (Health)', '');
+                          const isConfigPending = ef.message?.includes('config pendente') || ef.message?.includes('API key pendente') || ef.message?.includes('credenciais pendentes') || ef.message?.includes('sem destinatários');
+                          
+                          return (
+                            <div 
+                              key={ef.name}
+                              className={`
+                                relative rounded-lg p-3 border-2 transition-all
+                                ${ef.status === 'success' 
+                                  ? isConfigPending 
+                                    ? 'bg-yellow-500/10 border-yellow-500/50' 
+                                    : 'bg-green-500/10 border-green-500/50'
+                                  : ef.status === 'error'
+                                    ? 'bg-red-500/10 border-red-500/50'
+                                    : ef.status === 'running'
+                                      ? 'bg-blue-500/10 border-blue-500/50 animate-pulse'
+                                      : 'bg-muted/50 border-muted-foreground/20'
+                                }
+                              `}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                {ef.status === 'success' ? (
+                                  isConfigPending ? (
+                                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                                  ) : (
+                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                  )
+                                ) : ef.status === 'error' ? (
+                                  <XCircle className="w-4 h-4 text-red-500" />
+                                ) : ef.status === 'running' ? (
+                                  <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                                ) : (
+                                  <Clock className="w-4 h-4 text-muted-foreground" />
+                                )}
+                                {ef.duration && (
+                                  <span className="text-[10px] text-muted-foreground font-mono">
+                                    {ef.duration}ms
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs font-medium truncate" title={efName}>
+                                {efName}
+                              </div>
+                              {isConfigPending && (
+                                <div className="text-[9px] text-yellow-600 mt-1 truncate">
+                                  Config pendente
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Performance Stats */}
+                      {efSlowest.duration > 0 && efFastest.duration < Infinity && (
+                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            Mais rápida: <strong className="text-foreground">{efFastest.name?.replace('EF: ', '').replace(' (Health)', '')}</strong> ({efFastest.duration}ms)
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                            Mais lenta: <strong className="text-foreground">{efSlowest.name?.replace('EF: ', '').replace(' (Health)', '')}</strong> ({efSlowest.duration}ms)
+                          </span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Results */}
                 <ScrollArea className="max-h-[calc(100vh-400px)] min-h-[400px] pr-4">
