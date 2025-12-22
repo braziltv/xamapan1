@@ -1966,6 +1966,47 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
+      {/* Voice Announcement Indicator */}
+      {announcingType && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[55] pointer-events-none">
+          <div className={`flex flex-col items-center gap-4 p-6 sm:p-8 rounded-2xl backdrop-blur-lg shadow-2xl ${
+            announcingType === 'triage'
+              ? 'bg-blue-900/90 border-2 border-blue-400 shadow-blue-500/50'
+              : 'bg-emerald-900/90 border-2 border-emerald-400 shadow-emerald-500/50'
+          }`}>
+            {/* Animated Sound Wave Icon */}
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 sm:w-3 rounded-full ${
+                    announcingType === 'triage' ? 'bg-blue-400' : 'bg-emerald-400'
+                  }`}
+                  style={{
+                    height: `${20 + Math.random() * 30}px`,
+                    animation: `soundWave 0.5s ease-in-out infinite alternate`,
+                    animationDelay: `${i * 0.1}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            <div className="text-center">
+              <p className={`text-lg sm:text-2xl font-bold ${
+                announcingType === 'triage' ? 'text-blue-100' : 'text-emerald-100'
+              }`}>
+                🔊 Reproduzindo Anúncio
+              </p>
+              <p className={`text-sm sm:text-base mt-1 ${
+                announcingType === 'triage' ? 'text-blue-300' : 'text-emerald-300'
+              }`}>
+                Por favor, aguarde...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TTS Error Indicator */}
       {ttsError && (
         <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-[60] max-w-[90vw] sm:max-w-md animate-scale-in">
