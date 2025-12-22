@@ -2433,7 +2433,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   return itemsWithExtras.map((item, index) => (
                     <span key={index} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50' :
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -2513,7 +2513,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   return itemsWithExtras.map((item, index) => (
                     <span key={`dup-${index}`} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50' :
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
