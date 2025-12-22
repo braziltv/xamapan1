@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -67,6 +67,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   const [editingAnnouncement, setEditingAnnouncement] = useState<VoiceAnnouncement | null>(null);
   const [editingPhrase, setEditingPhrase] = useState<CommercialPhrase | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
+  const [testingOnTV, setTestingOnTV] = useState<string | null>(null);
   const [generatingAudio, setGeneratingAudio] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -378,6 +379,37 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
     }
   };
 
+  // Teste imediato na TV - usa realtime para enviar comando para todas as TVs
+  const handleTestOnTV = async (announcement: VoiceAnnouncement) => {
+    setTestingOnTV(announcement.id);
+    try {
+      // Forçar last_played_at para null para que o anúncio seja reproduzido imediatamente
+      // e reduzir temporariamente o intervalo
+      const { error } = await supabase
+        .from('scheduled_announcements')
+        .update({ 
+          last_played_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', announcement.id);
+
+      if (error) throw error;
+
+      // Aguardar um pouco para a TV detectar a mudança
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      toast.success(
+        `Anúncio "${announcement.title}" enviado para as TVs! Será reproduzido em até 60 segundos.`,
+        { duration: 5000 }
+      );
+    } catch (error) {
+      console.error('Error sending to TV:', error);
+      toast.error('Erro ao enviar para TV');
+    } finally {
+      setTestingOnTV(null);
+    }
+  };
+
   const formatDays = (days: number[]) => {
     if (days.length === 7) return 'Todos os dias';
     if (days.length === 5 && !days.includes(0) && !days.includes(6)) return 'Dias úteis';
@@ -487,12 +519,26 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
                               size="icon"
                               onClick={() => handleTestAnnouncement(announcement)}
                               disabled={testing === announcement.id}
-                              title="Testar"
+                              title="Testar aqui"
                             >
                               {testing === announcement.id ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                               ) : (
                                 <Play className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleTestOnTV(announcement)}
+                              disabled={testingOnTV === announcement.id || !announcement.is_active}
+                              title="Tocar na TV agora"
+                              className="text-primary hover:bg-primary hover:text-primary-foreground"
+                            >
+                              {testingOnTV === announcement.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Tv className="w-4 h-4" />
                               )}
                             </Button>
                             <Button
@@ -512,6 +558,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleOpenEdit(announcement)}
+                              title="Editar"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -519,6 +566,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteAnnouncement(announcement.id)}
+                              title="Excluir"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
