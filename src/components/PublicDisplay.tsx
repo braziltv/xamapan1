@@ -2433,7 +2433,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   return itemsWithExtras.map((item, index) => (
                     <span key={index} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -2469,7 +2469,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
+                      <span className={`${item.source === '📢 Informativo' ? 'text-red-400 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
                       <span className="text-slate-500 mx-1 sm:mx-2">•</span>
@@ -2513,7 +2513,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   return itemsWithExtras.map((item, index) => (
                     <span key={`dup-${index}`} className="mx-2 sm:mx-4 inline-flex items-center gap-1 sm:gap-2 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
                       <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] lg:text-xs font-bold inline-block ${
-                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white animate-pulse' :
+                        item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white animate-pulse' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
                         item.source === 'O Globo' ? 'bg-blue-600' :
@@ -2549,7 +2549,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
                         {item.source === 'Créditos' ? '⭐' : item.source}
                       </span>
-                      <span className={`${item.source === '📢 Informativo' ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
+                      <span className={`${item.source === '📢 Informativo' ? 'text-red-400 font-semibold' : 'text-white'}`}>
                         {item.title}
                       </span>
                       <span className="text-slate-500 mx-1 sm:mx-2">•</span>
