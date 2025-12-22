@@ -14,6 +14,13 @@ export function SuccessAnimation({ show, message, type = 'default', onComplete }
   const [visible, setVisible] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
 
+  // Keep latest onComplete without retriggering the "show" timer on every render.
+  // (Parent components often pass an inline callback which changes identity frequently.)
+  const onCompleteRef = useRef<(() => void) | undefined>(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   const playSuccessSound = useCallback((actionType: ActionType) => {
     try {
       const volume = parseFloat(localStorage.getItem('notificationVolume') || '0.3');
@@ -114,16 +121,18 @@ export function SuccessAnimation({ show, message, type = 'default', onComplete }
   }, []);
 
   useEffect(() => {
-    if (show) {
-      setVisible(true);
-      playSuccessSound(type);
-      const timer = setTimeout(() => {
-        setVisible(false);
-        onComplete?.();
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onComplete, playSuccessSound, type]);
+    if (!show) return;
+
+    setVisible(true);
+    playSuccessSound(type);
+
+    const timer = window.setTimeout(() => {
+      setVisible(false);
+      onCompleteRef.current?.();
+    }, 2000);
+
+    return () => window.clearTimeout(timer);
+  }, [show, playSuccessSound, type]);
 
   // Icon and color based on type
   const getIconAndColor = () => {
