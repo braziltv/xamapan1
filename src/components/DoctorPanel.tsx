@@ -37,6 +37,7 @@ import {
 
 import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
+import { useForwardNotification } from '@/hooks/useForwardNotification';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 
@@ -116,6 +117,7 @@ export function DoctorPanel({
   
   const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
+  const { forwardAlert } = useForwardNotification('doctor', waitingPatients, 'waiting-doctor');
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -148,7 +150,7 @@ export function DoctorPanel({
 
   return (
     <div className="space-y-4 sm:space-y-6 relative">
-      {/* Visual Alert Overlay */}
+      {/* Visual Alert Overlay - New Patient */}
       {visualAlert.active && visualAlert.priority && (
         <div className={`absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-pulse ${alertColors[visualAlert.priority]}`}>
           <div className={`absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-white font-bold text-sm ${
@@ -157,6 +159,16 @@ export function DoctorPanel({
           }`}>
             {visualAlert.priority === 'emergency' ? '🚨 EMERGÊNCIA!' : 
              visualAlert.priority === 'priority' ? '⚠️ PRIORIDADE' : '✓ Novo Paciente'}
+          </div>
+        </div>
+      )}
+
+      {/* Forward Alert Overlay - Patient Forwarded from another module */}
+      {forwardAlert.active && forwardAlert.patient && (
+        <div className="absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-pulse bg-blue-500/20 border-blue-500">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center gap-2">
+            <ArrowRight className="w-4 h-4" />
+            Encaminhado: {forwardAlert.patient.name} ({forwardAlert.patient.fromModule})
           </div>
         </div>
       )}
