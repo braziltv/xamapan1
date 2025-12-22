@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, User, Send, HardDrive } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, User, Send, HardDrive, Megaphone } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -14,6 +14,7 @@ import { StatisticsDashboard } from './StatisticsDashboard';
 import { SystemTestPanel } from './SystemTestPanel';
 import { TelegramManager } from './TelegramManager';
 import { DataStoragePanel } from './DataStoragePanel';
+import { MarketingPanel } from './MarketingPanel';
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
@@ -63,7 +64,7 @@ export function SystemConfigPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-10 mb-6">
+        <TabsList className="grid w-full grid-cols-11 mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -95,6 +96,10 @@ export function SystemConfigPanel() {
           <TabsTrigger value="tts" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             <span className="hidden sm:inline">TTS</span>
+          </TabsTrigger>
+          <TabsTrigger value="marketing" className="flex items-center gap-2">
+            <Megaphone className="w-4 h-4" />
+            <span className="hidden sm:inline">Marketing</span>
           </TabsTrigger>
           <TabsTrigger value="telegram" className="flex items-center gap-2">
             <Send className="w-4 h-4" />
@@ -197,6 +202,18 @@ export function SystemConfigPanel() {
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 Selecione uma unidade para gerenciar as frases TTS.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="marketing">
+          {selectedUnitId ? (
+            <MarketingPanel unitName={units.find(u => u.id === selectedUnitId)?.name || ''} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Selecione uma unidade para gerenciar o marketing.
               </CardContent>
             </Card>
           )}
