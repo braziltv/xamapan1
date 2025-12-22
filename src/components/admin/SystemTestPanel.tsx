@@ -599,8 +599,8 @@ export function SystemTestPanel() {
               </Card>
             </div>
 
-            {/* Results */}
-            <ScrollArea className="h-[500px] pr-4">
+            {/* Results - now with max-height instead of fixed height for better visibility */}
+            <ScrollArea className="max-h-[calc(100vh-400px)] min-h-[400px] pr-4">
               <div className="space-y-4">
                 {Object.entries(groupedResults).map(([category, categoryResults]) => (
                   <Card key={category} className="overflow-hidden">
@@ -614,10 +614,10 @@ export function SystemTestPanel() {
                     <div className="divide-y">
                       {categoryResults.map((result) => (
                         <div key={result.name} className="p-3">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-3">
                               {getStatusIcon(result.status)}
-                              <span className="font-medium">{result.name}</span>
+                              <span className="font-medium text-sm">{result.name}</span>
                             </div>
                             <div className="flex items-center gap-3">
                               {result.duration !== undefined && (
