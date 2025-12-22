@@ -1075,9 +1075,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return announcements;
   }, []);
 
-  // Expose test function on window for manual testing
+  // Expose test functions on window for manual testing
   useEffect(() => {
-    const testAnnouncement = () => {
+    // Test hour announcement
+    const testTimeAnnouncement = () => {
       if (!currentTime) {
         console.log('currentTime not available');
         return;
@@ -1088,12 +1089,61 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       playHourAnnouncement(hour, minute);
     };
     
-    (window as any).testarHora = testAnnouncement;
+    // Test voice marketing announcement (plays first active scheduled announcement)
+    const testVoiceAnnouncement = async () => {
+      if (!audioUnlocked) {
+        console.log('❌ Áudio não liberado! Clique na tela primeiro.');
+        return;
+      }
+      
+      if (scheduledAnnouncements.length === 0) {
+        console.log('❌ Nenhum anúncio de voz programado encontrado.');
+        return;
+      }
+      
+      if (isSpeakingRef.current || announcingType) {
+        console.log('⏸️ Já está falando, aguarde...');
+        return;
+      }
+      
+      const announcement = scheduledAnnouncements[0];
+      console.log(`🔊 Testando anúncio de voz: "${announcement.title}"`);
+      console.log(`📝 Texto: ${announcement.text_content}`);
+      console.log(`🔗 Cache URL: ${announcement.audio_cache_url || 'Não cacheado'}`);
+      
+      isSpeakingRef.current = true;
+      setAnnouncingType('triage');
+      
+      try {
+        // Play notification sound first
+        await playNotificationSound();
+        
+        // Use cached audio if available, otherwise generate via TTS
+        if (announcement.audio_cache_url) {
+          console.log(`📢 Reproduzindo áudio em cache...`);
+          await playCachedAudio(announcement.audio_cache_url);
+        } else {
+          console.log(`📢 Gerando TTS ao vivo...`);
+          await speakWithGoogleTTS(announcement.text_content);
+        }
+        
+        console.log(`✅ Anúncio de voz concluído!`);
+      } catch (error) {
+        console.error('❌ Erro ao reproduzir anúncio:', error);
+      } finally {
+        isSpeakingRef.current = false;
+        setAnnouncingType(null);
+      }
+    };
+    
+    (window as any).testarHora = testTimeAnnouncement;
+    (window as any).testarAnuncioVoz = testVoiceAnnouncement;
     
     return () => {
       delete (window as any).testarHora;
+      delete (window as any).testarAnuncioVoz;
     };
-  }, [currentTime, playHourAnnouncement]);
+  }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
 
   // Announce time once per hour at minute 0 (quiet hours: 22h-06h)
   useEffect(() => {
