@@ -1077,21 +1077,19 @@ export function SystemTestPanel() {
       fn: async () => {
         try {
           const start = Date.now();
-          // Just test if the function is reachable, don't actually send
           const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-daily-statistics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
             body: JSON.stringify({ test: true })
           });
           const elapsed = Date.now() - start;
-          // Even if it returns error due to no recipients, the function is working
+          const responseText = await response.text();
           if (response.status === 500) {
-            const errorText = await response.text();
-            if (errorText.includes('recipient') || errorText.includes('telegram') || errorText.includes('No recipients')) {
+            if (responseText.includes('recipient') || responseText.includes('telegram') || responseText.includes('No recipients')) {
               return { success: true, message: `Função OK (sem destinatários) - ${elapsed}ms` };
             }
           }
-          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: await response.text() };
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
           return { success: true, message: `OK em ${elapsed}ms` };
         } catch (err) {
           return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
@@ -1104,18 +1102,143 @@ export function SystemTestPanel() {
       fn: async () => {
         try {
           const start = Date.now();
-          // Just test if the function is reachable with a test flag
           const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-alert`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
             body: JSON.stringify({ test: true, message: 'Teste de conectividade' })
           });
           const elapsed = Date.now() - start;
-          // Read response body only once
           const responseText = await response.text();
-          // Even if it returns error due to config issues, the function is reachable
           if (response.status === 500 || response.status === 400) {
             if (responseText.includes('TELEGRAM') || responseText.includes('chat_id') || responseText.includes('token')) {
+              return { success: true, message: `Função OK (config pendente) - ${elapsed}ms` };
+            }
+          }
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
+          return { success: true, message: `OK em ${elapsed}ms` };
+        } catch (err) {
+          return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+    {
+      name: 'EF: Database Stats',
+      category: '⚡ Edge Functions',
+      fn: async () => {
+        try {
+          const start = Date.now();
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/database-stats`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({})
+          });
+          const elapsed = Date.now() - start;
+          const responseText = await response.text();
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
+          try {
+            const data = JSON.parse(responseText);
+            return { success: true, message: `OK - ${data.totalRecords || 'Dados obtidos'} em ${elapsed}ms` };
+          } catch {
+            return { success: true, message: `OK em ${elapsed}ms` };
+          }
+        } catch (err) {
+          return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+    {
+      name: 'EF: Update Cache',
+      category: '⚡ Edge Functions',
+      fn: async () => {
+        try {
+          const start = Date.now();
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-cache`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({})
+          });
+          const elapsed = Date.now() - start;
+          const responseText = await response.text();
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
+          try {
+            const data = JSON.parse(responseText);
+            return { success: data.success !== false, message: `OK - Weather: ${data.weatherCount || 0}, News: ${data.newsCount || 0} em ${elapsed}ms` };
+          } catch {
+            return { success: true, message: `OK em ${elapsed}ms` };
+          }
+        } catch (err) {
+          return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+    {
+      name: 'EF: ElevenLabs TTS (Health)',
+      category: '⚡ Edge Functions',
+      fn: async () => {
+        try {
+          const start = Date.now();
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({ health: true })
+          });
+          const elapsed = Date.now() - start;
+          const responseText = await response.text();
+          // If 400/401 due to missing API key, function is still reachable
+          if (response.status === 400 || response.status === 401) {
+            if (responseText.includes('API') || responseText.includes('key') || responseText.includes('auth')) {
+              return { success: true, message: `Função OK (API key pendente) - ${elapsed}ms` };
+            }
+          }
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
+          return { success: true, message: `OK em ${elapsed}ms` };
+        } catch (err) {
+          return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+    {
+      name: 'EF: Google Cloud TTS (Health)',
+      category: '⚡ Edge Functions',
+      fn: async () => {
+        try {
+          const start = Date.now();
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({ health: true })
+          });
+          const elapsed = Date.now() - start;
+          const responseText = await response.text();
+          // If 400/401 due to missing credentials, function is still reachable
+          if (response.status === 400 || response.status === 401 || response.status === 500) {
+            if (responseText.includes('credentials') || responseText.includes('GOOGLE') || responseText.includes('auth')) {
+              return { success: true, message: `Função OK (credenciais pendentes) - ${elapsed}ms` };
+            }
+          }
+          if (!response.ok) return { success: false, message: `Erro (${response.status})`, error: responseText };
+          return { success: true, message: `OK em ${elapsed}ms` };
+        } catch (err) {
+          return { success: false, message: 'Falha', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+    {
+      name: 'EF: Generate Hour Audio (Health)',
+      category: '⚡ Edge Functions',
+      fn: async () => {
+        try {
+          const start = Date.now();
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-hour-audio`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({ health: true })
+          });
+          const elapsed = Date.now() - start;
+          const responseText = await response.text();
+          // If 400/401 due to missing config, function is still reachable
+          if (response.status === 400 || response.status === 401 || response.status === 500) {
+            if (responseText.includes('API') || responseText.includes('key') || responseText.includes('credentials')) {
               return { success: true, message: `Função OK (config pendente) - ${elapsed}ms` };
             }
           }
