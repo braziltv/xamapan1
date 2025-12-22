@@ -57,7 +57,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
-  const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+  const [unitName, setUnitName] = useState(() =>
+    localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || ''
+  );
+  const [unitId, setUnitId] = useState(() =>
+    localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
+  );
   const [marketingUnitName, setMarketingUnitName] = useState<string>('');
   const marketingTimeKey = currentTime
     ? `${currentTime.getFullYear()}-${currentTime.getMonth()}-${currentTime.getDate()}-${currentTime.getHours()}-${currentTime.getMinutes()}`
@@ -91,7 +96,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return Math.min(1, Math.max(0, v));
   };
 
-  // Resolve unit_name used by marketing tables (they store the unit "name", while UI may store "display_name")
+  // Resolve unit_name used by marketing tables (they store the unit "name")
+  // Prefer resolving by selectedUnitId (more reliable than matching display text).
   useEffect(() => {
     let alive = true;
 
@@ -103,15 +109,38 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .trim();
 
     const resolve = async () => {
+      // 1) If we have an ID, resolve directly.
+      if (unitId) {
+        try {
+          const { data, error } = await supabase
+            .from('units')
+            .select('name, display_name')
+            .eq('id', unitId)
+            .maybeSingle();
+
+          if (!alive) return;
+          if (error) throw error;
+
+          if (data?.name) {
+            setMarketingUnitName(data.name);
+            // Keep a friendly display name for UI if we don't have one yet.
+            if (!unitName) setUnitName(data.display_name || data.name);
+            return;
+          }
+        } catch (e) {
+          // fall through to name-based matching
+          console.warn('Failed to resolve marketing unit by id; falling back to name matching:', e);
+        }
+      }
+
+      // 2) Fallback: resolve from stored name (display_name or name).
       if (!unitName) {
         setMarketingUnitName('');
         return;
       }
 
       try {
-        const { data: units, error } = await supabase
-          .from('units')
-          .select('name, display_name');
+        const { data: units, error } = await supabase.from('units').select('name, display_name');
 
         if (!alive) return;
         if (error) throw error;
@@ -121,17 +150,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           (u) => normalizeKey(u.display_name) === target || normalizeKey(u.name) === target
         );
 
-        const resolved = match?.name ?? unitName;
-        console.log('🏷️ Marketing unit resolved:', {
-          selectedUnitName: unitName,
-          marketingUnitName: resolved,
-          matched: match?.display_name ?? null,
-        });
-
-        setMarketingUnitName(resolved);
+        setMarketingUnitName(match?.name ?? '');
       } catch (e) {
-        console.warn('Failed to resolve marketing unit name, using raw unitName:', e);
-        if (alive) setMarketingUnitName(unitName);
+        console.warn('Failed to resolve marketing unit name:', e);
+        if (alive) setMarketingUnitName('');
       }
     };
 
@@ -139,7 +161,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => {
       alive = false;
     };
-  }, [unitName]);
+  }, [unitName, unitId]);
 
   // Fetch news from database cache
   useEffect(() => {
@@ -401,18 +423,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(countdownInterval);
   }, []);
 
-  // Re-check localStorage periodically for unit name (reduced frequency)
+  // Re-check localStorage periodically for unit name/id (reduced frequency)
   useEffect(() => {
-    const checkUnitName = () => {
-      const current = localStorage.getItem('selectedUnitName') || '';
-      if (current !== unitName) {
-        setUnitName(current);
-      }
+    const checkUnit = () => {
+      const name =
+        localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
+      const id =
+        localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || '';
+
+      if (name !== unitName) setUnitName(name);
+      if (id !== unitId) setUnitId(id);
     };
+
     // Check every 5 seconds instead of 1 second to reduce CPU load
-    const interval = setInterval(checkUnitName, 5000);
+    const interval = setInterval(checkUnit, 5000);
     return () => clearInterval(interval);
-  }, [unitName]);
+  }, [unitName, unitId]);
 
   // Auto fullscreen on mount
   useEffect(() => {
