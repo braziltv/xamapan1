@@ -28,7 +28,7 @@ interface WeatherWidgetProps {
 function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
   const desc = description.toLowerCase();
   const iconClass = size === 'lg' 
-    ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 4k:w-12 4k:h-12' 
+    ? 'w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-16 3xl:h-16 4k:w-20 4k:h-20' 
     : 'w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6';
   
   if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) 
@@ -209,12 +209,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       {/* City + Weather Icon */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="font-bold text-white/70 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
+          <span className="font-black text-white uppercase tracking-wider text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
             Previsão
           </span>
           <div className="flex items-center gap-0.5 text-amber-300">
-            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 3xl:w-4 3xl:h-4 animate-bounce shrink-0" />
-            <span className="font-bold whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-xs 3xl:text-sm 4k:text-base">
+            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 animate-bounce shrink-0" />
+            <span className="font-black whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
               {displayCity}-MG
             </span>
           </div>
