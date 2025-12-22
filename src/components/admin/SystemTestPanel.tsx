@@ -297,261 +297,19 @@ export function SystemTestPanel() {
   };
 
   const tests: { name: string; category: string; fn: () => Promise<{ success: boolean; message: string; error?: string }> }[] = [
-    // Database Connection Tests
+    // ==================== DATABASE CORE ====================
     {
       name: 'Conexão com Banco de Dados',
-      category: 'Banco de Dados',
+      category: '🔌 Conexão',
       fn: async () => {
         const { data, error } = await supabase.from('units').select('id').limit(1);
         if (error) return { success: false, message: 'Falha na conexão', error: error.message };
         return { success: true, message: 'Conexão estabelecida com sucesso' };
       }
     },
-    // Units Table Tests
-    {
-      name: 'Leitura de Unidades',
-      category: 'Tabela: Units',
-      fn: async () => {
-        const { data, error, count } = await supabase.from('units').select('*', { count: 'exact' });
-        if (error) return { success: false, message: 'Erro ao ler unidades', error: error.message };
-        return { success: true, message: `${count || data?.length || 0} unidades encontradas` };
-      }
-    },
-    {
-      name: 'Inserção de Unidade (Teste)',
-      category: 'Tabela: Units',
-      fn: async () => {
-        const testName = `teste_auto_${Date.now()}`;
-        const { data, error } = await supabase.from('units')
-          .insert({ name: testName, display_name: 'Unidade Teste Auto', password: '123456' })
-          .select()
-          .single();
-        if (error) return { success: false, message: 'Erro ao inserir unidade', error: error.message };
-        // Cleanup
-        await supabase.from('units').delete().eq('id', data.id);
-        return { success: true, message: 'Inserção e limpeza OK' };
-      }
-    },
-    // Modules Table Tests
-    {
-      name: 'Leitura de Módulos',
-      category: 'Tabela: Modules',
-      fn: async () => {
-        const { data, error } = await supabase.from('modules').select('*');
-        if (error) return { success: false, message: 'Erro ao ler módulos', error: error.message };
-        return { success: true, message: `${data?.length || 0} módulos encontrados` };
-      }
-    },
-    // Operators Table Tests
-    {
-      name: 'Leitura de Operadores',
-      category: 'Tabela: Operators',
-      fn: async () => {
-        const { data, error } = await supabase.from('operators').select('*');
-        if (error) return { success: false, message: 'Erro ao ler operadores', error: error.message };
-        return { success: true, message: `${data?.length || 0} operadores encontrados` };
-      }
-    },
-    // Destinations Table Tests
-    {
-      name: 'Leitura de Destinos',
-      category: 'Tabela: Destinations',
-      fn: async () => {
-        const { data, error } = await supabase.from('destinations').select('*');
-        if (error) return { success: false, message: 'Erro ao ler destinos', error: error.message };
-        return { success: true, message: `${data?.length || 0} destinos encontrados` };
-      }
-    },
-    // Patient Calls Tests
-    {
-      name: 'Leitura de Chamadas de Pacientes',
-      category: 'Tabela: Patient Calls',
-      fn: async () => {
-        const { data, error } = await supabase.from('patient_calls').select('*');
-        if (error) return { success: false, message: 'Erro ao ler chamadas', error: error.message };
-        return { success: true, message: `${data?.length || 0} chamadas ativas` };
-      }
-    },
-    {
-      name: 'Inserção de Paciente (Teste)',
-      category: 'Tabela: Patient Calls',
-      fn: async () => {
-        const { data: units } = await supabase.from('units').select('name').limit(1).single();
-        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
-        
-        const { data, error } = await supabase.from('patient_calls')
-          .insert({ 
-            patient_name: 'TESTE AUTOMATIZADO', 
-            unit_name: units.name,
-            call_type: 'registration',
-            status: 'waiting'
-          })
-          .select()
-          .single();
-        if (error) return { success: false, message: 'Erro ao inserir paciente', error: error.message };
-        // Cleanup
-        await supabase.from('patient_calls').delete().eq('id', data.id);
-        return { success: true, message: 'Inserção e limpeza OK' };
-      }
-    },
-    // Call History Tests
-    {
-      name: 'Leitura de Histórico',
-      category: 'Tabela: Call History',
-      fn: async () => {
-        const { data, error, count } = await supabase.from('call_history')
-          .select('*', { count: 'exact' })
-          .limit(10);
-        if (error) return { success: false, message: 'Erro ao ler histórico', error: error.message };
-        return { success: true, message: `${count || 0} registros no histórico` };
-      }
-    },
-    // Chat Messages Tests
-    {
-      name: 'Leitura de Mensagens do Chat',
-      category: 'Tabela: Chat Messages',
-      fn: async () => {
-        const { data, error } = await supabase.from('chat_messages').select('*').limit(10);
-        if (error) return { success: false, message: 'Erro ao ler mensagens', error: error.message };
-        return { success: true, message: `${data?.length || 0} mensagens recentes` };
-      }
-    },
-    // TTS Phrases Tests
-    {
-      name: 'Leitura de Frases TTS',
-      category: 'Tabela: TTS Phrases',
-      fn: async () => {
-        const { data, error } = await supabase.from('tts_phrases').select('*');
-        if (error) return { success: false, message: 'Erro ao ler frases TTS', error: error.message };
-        return { success: true, message: `${data?.length || 0} frases configuradas` };
-      }
-    },
-    // Scheduled Announcements Tests
-    {
-      name: 'Leitura de Anúncios Programados',
-      category: 'Tabela: Announcements',
-      fn: async () => {
-        const { data, error } = await supabase.from('scheduled_announcements').select('*');
-        if (error) return { success: false, message: 'Erro ao ler anúncios', error: error.message };
-        const active = data?.filter(a => a.is_active).length || 0;
-        return { success: true, message: `${data?.length || 0} anúncios (${active} ativos)` };
-      }
-    },
-    // User Sessions Tests
-    {
-      name: 'Leitura de Sessões de Usuário',
-      category: 'Tabela: User Sessions',
-      fn: async () => {
-        const { data, error } = await supabase.from('user_sessions')
-          .select('*')
-          .eq('is_active', true);
-        if (error) return { success: false, message: 'Erro ao ler sessões', error: error.message };
-        return { success: true, message: `${data?.length || 0} sessões ativas` };
-      }
-    },
-    // Session Filtering Test
-    {
-      name: 'Filtro de Sessões por Unidade',
-      category: 'Tabela: User Sessions',
-      fn: async () => {
-        const { data: units } = await supabase.from('units').select('name').limit(1).single();
-        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
-        
-        const { data, error } = await supabase.from('user_sessions')
-          .select('*')
-          .eq('unit_name', units.name)
-          .eq('is_active', true);
-        if (error) return { success: false, message: 'Erro ao filtrar sessões', error: error.message };
-        return { success: true, message: `${data?.length || 0} sessões ativas na unidade ${units.name}` };
-      }
-    },
-    // Session IP and User Agent Test
-    {
-      name: 'Dados de Conexão (IP/User Agent)',
-      category: 'Tabela: User Sessions',
-      fn: async () => {
-        const { data, error } = await supabase.from('user_sessions')
-          .select('ip_address, user_agent')
-          .eq('is_active', true)
-          .limit(5);
-        if (error) return { success: false, message: 'Erro ao ler dados de conexão', error: error.message };
-        const withIP = data?.filter(s => s.ip_address).length || 0;
-        const withUA = data?.filter(s => s.user_agent).length || 0;
-        return { success: true, message: `${withIP} com IP, ${withUA} com User Agent` };
-      }
-    },
-    // Session Statistics Test
-    {
-      name: 'Estatísticas de Sessões por Unidade',
-      category: 'Tabela: User Sessions',
-      fn: async () => {
-        const { data, error } = await supabase.from('user_sessions')
-          .select('unit_name, is_active');
-        if (error) return { success: false, message: 'Erro ao calcular estatísticas', error: error.message };
-        const units = [...new Set(data?.map(s => s.unit_name))];
-        const active = data?.filter(s => s.is_active).length || 0;
-        return { success: true, message: `${units.length} unidades, ${active} sessões ativas` };
-      }
-    },
-    // Statistics Tests
-    {
-      name: 'Leitura de Estatísticas Diárias',
-      category: 'Tabela: Statistics',
-      fn: async () => {
-        const { data, error } = await supabase.from('statistics_daily')
-          .select('*')
-          .order('date', { ascending: false })
-          .limit(7);
-        if (error) return { success: false, message: 'Erro ao ler estatísticas', error: error.message };
-        return { success: true, message: `${data?.length || 0} dias de estatísticas` };
-      }
-    },
-    // Edge Function Tests
-    {
-      name: 'Edge Function: Google Cloud TTS',
-      category: 'Edge Functions',
-      fn: async () => {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
-            },
-            body: JSON.stringify({ text: 'Teste', voiceName: 'pt-BR-Neural2-A' })
-          });
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            return { success: false, message: 'Erro no TTS', error: errorText };
-          }
-          
-          const contentType = response.headers.get('Content-Type');
-          if (contentType?.includes('audio')) {
-            const blob = await response.blob();
-            return { success: true, message: `Áudio gerado: ${Math.round(blob.size / 1024)}KB` };
-          }
-          
-          return { success: false, message: 'Resposta inesperada', error: `Content-Type: ${contentType}` };
-        } catch (err) {
-          return { success: false, message: 'Falha ao chamar TTS', error: err instanceof Error ? err.message : 'Erro desconhecido' };
-        }
-      }
-    },
-    // Storage Tests
-    {
-      name: 'Storage: Bucket TTS Cache',
-      category: 'Storage',
-      fn: async () => {
-        const { data, error } = await supabase.storage.from('tts-cache').list('', { limit: 10 });
-        if (error) return { success: false, message: 'Erro ao acessar storage', error: error.message };
-        return { success: true, message: `${data?.length || 0} arquivos no cache` };
-      }
-    },
-    // Realtime Connection Test
     {
       name: 'Conexão Realtime',
-      category: 'Realtime',
+      category: '🔌 Conexão',
       fn: async () => {
         return new Promise((resolve) => {
           const channelName = `test-${Date.now()}`;
@@ -567,19 +325,13 @@ export function SystemTestPanel() {
           }, 5000);
           
           channel
-            .on('presence', { event: 'sync' }, () => {
-              // Presence sync event
-            })
+            .on('presence', { event: 'sync' }, () => {})
             .subscribe((status) => {
               if (resolved) return;
-              
               if (status === 'SUBSCRIBED') {
                 resolved = true;
                 clearTimeout(timeout);
-                // Wait a moment then cleanup
-                setTimeout(() => {
-                  supabase.removeChannel(channel);
-                }, 100);
+                setTimeout(() => supabase.removeChannel(channel), 100);
                 resolve({ success: true, message: 'Canal subscrito com sucesso' });
               } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                 resolved = true;
@@ -587,91 +339,563 @@ export function SystemTestPanel() {
                 supabase.removeChannel(channel);
                 resolve({ success: false, message: `Status: ${status}`, error: 'Erro na conexão do canal' });
               }
-              // For other statuses (SUBSCRIBING, etc), just wait
             });
         });
       }
     },
-    // PWA Installation Tests
+    
+    // ==================== UNITS MODULE ====================
     {
-      name: 'Página de Instalação PWA',
-      category: 'PWA',
+      name: 'Leitura de Unidades',
+      category: '🏢 Unidades',
+      fn: async () => {
+        const { data, error, count } = await supabase.from('units').select('*', { count: 'exact' });
+        if (error) return { success: false, message: 'Erro ao ler unidades', error: error.message };
+        return { success: true, message: `${count || data?.length || 0} unidades cadastradas` };
+      }
+    },
+    {
+      name: 'CRUD Completo de Unidade',
+      category: '🏢 Unidades',
+      fn: async () => {
+        const testName = `teste_crud_${Date.now()}`;
+        // Create
+        const { data: created, error: createErr } = await supabase.from('units')
+          .insert({ name: testName, display_name: 'Teste CRUD', password: '123456' })
+          .select()
+          .single();
+        if (createErr) return { success: false, message: 'Erro ao criar', error: createErr.message };
+        
+        // Read
+        const { data: read, error: readErr } = await supabase.from('units')
+          .select('*')
+          .eq('id', created.id)
+          .single();
+        if (readErr) return { success: false, message: 'Erro ao ler', error: readErr.message };
+        
+        // Update
+        const { error: updateErr } = await supabase.from('units')
+          .update({ display_name: 'Teste Atualizado' })
+          .eq('id', created.id);
+        if (updateErr) return { success: false, message: 'Erro ao atualizar', error: updateErr.message };
+        
+        // Delete
+        const { error: deleteErr } = await supabase.from('units').delete().eq('id', created.id);
+        if (deleteErr) return { success: false, message: 'Erro ao deletar', error: deleteErr.message };
+        
+        return { success: true, message: 'CRUD completo: Create, Read, Update, Delete OK' };
+      }
+    },
+    {
+      name: 'Validação de Senha de Unidade',
+      category: '🏢 Unidades',
+      fn: async () => {
+        const { data } = await supabase.from('units').select('name, password').limit(1).maybeSingle();
+        if (!data) return { success: true, message: 'Nenhuma unidade para validar' };
+        return { success: data.password?.length >= 4, message: `Unidade ${data.name}: senha ${data.password?.length >= 4 ? 'válida' : 'muito curta'}` };
+      }
+    },
+
+    // ==================== MODULES ====================
+    {
+      name: 'Leitura de Módulos',
+      category: '📦 Módulos',
+      fn: async () => {
+        const { data, error } = await supabase.from('modules').select('*, units(name)');
+        if (error) return { success: false, message: 'Erro ao ler módulos', error: error.message };
+        const active = data?.filter(m => m.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} módulos (${active} ativos)` };
+      }
+    },
+    {
+      name: 'Relação Módulos-Unidades',
+      category: '📦 Módulos',
+      fn: async () => {
+        const { data, error } = await supabase.from('modules').select('unit_id, units(name)');
+        if (error) return { success: false, message: 'Erro ao verificar relação', error: error.message };
+        const withUnit = data?.filter(m => m.unit_id).length || 0;
+        return { success: true, message: `${withUnit}/${data?.length || 0} módulos vinculados a unidades` };
+      }
+    },
+
+    // ==================== OPERATORS ====================
+    {
+      name: 'Leitura de Operadores',
+      category: '👥 Operadores',
+      fn: async () => {
+        const { data, error } = await supabase.from('operators').select('*');
+        if (error) return { success: false, message: 'Erro ao ler operadores', error: error.message };
+        const active = data?.filter(o => o.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} operadores (${active} ativos)` };
+      }
+    },
+    {
+      name: 'Distribuição de Funções',
+      category: '👥 Operadores',
+      fn: async () => {
+        const { data, error } = await supabase.from('operators').select('role');
+        if (error) return { success: false, message: 'Erro ao ler funções', error: error.message };
+        const roles = data?.reduce((acc, o) => {
+          acc[o.role] = (acc[o.role] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>) || {};
+        const rolesList = Object.entries(roles).map(([r, c]) => `${r}:${c}`).join(', ');
+        return { success: true, message: rolesList || 'Nenhum operador' };
+      }
+    },
+    {
+      name: 'Permissões de Operadores',
+      category: '👥 Operadores',
+      fn: async () => {
+        const { data, error } = await supabase.from('operator_permissions').select('*, operators(name), modules(name)');
+        if (error) return { success: false, message: 'Erro ao ler permissões', error: error.message };
+        return { success: true, message: `${data?.length || 0} permissões configuradas` };
+      }
+    },
+
+    // ==================== DESTINATIONS ====================
+    {
+      name: 'Leitura de Destinos',
+      category: '📍 Destinos',
+      fn: async () => {
+        const { data, error } = await supabase.from('destinations').select('*');
+        if (error) return { success: false, message: 'Erro ao ler destinos', error: error.message };
+        const active = data?.filter(d => d.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} destinos (${active} ativos)` };
+      }
+    },
+    {
+      name: 'Destinos por Módulo',
+      category: '📍 Destinos',
+      fn: async () => {
+        const { data, error } = await supabase.from('destinations').select('module_id, modules(name)');
+        if (error) return { success: false, message: 'Erro ao verificar relação', error: error.message };
+        const withModule = data?.filter(d => d.module_id).length || 0;
+        return { success: true, message: `${withModule}/${data?.length || 0} destinos vinculados a módulos` };
+      }
+    },
+
+    // ==================== PATIENT CALLS ====================
+    {
+      name: 'Leitura de Chamadas',
+      category: '📞 Chamadas',
+      fn: async () => {
+        const { data, error } = await supabase.from('patient_calls').select('*');
+        if (error) return { success: false, message: 'Erro ao ler chamadas', error: error.message };
+        const waiting = data?.filter(p => p.status === 'waiting').length || 0;
+        const active = data?.filter(p => p.status === 'active').length || 0;
+        return { success: true, message: `${data?.length || 0} total (${waiting} aguardando, ${active} em atendimento)` };
+      }
+    },
+    {
+      name: 'Simulação: Registro de Paciente',
+      category: '📞 Chamadas',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
+        
+        const { data, error } = await supabase.from('patient_calls')
+          .insert({ 
+            patient_name: 'TESTE SIMULAÇÃO REGISTRO', 
+            unit_name: units.name,
+            call_type: 'registration',
+            status: 'waiting',
+            priority: 'normal'
+          })
+          .select()
+          .single();
+        if (error) return { success: false, message: 'Erro ao registrar', error: error.message };
+        await supabase.from('patient_calls').delete().eq('id', data.id);
+        return { success: true, message: 'Registro simulado e limpo com sucesso' };
+      }
+    },
+    {
+      name: 'Simulação: Chamada de Triagem',
+      category: '📞 Chamadas',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
+        
+        const { data, error } = await supabase.from('patient_calls')
+          .insert({ 
+            patient_name: 'TESTE SIMULAÇÃO TRIAGEM', 
+            unit_name: units.name,
+            call_type: 'triage',
+            status: 'active',
+            destination: 'Triagem 01'
+          })
+          .select()
+          .single();
+        if (error) return { success: false, message: 'Erro na triagem', error: error.message };
+        await supabase.from('patient_calls').delete().eq('id', data.id);
+        return { success: true, message: 'Triagem simulada e limpa com sucesso' };
+      }
+    },
+    {
+      name: 'Simulação: Chamada Médica',
+      category: '📞 Chamadas',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
+        
+        const { data, error } = await supabase.from('patient_calls')
+          .insert({ 
+            patient_name: 'TESTE SIMULAÇÃO MÉDICA', 
+            unit_name: units.name,
+            call_type: 'doctor',
+            status: 'active',
+            destination: 'Consultório 01'
+          })
+          .select()
+          .single();
+        if (error) return { success: false, message: 'Erro na chamada médica', error: error.message };
+        await supabase.from('patient_calls').delete().eq('id', data.id);
+        return { success: true, message: 'Chamada médica simulada e limpa com sucesso' };
+      }
+    },
+    {
+      name: 'Simulação: Fluxo Completo do Paciente',
+      category: '📞 Chamadas',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível', error: 'Cadastre uma unidade primeiro' };
+        
+        // 1. Registro
+        const { data: reg, error: regErr } = await supabase.from('patient_calls')
+          .insert({ patient_name: 'TESTE FLUXO COMPLETO', unit_name: units.name, call_type: 'registration', status: 'waiting' })
+          .select().single();
+        if (regErr) return { success: false, message: 'Erro no registro', error: regErr.message };
+        
+        // 2. Atualiza para triagem
+        const { error: triErr } = await supabase.from('patient_calls')
+          .update({ call_type: 'triage', status: 'active', destination: 'Triagem' })
+          .eq('id', reg.id);
+        if (triErr) { await supabase.from('patient_calls').delete().eq('id', reg.id); return { success: false, message: 'Erro na triagem', error: triErr.message }; }
+        
+        // 3. Atualiza para médico
+        const { error: docErr } = await supabase.from('patient_calls')
+          .update({ call_type: 'doctor', destination: 'Consultório' })
+          .eq('id', reg.id);
+        if (docErr) { await supabase.from('patient_calls').delete().eq('id', reg.id); return { success: false, message: 'Erro no médico', error: docErr.message }; }
+        
+        // 4. Finaliza
+        const { error: compErr } = await supabase.from('patient_calls')
+          .update({ status: 'completed', completed_at: new Date().toISOString() })
+          .eq('id', reg.id);
+        if (compErr) { await supabase.from('patient_calls').delete().eq('id', reg.id); return { success: false, message: 'Erro ao finalizar', error: compErr.message }; }
+        
+        // Cleanup
+        await supabase.from('patient_calls').delete().eq('id', reg.id);
+        return { success: true, message: 'Fluxo: Registro → Triagem → Médico → Conclusão OK' };
+      }
+    },
+
+    // ==================== CALL HISTORY ====================
+    {
+      name: 'Histórico de Chamadas',
+      category: '📊 Histórico',
+      fn: async () => {
+        const { data, error, count } = await supabase.from('call_history').select('*', { count: 'exact' }).limit(10);
+        if (error) return { success: false, message: 'Erro ao ler histórico', error: error.message };
+        return { success: true, message: `${count || 0} registros no histórico` };
+      }
+    },
+    {
+      name: 'Inserção no Histórico',
+      category: '📊 Histórico',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível' };
+        
+        const { data, error } = await supabase.from('call_history')
+          .insert({ patient_name: 'TESTE HISTÓRICO', unit_name: units.name, call_type: 'test', destination: 'Teste' })
+          .select().single();
+        if (error) return { success: false, message: 'Erro ao inserir', error: error.message };
+        await supabase.from('call_history').delete().eq('id', data.id);
+        return { success: true, message: 'Inserção no histórico OK' };
+      }
+    },
+
+    // ==================== CHAT ====================
+    {
+      name: 'Leitura de Mensagens',
+      category: '💬 Chat',
+      fn: async () => {
+        const { data, error } = await supabase.from('chat_messages').select('*').limit(20);
+        if (error) return { success: false, message: 'Erro ao ler mensagens', error: error.message };
+        return { success: true, message: `${data?.length || 0} mensagens recentes` };
+      }
+    },
+    {
+      name: 'Simulação: Envio de Mensagem',
+      category: '💬 Chat',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível' };
+        
+        const { data, error } = await supabase.from('chat_messages')
+          .insert({ message: 'Mensagem de teste automatizado', sender_station: 'TESTE', sender_name: 'Sistema de Testes', unit_name: units.name, recipient: 'todos' })
+          .select().single();
+        if (error) return { success: false, message: 'Erro ao enviar', error: error.message };
+        await supabase.from('chat_messages').delete().eq('id', data.id);
+        return { success: true, message: 'Envio de mensagem simulado e limpo' };
+      }
+    },
+
+    // ==================== TTS ====================
+    {
+      name: 'Frases TTS Configuradas',
+      category: '🔊 TTS',
+      fn: async () => {
+        const { data, error } = await supabase.from('tts_phrases').select('*, modules(name)');
+        if (error) return { success: false, message: 'Erro ao ler frases', error: error.message };
+        const active = data?.filter(p => p.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} frases (${active} ativas)` };
+      }
+    },
+    {
+      name: 'Edge Function: Google Cloud TTS',
+      category: '🔊 TTS',
+      fn: async () => {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+            body: JSON.stringify({ text: 'Teste de voz', voiceName: 'pt-BR-Neural2-A' })
+          });
+          if (!response.ok) return { success: false, message: 'Erro no TTS', error: await response.text() };
+          const blob = await response.blob();
+          return { success: true, message: `Áudio gerado: ${Math.round(blob.size / 1024)}KB` };
+        } catch (err) {
+          return { success: false, message: 'Falha ao chamar TTS', error: err instanceof Error ? err.message : 'Erro' };
+        }
+      }
+    },
+
+    // ==================== ANNOUNCEMENTS ====================
+    {
+      name: 'Anúncios Programados',
+      category: '📢 Anúncios',
+      fn: async () => {
+        const { data, error } = await supabase.from('scheduled_announcements').select('*');
+        if (error) return { success: false, message: 'Erro ao ler anúncios', error: error.message };
+        const active = data?.filter(a => a.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} anúncios (${active} ativos)` };
+      }
+    },
+    {
+      name: 'Frases Comerciais Programadas',
+      category: '📢 Anúncios',
+      fn: async () => {
+        const { data, error } = await supabase.from('scheduled_commercial_phrases').select('*');
+        if (error) return { success: false, message: 'Erro ao ler frases', error: error.message };
+        const active = data?.filter(p => p.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} frases comerciais (${active} ativas)` };
+      }
+    },
+
+    // ==================== USER SESSIONS ====================
+    {
+      name: 'Sessões de Usuários',
+      category: '👤 Sessões',
+      fn: async () => {
+        const { data, error } = await supabase.from('user_sessions').select('*');
+        if (error) return { success: false, message: 'Erro ao ler sessões', error: error.message };
+        const active = data?.filter(s => s.is_active).length || 0;
+        const tvMode = data?.filter(s => s.is_tv_mode).length || 0;
+        return { success: true, message: `${data?.length || 0} sessões (${active} ativas, ${tvMode} TV)` };
+      }
+    },
+    {
+      name: 'Simulação: Criar Sessão',
+      category: '👤 Sessões',
+      fn: async () => {
+        const { data: units } = await supabase.from('units').select('name').limit(1).maybeSingle();
+        if (!units) return { success: false, message: 'Nenhuma unidade disponível' };
+        
+        const { data, error } = await supabase.from('user_sessions')
+          .insert({ unit_name: units.name, station: 'TESTE_AUTO', is_active: true, ip_address: '127.0.0.1' })
+          .select().single();
+        if (error) return { success: false, message: 'Erro ao criar sessão', error: error.message };
+        await supabase.from('user_sessions').delete().eq('id', data.id);
+        return { success: true, message: 'Sessão criada e removida OK' };
+      }
+    },
+
+    // ==================== STATISTICS ====================
+    {
+      name: 'Estatísticas Diárias',
+      category: '📈 Estatísticas',
+      fn: async () => {
+        const { data, error } = await supabase.from('statistics_daily').select('*').order('date', { ascending: false }).limit(7);
+        if (error) return { success: false, message: 'Erro ao ler estatísticas', error: error.message };
+        const totalCalls = data?.reduce((sum, d) => sum + (d.total_calls || 0), 0) || 0;
+        return { success: true, message: `${data?.length || 0} dias, ${totalCalls} chamadas totais` };
+      }
+    },
+
+    // ==================== TELEGRAM ====================
+    {
+      name: 'Destinatários Telegram',
+      category: '📲 Telegram',
+      fn: async () => {
+        const { data, error } = await supabase.from('telegram_recipients').select('*');
+        if (error) return { success: false, message: 'Erro ao ler destinatários', error: error.message };
+        const active = data?.filter(t => t.is_active).length || 0;
+        return { success: true, message: `${data?.length || 0} destinatários (${active} ativos)` };
+      }
+    },
+
+    // ==================== STORAGE ====================
+    {
+      name: 'Bucket TTS Cache',
+      category: '💾 Storage',
+      fn: async () => {
+        const { data, error } = await supabase.storage.from('tts-cache').list('', { limit: 100 });
+        if (error) return { success: false, message: 'Erro ao acessar storage', error: error.message };
+        return { success: true, message: `${data?.length || 0} arquivos em cache` };
+      }
+    },
+
+    // ==================== SYSTEM LOGS ====================
+    {
+      name: 'Logs de Erros do Sistema',
+      category: '🚨 Logs',
+      fn: async () => {
+        const { data, error } = await supabase.from('system_error_logs').select('*').order('created_at', { ascending: false }).limit(10);
+        if (error) return { success: false, message: 'Erro ao ler logs', error: error.message };
+        return { success: true, message: `${data?.length || 0} erros recentes` };
+      }
+    },
+    {
+      name: 'Histórico de Health Checks',
+      category: '🚨 Logs',
+      fn: async () => {
+        const { data, error } = await supabase.from('edge_function_health_history').select('*').order('checked_at', { ascending: false }).limit(20);
+        if (error) return { success: false, message: 'Erro ao ler health checks', error: error.message };
+        const healthy = data?.filter(h => h.status === 'healthy').length || 0;
+        return { success: true, message: `${data?.length || 0} checks (${healthy} healthy)` };
+      }
+    },
+    {
+      name: 'Histórico de Testes',
+      category: '🚨 Logs',
+      fn: async () => {
+        const { data, error } = await supabase.from('test_history').select('*').order('executed_at', { ascending: false }).limit(10);
+        if (error) return { success: false, message: 'Erro ao ler histórico de testes', error: error.message };
+        return { success: true, message: `${data?.length || 0} execuções de testes registradas` };
+      }
+    },
+
+    // ==================== PWA ====================
+    {
+      name: 'Página de Instalação',
+      category: '📱 PWA',
       fn: async () => {
         try {
           const response = await fetch('/install');
-          if (response.ok) {
-            return { success: true, message: 'Página de instalação acessível' };
-          }
-          return { success: false, message: 'Página não acessível', error: `Status: ${response.status}` };
+          return response.ok ? { success: true, message: 'Página acessível' } : { success: false, message: 'Erro', error: `Status: ${response.status}` };
         } catch (err) {
-          return { success: false, message: 'Erro ao acessar página', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+          return { success: false, message: 'Erro', error: err instanceof Error ? err.message : 'Erro' };
         }
       }
     },
     {
-      name: 'Link Instalação Modo TV',
-      category: 'PWA',
+      name: 'Modo TV',
+      category: '📱 PWA',
       fn: async () => {
         try {
           const response = await fetch('/install?mode=tv');
-          if (response.ok) {
-            return { success: true, message: 'Modo TV acessível via /install?mode=tv' };
-          }
-          return { success: false, message: 'Link não acessível', error: `Status: ${response.status}` };
+          return response.ok ? { success: true, message: 'Modo TV acessível' } : { success: false, message: 'Erro', error: `Status: ${response.status}` };
         } catch (err) {
-          return { success: false, message: 'Erro ao acessar link', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+          return { success: false, message: 'Erro', error: err instanceof Error ? err.message : 'Erro' };
         }
       }
     },
     {
-      name: 'Link Instalação Modo Normal',
-      category: 'PWA',
+      name: 'Ícones PWA',
+      category: '📱 PWA',
       fn: async () => {
         try {
-          const response = await fetch('/install?mode=normal');
-          if (response.ok) {
-            return { success: true, message: 'Modo Normal acessível via /install?mode=normal' };
-          }
-          return { success: false, message: 'Link não acessível', error: `Status: ${response.status}` };
-        } catch (err) {
-          return { success: false, message: 'Erro ao acessar link', error: err instanceof Error ? err.message : 'Erro desconhecido' };
-        }
-      }
-    },
-    {
-      name: 'Ícones PWA TV',
-      category: 'PWA',
-      fn: async () => {
-        try {
-          const [res192, res512] = await Promise.all([
+          const responses = await Promise.all([
+            fetch('/pwa-192x192.png'),
+            fetch('/pwa-512x512.png'),
             fetch('/pwa-tv-192x192.png'),
             fetch('/pwa-tv-512x512.png')
           ]);
-          if (res192.ok && res512.ok) {
-            return { success: true, message: 'Ícones TV 192x192 e 512x512 disponíveis' };
-          }
-          return { success: false, message: 'Alguns ícones não encontrados', error: `192: ${res192.status}, 512: ${res512.status}` };
+          const allOk = responses.every(r => r.ok);
+          const found = responses.filter(r => r.ok).length;
+          return { success: allOk, message: `${found}/4 ícones encontrados` };
         } catch (err) {
-          return { success: false, message: 'Erro ao verificar ícones', error: err instanceof Error ? err.message : 'Erro desconhecido' };
+          return { success: false, message: 'Erro', error: err instanceof Error ? err.message : 'Erro' };
         }
       }
     },
+
+    // ==================== API KEY USAGE ====================
     {
-      name: 'Ícones PWA Full',
-      category: 'PWA',
+      name: 'Uso de Chaves de API',
+      category: '🔑 API Keys',
       fn: async () => {
-        try {
-          const [res192, res512] = await Promise.all([
-            fetch('/pwa-full-192x192.png'),
-            fetch('/pwa-full-512x512.png')
-          ]);
-          if (res192.ok && res512.ok) {
-            return { success: true, message: 'Ícones Full 192x192 e 512x512 disponíveis' };
-          }
-          return { success: false, message: 'Alguns ícones não encontrados', error: `192: ${res192.status}, 512: ${res512.status}` };
-        } catch (err) {
-          return { success: false, message: 'Erro ao verificar ícones', error: err instanceof Error ? err.message : 'Erro desconhecido' };
-        }
+        const { data, error } = await supabase.from('api_key_usage').select('*').order('created_at', { ascending: false }).limit(10);
+        if (error) return { success: false, message: 'Erro ao ler uso de API', error: error.message };
+        return { success: true, message: `${data?.length || 0} usos recentes` };
+      }
+    },
+
+    // ==================== APPOINTMENTS ====================
+    {
+      name: 'Agendamentos',
+      category: '📅 Agendamentos',
+      fn: async () => {
+        const { data, error } = await supabase.from('appointments').select('*');
+        if (error) return { success: false, message: 'Erro ao ler agendamentos', error: error.message };
+        const scheduled = data?.filter(a => a.status === 'scheduled').length || 0;
+        return { success: true, message: `${data?.length || 0} agendamentos (${scheduled} pendentes)` };
+      }
+    },
+
+    // ==================== WEATHER ====================
+    {
+      name: 'Cache de Clima',
+      category: '🌤️ Clima',
+      fn: async () => {
+        const { data, error } = await supabase.from('weather_cache').select('*');
+        if (error) return { success: false, message: 'Erro ao ler cache de clima', error: error.message };
+        return { success: true, message: `${data?.length || 0} cidades em cache` };
+      }
+    },
+
+    // ==================== NEWS ====================
+    {
+      name: 'Cache de Notícias',
+      category: '📰 Notícias',
+      fn: async () => {
+        const { data, error } = await supabase.from('news_cache').select('*');
+        if (error) return { success: false, message: 'Erro ao ler cache de notícias', error: error.message };
+        return { success: true, message: `${data?.length || 0} notícias em cache` };
+      }
+    },
+
+    // ==================== UNIT SETTINGS ====================
+    {
+      name: 'Configurações de Unidades',
+      category: '⚙️ Configurações',
+      fn: async () => {
+        const { data, error } = await supabase.from('unit_settings').select('*');
+        if (error) return { success: false, message: 'Erro ao ler configurações', error: error.message };
+        return { success: true, message: `${data?.length || 0} configurações de unidades` };
+      }
+    },
+
+    // ==================== TTS NAME USAGE ====================
+    {
+      name: 'Cache de Nomes TTS',
+      category: '🔊 TTS',
+      fn: async () => {
+        const { data, error } = await supabase.from('tts_name_usage').select('*').limit(50);
+        if (error) return { success: false, message: 'Erro ao ler cache de nomes', error: error.message };
+        return { success: true, message: `${data?.length || 0}+ nomes em cache` };
       }
     },
   ];
