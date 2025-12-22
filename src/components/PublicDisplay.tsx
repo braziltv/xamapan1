@@ -59,6 +59,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const pollInitializedRef = useRef(false);
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
   const [marketingUnitName, setMarketingUnitName] = useState<string>('');
+  const marketingTimeKey = currentTime
+    ? `${currentTime.getFullYear()}-${currentTime.getMonth()}-${currentTime.getDate()}-${currentTime.getHours()}-${currentTime.getMinutes()}`
+    : '';
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
@@ -92,6 +95,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     let alive = true;
 
+    const normalizeKey = (value: string) =>
+      (value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
     const resolve = async () => {
       if (!unitName) {
         setMarketingUnitName('');
@@ -99,26 +109,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
 
       try {
-        const { data: byDisplay, error: errDisplay } = await supabase
+        const { data: units, error } = await supabase
           .from('units')
-          .select('name, display_name')
-          .eq('display_name', unitName)
-          .maybeSingle();
+          .select('name, display_name');
 
         if (!alive) return;
-        if (!errDisplay && byDisplay?.name) {
-          setMarketingUnitName(byDisplay.name);
-          return;
-        }
+        if (error) throw error;
 
-        const { data: byName } = await supabase
-          .from('units')
-          .select('name, display_name')
-          .eq('name', unitName)
-          .maybeSingle();
+        const target = normalizeKey(unitName);
+        const match = (units || []).find(
+          (u) => normalizeKey(u.display_name) === target || normalizeKey(u.name) === target
+        );
 
-        if (!alive) return;
-        setMarketingUnitName(byName?.name ?? unitName);
+        const resolved = match?.name ?? unitName;
+        console.log('🏷️ Marketing unit resolved:', {
+          selectedUnitName: unitName,
+          marketingUnitName: resolved,
+          matched: match?.display_name ?? null,
+        });
+
+        setMarketingUnitName(resolved);
       } catch (e) {
         console.warn('Failed to resolve marketing unit name, using raw unitName:', e);
         if (alive) setMarketingUnitName(unitName);
@@ -197,34 +207,38 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Load commercial phrases from database
+  // Load commercial phrases from database (used in TV footer)
   useEffect(() => {
     const loadCommercialPhrases = async () => {
       try {
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}:00`;
-        const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
-        const today = now.toISOString().split('T')[0];
+        if (!marketingUnitName) {
+          setCommercialPhrases([]);
+          return;
+        }
 
-        let query = supabase
+        const now = currentTime ?? new Date();
+        const currentTimeStr = formatBrazilTime(now, 'HH:mm:00');
+        const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+        const today = formatBrazilTime(now, 'yyyy-MM-dd');
+
+        console.log('📢 Loading commercial phrases:', {
+          marketingUnitName,
+          today,
+          currentTimeStr,
+          dayOfWeek,
+        });
+
+        const { data, error } = await supabase
           .from('scheduled_commercial_phrases')
           .select('*')
+          .eq('unit_name', marketingUnitName)
           .eq('is_active', true)
           .lte('valid_from', today)
           .gte('valid_until', today)
-          .lte('start_time', currentTime)
-          .gte('end_time', currentTime)
+          .lte('start_time', currentTimeStr)
+          .gte('end_time', currentTimeStr)
           .contains('days_of_week', [dayOfWeek])
           .order('display_order', { ascending: true });
-
-        // Filter by unit if set (marketing tables use units.name)
-        if (marketingUnitName) {
-          query = query.eq('unit_name', marketingUnitName);
-        }
-
-        const { data, error } = await query;
 
         if (error) {
           console.error('Error loading commercial phrases:', error);
@@ -232,17 +246,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         }
 
         if (data && data.length > 0) {
-          console.log('📢 Commercial phrases loaded:', data.length);
-          setCommercialPhrases(data.map(p => ({
-            id: p.id,
-            phrase_content: p.phrase_content,
-            start_time: p.start_time,
-            end_time: p.end_time,
-            days_of_week: p.days_of_week,
-            is_active: p.is_active,
-            display_order: p.display_order,
-          })));
+          console.log('✅ Commercial phrases loaded:', data.length);
+          setCommercialPhrases(
+            data.map((p) => ({
+              id: p.id,
+              phrase_content: p.phrase_content,
+              start_time: p.start_time,
+              end_time: p.end_time,
+              days_of_week: p.days_of_week,
+              is_active: p.is_active,
+              display_order: p.display_order,
+            }))
+          );
         } else {
+          console.log('ℹ️ No commercial phrases for current window');
           setCommercialPhrases([]);
         }
       } catch (error) {
@@ -250,11 +267,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
-    loadCommercialPhrases();
-    // Reload every minute to check for schedule changes
-    const interval = setInterval(loadCommercialPhrases, 60 * 1000);
-    return () => clearInterval(interval);
-  }, [marketingUnitName]);
+    void loadCommercialPhrases();
+  }, [marketingUnitName, marketingTimeKey]);
 
   // Load scheduled voice announcements from database
   const loadScheduledAnnouncements = useCallback(async () => {
