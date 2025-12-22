@@ -35,6 +35,7 @@ interface ScheduledAnnouncement {
   is_active: boolean;
   last_played_at: string | null;
   audio_cache_url?: string | null;
+  updated_at?: string;
 }
 
 interface CommercialPhrase {
@@ -259,6 +260,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           is_active: a.is_active,
           last_played_at: a.last_played_at,
           audio_cache_url: a.audio_cache_url,
+          updated_at: a.updated_at,
         })));
       } else {
         setScheduledAnnouncements([]);
@@ -1263,79 +1265,94 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         end: announcement.end_time,
         days: announcement.days_of_week,
         currentTimeStr,
-        dayOfWeek
+        dayOfWeek,
+        last_played_at: announcement.last_played_at,
+        updated_at: announcement.updated_at
       });
 
-      // Check if within time window
-      if (announcement.start_time > currentTimeStr || announcement.end_time < currentTimeStr) {
-        console.log('⏭️ Outside time window');
-        continue;
+      // Check if this is a forced immediate playback (last_played_at is null and updated recently)
+      const isImmediatePlayback = !announcement.last_played_at && announcement.updated_at;
+      const updatedRecently = isImmediatePlayback && 
+        (nowMs - new Date(announcement.updated_at!).getTime()) < 60000; // Updated in last 60 seconds
+
+      if (updatedRecently) {
+        console.log('🚀 Immediate playback triggered for:', announcement.title);
+      } else {
+        // Normal schedule checks - only apply if not immediate playback
+        // Check if within time window
+        if (announcement.start_time > currentTimeStr || announcement.end_time < currentTimeStr) {
+          console.log('⏭️ Outside time window');
+          continue;
+        }
+
+        // Check if day of week is valid
+        if (!announcement.days_of_week.includes(dayOfWeek)) {
+          console.log('⏭️ Wrong day of week');
+          continue;
+        }
+
+        // Check interval since last played
+        const lastPlayed = lastAnnouncementPlayedRef.current[announcement.id] || 0;
+        const intervalMs = announcement.interval_minutes * 60 * 1000;
+
+        if (nowMs - lastPlayed < intervalMs) {
+          console.log('⏭️ Too soon since last play');
+          continue;
+        }
       }
 
-      // Check if day of week is valid
-      if (!announcement.days_of_week.includes(dayOfWeek)) {
-        console.log('⏭️ Wrong day of week');
-        continue;
-      }
+      // Time to play this announcement (either scheduled or immediate)
+      lastAnnouncementPlayedRef.current[announcement.id] = nowMs;
 
-      // Check interval since last played
-      const lastPlayed = lastAnnouncementPlayedRef.current[announcement.id] || 0;
-      const intervalMs = announcement.interval_minutes * 60 * 1000;
+      console.log(`📢 Playing scheduled voice announcement: ${announcement.title}`);
 
-      if (nowMs - lastPlayed >= intervalMs) {
-        // Time to play this announcement
-        lastAnnouncementPlayedRef.current[announcement.id] = nowMs;
+      // Update last_played_at in database
+      supabase
+        .from('scheduled_announcements')
+        .update({ last_played_at: now.toISOString() })
+        .eq('id', announcement.id)
+        .then(({ error }) => {
+          if (error) console.error('Error updating last_played_at:', error);
+        });
 
-        console.log(`📢 Playing scheduled voice announcement: ${announcement.title}`);
+      // Play the announcement (with delay to avoid conflicts)
+      setTimeout(async () => {
+        if (announcingType || isSpeakingRef.current) return;
+        
+        isSpeakingRef.current = true;
+        setAnnouncingType('triage');
 
-        // Update last_played_at in database
-        supabase
-          .from('scheduled_announcements')
-          .update({ last_played_at: now.toISOString() })
-          .eq('id', announcement.id)
-          .then(({ error }) => {
-            if (error) console.error('Error updating last_played_at:', error);
-          });
-
-        // Play the announcement (with delay to avoid conflicts)
-        setTimeout(async () => {
-          if (announcingType || isSpeakingRef.current) return;
-          
-          isSpeakingRef.current = true;
-          setAnnouncingType('triage');
-
-          try {
-            // Repeat according to repeat_count
-            for (let i = 0; i < announcement.repeat_count; i++) {
-              if (i > 0) {
-                await new Promise(resolve => setTimeout(resolve, 800));
-              }
-              
-              // Play notification sound
-              await playNotificationSound();
-              
-              // Use cached audio if available, otherwise generate via TTS
-              if (announcement.audio_cache_url) {
-                console.log(`📢 Playing cached audio for "${announcement.title}"`);
-                await playCachedAudio(announcement.audio_cache_url);
-              } else {
-                console.log(`📢 Generating TTS for "${announcement.title}" (no cache)`);
-                await speakWithGoogleTTS(announcement.text_content);
-              }
-              
-              console.log(`📢 Announcement "${announcement.title}" iteration ${i + 1}/${announcement.repeat_count} completed`);
+        try {
+          // Repeat according to repeat_count
+          for (let i = 0; i < announcement.repeat_count; i++) {
+            if (i > 0) {
+              await new Promise(resolve => setTimeout(resolve, 800));
             }
-          } catch (error) {
-            console.error('Error playing scheduled announcement:', error);
-          } finally {
-            isSpeakingRef.current = false;
-            setAnnouncingType(null);
+            
+            // Play notification sound
+            await playNotificationSound();
+            
+            // Use cached audio if available, otherwise generate via TTS
+            if (announcement.audio_cache_url) {
+              console.log(`📢 Playing cached audio for "${announcement.title}"`);
+              await playCachedAudio(announcement.audio_cache_url);
+            } else {
+              console.log(`📢 Generating TTS for "${announcement.title}" (no cache)`);
+              await speakWithGoogleTTS(announcement.text_content);
+            }
+            
+            console.log(`📢 Announcement "${announcement.title}" iteration ${i + 1}/${announcement.repeat_count} completed`);
           }
-        }, 1500);
+        } catch (error) {
+          console.error('Error playing scheduled announcement:', error);
+        } finally {
+          isSpeakingRef.current = false;
+          setAnnouncingType(null);
+        }
+      }, 1500);
 
-        // Only play one announcement at a time
-        break;
-      }
+      // Only play one announcement at a time
+      break;
     }
   }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio]);
 
