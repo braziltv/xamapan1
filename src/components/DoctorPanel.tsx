@@ -115,11 +115,12 @@ export function DoctorPanel({
   
   const currentConsultorioLabel = consultorios.find(c => c.value === selectedConsultorio)?.label || 'Consultório 1';
   
-  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' } | null>(null);
+  const [confirmFinish, setConfirmFinish] = useState<{ id: string; name: string; type: 'consultation' | 'without' | 'finished' } | null>(null);
   const { soundEnabled, toggleSound, visualAlert } = useNewPatientSound('doctor', waitingPatients);
   const { forwardAlert } = useForwardNotification('doctor', waitingPatients, 'waiting-doctor');
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
-  const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [successAnimationData, setSuccessAnimationData] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' }>({ message: '', type: 'default' });
   const [isLoading, setIsLoading] = useState(false);
 
   // Auto-reload após 10 minutos de inatividade
@@ -330,6 +331,10 @@ export function DoctorPanel({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
+                <Button onClick={() => setConfirmFinish({ id: myCurrentCall.id, name: myCurrentCall.name, type: 'finished' })} size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm">
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  Finalizar Atendimento
+                </Button>
                 <Button onClick={() => setConfirmFinish({ id: myCurrentCall.id, name: myCurrentCall.name, type: 'consultation' })} size="sm" className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Concluir Consulta
@@ -498,16 +503,26 @@ export function DoctorPanel({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmFinish?.type === 'consultation' ? 'Concluir Consulta' : 'Confirmar Desistência'}
+              {confirmFinish?.type === 'consultation' 
+                ? 'Concluir Consulta' 
+                : confirmFinish?.type === 'finished'
+                ? 'Finalizar Atendimento'
+                : 'Confirmar Desistência'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmFinish?.type === 'consultation' ? (
                 <>Confirma a conclusão da consulta de <strong>{confirmFinish?.name}</strong>?</>
+              ) : confirmFinish?.type === 'finished' ? (
+                <>Confirma que o atendimento de <strong>{confirmFinish?.name}</strong> foi finalizado?</>
               ) : (
                 <>Confirma a desistência de <strong>{confirmFinish?.name}</strong>?</>
               )}
               <br />
-              <span className="text-destructive">O paciente será removido da fila.</span>
+              <span className="text-muted-foreground">
+                {confirmFinish?.type === 'finished' 
+                  ? 'O paciente será liberado com sucesso.'
+                  : 'O paciente será removido da fila.'}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -521,14 +536,17 @@ export function DoctorPanel({
                     await new Promise(resolve => setTimeout(resolve, 400));
                     const message = confirmFinish.type === 'consultation' 
                       ? 'Consulta Concluída!' 
+                      : confirmFinish.type === 'finished'
+                      ? 'Atendimento Finalizado!'
                       : 'Desistência Registrada!';
-                    const animationType = confirmFinish.type === 'consultation' ? 'consultation' : 'withdrawal';
-                    if (confirmFinish.type === 'consultation') {
+                    const animationType = confirmFinish.type === 'without' ? 'withdrawal' : 'consultation';
+                    if (confirmFinish.type === 'consultation' || confirmFinish.type === 'finished') {
                       onFinishConsultation(confirmFinish.id);
                     } else {
                       onFinishWithoutCall(confirmFinish.id);
                     }
-                    setSuccessAnimation({ message, type: animationType });
+                    setSuccessAnimationData({ message, type: animationType });
+                    setShowSuccessAnimation(true);
                   } finally {
                     setIsLoading(false);
                   }
@@ -544,10 +562,10 @@ export function DoctorPanel({
 
       {/* Success Animation */}
       <SuccessAnimation 
-        show={!!successAnimation} 
-        message={successAnimation?.message || ''} 
-        type={successAnimation?.type || 'default'}
-        onComplete={() => setSuccessAnimation(null)} 
+        show={showSuccessAnimation} 
+        message={successAnimationData.message} 
+        type={successAnimationData.type}
+        onComplete={() => setShowSuccessAnimation(false)} 
       />
 
       {/* Loading Overlay */}
