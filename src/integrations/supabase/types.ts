@@ -638,6 +638,45 @@ export type Database = {
           },
         ]
       }
+      test_history: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          executed_at: string
+          failed_tests: number
+          id: string
+          passed_tests: number
+          results: Json
+          total_tests: number
+          unit_name: string
+          warning_tests: number
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          executed_at?: string
+          failed_tests?: number
+          id?: string
+          passed_tests?: number
+          results?: Json
+          total_tests?: number
+          unit_name: string
+          warning_tests?: number
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          executed_at?: string
+          failed_tests?: number
+          id?: string
+          passed_tests?: number
+          results?: Json
+          total_tests?: number
+          unit_name?: string
+          warning_tests?: number
+        }
+        Relationships: []
+      }
       tts_name_usage: {
         Row: {
           id: string
