@@ -2412,8 +2412,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   newsItems.forEach((item, index) => {
                     itemsWithExtras.push(item);
                     
-                    // Insert commercial phrase every 3 news items (if available)
-                    if ((index + 1) % 3 === 0 && commercialIndex < commercialItems.length) {
+                    // Insert commercial phrase every 5 news items (if available)
+                    if ((index + 1) % 5 === 0 && commercialIndex < commercialItems.length) {
                       itemsWithExtras.push(commercialItems[commercialIndex]);
                       commercialIndex++;
                     }
@@ -2492,8 +2492,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   newsItems.forEach((item, index) => {
                     itemsWithExtras.push(item);
                     
-                    // Insert commercial phrase every 2 news items (if available)
-                    if ((index + 1) % 2 === 0 && commercialIndex < commercialItems.length) {
+                    // Insert commercial phrase every 5 news items (if available)
+                    if ((index + 1) % 5 === 0 && commercialIndex < commercialItems.length) {
                       itemsWithExtras.push(commercialItems[commercialIndex]);
                       commercialIndex++;
                     }
