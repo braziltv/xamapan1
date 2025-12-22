@@ -58,6 +58,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
   const [unitName, setUnitName] = useState(() => localStorage.getItem('selectedUnitName') || '');
+  const [marketingUnitName, setMarketingUnitName] = useState<string>('');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [lastNewsUpdate, setLastNewsUpdate] = useState<Date | null>(null);
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
@@ -86,6 +87,49 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (!Number.isFinite(v)) return fallback;
     return Math.min(1, Math.max(0, v));
   };
+
+  // Resolve unit_name used by marketing tables (they store the unit "name", while UI may store "display_name")
+  useEffect(() => {
+    let alive = true;
+
+    const resolve = async () => {
+      if (!unitName) {
+        setMarketingUnitName('');
+        return;
+      }
+
+      try {
+        const { data: byDisplay, error: errDisplay } = await supabase
+          .from('units')
+          .select('name, display_name')
+          .eq('display_name', unitName)
+          .maybeSingle();
+
+        if (!alive) return;
+        if (!errDisplay && byDisplay?.name) {
+          setMarketingUnitName(byDisplay.name);
+          return;
+        }
+
+        const { data: byName } = await supabase
+          .from('units')
+          .select('name, display_name')
+          .eq('name', unitName)
+          .maybeSingle();
+
+        if (!alive) return;
+        setMarketingUnitName(byName?.name ?? unitName);
+      } catch (e) {
+        console.warn('Failed to resolve marketing unit name, using raw unitName:', e);
+        if (alive) setMarketingUnitName(unitName);
+      }
+    };
+
+    void resolve();
+    return () => {
+      alive = false;
+    };
+  }, [unitName]);
 
   // Fetch news from database cache
   useEffect(() => {
@@ -175,9 +219,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           .contains('days_of_week', [dayOfWeek])
           .order('display_order', { ascending: true });
 
-        // Filter by unit if set
-        if (unitName) {
-          query = query.eq('unit_name', unitName);
+        // Filter by unit if set (marketing tables use units.name)
+        if (marketingUnitName) {
+          query = query.eq('unit_name', marketingUnitName);
         }
 
         const { data, error } = await query;
@@ -210,7 +254,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // Reload every minute to check for schedule changes
     const interval = setInterval(loadCommercialPhrases, 60 * 1000);
     return () => clearInterval(interval);
-  }, [unitName]);
+  }, [marketingUnitName]);
 
   // Load scheduled voice announcements from database
   const loadScheduledAnnouncements = useCallback(async () => {
@@ -223,9 +267,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .lte('valid_from', today)
         .gte('valid_until', today);
 
-      // Filter by unit if set
-      if (unitName) {
-        query = query.eq('unit_name', unitName);
+      // Filter by unit if set (marketing tables use units.name)
+      if (marketingUnitName) {
+        query = query.eq('unit_name', marketingUnitName);
       }
 
       const { data, error } = await query;
@@ -269,7 +313,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     } catch (error) {
       console.error('Error loading scheduled announcements:', error);
     }
-  }, [unitName]);
+  }, [marketingUnitName]);
 
   useEffect(() => {
     loadScheduledAnnouncements();
@@ -280,7 +324,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Realtime subscription for scheduled announcements (for instant TV playback)
   useEffect(() => {
-    if (!unitName) return;
+    if (!marketingUnitName) return;
 
     console.log('📡 Setting up realtime subscription for scheduled announcements');
     
@@ -292,7 +336,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'UPDATE',
           schema: 'public',
           table: 'scheduled_announcements',
-          filter: `unit_name=eq.${unitName}`
+          filter: `unit_name=eq.${marketingUnitName}`
         },
         async (payload) => {
           console.log('📢 Realtime update received for scheduled announcement:', payload);
@@ -333,7 +377,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('📡 Removing realtime subscription for scheduled announcements');
       supabase.removeChannel(channel);
     };
-  }, [unitName, loadScheduledAnnouncements]);
+  }, [marketingUnitName, loadScheduledAnnouncements]);
 
   // Countdown timer for next news update
   useEffect(() => {
