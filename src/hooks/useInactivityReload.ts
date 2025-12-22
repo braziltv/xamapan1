@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export function useInactivityReload() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -11,7 +11,7 @@ export function useInactivityReload() {
     }
     
     timeoutRef.current = setTimeout(() => {
-      console.log('Inactivity timeout reached (10 minutes). Reloading page...');
+      console.log('Inactivity timeout reached (15 minutes). Reloading page...');
       window.location.reload();
     }, INACTIVITY_TIMEOUT);
   }, []);
