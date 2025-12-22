@@ -346,35 +346,71 @@ export function useCallPanel() {
           }
           processedCallIdsRef.current.add(call.id);
           
-          // Check if this patient already exists locally (normalized)
+          // Determine status based on call_type
+          let status: Patient['status'] = 'waiting';
+
+          if (call.status === 'active') {
+            if (call.call_type === 'triage') status = 'in-triage';
+            else if (call.call_type === 'doctor') status = 'in-consultation';
+            else if (call.call_type === 'ecg') status = 'in-ecg';
+            else if (call.call_type === 'curativos') status = 'in-curativos';
+            else if (call.call_type === 'raiox') status = 'in-raiox';
+            else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
+          } else if (call.status === 'waiting') {
+            if (call.call_type === 'triage') status = 'waiting-triage';
+            else if (call.call_type === 'doctor') status = 'waiting-doctor';
+            else if (call.call_type === 'ecg') status = 'waiting-ecg';
+            else if (call.call_type === 'curativos') status = 'waiting-curativos';
+            else if (call.call_type === 'raiox') status = 'waiting-raiox';
+            else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
+            else if (call.call_type === 'registration') status = 'waiting';
+            else status = 'waiting';
+          }
+          
           const callNameKey = normalizePatientName(call.patient_name || '');
-          const patientExists = patientsRef.current.some(
+          const existingPatient = patientsRef.current.find(
             (p) => normalizePatientName(p.name) === callNameKey && p.status !== 'attended'
           );
           
-          if (!patientExists) {
-            // Determine status based on call_type
-            let status: Patient['status'] = 'waiting';
-
-            if (call.status === 'active') {
-              if (call.call_type === 'triage') status = 'in-triage';
-              else if (call.call_type === 'doctor') status = 'in-consultation';
-              else if (call.call_type === 'ecg') status = 'in-ecg';
-              else if (call.call_type === 'curativos') status = 'in-curativos';
-              else if (call.call_type === 'raiox') status = 'in-raiox';
-              else if (call.call_type === 'enfermaria') status = 'in-enfermaria';
-            } else if (call.status === 'waiting') {
-              if (call.call_type === 'triage') status = 'waiting-triage';
-              else if (call.call_type === 'doctor') status = 'waiting-doctor';
-              else if (call.call_type === 'ecg') status = 'waiting-ecg';
-              else if (call.call_type === 'curativos') status = 'waiting-curativos';
-              else if (call.call_type === 'raiox') status = 'waiting-raiox';
-              else if (call.call_type === 'enfermaria') status = 'waiting-enfermaria';
-              else if (call.call_type === 'registration') status = 'waiting';
-              else status = 'waiting';
-            }
+          if (existingPatient) {
+            // Patient already exists - UPDATE their status (forward from another module)
+            console.log('🔄 Updating existing patient status:', existingPatient.name, 'from', existingPatient.status, 'to', status, 'call_type:', call.call_type);
             
-            // Add patient from another device
+            setPatients(prev => prev.map(p => {
+              if (normalizePatientName(p.name) === callNameKey && p.status !== 'attended') {
+                return {
+                  ...p,
+                  id: `patient-${call.id}`,
+                  status,
+                  calledAt: call.status === 'active' ? new Date(call.created_at) : p.calledAt,
+                  calledBy: call.call_type === 'registration' ? undefined : call.call_type,
+                  destination: call.destination || p.destination,
+                  observations: call.observations || p.observations,
+                };
+              }
+              return p;
+            }));
+            
+            // Update current call states
+            if (call.status === 'active') {
+              const updatedPatient: Patient = {
+                ...existingPatient,
+                id: `patient-${call.id}`,
+                status,
+                calledAt: new Date(call.created_at),
+                calledBy: call.call_type === 'registration' ? undefined : call.call_type,
+                destination: call.destination || existingPatient.destination,
+              };
+              
+              if (call.call_type === 'triage') setCurrentTriageCall(updatedPatient);
+              else if (call.call_type === 'doctor') setCurrentDoctorCall(updatedPatient);
+              else if (call.call_type === 'ecg') setCurrentEcgCall(updatedPatient);
+              else if (call.call_type === 'curativos') setCurrentCurativosCall(updatedPatient);
+              else if (call.call_type === 'raiox') setCurrentRaioxCall(updatedPatient);
+              else if (call.call_type === 'enfermaria') setCurrentEnfermariaCall(updatedPatient);
+            }
+          } else {
+            // New patient - add them
             const newPatient: Patient = {
               id: `patient-${call.id}`,
               name: (call.patient_name || '').trim().replace(/\s+/g, ' '),
