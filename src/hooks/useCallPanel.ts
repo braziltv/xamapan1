@@ -545,11 +545,11 @@ export function useCallPanel() {
         }
       });
 
-    // Periodic refresh every 3 seconds for real-time sync across modules
-    // Using 3s instead of 2s to reduce server load while maintaining responsiveness
+    // Periodic refresh every 1.5 seconds for real-time sync across modules
+    // Using 1.5s for faster responsiveness when forwarding patients between modules
     const refreshInterval = setInterval(() => {
       refreshPatientsFromDB();
-    }, 3000);
+    }, 1500);
 
     return () => {
       console.log('🔌 Cleaning up patient sync subscription');
@@ -950,7 +950,10 @@ export function useCallPanel() {
     if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
     if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
     if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
-  }, [createCall, triggerCallEvent, unitName, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, currentDoctorCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall, refreshPatientsFromDB]);
 
   // Helper to clear patient from all current call states
   const clearPatientFromAllCurrentCalls = useCallback((patientId: string) => {
@@ -993,13 +996,16 @@ export function useCallPanel() {
         console.error('Error forwarding to Triage:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-triage' as const, calledBy: 'cadastro' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Send to doctor queue WITHOUT TV announcement (triage uses this)
   const sendToDoctorQueue = useCallback(async (patientId: string, destination?: string) => {
@@ -1032,13 +1038,16 @@ export function useCallPanel() {
         console.error('Error forwarding to Doctor:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Forward to doctor WITH voice call on TV (doctor panel uses this)
   const forwardToDoctor = useCallback(async (patientId: string, destination?: string) => {
@@ -1070,7 +1079,10 @@ export function useCallPanel() {
     if (currentCurativosCall?.id === patientId) setCurrentCurativosCall(null);
     if (currentRaioxCall?.id === patientId) setCurrentRaioxCall(null);
     if (currentEnfermariaCall?.id === patientId) setCurrentEnfermariaCall(null);
-  }, [createCall, triggerCallEvent, unitName, currentTriageCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, currentTriageCall, currentEcgCall, currentCurativosCall, currentRaioxCall, currentEnfermariaCall, refreshPatientsFromDB]);
 
   // Generic function to call patient to a service
   const callPatientToService = useCallback((
@@ -1257,6 +1269,9 @@ export function useCallPanel() {
         console.error('Error forwarding to ECG:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     // Only update local state after DB success
@@ -1264,7 +1279,7 @@ export function useCallPanel() {
       p.id === patientId ? { ...p, status: 'waiting-ecg' as PatientStatus, destination: 'Sala de Eletrocardiograma', calledBy: 'ecg' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   const sendToCurativosQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
@@ -1296,13 +1311,16 @@ export function useCallPanel() {
         console.error('Error forwarding to Curativos:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-curativos' as PatientStatus, destination: 'Sala de Curativos', calledBy: 'curativos' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   const sendToRaioxQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
@@ -1334,13 +1352,16 @@ export function useCallPanel() {
         console.error('Error forwarding to Raio X:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-raiox' as PatientStatus, destination: 'Sala de Raio X', calledBy: 'raiox' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   const sendToEnfermariaQueue = useCallback(async (patientId: string) => {
     const patient = patientsRef.current.find(p => p.id === patientId);
@@ -1372,13 +1393,16 @@ export function useCallPanel() {
         console.error('Error forwarding to Enfermaria:', error);
         return;
       }
+      
+      // Force immediate refresh for real-time sync
+      setTimeout(() => refreshPatientsFromDB(), 100);
     }
     
     setPatients(prev => prev.map(p => 
       p.id === patientId ? { ...p, status: 'waiting-enfermaria' as PatientStatus, destination: 'Enfermaria', calledBy: 'enfermaria' as const } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [unitName, clearPatientFromAllCurrentCalls]);
+  }, [unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Forward to ECG WITH voice call on TV
   const forwardToEcg = useCallback(async (patientId: string) => {
@@ -1403,7 +1427,10 @@ export function useCallPanel() {
       p.id === patientId ? { ...p, status: 'waiting-ecg' as const, calledAt: new Date(), calledBy: 'ecg' as const, destination: 'Sala de Eletrocardiograma' } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Forward to Curativos WITH voice call on TV
   const forwardToCurativos = useCallback(async (patientId: string) => {
@@ -1426,7 +1453,10 @@ export function useCallPanel() {
       p.id === patientId ? { ...p, status: 'waiting-curativos' as const, calledAt: new Date(), calledBy: 'curativos' as const, destination: 'Sala de Curativos' } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Forward to Raio X WITH voice call on TV
   const forwardToRaiox = useCallback(async (patientId: string) => {
@@ -1449,7 +1479,10 @@ export function useCallPanel() {
       p.id === patientId ? { ...p, status: 'waiting-raiox' as const, calledAt: new Date(), calledBy: 'raiox' as const, destination: 'Sala de Raio X' } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Forward to Enfermaria WITH voice call on TV
   const forwardToEnfermaria = useCallback(async (patientId: string) => {
@@ -1472,7 +1505,10 @@ export function useCallPanel() {
       p.id === patientId ? { ...p, status: 'waiting-enfermaria' as const, calledAt: new Date(), calledBy: 'enfermaria' as const, destination: 'Enfermaria' } : p
     ));
     clearPatientFromAllCurrentCalls(patientId);
-  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls]);
+    
+    // Force immediate refresh for real-time sync
+    setTimeout(() => refreshPatientsFromDB(), 100);
+  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
 
   // Sort by priority first (emergency > priority > normal), then by time
   const priorityOrder = { emergency: 0, priority: 1, normal: 2 };
