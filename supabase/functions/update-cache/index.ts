@@ -161,7 +161,47 @@ async function fetchNewsFromFeed(feed: { url: string; source: string }): Promise
     
     if (!response.ok) return [];
     
-    const text = await response.text();
+    // Get the raw bytes first
+    const buffer = await response.arrayBuffer();
+    
+    // Try to detect encoding from content-type header or XML declaration
+    const contentType = response.headers.get('content-type') || '';
+    let encoding = 'utf-8';
+    
+    // Check content-type header for charset
+    const charsetMatch = contentType.match(/charset=([^;]+)/i);
+    if (charsetMatch) {
+      encoding = charsetMatch[1].toLowerCase().trim();
+    }
+    
+    // Decode with the detected encoding
+    let text: string;
+    try {
+      // Handle ISO-8859-1 / Latin-1 encoding (common in Brazilian feeds like Folha)
+      if (encoding === 'iso-8859-1' || encoding === 'latin1' || encoding === 'latin-1') {
+        const decoder = new TextDecoder('iso-8859-1');
+        text = decoder.decode(buffer);
+      } else {
+        // Default to UTF-8
+        const decoder = new TextDecoder('utf-8');
+        text = decoder.decode(buffer);
+      }
+      
+      // Also check XML declaration for encoding
+      const xmlEncodingMatch = text.match(/<\?xml[^>]+encoding=["']([^"']+)["']/i);
+      if (xmlEncodingMatch) {
+        const xmlEncoding = xmlEncodingMatch[1].toLowerCase();
+        if ((xmlEncoding === 'iso-8859-1' || xmlEncoding === 'latin1') && encoding === 'utf-8') {
+          // Re-decode with correct encoding
+          const decoder = new TextDecoder('iso-8859-1');
+          text = decoder.decode(buffer);
+        }
+      }
+    } catch {
+      // Fallback to simple UTF-8
+      text = new TextDecoder().decode(buffer);
+    }
+    
     const items: Array<{ title: string; link: string; source: string }> = [];
     
     const itemMatches = text.match(/<item[^>]*>[\s\S]*?<\/item>/gi) || [];
