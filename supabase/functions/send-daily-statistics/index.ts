@@ -300,15 +300,20 @@ serve(async (req) => {
 
     console.log('Weekly report sent:', weeklyReportResponse.data);
 
-    // ========== CLEANUP OLD DATA ==========
+    // ========== CLEANUP OLD DATA (60 DAYS RETENTION) ==========
     
-    console.log('🧹 Starting data cleanup...');
+    console.log('🧹 Starting data cleanup (60 days retention)...');
 
-    // Delete call history older than 7 days
+    // Calculate 60 days ago for data retention
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    const sixtyDaysAgoStr = sixtyDaysAgo.toISOString().split('T')[0];
+
+    // Delete call history older than 60 days
     const { data: deletedCallHistory, error: deleteCallError } = await supabase
       .from('call_history')
       .delete()
-      .lt('created_at', `${sevenDaysAgo}T00:00:00-03:00`)
+      .lt('created_at', `${sixtyDaysAgoStr}T00:00:00-03:00`)
       .select('id');
 
     if (deleteCallError) {
@@ -316,14 +321,14 @@ serve(async (req) => {
     }
 
     const callHistoryDeleted = deletedCallHistory?.length || 0;
-    console.log(`Deleted ${callHistoryDeleted} old call history records`);
+    console.log(`Deleted ${callHistoryDeleted} old call history records (>60 days)`);
 
-    // Delete completed patient calls older than 7 days
+    // Delete completed patient calls older than 60 days
     const { data: deletedPatientCalls, error: deletePatientError } = await supabase
       .from('patient_calls')
       .delete()
       .eq('status', 'completed')
-      .lt('completed_at', `${sevenDaysAgo}T00:00:00-03:00`)
+      .lt('completed_at', `${sixtyDaysAgoStr}T00:00:00-03:00`)
       .select('id');
 
     if (deletePatientError) {
@@ -331,61 +336,77 @@ serve(async (req) => {
     }
 
     const patientCallsDeleted = deletedPatientCalls?.length || 0;
-    console.log(`Deleted ${patientCallsDeleted} old patient calls`);
+    console.log(`Deleted ${patientCallsDeleted} old patient calls (>60 days)`);
 
-    // Compact old statistics using the database function
+    // Compact old statistics using the database function (60 days)
     const { data: compactResult, error: compactError } = await supabase
-      .rpc('compact_old_statistics', { days_to_keep: 7 });
+      .rpc('compact_old_statistics', { days_to_keep: 60 });
 
     if (compactError) {
       console.error('Error compacting statistics:', compactError);
     }
 
     const statisticsCompacted = compactResult || 0;
-    console.log(`Compacted ${statisticsCompacted} old statistics records`);
+    console.log(`Compacted ${statisticsCompacted} old statistics records (>60 days)`);
 
-    // Delete old user sessions (older than 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
-
+    // Delete old user sessions (older than 60 days)
     const { error: deleteSessionsError } = await supabase
       .from('user_sessions')
       .delete()
-      .lt('login_at', `${thirtyDaysAgoStr}T00:00:00-03:00`);
+      .lt('login_at', `${sixtyDaysAgoStr}T00:00:00-03:00`);
 
     if (deleteSessionsError) {
       console.error('Error deleting old sessions:', deleteSessionsError);
     }
 
-    // Delete old health history (older than 7 days)
+    // Delete old health history (older than 60 days)
     const { error: deleteHealthError } = await supabase
       .from('edge_function_health_history')
       .delete()
-      .lt('checked_at', `${sevenDaysAgo}T00:00:00-03:00`);
+      .lt('checked_at', `${sixtyDaysAgoStr}T00:00:00-03:00`);
 
     if (deleteHealthError) {
       console.error('Error deleting old health history:', deleteHealthError);
     }
 
-    // Delete old error logs (older than 30 days)
+    // Delete old error logs (older than 60 days)
     const { error: deleteErrorLogsError } = await supabase
       .from('system_error_logs')
       .delete()
-      .lt('created_at', `${thirtyDaysAgoStr}T00:00:00-03:00`);
+      .lt('created_at', `${sixtyDaysAgoStr}T00:00:00-03:00`);
 
     if (deleteErrorLogsError) {
       console.error('Error deleting old error logs:', deleteErrorLogsError);
     }
 
-    // Delete old chat messages (older than 7 days)
+    // Delete old chat messages (older than 60 days)
     const { error: deleteChatError } = await supabase
       .from('chat_messages')
       .delete()
-      .lt('created_at', `${sevenDaysAgo}T00:00:00-03:00`);
+      .lt('created_at', `${sixtyDaysAgoStr}T00:00:00-03:00`);
 
     if (deleteChatError) {
       console.error('Error deleting old chat messages:', deleteChatError);
+    }
+
+    // Delete old test history (older than 60 days)
+    const { error: deleteTestHistoryError } = await supabase
+      .from('test_history')
+      .delete()
+      .lt('executed_at', `${sixtyDaysAgoStr}T00:00:00-03:00`);
+
+    if (deleteTestHistoryError) {
+      console.error('Error deleting old test history:', deleteTestHistoryError);
+    }
+
+    // Delete old statistics_daily (older than 60 days)
+    const { error: deleteStatsDailyError } = await supabase
+      .from('statistics_daily')
+      .delete()
+      .lt('date', sixtyDaysAgoStr);
+
+    if (deleteStatsDailyError) {
+      console.error('Error deleting old daily statistics:', deleteStatsDailyError);
     }
 
     // Send cleanup report to Telegram
