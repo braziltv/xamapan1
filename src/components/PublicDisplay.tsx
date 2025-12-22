@@ -2024,7 +2024,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* Right Column: History Panel - Hidden on very small screens, shown on sm+ */}
-        <div className="hidden sm:flex lg:col-span-3 tv-glass tv-card border border-slate-700/50 p-2 sm:p-3 lg:p-4 flex-col min-h-0 max-h-[200px] sm:max-h-none">
+        <div className="flex lg:col-span-3 tv-glass tv-card border border-slate-700/50 p-2 sm:p-3 lg:p-4 flex-col min-h-0 max-h-[180px] sm:max-h-none landscape:max-h-none">
           <h3 className="font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base">
             <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-primary shrink-0" />
             <span>Últimas Chamadas</span>
