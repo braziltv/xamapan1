@@ -333,15 +333,28 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
         }
       );
 
-      if (!response.ok) throw new Error('Falha ao gerar áudio');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Falha ao gerar áudio');
+      }
 
-      const data = await response.json();
-      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-      audio.play();
+      // A edge function retorna o áudio como binário, não como JSON
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        toast.error('Erro ao reproduzir áudio');
+      };
+      
+      await audio.play();
       toast.success('Reproduzindo anúncio');
     } catch (error) {
       console.error('Error testing announcement:', error);
-      toast.error('Erro ao reproduzir anúncio');
+      toast.error(error instanceof Error ? error.message : 'Erro ao reproduzir anúncio');
     } finally {
       setTesting(null);
     }
