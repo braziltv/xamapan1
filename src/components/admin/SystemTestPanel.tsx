@@ -608,7 +608,7 @@ export function SystemTestPanel() {
         if (!units) return { success: false, message: 'Nenhuma unidade disponível' };
         
         const { data, error } = await supabase.from('call_history')
-          .insert({ patient_name: 'TESTE HISTÓRICO', unit_name: units.name, call_type: 'test', destination: 'Teste' })
+          .insert({ patient_name: 'TESTE HISTÓRICO', unit_name: units.name, call_type: 'custom', destination: 'Teste' })
           .select().single();
         if (error) return { success: false, message: 'Erro ao inserir', error: error.message };
         await supabase.from('call_history').delete().eq('id', data.id);
