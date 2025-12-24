@@ -32,7 +32,7 @@ import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useForwardNotification } from '@/hooks/useForwardNotification';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
-import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { RotatingTipsCard } from '@/components/RotatingTipsCard';
 import {
   Tooltip,
   TooltipContent,
@@ -719,7 +719,7 @@ export function ServicePanel({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <DailyQuoteCard />
+        <RotatingTipsCard />
       </div>
 
       {/* Confirmation Dialog */}

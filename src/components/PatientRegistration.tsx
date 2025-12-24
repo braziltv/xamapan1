@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { usePatientAddedSound } from '@/hooks/usePatientAddedSound';
-import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { RotatingTipsCard } from '@/components/RotatingTipsCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Button } from '@/components/ui/button';
@@ -598,7 +598,7 @@ export function PatientRegistration({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <DailyQuoteCard />
+        <RotatingTipsCard />
       </div>
 
       {/* Confirmation Dialog */}
