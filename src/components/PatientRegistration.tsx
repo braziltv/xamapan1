@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
 import { usePatientAddedSound } from '@/hooks/usePatientAddedSound';
-import { RotatingTipsCard } from '@/components/RotatingTipsCard';
+import { DailyQuoteCard } from '@/components/DailyQuoteCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 interface PatientRegistrationProps {
   patients: Patient[];
@@ -207,10 +206,7 @@ export function PatientRegistration({
       {/* Registration Form */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-bounce inline-block">📝</span> 
-          <ContextualTip tipKey="cadastro_salvar" side="right">
-            Cadastrar Paciente
-          </ContextualTip>
+          <span className="animate-bounce inline-block">📝</span> Cadastrar Paciente
         </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -257,12 +253,7 @@ export function PatientRegistration({
       {/* Patient List */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-pulse inline-block">👥</span> 
-          <ContextualTip tipKey="atualizacao_auto" side="right">
-            Pacientes Cadastrados
-          </ContextualTip>
-          <AnimatedCounter value={activePatients.length} />
-          <InlineTip tipKey="regra_fila_unica" />
+          <span className="animate-pulse inline-block">👥</span> Pacientes Cadastrados <AnimatedCounter value={activePatients.length} />
         </h2>
         
         {activePatients.length === 0 ? (
@@ -598,7 +589,7 @@ export function PatientRegistration({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <RotatingTipsCard />
+        <DailyQuoteCard />
       </div>
 
       {/* Confirmation Dialog */}

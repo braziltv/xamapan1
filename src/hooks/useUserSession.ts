@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SessionData {
@@ -9,56 +9,11 @@ interface SessionData {
   is_tv_mode: boolean;
 }
 
-interface SessionMetrics {
-  clicks: number;
-  keystrokes: number;
-  scrolls: number;
-  pageViews: number;
-  idleTime: number;
-  activeTime: number;
-}
-
 const SESSION_KEY = 'user_session_id';
-const METRICS_KEY = 'session_metrics';
-const HEARTBEAT_INTERVAL = 15000; // 15 seconds
-const IDLE_THRESHOLD = 60000; // 1 minute
-const ACTIVITY_THROTTLE = 5000; // 5 seconds
 
 export function useUserSession() {
   const sessionIdRef = useRef<string | null>(null);
   const lastActivityRef = useRef<Date>(new Date());
-  const lastUserInteractionRef = useRef<Date>(new Date());
-  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const activeTimeStartRef = useRef<Date>(new Date());
-  const isIdleRef = useRef<boolean>(false);
-  
-  const [metrics, setMetrics] = useState<SessionMetrics>(() => {
-    try {
-      const saved = localStorage.getItem(METRICS_KEY);
-      return saved ? JSON.parse(saved) : {
-        clicks: 0,
-        keystrokes: 0,
-        scrolls: 0,
-        pageViews: 0,
-        idleTime: 0,
-        activeTime: 0,
-      };
-    } catch {
-      return {
-        clicks: 0,
-        keystrokes: 0,
-        scrolls: 0,
-        pageViews: 0,
-        idleTime: 0,
-        activeTime: 0,
-      };
-    }
-  });
-
-  // Save metrics to localStorage
-  useEffect(() => {
-    localStorage.setItem(METRICS_KEY, JSON.stringify(metrics));
-  }, [metrics]);
 
   // Get user's IP address
   const getIpAddress = useCallback(async (): Promise<string | null> => {
@@ -103,19 +58,6 @@ export function useUserSession() {
       sessionIdRef.current = sessionId;
       localStorage.setItem(SESSION_KEY, sessionId);
       
-      // Reset metrics for new session
-      setMetrics({
-        clicks: 0,
-        keystrokes: 0,
-        scrolls: 0,
-        pageViews: 1,
-        idleTime: 0,
-        activeTime: 0,
-      });
-      
-      activeTimeStartRef.current = new Date();
-      console.log('📊 Session created:', sessionId);
-      
       return sessionId;
     } catch (error) {
       console.error('Error creating session:', error);
@@ -123,21 +65,19 @@ export function useUserSession() {
     }
   }, [getIpAddress]);
 
-  // Update session activity with more precise tracking
-  const updateActivity = useCallback(async (station?: string, forceUpdate: boolean = false) => {
+  // Update session activity
+  const updateActivity = useCallback(async (station?: string) => {
     const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
     if (!sessionId) return;
 
     const now = new Date();
-    
-    // Throttle updates unless forced
-    if (!forceUpdate && now.getTime() - lastActivityRef.current.getTime() < ACTIVITY_THROTTLE) return;
+    // Throttle updates to every 30 seconds
+    if (now.getTime() - lastActivityRef.current.getTime() < 30000) return;
     lastActivityRef.current = now;
 
     try {
       const updateData: Record<string, unknown> = {
         last_activity_at: now.toISOString(),
-        is_active: true,
       };
 
       if (station) {
@@ -152,33 +92,6 @@ export function useUserSession() {
       console.error('Error updating activity:', error);
     }
   }, []);
-
-  // Record user interaction for precision tracking
-  const recordInteraction = useCallback((type: 'click' | 'keystroke' | 'scroll') => {
-    const now = new Date();
-    lastUserInteractionRef.current = now;
-    
-    // If was idle, calculate idle time
-    if (isIdleRef.current) {
-      isIdleRef.current = false;
-      activeTimeStartRef.current = now;
-    }
-    
-    setMetrics(prev => ({
-      ...prev,
-      [type === 'click' ? 'clicks' : type === 'keystroke' ? 'keystrokes' : 'scrolls']: 
-        prev[type === 'click' ? 'clicks' : type === 'keystroke' ? 'keystrokes' : 'scrolls'] + 1,
-    }));
-  }, []);
-
-  // Record page view
-  const recordPageView = useCallback(() => {
-    setMetrics(prev => ({
-      ...prev,
-      pageViews: prev.pageViews + 1,
-    }));
-    updateActivity(undefined, true);
-  }, [updateActivity]);
 
   // Increment counters
   const incrementCounter = useCallback(async (
@@ -204,100 +117,31 @@ export function useUserSession() {
             last_activity_at: new Date().toISOString()
           })
           .eq('id', sessionId);
-        
-        console.log(`📊 Counter incremented: ${counter} = ${currentValue + 1}`);
       }
     } catch (error) {
       console.error('Error incrementing counter:', error);
     }
   }, []);
 
-  // End session with final metrics
+  // End session
   const endSession = useCallback(async () => {
     const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
     if (!sessionId) return;
-
-    // Calculate final active time
-    const now = new Date();
-    const finalActiveTime = metrics.activeTime + 
-      (now.getTime() - activeTimeStartRef.current.getTime()) / 1000;
 
     try {
       await supabase
         .from('user_sessions')
         .update({
-          logout_at: now.toISOString(),
+          logout_at: new Date().toISOString(),
           is_active: false,
         })
         .eq('id', sessionId);
 
       localStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(METRICS_KEY);
       sessionIdRef.current = null;
-      
-      console.log('📊 Session ended. Final metrics:', {
-        ...metrics,
-        activeTime: Math.round(finalActiveTime),
-      });
     } catch (error) {
       console.error('Error ending session:', error);
     }
-  }, [metrics]);
-
-  // Heartbeat for precise session tracking
-  useEffect(() => {
-    const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
-    if (!sessionId) return;
-
-    const heartbeat = async () => {
-      const now = new Date();
-      const timeSinceInteraction = now.getTime() - lastUserInteractionRef.current.getTime();
-      
-      // Check if user is idle
-      if (timeSinceInteraction > IDLE_THRESHOLD && !isIdleRef.current) {
-        isIdleRef.current = true;
-        // Add active time before going idle
-        const activeSeconds = (now.getTime() - activeTimeStartRef.current.getTime()) / 1000;
-        setMetrics(prev => ({
-          ...prev,
-          activeTime: prev.activeTime + activeSeconds,
-        }));
-        console.log('📊 User went idle');
-      } else if (timeSinceInteraction <= IDLE_THRESHOLD && isIdleRef.current) {
-        isIdleRef.current = false;
-        activeTimeStartRef.current = now;
-        console.log('📊 User became active');
-      }
-      
-      // Track idle time
-      if (isIdleRef.current) {
-        setMetrics(prev => ({
-          ...prev,
-          idleTime: prev.idleTime + (HEARTBEAT_INTERVAL / 1000),
-        }));
-      }
-
-      // Update session in database
-      try {
-        await supabase
-          .from('user_sessions')
-          .update({
-            last_activity_at: now.toISOString(),
-            is_active: !isIdleRef.current,
-          })
-          .eq('id', sessionId);
-      } catch (error) {
-        console.error('Heartbeat error:', error);
-      }
-    };
-
-    heartbeatIntervalRef.current = setInterval(heartbeat, HEARTBEAT_INTERVAL);
-    
-    return () => {
-      if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
-      }
-    };
   }, []);
 
   // Restore session on mount
@@ -306,69 +150,28 @@ export function useUserSession() {
     if (storedSessionId) {
       sessionIdRef.current = storedSessionId;
       // Update activity to show session is still active
-      updateActivity(undefined, true);
-      console.log('📊 Session restored:', storedSessionId);
+      updateActivity();
     }
   }, [updateActivity]);
-
-  // Track user interactions for precision monitoring
-  useEffect(() => {
-    let scrollThrottle: ReturnType<typeof setTimeout> | null = null;
-    
-    const handleClick = () => recordInteraction('click');
-    const handleKeydown = () => recordInteraction('keystroke');
-    const handleScroll = () => {
-      if (scrollThrottle) return;
-      scrollThrottle = setTimeout(() => {
-        recordInteraction('scroll');
-        scrollThrottle = null;
-      }, 500);
-    };
-
-    document.addEventListener('click', handleClick);
-    document.addEventListener('keydown', handleKeydown);
-    document.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('keydown', handleKeydown);
-      document.removeEventListener('scroll', handleScroll);
-      if (scrollThrottle) clearTimeout(scrollThrottle);
-    };
-  }, [recordInteraction]);
 
   // Track page visibility for activity updates
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        updateActivity(undefined, true);
-        activeTimeStartRef.current = new Date();
-        isIdleRef.current = false;
-        console.log('📊 Page became visible');
+        updateActivity();
       } else if (document.visibilityState === 'hidden') {
-        // Calculate active time before hiding
-        const now = new Date();
-        if (!isIdleRef.current) {
-          const activeSeconds = (now.getTime() - activeTimeStartRef.current.getTime()) / 1000;
-          setMetrics(prev => ({
-            ...prev,
-            activeTime: prev.activeTime + activeSeconds,
-          }));
-        }
-        
         // Mark session as inactive when page is hidden
         const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
         if (sessionId) {
+          // Use regular fetch for session update (sendBeacon doesn't work with Supabase headers)
           supabase
             .from('user_sessions')
             .update({ 
-              last_activity_at: now.toISOString(),
-              is_active: false,
+              last_activity_at: new Date().toISOString(),
             })
             .eq('id', sessionId)
             .then(() => {});
         }
-        console.log('📊 Page became hidden');
       }
     };
 
@@ -376,6 +179,7 @@ export function useUserSession() {
       // Mark session as inactive on page close
       const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
       if (sessionId) {
+        // Use synchronous approach for beforeunload
         supabase
           .from('user_sessions')
           .update({ 
@@ -401,10 +205,6 @@ export function useUserSession() {
     updateActivity,
     incrementCounter,
     endSession,
-    recordPageView,
-    recordInteraction,
     getSessionId: () => sessionIdRef.current || localStorage.getItem(SESSION_KEY),
-    metrics,
-    isIdle: isIdleRef.current,
   };
 }
