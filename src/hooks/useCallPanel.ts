@@ -656,12 +656,14 @@ export function useCallPanel() {
       return { patient: existingPatient, isDuplicate: true };
     }
     
+    // Create patient already with waiting-triage status (auto-forward to triage queue)
     const newPatient: Patient = {
       id: `patient-${Date.now()}`,
       name: trimmedName,
-      status: 'waiting',
+      status: 'waiting-triage',
       priority,
       createdAt: getBrazilTime(),
+      calledBy: 'cadastro',
     };
     setPatients(prev => {
       // Double-check to avoid race conditions
@@ -671,7 +673,7 @@ export function useCallPanel() {
       return [...prev, newPatient];
     });
     
-    // Sync to database for multi-device synchronization
+    // Sync to database - insert directly into triage queue (auto-forward)
     if (unitName) {
       // Check if patient already exists in database
       const { data: existingInDB } = await supabase
@@ -687,10 +689,11 @@ export function useCallPanel() {
           .from('patient_calls')
           .insert({
             unit_name: unitName,
-            call_type: 'registration',
+            call_type: 'triage',
             patient_name: trimmedName,
             priority,
             status: 'waiting',
+            destination: 'Triagem',
           });
       }
     }

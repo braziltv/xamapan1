@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
-import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { RotatingTipsCard } from '@/components/RotatingTipsCard';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SuccessAnimation } from '@/components/SuccessAnimation';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
@@ -119,33 +120,57 @@ export function TriagePanel({
   useInactivityReload();
 
   const alertColors = {
-    emergency: 'bg-red-500/20 border-red-500',
-    priority: 'bg-amber-500/20 border-amber-500',
-    normal: 'bg-green-500/20 border-green-500'
+    emergency: 'border-red-500 text-red-500',
+    priority: 'border-amber-500 text-amber-500',
+    normal: 'border-green-500 text-green-500'
+  };
+
+  const alertBgColors = {
+    emergency: 'bg-red-600',
+    priority: 'bg-amber-600',
+    normal: 'bg-green-600'
   };
 
   return (
     <div className="space-y-4 sm:space-y-6 relative">
-      {/* Visual Alert Overlay - New Patient */}
+      {/* Visual Alert Overlay - New Patient - More Prominent */}
       {visualAlert.active && visualAlert.priority && (
-        <div className={`absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-pulse ${alertColors[visualAlert.priority]}`}>
-          <div className={`absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-white font-bold text-sm ${
-            visualAlert.priority === 'emergency' ? 'bg-red-600' : 
-            visualAlert.priority === 'priority' ? 'bg-amber-600' : 'bg-green-600'
-          }`}>
-            {visualAlert.priority === 'emergency' ? '🚨 EMERGÊNCIA!' : 
-             visualAlert.priority === 'priority' ? '⚠️ PRIORIDADE' : '✓ Novo Paciente'}
+        <>
+          {/* Animated border glow */}
+          <div className={`absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-flash-border ${alertColors[visualAlert.priority]}`} />
+          
+          {/* Animated notification badge */}
+          <div className={`absolute top-4 left-1/2 z-50 pointer-events-none animate-slide-down-bounce`}>
+            <div className={`flex items-center gap-2 px-6 py-3 rounded-full text-white font-bold text-base shadow-2xl animate-shake ${alertBgColors[visualAlert.priority]}`}>
+              <span className="text-xl animate-bounce">
+                {visualAlert.priority === 'emergency' ? '🚨' : 
+                 visualAlert.priority === 'priority' ? '⚠️' : '🔔'}
+              </span>
+              <span>
+                {visualAlert.priority === 'emergency' ? 'EMERGÊNCIA!' : 
+                 visualAlert.priority === 'priority' ? 'PRIORIDADE!' : 'Novo Paciente!'}
+              </span>
+              <span className="text-xl animate-bounce">
+                {visualAlert.priority === 'emergency' ? '🚨' : 
+                 visualAlert.priority === 'priority' ? '⚠️' : '🔔'}
+              </span>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Forward Alert Overlay - Patient Forwarded from another module */}
       {forwardAlert.active && forwardAlert.patient && (
-        <div className="absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-pulse bg-blue-500/20 border-blue-500">
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center gap-2">
-            ↪ Encaminhado: {forwardAlert.patient.name} ({forwardAlert.patient.fromModule})
+        <>
+          <div className="absolute inset-0 z-50 pointer-events-none rounded-xl border-4 animate-flash-border border-blue-500 text-blue-500" />
+          <div className="absolute top-4 left-1/2 z-50 pointer-events-none animate-slide-down-bounce">
+            <div className="flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 text-white font-bold text-base shadow-2xl animate-shake">
+              <span className="text-xl animate-bounce">↪</span>
+              <span>Encaminhado: {forwardAlert.patient.name}</span>
+              <span className="text-sm opacity-80">({forwardAlert.patient.fromModule})</span>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Sound Toggle */}
@@ -165,7 +190,10 @@ export function TriagePanel({
       <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 sm:p-4">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-            <span className="animate-bounce inline-block">📞</span> Chamada Atual - Triagem
+            <span className="animate-bounce inline-block">📞</span> 
+            <ContextualTip tipKey="triagem_avaliacao" side="right" className="text-white">
+              Chamada Atual - Triagem
+            </ContextualTip>
           </h2>
         </div>
         <div className="p-4 sm:p-6">
@@ -319,7 +347,12 @@ export function TriagePanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Fila de Espera <AnimatedCounter value={waitingPatients.length} />
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> 
+          <ContextualTip tipKey="triagem_lista" side="right">
+            Fila de Espera
+          </ContextualTip>
+          <AnimatedCounter value={waitingPatients.length} />
+          <InlineTip tipKey="atualizacao_auto" />
         </h2>
         
         {waitingPatients.length === 0 ? (
@@ -584,7 +617,7 @@ export function TriagePanel({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <DailyQuoteCard />
+        <RotatingTipsCard />
       </div>
 
       {/* Confirmation Dialog */}

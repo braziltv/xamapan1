@@ -39,7 +39,7 @@ import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useForwardNotification } from '@/hooks/useForwardNotification';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
-import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { RotatingTipsCard } from '@/components/RotatingTipsCard';
 
 import {
   Tooltip,
@@ -47,6 +47,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
@@ -352,7 +353,12 @@ export function DoctorPanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Aguardando Consulta - {currentConsultorioLabel} <AnimatedCounter value={waitingPatients.filter(p => p.destination === currentConsultorioLabel).length} />
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> 
+          <ContextualTip tipKey="setor_lista" side="right">
+            Aguardando Consulta - {currentConsultorioLabel}
+          </ContextualTip>
+          <AnimatedCounter value={waitingPatients.filter(p => p.destination === currentConsultorioLabel).length} />
+          <InlineTip tipKey="atualizacao_auto" />
         </h2>
         
         {waitingPatients.filter(p => p.destination === currentConsultorioLabel).length === 0 ? (
@@ -495,7 +501,7 @@ export function DoctorPanel({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <DailyQuoteCard />
+        <RotatingTipsCard />
       </div>
 
       {/* Confirmation Dialog */}

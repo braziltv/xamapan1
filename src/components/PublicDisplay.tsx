@@ -1695,7 +1695,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       destination?: string
     ) => {
       const now = Date.now();
-      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current });
+      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current, audioUnlocked });
+
+      // Check if audio is unlocked first
+      if (!audioUnlocked) {
+        console.warn('⚠️ Audio not unlocked, cannot speak. User needs to click the screen first.');
+        return;
+      }
 
       // Debounce: ignore calls within 2 seconds of each other FOR THE SAME NAME
       const lastCallKey = `${name}-${caller}`;
@@ -1707,9 +1713,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         return;
       }
       
+      // Check if isSpeakingRef is stuck (more than 45 seconds since last call)
+      const lastSpeakTime = lastSpeakCallRef.current;
+      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 45000) {
+        console.warn('⚠️ isSpeakingRef was stuck for over 45s, forcing reset');
+        isSpeakingRef.current = false;
+      }
+      
       // Prevent duplicate TTS calls - but add a timeout safety
       if (isSpeakingRef.current) {
-        console.log('⏸️ Already speaking, skipping duplicate call');
+        console.log('⏸️ Already speaking, skipping duplicate call. Time since last speak:', now - lastSpeakTime, 'ms');
         return;
       }
       
@@ -1767,13 +1780,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.log('✅ TTS completed (2x repetition - Google Cloud TTS Brazilian Portuguese)');
       } catch (e) {
         console.error('❌ Google Cloud TTS failed:', e);
+        // Show error to user
+        setTtsError({ 
+          message: e instanceof Error ? e.message : 'Erro desconhecido no TTS', 
+          timestamp: new Date() 
+        });
       } finally {
         clearTimeout(safetyTimeout);
         isSpeakingRef.current = false;
         console.log('🎤 isSpeakingRef set to FALSE');
       }
     },
-    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase]
+    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase, audioUnlocked]
   );
 
   // Stop the flashing alert after exactly 10 seconds
@@ -1873,52 +1891,65 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         },
         (payload) => {
           const call = payload.new as any;
-          
+
           // Filter by unit name in handler (to handle spaces/special chars)
           const normalizedUnit = (unitName || '').trim().toLowerCase();
           const callUnit = (call.unit_name || '').trim().toLowerCase();
           if (!normalizedUnit || callUnit !== normalizedUnit) {
             return;
           }
-          
+
           console.log('🔔 Received INSERT event:', payload);
-          
+
+          // Important: only process when the call becomes ACTIVE.
+          // Many flows insert the row as "waiting" and later UPDATE to "active".
+          if (call.status !== 'active') {
+            console.log('ℹ️ INSERT ignored (status not active):', {
+              id: call.id,
+              status: call.status,
+              call_type: call.call_type,
+              patient_name: call.patient_name,
+            });
+            return;
+          }
+
           if (processedCallsRef.current.has(call.id)) {
-            console.log('Skipping already processed call:', call.id);
+            console.log('Skipping already processed ACTIVE call:', call.id);
             return;
           }
           processedCallsRef.current.add(call.id);
 
-          console.log('📢 Processing call:', call.patient_name, call.call_type, call.status);
-          
-          if (call.status === 'active') {
-            // Dispatch activity event to reset idle timer (anti-standby)
-            window.dispatchEvent(new CustomEvent('patientCallActivity'));
-            
-            // Valid call types for announcements
-            const validCallTypes = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria', 'custom'] as const;
-            type ValidCallType = typeof validCallTypes[number];
-            
-            // Handle custom announcements (just speak the text, no destination display)
-            if (call.call_type === 'custom') {
-              console.log('Custom announcement:', call.patient_name);
-              speakCustomTextRef.current(call.patient_name);
-            } else if (validCallTypes.includes(call.call_type as ValidCallType)) {
-              // Update display state based on call type
-              if (call.call_type === 'triage') {
-                setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
-              } else {
-                // For doctor and all services (ecg, curativos, raiox, enfermaria)
-                setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
-              }
-              
-              // Play audio announcement with correct service type
-              const callType = call.call_type as 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
-              console.log('🔊 About to call speakName with type:', callType);
-              speakNameRef.current(call.patient_name, callType, call.destination || undefined);
+          console.log('📢 Processing ACTIVE call (INSERT):', call.patient_name, call.call_type, call.status);
+
+          // Dispatch activity event to reset idle timer (anti-standby)
+          window.dispatchEvent(new CustomEvent('patientCallActivity'));
+
+          // Valid call types for announcements
+          const validCallTypes = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria', 'custom'] as const;
+          type ValidCallType = typeof validCallTypes[number];
+
+          // Handle custom announcements (just speak the text, no destination display)
+          if (call.call_type === 'custom') {
+            console.log('Custom announcement (INSERT):', call.patient_name);
+            speakCustomTextRef.current(call.patient_name);
+            return;
+          }
+
+          if (validCallTypes.includes(call.call_type as ValidCallType)) {
+            // Update display state based on call type
+            if (call.call_type === 'triage') {
+              setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
             } else {
-              console.log('⚠️ Unknown call type:', call.call_type);
+              // For doctor and all services (ecg, curativos, raiox, enfermaria)
+              setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
             }
+
+            // Play audio announcement with correct service type
+            const callType = call.call_type as 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+            console.log('🔊 About to call speakName (INSERT) with type:', callType);
+            speakNameRef.current(call.patient_name, callType, call.destination || undefined);
+          } else {
+            console.log('⚠️ Unknown call type:', call.call_type);
           }
         }
       )
@@ -1931,12 +1962,56 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         },
         (payload) => {
           const call = payload.new as any;
-          
+          const prev = payload.old as any;
+
           // Filter by unit name in handler
           const normalizedUnit = (unitName || '').trim().toLowerCase();
           const callUnit = (call.unit_name || '').trim().toLowerCase();
           if (!normalizedUnit || callUnit !== normalizedUnit) {
             return;
+          }
+
+          const prevStatus = prev?.status;
+
+          // If the row transitions to ACTIVE, announce it here (common flow: waiting -> active)
+          if (call.status === 'active' && prevStatus !== 'active') {
+            console.log('🔁 Call became ACTIVE (UPDATE):', {
+              id: call.id,
+              from: prevStatus,
+              to: call.status,
+              name: call.patient_name,
+              type: call.call_type,
+            });
+
+            if (processedCallsRef.current.has(call.id)) {
+              console.log('Skipping already processed ACTIVE call (UPDATE):', call.id);
+              return;
+            }
+            processedCallsRef.current.add(call.id);
+
+            // Dispatch activity event to reset idle timer (anti-standby)
+            window.dispatchEvent(new CustomEvent('patientCallActivity'));
+
+            const validCallTypes = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria', 'custom'] as const;
+            type ValidCallType = typeof validCallTypes[number];
+
+            if (call.call_type === 'custom') {
+              console.log('Custom announcement (UPDATE):', call.patient_name);
+              speakCustomTextRef.current(call.patient_name);
+              return;
+            }
+
+            if (validCallTypes.includes(call.call_type as ValidCallType)) {
+              if (call.call_type === 'triage') {
+                setCurrentTriageCall({ name: call.patient_name, destination: call.destination || undefined });
+              } else {
+                setCurrentDoctorCall({ name: call.patient_name, destination: call.destination || undefined });
+              }
+
+              const callType = call.call_type as 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria';
+              console.log('🔊 About to call speakName (UPDATE) with type:', callType);
+              speakNameRef.current(call.patient_name, callType, call.destination || undefined);
+            }
           }
 
           if (call.status === 'completed') {

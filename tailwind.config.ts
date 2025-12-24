@@ -110,10 +110,55 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "flash-border": {
+          "0%, 100%": { 
+            borderColor: "transparent",
+            boxShadow: "0 0 0 0 transparent"
+          },
+          "50%": { 
+            borderColor: "currentColor",
+            boxShadow: "0 0 30px 5px currentColor"
+          },
+        },
+        "slide-down-bounce": {
+          "0%": { 
+            transform: "translateX(-50%) translateY(-100%)",
+            opacity: "0"
+          },
+          "60%": { 
+            transform: "translateX(-50%) translateY(10%)",
+            opacity: "1"
+          },
+          "80%": { 
+            transform: "translateX(-50%) translateY(-5%)"
+          },
+          "100%": { 
+            transform: "translateX(-50%) translateY(0)"
+          },
+        },
+        "shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-4px)" },
+          "20%, 40%, 60%, 80%": { transform: "translateX(4px)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { 
+            boxShadow: "0 0 20px 0 currentColor",
+            opacity: "0.8"
+          },
+          "50%": { 
+            boxShadow: "0 0 40px 10px currentColor",
+            opacity: "1"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "flash-border": "flash-border 0.5s ease-in-out 3",
+        "slide-down-bounce": "slide-down-bounce 0.5s ease-out forwards",
+        "shake": "shake 0.5s ease-in-out",
+        "glow-pulse": "glow-pulse 1s ease-in-out infinite",
       },
     },
   },

@@ -32,7 +32,7 @@ import { useState } from 'react';
 import { useNewPatientSound } from '@/hooks/useNewPatientSound';
 import { useForwardNotification } from '@/hooks/useForwardNotification';
 import { useInactivityReload } from '@/hooks/useInactivityReload';
-import { DailyQuoteCard } from '@/components/DailyQuoteCard';
+import { RotatingTipsCard } from '@/components/RotatingTipsCard';
 import {
   Tooltip,
   TooltipContent,
@@ -40,6 +40,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { LucideIcon } from 'lucide-react';
+import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 const CONSULTORIOS = [
   { id: 'cons1', name: 'Consultório 1' },
@@ -411,7 +412,12 @@ export function ServicePanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Aguardando - {serviceName} <AnimatedCounter value={waitingPatients.length} />
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> 
+          <ContextualTip tipKey="setor_lista" side="right">
+            Aguardando - {serviceName}
+          </ContextualTip>
+          <AnimatedCounter value={waitingPatients.length} />
+          <InlineTip tipKey="atualizacao_auto" />
         </h2>
         
         {waitingPatients.length === 0 ? (
@@ -713,7 +719,7 @@ export function ServicePanel({
 
       {/* Daily Motivational Quote */}
       <div className="mt-4">
-        <DailyQuoteCard />
+        <RotatingTipsCard />
       </div>
 
       {/* Confirmation Dialog */}
