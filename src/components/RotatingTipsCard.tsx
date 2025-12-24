@@ -239,8 +239,8 @@ const USAGE_TIPS: UsageTip[] = [
     emoji: "👥"
   },
   {
-    title: "Notificações Sonoras",
-    tip: "Receba alertas quando novos pacientes chegarem",
+    title: "Notificações Automáticas",
+    tip: "O App recebe alerta sonoro e visual automático quando novos pacientes chegarem",
     detail: "O sistema emite um som ao adicionar pacientes à sua fila.",
     icon: <Bell className="w-4 h-4" />,
     bgColor: "from-yellow-500 via-amber-600 to-orange-700",
