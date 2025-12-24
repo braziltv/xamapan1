@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Lightbulb, 
-  Quote, 
+  Quote,
   Sparkles, 
-  X, 
   ChevronRight,
   HelpCircle,
   ClipboardList,
@@ -203,15 +202,7 @@ interface ContentItem {
 }
 
 // ==================== CONSTANTES ====================
-const STORAGE_KEY = 'rotatingTips_dismissState';
-const DISMISS_DELAY = 60 * 60 * 1000; // 1 hour
 const ROTATION_INTERVAL = 3 * 60 * 1000; // 3 minutes
-const SUPPORT_INTERVAL = 10 * 60 * 1000; // 10 minutes for support card
-
-interface DismissState {
-  dismissCount: number;
-  lastDismissTime: number;
-}
 
 function getRandomIndex(max: number, excludeIndex?: number): number {
   let index = Math.floor(Math.random() * max);
@@ -224,7 +215,6 @@ function getRandomIndex(max: number, excludeIndex?: number): number {
 }
 
 export function RotatingTipsCard() {
-  const [isHidden, setIsHidden] = useState(true);
   const [currentContent, setCurrentContent] = useState<ContentItem>({ type: 'quote', index: 0 });
   const [animationKey, setAnimationKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -232,7 +222,6 @@ export function RotatingTipsCard() {
   const [showContent, setShowContent] = useState(false);
   const [showSubContent, setShowSubContent] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const rotationCountRef = useRef(0);
 
@@ -284,59 +273,6 @@ export function RotatingTipsCard() {
       };
     }
   }, [currentContent]);
-
-  // Check visibility based on dismiss state
-  useEffect(() => {
-    const checkVisibility = () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) {
-          setIsHidden(false);
-          return;
-        }
-
-        const state: DismissState = JSON.parse(stored);
-        const now = Date.now();
-        const elapsed = now - state.lastDismissTime;
-
-        if (elapsed >= DISMISS_DELAY) {
-          localStorage.removeItem(STORAGE_KEY);
-          setIsHidden(false);
-        } else {
-          setIsHidden(true);
-        }
-      } catch {
-        setIsHidden(false);
-      }
-    };
-
-    checkVisibility();
-    const interval = setInterval(checkVisibility, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleDismiss = useCallback(() => {
-    setIsClosing(true);
-    
-    setTimeout(() => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const now = Date.now();
-        
-        const newState: DismissState = {
-          dismissCount: stored ? JSON.parse(stored).dismissCount + 1 : 1,
-          lastDismissTime: now,
-        };
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-        setIsHidden(true);
-        setIsClosing(false);
-      } catch {
-        setIsHidden(true);
-        setIsClosing(false);
-      }
-    }, 400);
-  }, []);
 
   const runAnimation = useCallback(() => {
     setIsVisible(true);
@@ -407,8 +343,6 @@ export function RotatingTipsCard() {
   }, []);
 
   useEffect(() => {
-    if (isHidden) return;
-
     const timers = runAnimation();
 
     const interval = setInterval(() => {
@@ -419,9 +353,7 @@ export function RotatingTipsCard() {
       timers.forEach(clearTimeout);
       clearInterval(interval);
     };
-  }, [runAnimation, isHidden, transitionToNext]);
-
-  if (isHidden) return null;
+  }, [runAnimation, transitionToNext]);
 
   return (
     <div 
@@ -432,17 +364,15 @@ export function RotatingTipsCard() {
         p-3 sm:p-4 shadow-lg
         border border-white/20
         transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]
-        ${isClosing 
-          ? 'opacity-0 scale-95 translate-y-4' 
-          : isVisible 
-            ? 'opacity-100 translate-y-0 scale-100' 
-            : 'opacity-0 translate-y-6 scale-98'
+        ${isVisible 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-6 scale-98'
         }
         ${isTransitioning ? 'bg-opacity-95' : 'bg-opacity-100'}
       `}
     >
-      {/* Action Buttons */}
-      <div className="absolute top-2 right-2 z-20 flex gap-1.5">
+      {/* Action Button - Next Only */}
+      <div className="absolute top-2 right-2 z-20">
         <button
           onClick={transitionToNext}
           disabled={isTransitioning}
@@ -455,18 +385,6 @@ export function RotatingTipsCard() {
           title="Próximo"
         >
           <ChevronRight className="w-4 h-4" />
-        </button>
-        
-        <button
-          onClick={handleDismiss}
-          className="p-1.5 rounded-full 
-            bg-white/30 hover:bg-white/50 backdrop-blur-sm
-            text-white hover:text-white shadow-md
-            transition-all duration-200 hover:scale-110
-            border border-white/40"
-          title="Fechar (volta em 1 hora)"
-        >
-          <X className="w-4 h-4" />
         </button>
       </div>
 
