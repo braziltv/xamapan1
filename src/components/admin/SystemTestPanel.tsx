@@ -789,24 +789,12 @@ export function SystemTestPanel() {
 
     // ==================== PWA ====================
     {
-      name: 'Página de Instalação',
+      name: 'Página de Configuração TV',
       category: '📱 PWA',
       fn: async () => {
         try {
-          const response = await fetch('/install');
+          const response = await fetch('/tv-setup');
           return response.ok ? { success: true, message: 'Página acessível' } : { success: false, message: 'Erro', error: `Status: ${response.status}` };
-        } catch (err) {
-          return { success: false, message: 'Erro', error: err instanceof Error ? err.message : 'Erro' };
-        }
-      }
-    },
-    {
-      name: 'Modo TV',
-      category: '📱 PWA',
-      fn: async () => {
-        try {
-          const response = await fetch('/install?mode=tv');
-          return response.ok ? { success: true, message: 'Modo TV acessível' } : { success: false, message: 'Erro', error: `Status: ${response.status}` };
         } catch (err) {
           return { success: false, message: 'Erro', error: err instanceof Error ? err.message : 'Erro' };
         }

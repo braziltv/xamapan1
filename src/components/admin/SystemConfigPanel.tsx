@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, User, Send, HardDrive, Megaphone } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -45,20 +45,11 @@ export function SystemConfigPanel() {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={() => navigate('/install?mode=tv')}
+            onClick={() => navigate('/tv-setup')}
             className="gap-2"
           >
             <Tv className="w-4 h-4" />
-            <span className="hidden sm:inline">Instalar</span> Xama-Pan TV
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate('/install?mode=normal')}
-            className="gap-2"
-          >
-            <User className="w-4 h-4" />
-            <span className="hidden sm:inline">Instalar</span> Xama-Pan Full
+            <span className="hidden sm:inline">Configurar</span> Painel TV
           </Button>
         </div>
       </div>
