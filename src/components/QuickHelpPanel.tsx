@@ -80,14 +80,14 @@ const HELP_CATEGORIES: TipCategory[] = [
     color: 'bg-purple-500',
     tips: [
       {
-        icon: '🔀➡️',
-        title: 'Encaminhar',
-        description: 'Envia o paciente para outro setor com anúncio na TV'
+        icon: '🔊➡️',
+        title: 'Encaminhar com voz',
+        description: 'Envia o paciente para outro setor com anúncio sonoro na TV pública'
       },
       {
         icon: '🔕➡️',
         title: 'Encaminhar interno',
-        description: 'Direcionamento silencioso sem exibição pública'
+        description: 'Direcionamento silencioso, sem som e sem exibição pública - apenas interno'
       }
     ]
   },
@@ -103,13 +103,13 @@ const HELP_CATEGORIES: TipCategory[] = [
       },
       {
         icon: '🔊👤',
-        title: 'Chamar no setor',
-        description: 'Chamada pública por voz exibida no painel da TV'
+        title: 'Chamar com voz',
+        description: 'Chamada pública com anúncio sonoro exibida no painel da TV'
       },
       {
         icon: '🔕👤',
         title: 'Chamada interna',
-        description: 'Chamada discreta sem exibição no painel público'
+        description: 'Chamada silenciosa, sem som e sem exibição no painel público - apenas interno'
       }
     ]
   },
