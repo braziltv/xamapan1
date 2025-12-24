@@ -1695,7 +1695,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       destination?: string
     ) => {
       const now = Date.now();
-      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current });
+      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current, audioUnlocked });
+
+      // Check if audio is unlocked first
+      if (!audioUnlocked) {
+        console.warn('⚠️ Audio not unlocked, cannot speak. User needs to click the screen first.');
+        return;
+      }
 
       // Debounce: ignore calls within 2 seconds of each other FOR THE SAME NAME
       const lastCallKey = `${name}-${caller}`;
@@ -1707,9 +1713,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         return;
       }
       
+      // Check if isSpeakingRef is stuck (more than 45 seconds since last call)
+      const lastSpeakTime = lastSpeakCallRef.current;
+      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 45000) {
+        console.warn('⚠️ isSpeakingRef was stuck for over 45s, forcing reset');
+        isSpeakingRef.current = false;
+      }
+      
       // Prevent duplicate TTS calls - but add a timeout safety
       if (isSpeakingRef.current) {
-        console.log('⏸️ Already speaking, skipping duplicate call');
+        console.log('⏸️ Already speaking, skipping duplicate call. Time since last speak:', now - lastSpeakTime, 'ms');
         return;
       }
       
@@ -1767,13 +1780,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         console.log('✅ TTS completed (2x repetition - Google Cloud TTS Brazilian Portuguese)');
       } catch (e) {
         console.error('❌ Google Cloud TTS failed:', e);
+        // Show error to user
+        setTtsError({ 
+          message: e instanceof Error ? e.message : 'Erro desconhecido no TTS', 
+          timestamp: new Date() 
+        });
       } finally {
         clearTimeout(safetyTimeout);
         isSpeakingRef.current = false;
         console.log('🎤 isSpeakingRef set to FALSE');
       }
     },
-    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase]
+    [playNotificationSound, speakWithConcatenatedTTS, getDestinationPhrase, audioUnlocked]
   );
 
   // Stop the flashing alert after exactly 10 seconds
