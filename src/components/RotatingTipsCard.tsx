@@ -15,7 +15,16 @@ import {
   AlertCircle,
   Wrench,
   Mail,
-  Phone
+  Phone,
+  Users,
+  Clock,
+  MessageSquare,
+  Monitor,
+  Search,
+  Bell,
+  Star,
+  Shield,
+  Keyboard
 } from 'lucide-react';
 
 // ==================== FRASES DO DIA ====================
@@ -180,6 +189,78 @@ const USAGE_TIPS: UsageTip[] = [
     icon: <AlertCircle className="w-4 h-4" />,
     bgColor: "from-rose-500 via-red-600 to-orange-700",
     emoji: "⛔"
+  },
+  {
+    title: "Prioridade de Atendimento",
+    tip: "Pacientes prioritários aparecem destacados na fila",
+    detail: "Idosos, gestantes e PCDs são identificados automaticamente pelo sistema.",
+    icon: <Star className="w-4 h-4" />,
+    bgColor: "from-amber-500 via-yellow-600 to-orange-700",
+    emoji: "⭐"
+  },
+  {
+    title: "Chat Interno",
+    tip: "Comunique-se com outros setores pelo chat",
+    detail: "Envie mensagens rápidas para coordenar atendimentos entre equipes.",
+    icon: <MessageSquare className="w-4 h-4" />,
+    bgColor: "from-violet-500 via-purple-600 to-indigo-700",
+    emoji: "💬"
+  },
+  {
+    title: "Painel TV",
+    tip: "A TV exibe automaticamente os pacientes chamados",
+    detail: "Configure o modo TV em uma tela dedicada para a sala de espera.",
+    icon: <Monitor className="w-4 h-4" />,
+    bgColor: "from-blue-500 via-indigo-600 to-violet-700",
+    emoji: "📺"
+  },
+  {
+    title: "Busca de Pacientes",
+    tip: "Use a busca para localizar pacientes rapidamente",
+    detail: "Digite parte do nome para filtrar a lista de pacientes em qualquer fila.",
+    icon: <Search className="w-4 h-4" />,
+    bgColor: "from-emerald-500 via-green-600 to-teal-700",
+    emoji: "🔍"
+  },
+  {
+    title: "Tempo de Espera",
+    tip: "O sistema calcula o tempo de espera automaticamente",
+    detail: "Monitore quanto tempo cada paciente está aguardando atendimento.",
+    icon: <Clock className="w-4 h-4" />,
+    bgColor: "from-pink-500 via-rose-600 to-red-700",
+    emoji: "⏱️"
+  },
+  {
+    title: "Usuários Ativos",
+    tip: "Veja quem está online no sistema",
+    detail: "Acompanhe os colegas conectados em cada setor em tempo real.",
+    icon: <Users className="w-4 h-4" />,
+    bgColor: "from-indigo-500 via-blue-600 to-cyan-700",
+    emoji: "👥"
+  },
+  {
+    title: "Notificações Sonoras",
+    tip: "Receba alertas quando novos pacientes chegarem",
+    detail: "O sistema emite um som ao adicionar pacientes à sua fila.",
+    icon: <Bell className="w-4 h-4" />,
+    bgColor: "from-yellow-500 via-amber-600 to-orange-700",
+    emoji: "🔔"
+  },
+  {
+    title: "Sessão Segura",
+    tip: "Sua sessão é protegida automaticamente",
+    detail: "O sistema faz logout automático após período de inatividade.",
+    icon: <Shield className="w-4 h-4" />,
+    bgColor: "from-slate-600 via-zinc-700 to-neutral-800",
+    emoji: "🔒"
+  },
+  {
+    title: "Atalhos do Sistema",
+    tip: "Navegue rapidamente entre os painéis",
+    detail: "Use os botões laterais para alternar entre Triagem, Médico e outros setores.",
+    icon: <Keyboard className="w-4 h-4" />,
+    bgColor: "from-fuchsia-500 via-pink-600 to-rose-700",
+    emoji: "⌨️"
   }
 ];
 
