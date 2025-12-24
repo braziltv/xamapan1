@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 const PRIORITY_CONFIG = {
   emergency: { label: 'Emergência', color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-500', icon: AlertTriangle },
@@ -189,7 +190,10 @@ export function TriagePanel({
       <div className="bg-card rounded-xl shadow-health border border-border overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 sm:p-4">
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-            <span className="animate-bounce inline-block">📞</span> Chamada Atual - Triagem
+            <span className="animate-bounce inline-block">📞</span> 
+            <ContextualTip tipKey="triagem_avaliacao" side="right" className="text-white">
+              Chamada Atual - Triagem
+            </ContextualTip>
           </h2>
         </div>
         <div className="p-4 sm:p-6">
@@ -343,7 +347,12 @@ export function TriagePanel({
       {/* Waiting Queue */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> Fila de Espera <AnimatedCounter value={waitingPatients.length} />
+          <span className="animate-spin inline-block" style={{ animationDuration: '3s' }}>⏳</span> 
+          <ContextualTip tipKey="triagem_lista" side="right">
+            Fila de Espera
+          </ContextualTip>
+          <AnimatedCounter value={waitingPatients.length} />
+          <InlineTip tipKey="atualizacao_auto" />
         </h2>
         
         {waitingPatients.length === 0 ? (

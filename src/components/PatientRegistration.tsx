@@ -47,6 +47,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { ContextualTip, InlineTip } from '@/components/ContextualTip';
 
 interface PatientRegistrationProps {
   patients: Patient[];
@@ -206,7 +207,10 @@ export function PatientRegistration({
       {/* Registration Form */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-bounce inline-block">📝</span> Cadastrar Paciente
+          <span className="animate-bounce inline-block">📝</span> 
+          <ContextualTip tipKey="cadastro_salvar" side="right">
+            Cadastrar Paciente
+          </ContextualTip>
         </h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -253,7 +257,12 @@ export function PatientRegistration({
       {/* Patient List */}
       <div className="bg-card rounded-xl p-4 sm:p-6 shadow-health border border-border">
         <h2 className="text-lg sm:text-xl font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
-          <span className="animate-pulse inline-block">👥</span> Pacientes Cadastrados <AnimatedCounter value={activePatients.length} />
+          <span className="animate-pulse inline-block">👥</span> 
+          <ContextualTip tipKey="atualizacao_auto" side="right">
+            Pacientes Cadastrados
+          </ContextualTip>
+          <AnimatedCounter value={activePatients.length} />
+          <InlineTip tipKey="regra_fila_unica" />
         </h2>
         
         {activePatients.length === 0 ? (
