@@ -43,6 +43,7 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
 const cities = Object.keys(cityCoordinates);
 
 // Feeds de notícias
+// Feeds de notícias (Tecmundo removido devido a erro de certificado SSL)
 const feeds = [
   { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
   { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
@@ -55,7 +56,6 @@ const feeds = [
   { url: 'https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
   { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
   { url: 'https://www.metropoles.com/feed', source: 'Metrópoles' },
-  { url: 'https://rss.tecmundo.com.br/feed', source: 'Tecmundo' },
   { url: 'https://olhardigital.com.br/feed/', source: 'Olhar Digital' },
   { url: 'https://canaltech.com.br/rss/', source: 'Canaltech' },
   { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
