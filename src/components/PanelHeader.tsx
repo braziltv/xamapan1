@@ -74,7 +74,12 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
             </Button>
           </div>
           
-          {/* Second Row - Controls */}
+          {/* Second Row - Stats Widget */}
+          <div className="w-full overflow-x-auto pb-1">
+            <HeaderStatsWidget unitName={unitName} />
+          </div>
+          
+          {/* Third Row - Controls */}
           <div className="flex items-center justify-between gap-2">
             {/* Time */}
             <div className="flex items-center gap-1.5 text-xs">
