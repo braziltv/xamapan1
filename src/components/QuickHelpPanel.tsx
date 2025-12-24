@@ -114,6 +114,28 @@ const HELP_CATEGORIES: TipCategory[] = [
     ]
   },
   {
+    title: 'Prioridades',
+    icon: <AlertTriangle className="w-5 h-5" />,
+    color: 'bg-red-500',
+    tips: [
+      {
+        icon: '🟢',
+        title: 'Normal',
+        description: 'Atendimento por ordem de chegada na fila'
+      },
+      {
+        icon: '🟡',
+        title: 'Preferencial',
+        description: 'Idosos, gestantes, deficientes e lactantes - prioridade na fila'
+      },
+      {
+        icon: '🔴',
+        title: 'Urgente',
+        description: 'Casos críticos com atendimento imediato - máxima prioridade'
+      }
+    ]
+  },
+  {
     title: 'Finalização',
     icon: <CheckCircle className="w-5 h-5" />,
     color: 'bg-emerald-500',
