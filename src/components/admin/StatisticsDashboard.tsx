@@ -76,6 +76,15 @@ const TYPE_LABELS: Record<string, string> = {
   service: 'Serviço',
 };
 
+interface AggregatedDailyStats {
+  date: string;
+  total_calls: number;
+  triage_calls: number;
+  doctor_calls: number;
+  calls_by_hour: Record<string, number>;
+  calls_by_destination: Record<string, number>;
+}
+
 export function StatisticsDashboard() {
   const { units } = useUnits();
   const [selectedUnit, setSelectedUnit] = useState<string>('all');
@@ -83,6 +92,10 @@ export function StatisticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [callData, setCallData] = useState<CallData[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('realtime');
+  
+  // Dados agregados da tabela statistics_daily
+  const [aggregatedStats, setAggregatedStats] = useState<AggregatedDailyStats[]>([]);
   
   // Refs para captura dos gráficos - tipagem explícita
   const chartDailyRef = useRef<HTMLDivElement | null>(null);
@@ -99,6 +112,39 @@ export function StatisticsDashboard() {
   const [avgPerDay, setAvgPerDay] = useState(0);
   const [peakHour, setPeakHour] = useState<string>('');
   const [topDestination, setTopDestination] = useState<string>('');
+
+  // Buscar dados agregados da tabela statistics_daily
+  const fetchAggregatedData = useCallback(async () => {
+    const startDate = subDays(new Date(), parseInt(period));
+    
+    let query = supabase
+      .from('statistics_daily')
+      .select('*')
+      .gte('date', format(startDate, 'yyyy-MM-dd'))
+      .order('date', { ascending: true });
+    
+    if (selectedUnit !== 'all') {
+      const unit = units.find(u => u.id === selectedUnit);
+      if (unit) {
+        query = query.eq('unit_name', unit.display_name);
+      }
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Erro ao buscar dados agregados:', error);
+    } else {
+      setAggregatedStats((data || []).map(d => ({
+        date: d.date,
+        total_calls: d.total_calls,
+        triage_calls: d.triage_calls,
+        doctor_calls: d.doctor_calls,
+        calls_by_hour: (d.calls_by_hour as Record<string, number>) || {},
+        calls_by_destination: (d.calls_by_destination as Record<string, number>) || {},
+      })));
+    }
+  }, [period, selectedUnit, units]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -128,8 +174,11 @@ export function StatisticsDashboard() {
       processData(data || []);
     }
     
+    // Buscar também dados agregados
+    await fetchAggregatedData();
+    
     setLoading(false);
-  }, [period, selectedUnit, units]);
+  }, [period, selectedUnit, units, fetchAggregatedData]);
 
   const processData = (data: CallData[]) => {
     if (data.length === 0) {
@@ -530,6 +579,8 @@ export function StatisticsDashboard() {
               <SelectItem value="7">Últimos 7 dias</SelectItem>
               <SelectItem value="15">Últimos 15 dias</SelectItem>
               <SelectItem value="30">Últimos 30 dias</SelectItem>
+              <SelectItem value="60">Últimos 60 dias</SelectItem>
+              <SelectItem value="90">Últimos 90 dias</SelectItem>
             </SelectContent>
           </Select>
 
@@ -549,287 +600,480 @@ export function StatisticsDashboard() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <>
-          {/* Cards de resumo */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total de Chamadas</p>
-                    <p className="text-3xl font-bold text-primary">{totalCalls}</p>
-                  </div>
-                  <Activity className="w-10 h-10 text-primary/50" />
-                </div>
-              </CardContent>
-            </Card>
+      {/* Tabs para alternar entre dados em tempo real e agregados */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="realtime" className="gap-2">
+            <Activity className="w-4 h-4" />
+            Tempo Real
+          </TabsTrigger>
+          <TabsTrigger value="aggregated" className="gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Histórico Consolidado
+          </TabsTrigger>
+        </TabsList>
 
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Média por Dia</p>
-                    <p className="text-3xl font-bold text-green-600">{avgPerDay}</p>
-                  </div>
-                  <TrendingUp className="w-10 h-10 text-green-500/50" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Hora de Pico</p>
-                    <p className="text-3xl font-bold text-amber-600">{peakHour || '-'}</p>
-                  </div>
-                  <Clock className="w-10 h-10 text-amber-500/50" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Top Destino</p>
-                    <p className="text-lg font-bold text-purple-600 truncate max-w-[120px]" title={topDestination}>
-                      {topDestination || '-'}
-                    </p>
-                  </div>
-                  <Users className="w-10 h-10 text-purple-500/50" />
-                </div>
-              </CardContent>
-            </Card>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-
-          {/* Gráficos principais */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Gráfico de linha - Evolução diária */}
-            <div ref={chartDailyRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <TrendingUp className="w-5 h-5" />
-                    Evolução Diária
-                  </CardTitle>
-                  <CardDescription>Chamadas por dia no período selecionado</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {dailyStats.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={dailyStats}>
-                        <defs>
-                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="date" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                        <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Legend />
-                        <Area 
-                          type="monotone" 
-                          dataKey="total" 
-                          name="Total"
-                          stroke="hsl(var(--primary))" 
-                          fill="url(#colorTotal)"
-                          strokeWidth={2}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="triage" 
-                          name="Triagem"
-                          stroke="hsl(142, 76%, 36%)" 
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="doctor" 
-                          name="Médico"
-                          stroke="hsl(262, 83%, 58%)" 
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                      Sem dados para o período selecionado
+        ) : (
+          <>
+            {/* Aba de dados em tempo real */}
+            <TabsContent value="realtime" className="space-y-6 mt-6">
+              {/* Cards de resumo */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total de Chamadas</p>
+                        <p className="text-3xl font-bold text-primary">{totalCalls}</p>
+                      </div>
+                      <Activity className="w-10 h-10 text-primary/50" />
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
 
-            {/* Gráfico de barras - Por hora */}
-            <div ref={chartHourlyRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Clock className="w-5 h-5" />
-                    Distribuição por Hora
-                  </CardTitle>
-                  <CardDescription>Volume de chamadas ao longo do dia</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={hourlyStats}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="hour" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
-                      <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Bar 
-                        dataKey="count" 
-                        name="Chamadas"
-                        fill="hsl(var(--primary))" 
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
+                <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Média por Dia</p>
+                        <p className="text-3xl font-bold text-green-600">{avgPerDay}</p>
+                      </div>
+                      <TrendingUp className="w-10 h-10 text-green-500/50" />
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Gráfico de pizza - Por tipo */}
-            <div ref={chartTypeRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Activity className="w-5 h-5" />
-                    Por Tipo de Chamada
-                  </CardTitle>
-                  <CardDescription>Distribuição por módulo/tipo</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {typeStats.length > 0 ? (
-                    <div className="flex flex-col md:flex-row items-center gap-4">
-                      <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                          <Pie
-                            data={typeStats}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={100}
-                            paddingAngle={2}
-                            dataKey="value"
-                            nameKey="name"
-                          >
-                            {typeStats.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<CustomTooltip />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-col gap-2 min-w-[150px]">
-                        {typeStats.slice(0, 6).map((item, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: item.color }}
+                <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Hora de Pico</p>
+                        <p className="text-3xl font-bold text-amber-600">{peakHour || '-'}</p>
+                      </div>
+                      <Clock className="w-10 h-10 text-amber-500/50" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Top Destino</p>
+                        <p className="text-lg font-bold text-purple-600 truncate max-w-[120px]" title={topDestination}>
+                          {topDestination || '-'}
+                        </p>
+                      </div>
+                      <Users className="w-10 h-10 text-purple-500/50" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Gráficos principais */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Gráfico de linha - Evolução diária */}
+                <div ref={chartDailyRef}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <TrendingUp className="w-5 h-5" />
+                        Evolução Diária
+                      </CardTitle>
+                      <CardDescription>Chamadas por dia no período selecionado</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {dailyStats.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <AreaChart data={dailyStats}>
+                            <defs>
+                              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="date" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                            <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend />
+                            <Area 
+                              type="monotone" 
+                              dataKey="total" 
+                              name="Total"
+                              stroke="hsl(var(--primary))" 
+                              fill="url(#colorTotal)"
+                              strokeWidth={2}
                             />
-                            <span className="text-sm text-muted-foreground flex-1">{item.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {item.value}
-                            </Badge>
+                            <Line 
+                              type="monotone" 
+                              dataKey="triage" 
+                              name="Triagem"
+                              stroke="hsl(142, 76%, 36%)" 
+                              strokeWidth={2}
+                              dot={false}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="doctor" 
+                              name="Médico"
+                              stroke="hsl(262, 83%, 58%)" 
+                              strokeWidth={2}
+                              dot={false}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                          Sem dados para o período selecionado
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Gráfico de barras - Por hora */}
+                <div ref={chartHourlyRef}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Clock className="w-5 h-5" />
+                        Distribuição por Hora
+                      </CardTitle>
+                      <CardDescription>Volume de chamadas ao longo do dia</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={hourlyStats}>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="hour" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                          <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar 
+                            dataKey="count" 
+                            name="Chamadas"
+                            fill="hsl(var(--primary))" 
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Gráfico de pizza - Por tipo */}
+                <div ref={chartTypeRef}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Activity className="w-5 h-5" />
+                        Por Tipo de Chamada
+                      </CardTitle>
+                      <CardDescription>Distribuição por módulo/tipo</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {typeStats.length > 0 ? (
+                        <div className="flex flex-col md:flex-row items-center gap-4">
+                          <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                              <Pie
+                                data={typeStats}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                paddingAngle={2}
+                                dataKey="value"
+                                nameKey="name"
+                              >
+                                {typeStats.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip content={<CustomTooltip />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="flex flex-col gap-2 min-w-[150px]">
+                            {typeStats.slice(0, 6).map((item, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <div 
+                                  className="w-3 h-3 rounded-full" 
+                                  style={{ backgroundColor: item.color }}
+                                />
+                                <span className="text-sm text-muted-foreground flex-1">{item.name}</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {item.value}
+                                </Badge>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                          Sem dados
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Gráfico de barras horizontal - Por destino */}
+                <div ref={chartDestRef}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="w-5 h-5" />
+                        Top Destinos
+                      </CardTitle>
+                      <CardDescription>Destinos mais frequentes</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {destinationStats.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={250}>
+                          <BarChart data={destinationStats} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis type="number" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                            <YAxis 
+                              dataKey="name" 
+                              type="category" 
+                              tick={{ fontSize: 11 }} 
+                              width={120}
+                              className="fill-muted-foreground"
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar 
+                              dataKey="count" 
+                              name="Chamadas"
+                              fill="hsl(142, 76%, 36%)" 
+                              radius={[0, 4, 4, 0]}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                          Sem dados
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Tabela de resumo por tipo */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="w-5 h-5" />
+                    Resumo por Tipo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {typeStats.map((type, index) => (
+                      <div 
+                        key={index}
+                        className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div 
+                            className="w-2 h-2 rounded-full" 
+                            style={{ backgroundColor: type.color }}
+                          />
+                          <span className="text-sm font-medium truncate">{type.name}</span>
+                        </div>
+                        <p className="text-2xl font-bold">{type.value}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {((type.value / totalCalls) * 100).toFixed(1)}% do total
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Aba de dados históricos consolidados */}
+            <TabsContent value="aggregated" className="space-y-6 mt-6">
+              {aggregatedStats.length > 0 ? (
+                <>
+                  {/* Cards de resumo do histórico */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Total Período</p>
+                            <p className="text-3xl font-bold text-blue-600">
+                              {aggregatedStats.reduce((sum, d) => sum + d.total_calls, 0)}
+                            </p>
+                          </div>
+                          <BarChart3 className="w-10 h-10 text-blue-500/50" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Total Triagem</p>
+                            <p className="text-3xl font-bold text-emerald-600">
+                              {aggregatedStats.reduce((sum, d) => sum + d.triage_calls, 0)}
+                            </p>
+                          </div>
+                          <Heart className="w-10 h-10 text-emerald-500/50" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-violet-500/10 to-violet-500/5">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Total Médico</p>
+                            <p className="text-3xl font-bold text-violet-600">
+                              {aggregatedStats.reduce((sum, d) => sum + d.doctor_calls, 0)}
+                            </p>
+                          </div>
+                          <Stethoscope className="w-10 h-10 text-violet-500/50" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Dias com Dados</p>
+                            <p className="text-3xl font-bold text-orange-600">
+                              {aggregatedStats.length}
+                            </p>
+                          </div>
+                          <Calendar className="w-10 h-10 text-orange-500/50" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Gráfico de evolução histórica */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <TrendingUp className="w-5 h-5" />
+                        Evolução Histórica Consolidada
+                      </CardTitle>
+                      <CardDescription>Dados agregados da tabela statistics_daily</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={350}>
+                        <AreaChart data={aggregatedStats.map(d => ({
+                          date: format(parseISO(d.date), 'dd/MM', { locale: ptBR }),
+                          total: d.total_calls,
+                          triagem: d.triage_calls,
+                          medico: d.doctor_calls,
+                        }))}>
+                          <defs>
+                            <linearGradient id="colorTotalAgg" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                          <XAxis dataKey="date" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                          <YAxis tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Area 
+                            type="monotone" 
+                            dataKey="total" 
+                            name="Total"
+                            stroke="hsl(217, 91%, 60%)" 
+                            fill="url(#colorTotalAgg)"
+                            strokeWidth={2}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="triagem" 
+                            name="Triagem"
+                            stroke="hsl(160, 84%, 39%)" 
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="medico" 
+                            name="Médico"
+                            stroke="hsl(262, 83%, 58%)" 
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tabela detalhada de dados agregados */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Calendar className="w-5 h-5" />
+                        Detalhamento Diário
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-3 font-medium">Data</th>
+                              <th className="text-right p-3 font-medium">Total</th>
+                              <th className="text-right p-3 font-medium">Triagem</th>
+                              <th className="text-right p-3 font-medium">Médico</th>
+                              <th className="text-right p-3 font-medium">Outros</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {aggregatedStats.slice().reverse().map((stat, index) => (
+                              <tr key={index} className="border-b hover:bg-muted/50">
+                                <td className="p-3">{format(parseISO(stat.date), 'dd/MM/yyyy', { locale: ptBR })}</td>
+                                <td className="text-right p-3 font-semibold">{stat.total_calls}</td>
+                                <td className="text-right p-3 text-emerald-600">{stat.triage_calls}</td>
+                                <td className="text-right p-3 text-violet-600">{stat.doctor_calls}</td>
+                                <td className="text-right p-3 text-muted-foreground">
+                                  {stat.total_calls - stat.triage_calls - stat.doctor_calls}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <Card>
+                  <CardContent className="py-16">
+                    <div className="flex flex-col items-center justify-center text-center gap-4">
+                      <BarChart3 className="w-16 h-16 text-muted-foreground/50" />
+                      <div>
+                        <h3 className="text-lg font-semibold">Sem dados consolidados</h3>
+                        <p className="text-muted-foreground text-sm max-w-md mt-1">
+                          A tabela de estatísticas diárias ainda não possui dados. 
+                          O sistema agrega automaticamente os dados às 00h (horário de Brasília).
+                        </p>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                      Sem dados
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Gráfico de barras horizontal - Por destino */}
-            <div ref={chartDestRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="w-5 h-5" />
-                    Top Destinos
-                  </CardTitle>
-                  <CardDescription>Destinos mais frequentes</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {destinationStats.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={destinationStats} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis type="number" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
-                        <YAxis 
-                          dataKey="name" 
-                          type="category" 
-                          tick={{ fontSize: 11 }} 
-                          width={120}
-                          className="fill-muted-foreground"
-                        />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar 
-                          dataKey="count" 
-                          name="Chamadas"
-                          fill="hsl(142, 76%, 36%)" 
-                          radius={[0, 4, 4, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex items-center justify-center h-[250px] text-muted-foreground">
-                      Sem dados
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Tabela de resumo por tipo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BarChart3 className="w-5 h-5" />
-                Resumo por Tipo
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {typeStats.map((type, index) => (
-                  <div 
-                    key={index}
-                    className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div 
-                        className="w-2 h-2 rounded-full" 
-                        style={{ backgroundColor: type.color }}
-                      />
-                      <span className="text-sm font-medium truncate">{type.name}</span>
-                    </div>
-                    <p className="text-2xl font-bold">{type.value}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {((type.value / totalCalls) * 100).toFixed(1)}% do total
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }
