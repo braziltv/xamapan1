@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Lightbulb, 
   Quote, 
@@ -13,7 +13,10 @@ import {
   ArrowRightCircle,
   CheckCircle,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Wrench,
+  Mail,
+  Phone
 } from 'lucide-react';
 
 // ==================== FRASES DO DIA ====================
@@ -181,8 +184,18 @@ const USAGE_TIPS: UsageTip[] = [
   }
 ];
 
+// ==================== SUPORTE ====================
+const SUPPORT_INFO = {
+  title: "Suporte do Sistema",
+  message: "Caso identifique algum erro ou tenha dúvidas, críticas ou sugestões, entre em contato:",
+  email: "kalebelg@gmail.com",
+  phone: "(37) 99844-4433",
+  bgColor: "from-slate-600 via-slate-700 to-zinc-800",
+  emoji: "🛠️"
+};
+
 // ==================== TIPOS ====================
-type ContentType = 'quote' | 'tip';
+type ContentType = 'quote' | 'tip' | 'support';
 
 interface ContentItem {
   type: ContentType;
@@ -193,6 +206,7 @@ interface ContentItem {
 const STORAGE_KEY = 'rotatingTips_dismissState';
 const DISMISS_DELAY = 60 * 60 * 1000; // 1 hour
 const ROTATION_INTERVAL = 3 * 60 * 1000; // 3 minutes
+const SUPPORT_INTERVAL = 10 * 60 * 1000; // 10 minutes for support card
 
 interface DismissState {
   dismissCount: number;
@@ -220,6 +234,7 @@ export function RotatingTipsCard() {
   const [showDetail, setShowDetail] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const rotationCountRef = useRef(0);
 
   const currentData = useMemo(() => {
     if (currentContent.type === 'quote') {
@@ -237,7 +252,7 @@ export function RotatingTipsCard() {
         emoji: quote.emoji,
         mainIcon: <Quote className="w-4 h-4 text-white/60" />
       };
-    } else {
+    } else if (currentContent.type === 'tip') {
       const tip = USAGE_TIPS[currentContent.index];
       return {
         type: 'tip' as const,
@@ -251,6 +266,21 @@ export function RotatingTipsCard() {
         bgColor: tip.bgColor,
         emoji: tip.emoji,
         mainIcon: tip.icon
+      };
+    } else {
+      // Support card
+      return {
+        type: 'support' as const,
+        badge: 'SUPORTE DO SISTEMA',
+        badgeIcon: <Wrench className="w-3 h-3 text-orange-300" />,
+        mainText: SUPPORT_INFO.message,
+        subText: '',
+        detailTitle: 'Contato',
+        detailText: '',
+        detailIcon: <Wrench className="w-3.5 h-3.5 text-orange-900" />,
+        bgColor: SUPPORT_INFO.bgColor,
+        emoji: SUPPORT_INFO.emoji,
+        mainIcon: <Wrench className="w-4 h-4 text-white/60" />
       };
     }
   }, [currentContent]);
@@ -337,14 +367,28 @@ export function RotatingTipsCard() {
     
     // Change content and fade in
     setTimeout(() => {
+      rotationCountRef.current += 1;
+      
       setCurrentContent(prev => {
+        // Every ~3 rotations (10 min / 3 min = ~3.33), show support card
+        // Show support after every 3 regular rotations
+        if (rotationCountRef.current % 4 === 0) {
+          return { type: 'support', index: 0 };
+        }
+        
         // Alternate between quote and tip
         if (prev.type === 'quote') {
           return {
             type: 'tip',
             index: getRandomIndex(USAGE_TIPS.length)
           };
+        } else if (prev.type === 'tip') {
+          return {
+            type: 'quote',
+            index: getRandomIndex(QUOTES.length)
+          };
         } else {
+          // After support, go back to quote
           return {
             type: 'quote',
             index: getRandomIndex(QUOTES.length)
@@ -530,48 +574,100 @@ export function RotatingTipsCard() {
         </div>
         
         {/* Sub Content */}
-        <p 
-          className={`
-            text-white/90 text-xs font-medium mb-2 pl-5
-            transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-            ${showSubContent 
-              ? 'opacity-100 translate-x-0 blur-0' 
-              : 'opacity-0 translate-x-6 blur-[1px]'
-            }
-          `}
-        >
-          {currentData.type === 'quote' ? currentData.subText : `📍 ${currentData.subText}`}
-        </p>
-        
-        {/* Detail Box */}
-        <div 
-          className={`
-            flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-2.5 py-2
-            transition-all duration-600 ease-[cubic-bezier(0.4,0,0.2,1)]
-            ${showDetail 
-              ? 'opacity-100 translate-y-0 scale-100 blur-0' 
-              : 'opacity-0 translate-y-6 scale-95 blur-[2px]'
-            }
-          `}
-        >
-          <div 
+        {currentData.type !== 'support' && (
+          <p 
             className={`
-              flex-shrink-0 w-7 h-7 ${currentData.type === 'quote' ? 'bg-yellow-400/90' : 'bg-blue-400/90'} rounded-full flex items-center justify-center shadow-md
-              transition-all duration-500 ease-out delay-75
-              ${showDetail ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
+              text-white/90 text-xs font-medium mb-2 pl-5
+              transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+              ${showSubContent 
+                ? 'opacity-100 translate-x-0 blur-0' 
+                : 'opacity-0 translate-x-6 blur-[1px]'
+              }
             `}
           >
-            {currentData.detailIcon}
+            {currentData.type === 'quote' ? currentData.subText : `📍 ${currentData.subText}`}
+          </p>
+        )}
+        
+        {/* Detail Box - Regular content */}
+        {currentData.type !== 'support' && (
+          <div 
+            className={`
+              flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-2.5 py-2
+              transition-all duration-600 ease-[cubic-bezier(0.4,0,0.2,1)]
+              ${showDetail 
+                ? 'opacity-100 translate-y-0 scale-100 blur-0' 
+                : 'opacity-0 translate-y-6 scale-95 blur-[2px]'
+              }
+            `}
+          >
+            <div 
+              className={`
+                flex-shrink-0 w-7 h-7 ${currentData.type === 'quote' ? 'bg-yellow-400/90' : 'bg-blue-400/90'} rounded-full flex items-center justify-center shadow-md
+                transition-all duration-500 ease-out delay-75
+                ${showDetail ? 'scale-100 rotate-0' : 'scale-0 -rotate-180'}
+              `}
+            >
+              {currentData.detailIcon}
+            </div>
+            <div className="transition-all duration-400">
+              <p className={`${currentData.type === 'quote' ? 'text-yellow-300' : 'text-blue-200'} text-[10px] font-semibold uppercase tracking-wider`}>
+                {currentData.detailTitle}
+              </p>
+              <p className="text-white text-xs leading-tight">
+                {currentData.detailText}
+              </p>
+            </div>
           </div>
-          <div className="transition-all duration-400">
-            <p className={`${currentData.type === 'quote' ? 'text-yellow-300' : 'text-blue-200'} text-[10px] font-semibold uppercase tracking-wider`}>
-              {currentData.detailTitle}
-            </p>
-            <p className="text-white text-xs leading-tight">
-              {currentData.detailText}
-            </p>
+        )}
+
+        {/* Support Contact Info */}
+        {currentData.type === 'support' && (
+          <div 
+            className={`
+              space-y-2 mt-2
+              transition-all duration-600 ease-[cubic-bezier(0.4,0,0.2,1)]
+              ${showSubContent 
+                ? 'opacity-100 translate-y-0 blur-0' 
+                : 'opacity-0 translate-y-4 blur-[2px]'
+              }
+            `}
+          >
+            {/* Email */}
+            <div 
+              className={`
+                flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-3 py-2
+                transition-all duration-500 delay-100
+                ${showDetail ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}
+              `}
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-500/90 rounded-full flex items-center justify-center shadow-md">
+                <Mail className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wider">E-mail</p>
+                <p className="text-white text-sm font-medium">{SUPPORT_INFO.email}</p>
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div 
+              className={`
+                flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-lg px-3 py-2
+                transition-all duration-500 delay-200
+                ${showDetail ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}
+              `}
+            >
+              <div className="flex-shrink-0 w-8 h-8 bg-green-500/90 rounded-full flex items-center justify-center shadow-md">
+                <Phone className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-green-200 text-[10px] font-semibold uppercase tracking-wider">Telefone</p>
+                <p className="text-white text-sm font-medium">{SUPPORT_INFO.phone}</p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* CSS for animations */}
