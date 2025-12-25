@@ -478,6 +478,59 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, []);
 
+  // Listen for remote reload commands via Supabase Realtime
+  useEffect(() => {
+    console.log('📡 Setting up remote command listener for TV');
+    
+    const channel = supabase
+      .channel('tv-commands')
+      .on(
+        'broadcast',
+        { event: 'reload' },
+        (payload) => {
+          console.log('📺 Received remote command:', payload);
+          
+          const command = payload.payload;
+          
+          // Check if command is for this unit or for all units
+          if (command.unit === 'all' || command.unit === unitName || command.unit === marketingUnitName) {
+            console.log('🔄 Executing remote reload command...');
+            
+            // Show a brief notification before reload
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: rgba(0,0,0,0.9);
+              color: white;
+              padding: 2rem 3rem;
+              border-radius: 1rem;
+              font-size: 1.5rem;
+              z-index: 99999;
+              text-align: center;
+            `;
+            notification.innerHTML = '🔄 Recarregando...<br><small>Comando remoto recebido</small>';
+            document.body.appendChild(notification);
+            
+            // Reload after a short delay
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('📡 TV command channel status:', status);
+      });
+
+    return () => {
+      console.log('📡 Removing remote command listener');
+      supabase.removeChannel(channel);
+    };
+  }, [unitName, marketingUnitName]);
+
   // Hide cursor after inactivity
   useEffect(() => {
     const hideCursor = () => {

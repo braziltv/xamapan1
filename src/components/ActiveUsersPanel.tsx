@@ -46,6 +46,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { RotateCcw } from 'lucide-react';
 
 interface UserSession {
   id: string;
@@ -144,6 +156,41 @@ export function ActiveUsersPanel() {
       toast.error('Erro ao limpar sessões');
     }
   }, [loadSessions]);
+
+  // Send remote reload command to all TVs
+  const sendTvReloadCommand = useCallback(async (unitName?: string) => {
+    try {
+      const channel = supabase.channel('tv-commands');
+      
+      await channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.send({
+            type: 'broadcast',
+            event: 'reload',
+            payload: { 
+              command: 'reload',
+              unit: unitName || 'all',
+              timestamp: new Date().toISOString()
+            }
+          });
+          
+          toast.success(
+            unitName 
+              ? `Comando de reload enviado para TV: ${unitName}`
+              : 'Comando de reload enviado para todas as TVs'
+          );
+          
+          // Cleanup channel after sending
+          setTimeout(() => {
+            supabase.removeChannel(channel);
+          }, 1000);
+        }
+      });
+    } catch (error) {
+      console.error('Error sending TV reload command:', error);
+      toast.error('Erro ao enviar comando de reload');
+    }
+  }, []);
 
   useEffect(() => {
     loadSessions();
@@ -437,6 +484,31 @@ export function ActiveUsersPanel() {
                 ))}
               </SelectContent>
             </Select>
+            
+            {/* TV Reload Button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <RotateCcw className="w-4 h-4" />
+                  <Tv className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Recarregar TVs Remotamente</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Isso enviará um comando para todas as TVs ativas recarregarem a página. 
+                    Use para aplicar atualizações de código.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => sendTvReloadCommand()}>
+                    Recarregar Todas as TVs
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             
             <Button variant="outline" size="sm" onClick={cleanupInactiveSessions}>
               <Trash2 className="w-4 h-4 mr-1" />
