@@ -20,12 +20,15 @@ interface SessionMetrics {
 
 const SESSION_KEY = 'user_session_id';
 const METRICS_KEY = 'session_metrics';
-const HEARTBEAT_INTERVAL = 15000; // 15 seconds
+const TV_MODE_KEY = 'session_is_tv_mode';
+const HEARTBEAT_INTERVAL = 15000; // 15 seconds for regular sessions
+const TV_HEARTBEAT_INTERVAL = 60000; // 60 seconds for TV mode
 const IDLE_THRESHOLD = 60000; // 1 minute
 const ACTIVITY_THROTTLE = 5000; // 5 seconds
 
 export function useUserSession() {
   const sessionIdRef = useRef<string | null>(null);
+  const isTvModeRef = useRef<boolean>(false);
   const lastActivityRef = useRef<Date>(new Date());
   const lastUserInteractionRef = useRef<Date>(new Date());
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -101,7 +104,9 @@ export function useUserSession() {
 
       const sessionId = data.id;
       sessionIdRef.current = sessionId;
+      isTvModeRef.current = isTvMode;
       localStorage.setItem(SESSION_KEY, sessionId);
+      localStorage.setItem(TV_MODE_KEY, isTvMode.toString());
       
       // Reset metrics for new session
       setMetrics({
@@ -233,7 +238,9 @@ export function useUserSession() {
 
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(METRICS_KEY);
+      localStorage.removeItem(TV_MODE_KEY);
       sessionIdRef.current = null;
+      isTvModeRef.current = false;
       
       console.log('📊 Session ended. Final metrics:', {
         ...metrics,
@@ -249,11 +256,35 @@ export function useUserSession() {
     const sessionId = sessionIdRef.current || localStorage.getItem(SESSION_KEY);
     if (!sessionId) return;
 
+    // Check if TV mode from localStorage
+    const storedTvMode = localStorage.getItem(TV_MODE_KEY) === 'true';
+    const isTvMode = isTvModeRef.current || storedTvMode;
+    
+    // Use longer interval for TV mode
+    const interval = isTvMode ? TV_HEARTBEAT_INTERVAL : HEARTBEAT_INTERVAL;
+
     const heartbeat = async () => {
       const now = new Date();
       const timeSinceInteraction = now.getTime() - lastUserInteractionRef.current.getTime();
       
-      // Check if user is idle
+      // TV mode is always considered active (no user interaction needed)
+      if (isTvMode) {
+        try {
+          await supabase
+            .from('user_sessions')
+            .update({
+              last_activity_at: now.toISOString(),
+              is_active: true,
+            })
+            .eq('id', sessionId);
+          console.log('📺 TV heartbeat sent');
+        } catch (error) {
+          console.error('TV Heartbeat error:', error);
+        }
+        return;
+      }
+      
+      // Regular session: check if user is idle
       if (timeSinceInteraction > IDLE_THRESHOLD && !isIdleRef.current) {
         isIdleRef.current = true;
         // Add active time before going idle
@@ -291,7 +322,13 @@ export function useUserSession() {
       }
     };
 
-    heartbeatIntervalRef.current = setInterval(heartbeat, HEARTBEAT_INTERVAL);
+    // Execute heartbeat immediately for TV mode
+    if (isTvMode) {
+      heartbeat();
+    }
+
+    heartbeatIntervalRef.current = setInterval(heartbeat, interval);
+    console.log(`📊 Heartbeat started with ${interval / 1000}s interval (TV mode: ${isTvMode})`);
     
     return () => {
       if (heartbeatIntervalRef.current) {
@@ -303,11 +340,14 @@ export function useUserSession() {
   // Restore session on mount
   useEffect(() => {
     const storedSessionId = localStorage.getItem(SESSION_KEY);
+    const storedTvMode = localStorage.getItem(TV_MODE_KEY) === 'true';
+    
     if (storedSessionId) {
       sessionIdRef.current = storedSessionId;
+      isTvModeRef.current = storedTvMode;
       // Update activity to show session is still active
       updateActivity(undefined, true);
-      console.log('📊 Session restored:', storedSessionId);
+      console.log(`📊 Session restored: ${storedSessionId} (TV mode: ${storedTvMode})`);
     }
   }, [updateActivity]);
 
