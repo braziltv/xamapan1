@@ -79,6 +79,7 @@ const feeds = [
   // Notícias gerais e internacionais
   { url: 'https://www.noticiasaominuto.com.br/rss/brasil', source: 'Notícias ao Minuto' },
   { url: 'https://news.un.org/feed/subscribe/pt/news/region/americas/feed/rss.xml', source: 'ONU News' },
+  { url: 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', source: 'Agência Brasil' },
 ];
 
 // Decodificar entidades HTML
