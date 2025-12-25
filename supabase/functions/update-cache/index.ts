@@ -53,6 +53,11 @@ const feeds = [
   { url: 'https://g1.globo.com/dynamo/ciencia-e-saude/rss2.xml', source: 'G1' },
   { url: 'https://g1.globo.com/dynamo/educacao/rss2.xml', source: 'G1' },
   { url: 'https://g1.globo.com/dynamo/pop-arte/rss2.xml', source: 'G1' },
+  // Minas Gerais - Regionais
+  { url: 'https://www.otempo.com.br/rss', source: 'O Tempo' },
+  { url: 'https://www.em.com.br/rss', source: 'Estado de Minas' },
+  { url: 'https://bhaz.com.br/feed/', source: 'BHAZ' },
+  { url: 'https://www.hojeemdia.com.br/rss', source: 'Hoje em Dia' },
   // Esportes
   { url: 'https://ge.globo.com/dynamo/rss2.xml', source: 'GE' },
   { url: 'https://www.espn.com.br/rss/', source: 'ESPN' },
