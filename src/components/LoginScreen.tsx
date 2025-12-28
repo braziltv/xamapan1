@@ -176,7 +176,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   <SelectTrigger className="h-10 sm:h-12 text-sm sm:text-base">
                     <SelectValue placeholder="Selecione a unidade" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background max-w-[90vw]">
+                  <SelectContent className="bg-background max-w-[90vw] z-[9999]">
                     {units.map((unit) => (
                       <SelectItem key={unit.id} value={unit.id} className="py-2 sm:py-3 text-sm sm:text-base">
                         {unit.display_name || unit.name}
@@ -254,7 +254,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   <SelectTrigger className="h-10 sm:h-11 text-sm sm:text-base">
                     <SelectValue placeholder="Selecione a unidade" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background max-w-[90vw]">
+                  <SelectContent className="bg-background max-w-[90vw] z-[9999]">
                     {units.map((unit) => (
                       <SelectItem key={unit.id} value={unit.id} className="text-sm sm:text-base py-2">
                         {unit.display_name || unit.name}
