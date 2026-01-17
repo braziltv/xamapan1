@@ -488,8 +488,88 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Separator */}
-      <div className="w-px h-6 sm:h-8 lg:h-10 bg-gradient-to-b from-transparent via-white/30 to-transparent shrink-0" />
+      {/* Animated Light Separator */}
+      <div className="relative flex items-center justify-center shrink-0 w-6 sm:w-8 lg:w-10 h-12 sm:h-16 lg:h-20">
+        {/* Outer glow pulse */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div 
+            className="w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12 rounded-full blur-xl animate-pulse"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(147, 51, 234, 0.2) 50%, transparent 70%)',
+              animationDuration: '2s'
+            }}
+          />
+        </div>
+        
+        {/* Main vertical light beam */}
+        <div className="relative w-0.5 sm:w-[3px] h-10 sm:h-14 lg:h-16">
+          {/* Base gradient line */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent rounded-full" />
+          
+          {/* Animated light traveling up */}
+          <div 
+            className="absolute inset-x-0 h-4 sm:h-6 rounded-full animate-[separatorLightUp_2s_ease-in-out_infinite]"
+            style={{ 
+              background: 'linear-gradient(to top, transparent, rgba(6, 182, 212, 0.9), rgba(255, 255, 255, 1), rgba(6, 182, 212, 0.9), transparent)',
+              boxShadow: '0 0 12px rgba(6, 182, 212, 0.8), 0 0 24px rgba(6, 182, 212, 0.4)'
+            }}
+          />
+          
+          {/* Animated light traveling down (delayed) */}
+          <div 
+            className="absolute inset-x-0 h-3 sm:h-4 rounded-full animate-[separatorLightDown_2s_ease-in-out_infinite]"
+            style={{ 
+              background: 'linear-gradient(to bottom, transparent, rgba(168, 85, 247, 0.8), rgba(255, 255, 255, 0.9), rgba(168, 85, 247, 0.8), transparent)',
+              boxShadow: '0 0 10px rgba(168, 85, 247, 0.7), 0 0 20px rgba(168, 85, 247, 0.3)',
+              animationDelay: '1s'
+            }}
+          />
+          
+          {/* Glow effect on line */}
+          <div 
+            className="absolute inset-0 rounded-full blur-sm"
+            style={{ 
+              background: 'linear-gradient(to bottom, transparent 10%, rgba(6, 182, 212, 0.5) 30%, rgba(147, 51, 234, 0.5) 70%, transparent 90%)'
+            }}
+          />
+        </div>
+        
+        {/* Center orb */}
+        <div className="absolute flex items-center justify-center">
+          {/* Outer ring */}
+          <div 
+            className="absolute w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 rounded-full animate-ping opacity-40"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, transparent 70%)',
+              animationDuration: '2s'
+            }}
+          />
+          
+          {/* Core orb with 3D effect */}
+          <div 
+            className="relative w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-full animate-pulse"
+            style={{ 
+              background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 1), rgba(6, 182, 212, 0.9) 50%, rgba(147, 51, 234, 0.8))',
+              boxShadow: '0 0 8px rgba(6, 182, 212, 0.9), 0 0 16px rgba(6, 182, 212, 0.5), 0 0 24px rgba(147, 51, 234, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.3)',
+              animationDuration: '1.5s'
+            }}
+          />
+        </div>
+        
+        {/* Sparkle particles */}
+        <div 
+          className="absolute w-1 h-1 rounded-full bg-white animate-[sparkle_3s_ease-in-out_infinite]"
+          style={{ top: '15%', left: '30%' }}
+        />
+        <div 
+          className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300 animate-[sparkle_3s_ease-in-out_infinite]"
+          style={{ top: '70%', right: '25%', animationDelay: '1s' }}
+        />
+        <div 
+          className="absolute w-0.5 h-0.5 rounded-full bg-purple-300 animate-[sparkle_3s_ease-in-out_infinite]"
+          style={{ top: '40%', left: '70%', animationDelay: '2s' }}
+        />
+      </div>
 
       {/* Date + Clock */}
       {renderDateTimeCompact()}

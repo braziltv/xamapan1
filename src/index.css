@@ -1199,3 +1199,49 @@
 .animate-light-burst {
   animation: lightBurst 1s ease-out forwards;
 }
+
+/* Separator animated light effects */
+@keyframes separatorLightUp {
+  0%, 100% {
+    top: 100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: -20%;
+    opacity: 0;
+  }
+}
+
+@keyframes separatorLightDown {
+  0%, 100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    bottom: -20%;
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
