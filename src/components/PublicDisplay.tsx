@@ -2369,19 +2369,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* ========== WAITING/IDLE STATE INDICATOR ========== */}
-      {!announcingType && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="px-6 py-2 rounded-full bg-slate-800/60 backdrop-blur-md border border-slate-600/50">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-sm sm:text-base font-medium text-slate-300 tracking-wide">
-                🟦 AGUARDANDO CHAMADA
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TTS Error Indicator */}
       {ttsError && (
