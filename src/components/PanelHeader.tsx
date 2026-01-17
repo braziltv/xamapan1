@@ -62,7 +62,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                 <p className="text-[10px] text-muted-foreground truncate">
                   {unitName}
                 </p>
-                <p className="text-[8px] truncate bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-medium animate-pulse">
+                <p className="text-[8px] text-muted-foreground/70 truncate">
                   Solução criada por Kalebe Gomes
                 </p>
               </div>
@@ -155,7 +155,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
               <p className="text-xs text-muted-foreground truncate max-w-[200px] lg:max-w-none">
                 {unitName}
               </p>
-              <p className="text-xs hidden lg:block bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-medium animate-pulse">
+              <p className="text-xs text-muted-foreground/70 hidden lg:block">
                 Solução criada por Kalebe Gomes
               </p>
             </div>
