@@ -2369,25 +2369,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
       )}
 
-      {/* Subtle status indicator - bottom left corner */}
-      <div className="fixed bottom-16 sm:bottom-20 left-2 sm:left-3 z-40 pointer-events-none">
-        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full backdrop-blur-sm transition-all duration-500 ${
-          announcingType 
-            ? 'bg-yellow-500/20 border border-yellow-400/40' 
-            : 'bg-slate-800/40 border border-slate-600/30'
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${
-            announcingType 
-              ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.8)]' 
-              : 'bg-blue-400/60'
-          }`} />
-          <span className={`text-[10px] sm:text-xs font-medium ${
-            announcingType ? 'text-yellow-300' : 'text-slate-400'
-          }`}>
-            {announcingType ? '🔔 AO VIVO' : 'Online'}
-          </span>
-        </div>
-      </div>
 
       {/* TTS Error Indicator */}
       {ttsError && (
