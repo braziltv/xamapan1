@@ -485,57 +485,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         })}
       </div>
 
-      {/* Animated Light Separator - Compact */}
-      <div className="relative flex items-center justify-center shrink-0 w-4 sm:w-5 lg:w-6 h-8 sm:h-10 lg:h-12">
-        {/* Outer glow pulse */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div 
-            className="w-5 sm:w-6 lg:w-8 h-5 sm:h-6 lg:h-8 rounded-full blur-lg animate-pulse opacity-60"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(147, 51, 234, 0.2) 50%, transparent 70%)',
-              animationDuration: '2s'
-            }}
-          />
-        </div>
-        
-        {/* Main vertical light beam */}
-        <div className="relative w-px sm:w-0.5 h-6 sm:h-8 lg:h-10">
-          {/* Base gradient line */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent rounded-full" />
-          
-          {/* Animated light traveling up */}
-          <div 
-            className="absolute inset-x-0 h-2 sm:h-3 rounded-full animate-[separatorLightUp_2s_ease-in-out_infinite]"
-            style={{ 
-              background: 'linear-gradient(to top, transparent, rgba(6, 182, 212, 0.9), rgba(255, 255, 255, 1), rgba(6, 182, 212, 0.9), transparent)',
-              boxShadow: '0 0 8px rgba(6, 182, 212, 0.8)'
-            }}
-          />
-          
-          {/* Animated light traveling down (delayed) */}
-          <div 
-            className="absolute inset-x-0 h-2 sm:h-2.5 rounded-full animate-[separatorLightDown_2s_ease-in-out_infinite]"
-            style={{ 
-              background: 'linear-gradient(to bottom, transparent, rgba(168, 85, 247, 0.8), rgba(255, 255, 255, 0.9), rgba(168, 85, 247, 0.8), transparent)',
-              boxShadow: '0 0 6px rgba(168, 85, 247, 0.6)',
-              animationDelay: '1s'
-            }}
-          />
-        </div>
-        
-        {/* Center orb */}
-        <div className="absolute flex items-center justify-center">
-          <div 
-            className="relative w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-pulse"
-            style={{ 
-              background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 1), rgba(6, 182, 212, 0.9) 50%, rgba(147, 51, 234, 0.8))',
-              boxShadow: '0 0 6px rgba(6, 182, 212, 0.8), 0 0 12px rgba(147, 51, 234, 0.3)',
-              animationDuration: '1.5s'
-            }}
-          />
-        </div>
-      </div>
-
       {/* Date + Clock */}
       {renderDateTimeCompact()}
     </div>
