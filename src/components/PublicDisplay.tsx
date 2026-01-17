@@ -2398,7 +2398,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   {unitName || 'Unidade de Saúde'}
                 </p>
                 <p className="text-white/50 leading-tight font-light italic text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm whitespace-nowrap">
-                  Desenvolvido por Kalebe
+                  Solução criada por Kalebe Gomes
                 </p>
               </div>
             </div>
