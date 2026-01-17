@@ -357,13 +357,13 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           {/* Glow effect behind city info */}
           <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/15 to-orange-500/10 rounded-xl blur-sm" />
           
-          <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 border border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+          <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 border border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[70px] sm:min-w-[80px] lg:min-w-[100px]">
             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[8px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-md">
               Previsão
             </span>
             <div className="flex items-center gap-1 min-w-0">
               <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
-              <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-[11px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md">
+              <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-[11px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md text-center leading-tight break-words">
                 {displayCity}-MG
               </span>
             </div>
