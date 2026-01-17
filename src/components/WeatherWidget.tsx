@@ -25,28 +25,120 @@ interface WeatherWidgetProps {
   formatTime?: (date: Date, format: string) => string;
 }
 
-function getWeatherIcon(description: string, size: 'sm' | 'lg' = 'sm') {
+// 3D-style weather icon component
+function Weather3DIcon({ description, size = 'sm' }: { description: string; size?: 'sm' | 'lg' }) {
   const desc = description.toLowerCase();
-  const iconClass = size === 'lg' 
-    ? 'w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-16 3xl:h-16 4k:w-20 4k:h-20' 
-    : 'w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6';
   
-  if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) 
-    return <Sun className={`${iconClass} text-yellow-400 animate-[spin_8s_linear_infinite]`} />;
-  if (desc.includes('partly') || desc.includes('parcialmente')) 
-    return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
-  if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) 
-    return <CloudRain className={`${iconClass} text-blue-400 animate-bounce`} />;
-  if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) 
-    return <CloudLightning className={`${iconClass} text-purple-400 animate-[pulse_0.5s_ease-in-out_infinite]`} />;
-  if (desc.includes('snow') || desc.includes('neve')) 
-    return <CloudSnow className={`${iconClass} text-white animate-[bounce_2s_ease-in-out_infinite]`} />;
-  if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) 
-    return <Wind className={`${iconClass} text-slate-400 animate-pulse`} />;
-  if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) 
-    return <Cloud className={`${iconClass} text-slate-300 animate-pulse`} />;
+  const sizeClasses = size === 'lg' 
+    ? 'w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24' 
+    : 'w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-7 3xl:h-7';
   
-  return <CloudSun className={`${iconClass} text-yellow-300 animate-pulse`} />;
+  const iconContainerClass = size === 'lg'
+    ? 'relative group'
+    : 'relative';
+
+  // Determine icon type and colors
+  let IconComponent = CloudSun;
+  let primaryColor = 'from-yellow-300 via-yellow-400 to-orange-400';
+  let glowColor = 'rgba(251, 191, 36, 0.6)';
+  let animation = 'animate-pulse';
+  
+  if (desc.includes('sunny') || desc.includes('clear') || desc.includes('sol') || desc.includes('limpo')) {
+    IconComponent = Sun;
+    primaryColor = 'from-yellow-300 via-amber-400 to-orange-500';
+    glowColor = 'rgba(251, 191, 36, 0.8)';
+    animation = 'animate-[spin_12s_linear_infinite]';
+  } else if (desc.includes('partly') || desc.includes('parcialmente')) {
+    IconComponent = CloudSun;
+    primaryColor = 'from-yellow-200 via-amber-300 to-orange-400';
+    glowColor = 'rgba(251, 191, 36, 0.5)';
+    animation = 'animate-pulse';
+  } else if (desc.includes('rain') || desc.includes('shower') || desc.includes('chuva') || desc.includes('pancada')) {
+    IconComponent = CloudRain;
+    primaryColor = 'from-blue-300 via-blue-400 to-blue-600';
+    glowColor = 'rgba(59, 130, 246, 0.6)';
+    animation = 'animate-bounce';
+  } else if (desc.includes('thunder') || desc.includes('storm') || desc.includes('trovoada') || desc.includes('tempestade')) {
+    IconComponent = CloudLightning;
+    primaryColor = 'from-purple-300 via-purple-500 to-purple-700';
+    glowColor = 'rgba(168, 85, 247, 0.7)';
+    animation = 'animate-[pulse_0.5s_ease-in-out_infinite]';
+  } else if (desc.includes('snow') || desc.includes('neve')) {
+    IconComponent = CloudSnow;
+    primaryColor = 'from-slate-100 via-blue-100 to-cyan-200';
+    glowColor = 'rgba(255, 255, 255, 0.6)';
+    animation = 'animate-[bounce_2s_ease-in-out_infinite]';
+  } else if (desc.includes('fog') || desc.includes('mist') || desc.includes('neblina') || desc.includes('nevoeiro')) {
+    IconComponent = Wind;
+    primaryColor = 'from-slate-300 via-slate-400 to-slate-500';
+    glowColor = 'rgba(148, 163, 184, 0.5)';
+    animation = 'animate-pulse';
+  } else if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('encoberto')) {
+    IconComponent = Cloud;
+    primaryColor = 'from-slate-200 via-slate-300 to-slate-400';
+    glowColor = 'rgba(148, 163, 184, 0.5)';
+    animation = 'animate-pulse';
+  }
+
+  if (size === 'lg') {
+    return (
+      <div className={iconContainerClass}>
+        {/* Outer glow ring */}
+        <div 
+          className="absolute -inset-2 rounded-full blur-xl opacity-60 animate-pulse"
+          style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
+        />
+        
+        {/* 3D glass container */}
+        <div className="relative">
+          {/* Background gradient with depth */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-transparent to-black/20 backdrop-blur-md" />
+          
+          {/* Main 3D icon container */}
+          <div 
+            className={`relative ${sizeClasses} rounded-xl bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 border border-white/20 flex items-center justify-center overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.3)]`}
+            style={{ transform: 'perspective(200px) rotateX(5deg)' }}
+          >
+            {/* Inner highlight */}
+            <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+            
+            {/* Icon with gradient fill effect */}
+            <div className={`relative ${animation}`}>
+              <IconComponent 
+                className={`w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14`}
+                style={{ 
+                  filter: `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 4px 6px rgba(0,0,0,0.4))`,
+                  color: 'white'
+                }}
+              />
+              {/* Gradient overlay for 3D effect */}
+              <div className={`absolute inset-0 bg-gradient-to-b ${primaryColor} opacity-80 mix-blend-overlay rounded-full`} />
+            </div>
+            
+            {/* Bottom reflection */}
+            <div className="absolute bottom-0 left-[20%] right-[20%] h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Small icon version
+  return (
+    <div className={iconContainerClass}>
+      <div 
+        className={`${sizeClasses} rounded-md bg-gradient-to-br from-slate-700/60 to-slate-900/60 border border-white/10 flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] ${animation}`}
+      >
+        <IconComponent 
+          className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 3xl:w-4 3xl:h-4"
+          style={{ 
+            filter: `drop-shadow(0 0 4px ${glowColor})`,
+            color: 'white'
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTime }: WeatherWidgetProps) {
@@ -249,68 +341,106 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 justify-end flex-nowrap overflow-visible">
-      {/* City + Weather Icon */}
-      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        <div className="flex flex-col items-center">
-          <span className="font-black text-white uppercase tracking-wider text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
-            Previsão
-          </span>
-          <div className="flex items-center gap-0.5 text-amber-300">
-            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 animate-bounce shrink-0" />
-            <span className="font-black whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
-              {displayCity}-MG
+      {/* City + Weather Icon - 3D Glass Card */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="relative">
+          {/* Glow effect behind city info */}
+          <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-xl blur-md" />
+          
+          <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 border border-amber-500/30 shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-lg">
+              Previsão
             </span>
+            <div className="flex items-center gap-0.5">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
+              <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-lg">
+                {displayCity}-MG
+              </span>
+            </div>
           </div>
         </div>
-        <div className="relative shrink-0">
-          <div className="absolute inset-0 bg-yellow-400/20 blur-lg rounded-full" />
-          <div className="relative bg-white/10 rounded-lg p-1 lg:p-1.5 backdrop-blur-sm border border-white/10">
-            {getWeatherIcon(weather.current.description, 'lg')}
+        
+        {/* 3D Weather Icon */}
+        <Weather3DIcon description={weather.current.description} size="lg" />
+      </div>
+
+      {/* Current Temperature - 3D Glass Card */}
+      <div className="relative shrink-0 group">
+        {/* Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500/30 to-teal-500/20 rounded-xl blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+        
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 border border-emerald-500/40 shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1),0_0_20px_rgba(16,185,129,0.15)]">
+          {/* Top highlight */}
+          <div className="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          
+          <span className="font-bold text-emerald-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
+            Agora
+          </span>
+          <div className="flex items-baseline">
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-emerald-50 to-emerald-100 tabular-nums text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-lg" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              {weather.current.temperature}
+            </span>
+            <span className="font-bold text-emerald-400 text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]">°C</span>
+          </div>
+          {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
+            <span className="text-white/70 whitespace-nowrap text-[5px] sm:text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs">
+              Sens: <span className="font-bold text-amber-300 tabular-nums drop-shadow-sm">{weather.current.feelsLike}°</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Max/Min Temperature - 3D Glass Card */}
+      <div className="relative shrink-0 group">
+        {/* Glow - changes color based on max/min */}
+        <div className={`absolute -inset-1 rounded-xl blur-md opacity-60 transition-all duration-500 ${
+          showMaxTemp ? 'bg-gradient-to-br from-orange-500/30 to-red-500/20' : 'bg-gradient-to-br from-cyan-500/30 to-blue-500/20'
+        }`} />
+        
+        <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 border shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500 ${
+          showMaxTemp ? 'border-orange-500/40' : 'border-cyan-500/40'
+        }`}>
+          {/* Top highlight */}
+          <div className={`absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent to-transparent transition-colors duration-500 ${
+            showMaxTemp ? 'via-orange-400/50' : 'via-cyan-400/50'
+          }`} />
+          
+          <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm transition-colors duration-500 ${
+            showMaxTemp ? 'text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]' : 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]'
+          }`}>
+            {showMaxTemp ? 'Máx' : 'Mín'}
+          </span>
+          <div className="flex items-baseline">
+            <span className={`font-black text-transparent bg-clip-text tabular-nums text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-lg transition-all duration-500 ${
+              showMaxTemp ? 'bg-gradient-to-b from-white via-orange-50 to-orange-100' : 'bg-gradient-to-b from-white via-cyan-50 to-cyan-100'
+            }`} style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              {showMaxTemp ? maxTemp : minTemp}
+            </span>
+            <span className={`font-bold text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg transition-colors duration-500 ${
+              showMaxTemp ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.5)]' : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]'
+            }`}>°C</span>
           </div>
         </div>
       </div>
 
-      {/* Current Temperature */}
-      <div className="flex flex-col items-center bg-gradient-to-br from-emerald-500/30 to-teal-600/30 rounded-lg px-1 sm:px-1.5 lg:px-2 py-0.5 backdrop-blur-sm border border-white/10 shrink-0">
-        <span className="font-bold text-emerald-300 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
-          Agora
-        </span>
-        <div className="flex items-baseline">
-          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
-            {weather.current.temperature}
+      {/* Humidity - 3D Glass Card */}
+      <div className="relative shrink-0 group">
+        {/* Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/25 to-cyan-500/15 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity" />
+        
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 border border-blue-500/40 shadow-[0_4px_16px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1),0_0_15px_rgba(59,130,246,0.1)]">
+          {/* Top highlight */}
+          <div className="absolute top-0 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent" />
+          
+          <Droplets className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 3xl:w-6 3xl:h-6 text-cyan-400 shrink-0 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)] animate-pulse" />
+          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-50 to-cyan-100 tabular-nums text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-lg" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+            {weather.current.humidity}%
           </span>
-          <span className="font-bold text-emerald-300 text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">°C</span>
-        </div>
-        {weather.current.feelsLike !== undefined && weather.current.feelsLike !== weather.current.temperature && (
-          <span className="text-white/70 whitespace-nowrap text-[5px] sm:text-[6px] lg:text-[7px] xl:text-[8px] 3xl:text-[9px] 4k:text-xs">
-            Sens: <span className="font-bold text-amber-300 tabular-nums">{weather.current.feelsLike}°</span>
-          </span>
-        )}
-      </div>
-
-      {/* Max/Min Temperature */}
-      <div className="flex flex-col items-center shrink-0">
-        <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm ${showMaxTemp ? 'text-orange-400' : 'text-cyan-400'}`}>
-          {showMaxTemp ? 'Máx' : 'Mín'}
-        </span>
-        <div className="flex items-baseline">
-          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
-            {showMaxTemp ? maxTemp : minTemp}
-          </span>
-          <span className="font-bold text-amber-300 text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">°C</span>
         </div>
       </div>
 
-      {/* Humidity */}
-      <div className="flex flex-col items-center bg-white/10 rounded-lg px-1 sm:px-1.5 lg:px-2 py-0.5 backdrop-blur-sm shrink-0">
-        <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 3xl:w-5 3xl:h-5 text-cyan-400 shrink-0" />
-        <span className="font-bold text-white tabular-nums text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
-          {weather.current.humidity}%
-        </span>
-      </div>
-
-      {/* Forecast Cards - visible on md+ */}
-      <div className="hidden md:flex gap-1 lg:gap-1.5 shrink-0">
+      {/* Forecast Cards - 3D Glass Style - visible on md+ */}
+      <div className="hidden md:flex gap-1.5 lg:gap-2 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           const today = currentTime;
@@ -319,22 +449,39 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           const dayName = index === 0 ? 'HOJE' : dayNames[targetDate.getDay()];
 
           return (
-            <div
-              key={index}
-              className={`${index === 0 ? 'bg-gradient-to-br from-amber-500/30 to-orange-600/30' : 'bg-white/10'} rounded-lg px-1 lg:px-1.5 py-0.5 lg:py-1 flex flex-col items-center backdrop-blur-sm border border-white/20`}
-            >
-              <span className="font-bold text-white text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
-                {dayName}
-              </span>
-              <div className="my-0.5">{getWeatherIcon(day.icon || 'cloud', 'sm')}</div>
-              <div className="flex items-center gap-0.5">
-                <span className="text-cyan-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
-                  {day.minTemp}°
+            <div key={index} className="relative group">
+              {/* Glow effect */}
+              <div className={`absolute -inset-0.5 rounded-xl blur-md opacity-50 group-hover:opacity-80 transition-opacity ${
+                index === 0 ? 'bg-gradient-to-br from-amber-500/40 to-orange-500/30' : 'bg-gradient-to-br from-purple-500/30 to-indigo-500/20'
+              }`} />
+              
+              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-1.5 lg:px-2 py-1 lg:py-1.5 border shadow-[0_4px_12px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] ${
+                index === 0 ? 'border-amber-500/40' : 'border-purple-500/30'
+              }`}>
+                {/* Top highlight */}
+                <div className={`absolute top-0 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent to-transparent ${
+                  index === 0 ? 'via-amber-400/50' : 'via-purple-400/40'
+                }`} />
+                
+                <span className={`font-bold text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm tracking-wide ${
+                  index === 0 ? 'text-amber-300 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]' : 'text-purple-300 drop-shadow-[0_0_4px_rgba(168,85,247,0.4)]'
+                }`}>
+                  {dayName}
                 </span>
-                <span className="text-white/50 font-bold text-[6px] lg:text-[7px]">/</span>
-                <span className="text-orange-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
-                  {day.maxTemp}°
-                </span>
+                
+                <div className="my-0.5 lg:my-1">
+                  <Weather3DIcon description={day.icon || 'cloud'} size="sm" />
+                </div>
+                
+                <div className="flex items-center gap-0.5">
+                  <span className="text-cyan-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm drop-shadow-sm">
+                    {day.minTemp}°
+                  </span>
+                  <span className="text-white/40 font-bold text-[6px] lg:text-[7px]">/</span>
+                  <span className="text-orange-300 font-bold tabular-nums text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm drop-shadow-sm">
+                    {day.maxTemp}°
+                  </span>
+                </div>
               </div>
             </div>
           );
