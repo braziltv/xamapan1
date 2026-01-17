@@ -2707,7 +2707,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* News Ticker - Fixed at bottom like TV news breaking news style */}
       {newsItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0">
-          <div className="flex items-stretch h-8 sm:h-10 lg:h-12 xl:h-14 3xl:h-16 4k:h-20 animate-ticker-glow">
+          <div className="flex items-stretch h-12 sm:h-14 lg:h-16 xl:h-20 3xl:h-24 4k:h-32 animate-ticker-glow">
             {/* Scrolling News Section - 3D Glass effect */}
             <div className="flex-1 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl overflow-hidden flex items-center relative border-t border-white/10">
               <div className="absolute left-0 top-0 bottom-0 w-2 sm:w-4 lg:w-8 bg-gradient-to-r from-slate-900 to-transparent z-10" />
@@ -2748,8 +2748,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                     return itemsWithExtras.map((item, index) => (
-                      <span key={index} className="mx-1 sm:mx-2 lg:mx-4 inline-flex items-center gap-0.5 sm:gap-1 lg:gap-2 text-white font-medium tracking-wide text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                        <span className={`px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-0.5 lg:py-1 rounded text-[7px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm font-bold inline-block ${
+                      <span key={index} className="mx-2 sm:mx-3 lg:mx-5 inline-flex items-center gap-1 sm:gap-1.5 lg:gap-3 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                        <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 lg:py-1.5 rounded text-[8px] sm:text-[10px] lg:text-sm xl:text-base 3xl:text-lg font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2784,12 +2784,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
                         } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
+                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
                         </span>
                         <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
                           {item.title}
                         </span>
-                        <span className="text-slate-500 mx-0.5 sm:mx-1 lg:mx-2">•</span>
+                        <span className="text-slate-500 mx-1 sm:mx-1.5 lg:mx-3">•</span>
                       </span>
                   ));
                 })()}
@@ -2828,8 +2828,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }
                   
                   return itemsWithExtras.map((item, index) => (
-                    <span key={`dup-${index}`} className="mx-1 sm:mx-2 lg:mx-4 inline-flex items-center gap-0.5 sm:gap-1 lg:gap-2 text-white font-medium tracking-wide text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                      <span className={`px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-0.5 lg:py-1 rounded text-[7px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm font-bold inline-block ${
+                    <span key={`dup-${index}`} className="mx-2 sm:mx-3 lg:mx-5 inline-flex items-center gap-1 sm:gap-1.5 lg:gap-3 text-white font-medium tracking-wide text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                      <span className={`px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 lg:py-1.5 rounded text-[8px] sm:text-[10px] lg:text-sm xl:text-base 3xl:text-lg font-bold inline-block ${
                         item.source === '📢 Informativo' ? 'bg-gradient-to-r from-red-900 to-red-700 text-white animate-pulse shadow-lg shadow-red-900/50 ring-2 ring-red-500 ring-offset-1 ring-offset-transparent' :
                         item.source === 'Créditos' ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-900' :
                         item.source === 'G1' ? 'bg-red-500' : 
@@ -2864,12 +2864,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'ESPN' ? 'bg-red-800' :
                         'bg-gray-500'
                       } ${item.source !== 'Créditos' && item.source !== 'Itatiaia' ? 'text-white' : ''}`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" /> <span className="hidden sm:inline">Informativo</span></> : item.source}
                       </span>
                       <span className={`${item.source === '📢 Informativo' ? 'text-red-500 font-bold' : 'text-white'}`}>
                         {item.title}
                       </span>
-                      <span className="text-slate-500 mx-0.5 sm:mx-1 lg:mx-2">•</span>
+                      <span className="text-slate-500 mx-1 sm:mx-1.5 lg:mx-3">•</span>
                     </span>
                   ));
                 })()}
@@ -2932,7 +2932,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* Hidden Exit Button - Only visible on hover */}
-      <div className="fixed bottom-10 sm:bottom-12 lg:bottom-14 xl:bottom-16 3xl:bottom-20 4k:bottom-24 right-1 sm:right-2 lg:right-4 z-50 group">
+      <div className="fixed bottom-14 sm:bottom-16 lg:bottom-20 xl:bottom-24 3xl:bottom-28 4k:bottom-36 right-1 sm:right-2 lg:right-4 z-50 group">
         <button
           onClick={() => setShowExitConfirm(true)}
           className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 rounded-full bg-slate-800/0 group-hover:bg-slate-800/90 border sm:border-2 border-transparent group-hover:border-red-500/50 flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
