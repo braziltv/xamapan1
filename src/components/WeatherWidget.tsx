@@ -155,27 +155,70 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Compact date+clock for landscape mode
-  const renderDateTimeCompact = () => (
-    <div className="flex flex-col items-center gap-0.5 sm:gap-1 shrink-0">
-      <div className="text-center bg-white/10 rounded px-1.5 sm:px-2 lg:px-3 py-0.5">
-        <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
-          {safeFormatTime(currentTime, 'EEEE')}
-        </p>
-        <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
-          {safeFormatTime(currentTime, 'dd/MM/yyyy')}
-        </p>
+  // Modern digital clock design
+  const renderDateTimeCompact = () => {
+    const hours = safeFormatTime(currentTime, 'HH');
+    const minutes = safeFormatTime(currentTime, 'mm');
+    const seconds = safeFormatTime(currentTime, 'ss');
+    
+    return (
+      <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0">
+        {/* Date pill */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 rounded-full px-2 sm:px-3 lg:px-4 py-0.5 border border-amber-400/40 backdrop-blur-sm">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+              {safeFormatTime(currentTime, 'EEEE')}
+            </p>
+          </div>
+          <div className="bg-white/10 rounded-full px-2 sm:px-3 lg:px-4 py-0.5 border border-cyan-400/30 backdrop-blur-sm">
+            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-[0_0_6px_rgba(6,182,212,0.4)]">
+              {safeFormatTime(currentTime, 'dd/MM/yyyy')}
+            </p>
+          </div>
+        </div>
+        
+        {/* Digital Clock Display */}
+        <div className="relative group">
+          {/* Glow background */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-cyan-500/30 rounded-xl blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+          
+          {/* Main clock container */}
+          <div className="relative flex items-center gap-0.5 sm:gap-1 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]">
+            
+            {/* Hours */}
+            <div className="flex">
+              <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 3xl:text-6xl 4k:text-7xl drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+                {hours}
+              </span>
+            </div>
+            
+            {/* Animated colon separator */}
+            <div className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 mx-0.5 sm:mx-1">
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
+            {/* Minutes */}
+            <div className="flex">
+              <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 3xl:text-6xl 4k:text-7xl drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+                {minutes}
+              </span>
+            </div>
+            
+            {/* Seconds with accent color */}
+            <div className="flex items-end ml-0.5 sm:ml-1">
+              <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-orange-400 text-sm sm:text-base lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
+                {seconds}
+              </span>
+            </div>
+          </div>
+          
+          {/* Subtle reflection at bottom */}
+          <div className="absolute -bottom-0.5 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+        </div>
       </div>
-      <div className="flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-        <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_6px_rgba(6,182,212,0.7)] text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl">
-          {safeFormatTime(currentTime, 'HH:mm')}
-        </span>
-        <span className="font-mono font-bold text-amber-300 animate-pulse text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
-          :{safeFormatTime(currentTime, 'ss')}
-        </span>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Loading state
   if (initialLoading && !currentWeather) {
