@@ -634,3 +634,266 @@
     transform: scaleY(1);
   }
 }
+
+/* ========== TV DISPLAY 3D MODERN ANIMATIONS ========== */
+
+/* Dynamic color shifting background */
+@keyframes colorShift {
+  0%, 100% {
+    background: linear-gradient(135deg, 
+      hsl(220, 60%, 8%) 0%, 
+      hsl(240, 50%, 12%) 25%,
+      hsl(280, 40%, 10%) 50%,
+      hsl(220, 60%, 8%) 100%);
+  }
+  25% {
+    background: linear-gradient(135deg, 
+      hsl(200, 60%, 10%) 0%, 
+      hsl(180, 50%, 12%) 25%,
+      hsl(220, 45%, 11%) 50%,
+      hsl(200, 60%, 10%) 100%);
+  }
+  50% {
+    background: linear-gradient(135deg, 
+      hsl(280, 50%, 9%) 0%, 
+      hsl(260, 45%, 13%) 25%,
+      hsl(300, 40%, 10%) 50%,
+      hsl(280, 50%, 9%) 100%);
+  }
+  75% {
+    background: linear-gradient(135deg, 
+      hsl(170, 55%, 8%) 0%, 
+      hsl(190, 50%, 11%) 25%,
+      hsl(160, 40%, 9%) 50%,
+      hsl(170, 55%, 8%) 100%);
+  }
+}
+
+.animate-color-shift {
+  animation: colorShift 30s ease-in-out infinite;
+}
+
+/* Floating 3D orbs */
+@keyframes floatOrb {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotateZ(0deg);
+    opacity: 0.15;
+  }
+  25% {
+    transform: translate(30px, -40px) scale(1.1) rotateZ(90deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-20px, -60px) scale(0.9) rotateZ(180deg);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translate(-40px, -20px) scale(1.15) rotateZ(270deg);
+    opacity: 0.18;
+  }
+}
+
+.animate-float-orb {
+  animation: floatOrb 20s ease-in-out infinite;
+}
+
+.animate-float-orb-slow {
+  animation: floatOrb 35s ease-in-out infinite reverse;
+}
+
+.animate-float-orb-fast {
+  animation: floatOrb 15s ease-in-out infinite;
+}
+
+/* 3D Card hover effect */
+.tv-card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tv-card-3d:hover {
+  transform: translateZ(20px) rotateX(2deg) rotateY(-2deg);
+}
+
+/* Glassmorphism with depth */
+.glass-3d {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Header glow animation */
+@keyframes headerGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px rgba(99, 102, 241, 0.3),
+      0 0 60px rgba(139, 92, 246, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 
+      0 0 50px rgba(99, 102, 241, 0.5),
+      0 0 100px rgba(139, 92, 246, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+.animate-header-glow {
+  animation: headerGlow 4s ease-in-out infinite;
+}
+
+/* Triage card color shift */
+@keyframes triageColorShift {
+  0%, 100% {
+    background: linear-gradient(135deg, hsl(217, 91%, 50%) 0%, hsl(199, 89%, 48%) 100%);
+  }
+  33% {
+    background: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(213, 94%, 55%) 100%);
+  }
+  66% {
+    background: linear-gradient(135deg, hsl(205, 88%, 48%) 0%, hsl(195, 85%, 45%) 100%);
+  }
+}
+
+.animate-triage-shift {
+  animation: triageColorShift 8s ease-in-out infinite;
+}
+
+/* Doctor card color shift */
+@keyframes doctorColorShift {
+  0%, 100% {
+    background: linear-gradient(135deg, hsl(160, 84%, 39%) 0%, hsl(142, 76%, 36%) 100%);
+  }
+  33% {
+    background: linear-gradient(135deg, hsl(152, 80%, 42%) 0%, hsl(168, 78%, 38%) 100%);
+  }
+  66% {
+    background: linear-gradient(135deg, hsl(145, 85%, 35%) 0%, hsl(155, 82%, 40%) 100%);
+  }
+}
+
+.animate-doctor-shift {
+  animation: doctorColorShift 8s ease-in-out infinite;
+}
+
+/* Neon border pulse */
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 40px currentColor;
+  }
+  50% {
+    box-shadow: 
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 40px currentColor,
+      0 0 80px currentColor;
+  }
+}
+
+.neon-border {
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 1) 25%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 1) 75%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Particle floating effect */
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-50vh) translateX(10vw) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-80vh) translateX(-5vw) rotate(180deg);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-40vh) translateX(-15vw) rotate(270deg);
+    opacity: 0.5;
+  }
+}
+
+/* History panel subtle glow */
+@keyframes historyGlow {
+  0%, 100% {
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
+  }
+}
+
+.animate-history-glow {
+  animation: historyGlow 5s ease-in-out infinite;
+}
+
+/* News ticker glow */
+@keyframes tickerGlow {
+  0%, 100% {
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.8);
+  }
+  50% {
+    box-shadow: 0 -4px 30px rgba(99, 102, 241, 0.3);
+  }
+}
+
+.animate-ticker-glow {
+  animation: tickerGlow 4s ease-in-out infinite;
+}
+
+/* 3D depth layers */
+.depth-layer-1 {
+  transform: translateZ(10px);
+}
+
+.depth-layer-2 {
+  transform: translateZ(20px);
+}
+
+.depth-layer-3 {
+  transform: translateZ(30px);
+}
