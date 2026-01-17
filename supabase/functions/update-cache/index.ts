@@ -80,6 +80,12 @@ const feeds = [
   { url: 'https://www.noticiasaominuto.com.br/rss/brasil', source: 'Notícias ao Minuto' },
   { url: 'https://news.un.org/feed/subscribe/pt/news/region/americas/feed/rss.xml', source: 'ONU News' },
   { url: 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', source: 'Agência Brasil' },
+  // Ciência e Tecnologia
+  { url: 'https://www.inovacaotecnologica.com.br/boletim/rss.xml', source: 'Inovação Tec' },
+  // Jornalismo investigativo
+  { url: 'https://www.intercept.com.br/feed/', source: 'Intercept' },
+  // Internacional
+  { url: 'https://operamundi.uol.com.br/feed/', source: 'Opera Mundi' },
 ];
 
 // Decodificar entidades HTML
