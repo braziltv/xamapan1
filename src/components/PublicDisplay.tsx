@@ -2548,7 +2548,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Activity className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
-                  announcingType === 'triage' ? 'animate-pulse' : ''
+                  announcingType === 'triage' ? 'animate-pulse' : 'animate-triage-icon'
                 }`} />
                 <span className="drop-shadow-md">
                   {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
@@ -2607,7 +2607,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Stethoscope className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
-                  announcingType === 'doctor' ? 'animate-pulse' : ''
+                  announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
                 }`} />
                 <span className="drop-shadow-md">
                   {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}

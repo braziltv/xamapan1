@@ -1324,3 +1324,84 @@
     box-shadow: 0 0 16px rgba(251, 191, 36, 0.5), 0 0 24px rgba(251, 191, 36, 0.2);
   }
 }
+
+/* TV Icon Animations - Triage (Activity) */
+@keyframes triageIconPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+  }
+  25% {
+    transform: scale(1.15) rotate(-5deg);
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.8));
+  }
+  50% {
+    transform: scale(1.05) rotate(0deg);
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.7));
+  }
+  75% {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.8));
+  }
+}
+
+@keyframes triageIconBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.2);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  56% {
+    transform: scale(1);
+  }
+}
+
+/* TV Icon Animations - Doctor (Stethoscope) */
+@keyframes doctorIconSwing {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+  }
+  25% {
+    transform: rotate(-12deg) scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
+  }
+  50% {
+    transform: rotate(0deg) scale(1.05);
+    filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.6));
+  }
+  75% {
+    transform: rotate(12deg) scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
+  }
+}
+
+@keyframes doctorIconBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-3px) scale(1.08);
+  }
+  50% {
+    transform: translateY(0) scale(1);
+  }
+  75% {
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+.animate-triage-icon {
+  animation: triageIconPulse 2s ease-in-out infinite, triageIconBeat 1.5s ease-in-out infinite;
+}
+
+.animate-doctor-icon {
+  animation: doctorIconSwing 3s ease-in-out infinite, doctorIconBounce 2s ease-in-out infinite;
+}
