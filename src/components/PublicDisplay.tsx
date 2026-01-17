@@ -2479,38 +2479,54 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       )}
 
-      {/* Animated 3D background elements - Floating orbs */}
+      {/* Animated 3D background elements - Floating orbs with aurora effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Primary orbs with 3D float animation */}
-        <div className="absolute top-[5%] left-[5%] w-[25vw] h-[25vw] max-w-[300px] max-h-[300px] bg-gradient-to-br from-indigo-500/20 to-purple-600/15 rounded-full blur-[80px] animate-float-orb" />
-        <div className="absolute bottom-[10%] right-[5%] w-[20vw] h-[20vw] max-w-[250px] max-h-[250px] bg-gradient-to-br from-emerald-500/20 to-cyan-500/15 rounded-full blur-[60px] animate-float-orb-slow" />
-        <div className="absolute top-[40%] right-[15%] w-[15vw] h-[15vw] max-w-[180px] max-h-[180px] bg-gradient-to-br from-rose-500/15 to-orange-500/10 rounded-full blur-[50px] animate-float-orb-fast" />
-        <div className="absolute bottom-[30%] left-[10%] w-[18vw] h-[18vw] max-w-[200px] max-h-[200px] bg-gradient-to-br from-blue-500/15 to-violet-500/10 rounded-full blur-[70px] animate-float-orb" style={{ animationDelay: '-5s' }} />
-        <div className="absolute top-[60%] left-[50%] w-[12vw] h-[12vw] max-w-[150px] max-h-[150px] bg-gradient-to-br from-teal-500/15 to-green-500/10 rounded-full blur-[40px] animate-float-orb-slow" style={{ animationDelay: '-10s' }} />
+        {/* Aurora glow layers */}
+        <div className="aurora-glow absolute top-[-20%] left-[-10%] w-[60vw] h-[40vh] bg-gradient-to-br from-violet-600/30 via-purple-500/20 to-transparent rounded-full" style={{ animationDelay: '0s' }} />
+        <div className="aurora-glow absolute top-[30%] right-[-15%] w-[50vw] h-[35vh] bg-gradient-to-bl from-cyan-500/25 via-blue-500/15 to-transparent rounded-full" style={{ animationDelay: '-3s' }} />
+        <div className="aurora-glow absolute bottom-[-10%] left-[20%] w-[55vw] h-[30vh] bg-gradient-to-tr from-emerald-500/20 via-teal-400/15 to-transparent rounded-full" style={{ animationDelay: '-6s' }} />
+        
+        {/* Primary orbs with enhanced 3D float animation */}
+        <div className="absolute top-[5%] left-[5%] w-[25vw] h-[25vw] max-w-[300px] max-h-[300px] bg-gradient-to-br from-indigo-500/25 via-purple-600/20 to-pink-500/15 rounded-full blur-[80px] animate-float-orb" />
+        <div className="absolute bottom-[10%] right-[5%] w-[20vw] h-[20vw] max-w-[250px] max-h-[250px] bg-gradient-to-br from-emerald-500/25 via-cyan-500/20 to-blue-500/15 rounded-full blur-[60px] animate-float-orb-slow" />
+        <div className="absolute top-[40%] right-[15%] w-[15vw] h-[15vw] max-w-[180px] max-h-[180px] bg-gradient-to-br from-rose-500/20 via-orange-500/15 to-amber-500/10 rounded-full blur-[50px] animate-float-orb-fast" />
+        <div className="absolute bottom-[30%] left-[10%] w-[18vw] h-[18vw] max-w-[200px] max-h-[200px] bg-gradient-to-br from-blue-500/20 via-violet-500/15 to-purple-500/10 rounded-full blur-[70px] animate-float-orb" style={{ animationDelay: '-5s' }} />
+        <div className="absolute top-[60%] left-[50%] w-[12vw] h-[12vw] max-w-[150px] max-h-[150px] bg-gradient-to-br from-teal-500/20 via-green-500/15 to-emerald-500/10 rounded-full blur-[40px] animate-float-orb-slow" style={{ animationDelay: '-10s' }} />
+        
+        {/* Floating particles */}
+        <div className="absolute top-[20%] left-[30%] w-3 h-3 rounded-full bg-cyan-400/60 animate-float-particle" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-[50%] left-[70%] w-2 h-2 rounded-full bg-purple-400/50 animate-float-particle" style={{ animationDelay: '-2s' }} />
+        <div className="absolute top-[70%] left-[20%] w-4 h-4 rounded-full bg-emerald-400/40 animate-float-particle" style={{ animationDelay: '-4s' }} />
+        <div className="absolute top-[30%] left-[85%] w-2 h-2 rounded-full bg-pink-400/50 animate-float-particle" style={{ animationDelay: '-1s' }} />
+        <div className="absolute top-[80%] left-[60%] w-3 h-3 rounded-full bg-blue-400/40 animate-float-particle" style={{ animationDelay: '-3s' }} />
       </div>
 
-      {/* Header - 3D Modern gradient bar with glow */}
+      {/* Header - Ultra Modern with Neon Accents */}
       <div className="relative z-10 mb-1 sm:mb-2 3xl:mb-4 4k:mb-6 shrink-0">
-        <div className="glass-3d animate-header-glow rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 3xl:px-8 3xl:py-4 4k:px-12 4k:py-6 relative overflow-hidden tv-card-3d">
+        <div className="ultra-glass gradient-border-animated rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl px-2 py-1.5 sm:px-4 sm:py-2 lg:px-6 lg:py-3 3xl:px-8 3xl:py-4 4k:px-12 4k:py-6 relative overflow-hidden tv-card-3d animate-card-breathing">
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 via-purple-600/40 to-indigo-600/30 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl opacity-80" />
-          {/* Top highlight line */}
-          <div className="absolute top-0 left-[10%] w-[80%] h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 via-purple-600/30 via-50% to-indigo-600/20 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl opacity-80" />
+          {/* Mesh gradient layer */}
+          <div className="absolute inset-0 mesh-gradient-bg opacity-40 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl" />
+          {/* Top highlight line with glow */}
+          <div className="absolute top-0 left-[5%] w-[90%] h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+          <div className="absolute top-0 left-[10%] w-[80%] h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent blur-sm" />
           {/* Bottom subtle line */}
           <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
           <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
-            {/* Left: Logo + Title with 3D effect */}
+            {/* Left: Logo + Title with enhanced 3D effect */}
             <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0">
-              <div className="relative w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 3xl:w-20 3xl:h-20 4k:w-28 4k:h-28">
-                {/* Glow behind logo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md opacity-60" />
-                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl shrink-0">
+              <div className="relative w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 xl:w-14 xl:h-14 3xl:w-20 3xl:h-20 4k:w-28 4k:h-28 animate-pulsing-ring">
+                {/* Multi-layer glow behind logo */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-lg opacity-70 animate-pulse" />
+                <div className="absolute inset-[-2px] bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md opacity-50" />
+                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl shrink-0 ring-2 ring-white/30">
                   <HealthCrossIcon size={32} className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-14 3xl:h-14 4k:w-20 4k:h-20" />
                 </div>
               </div>
               <div className="hidden sm:block shrink-0">
-                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
+                <h1 className="tv-font-heading font-bold holo-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
                 <p className="tv-font-body text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap drop-shadow-md">
@@ -2519,8 +2535,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
             </div>
             
-            {/* Animated separator */}
-            <div className="hidden sm:block w-px h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
+            {/* Animated separator with glow */}
+            <div className="hidden sm:flex items-center shrink-0">
+              <div className="w-px h-6 lg:h-8 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent animate-pulse" />
+              <div className="w-px h-4 lg:h-6 3xl:h-10 4k:h-14 bg-gradient-to-b from-transparent via-purple-400/40 to-transparent ml-1 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            </div>
             
             {/* Right: Weather + Clock */}
             <div className="flex-1 min-w-0 flex items-center justify-end overflow-visible">
@@ -2534,23 +2553,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div className="relative z-10 flex-1 grid grid-cols-12 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8 min-h-0 pb-12 sm:pb-14 lg:pb-16 3xl:pb-20 4k:pb-24">
         {/* Current Calls - Stacked on mobile, side by side on larger screens */}
         <div className="col-span-9 grid grid-cols-1 landscape:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 lg:gap-4 3xl:gap-6 4k:gap-8">
-          {/* Triage Call - 3D Modern Card */}
-          <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
+          {/* Triage Call - Ultra Modern Neon Card */}
+          <div className={`ultra-glass tv-card tv-card-modern flex flex-col transition-all duration-500 rounded-xl sm:rounded-2xl ${
             announcingType === 'triage' 
-              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
-              : 'border border-indigo-500/30 hover:border-indigo-400/50'
-          } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
-            {/* Header with animated gradient */}
-            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden ${
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call neon-glow-blue' 
+              : 'border border-indigo-500/40 hover:border-indigo-400/60 neon-glow-blue animate-card-lift'
+          } ${currentTriageCall ? 'animate-card-pop' : 'animate-card-breathing'}`}>
+            {/* Header with animated gradient and glow */}
+            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden rounded-t-xl sm:rounded-t-2xl ${
               announcingType === 'triage' ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' : 'animate-triage-shift'
             }`}>
               {/* Shimmer overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+              {/* Top glow line */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Activity className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
                   announcingType === 'triage' ? 'animate-pulse' : 'animate-triage-icon'
                 }`} />
-                <span className="drop-shadow-md">
+                <span className={`drop-shadow-md ${announcingType === 'triage' ? '' : 'ultra-shimmer-text'}`}>
                   {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
                 </span>
                 {announcingType === 'triage' && (
@@ -2559,18 +2580,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </p>
             </div>
             <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px] relative">
-              {/* Subtle inner glow */}
+              {/* Enhanced inner glow with mesh */}
               <div className={`absolute inset-0 pointer-events-none ${
                 announcingType === 'triage' 
-                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
-                  : 'bg-gradient-to-b from-blue-500/5 to-transparent'
+                  ? 'bg-gradient-to-b from-yellow-500/25 via-orange-500/10 to-transparent' 
+                  : 'bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent'
               }`} />
+              <div className="absolute inset-0 mesh-gradient-bg opacity-20 pointer-events-none" />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-110' : ''}`}>
                   <h2 className={`tv-font-display font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'triage' 
-                      ? 'text-yellow-300 animate-name-mega-pulse' 
-                      : 'shimmer-text animate-text-reveal'
+                      ? 'text-yellow-300 animate-name-mega-pulse animate-glitch' 
+                      : 'holo-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
@@ -2582,8 +2604,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-2 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
-                    <Activity className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-blue-400/50" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-2 rounded-full bg-gradient-to-br from-blue-500/30 via-indigo-500/20 to-purple-500/10 flex items-center justify-center animate-pulse ring-2 ring-blue-400/30">
+                    <Activity className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-blue-400/60" />
                   </div>
                   <p className="text-slate-400 text-center text-xs sm:text-sm lg:text-base 3xl:text-lg 4k:text-xl">
                     Aguardando próxima chamada...
@@ -2593,23 +2615,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
           </div>
 
-          {/* Doctor Call - 3D Modern Card */}
-          <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
+          {/* Doctor Call - Ultra Modern Neon Card */}
+          <div className={`ultra-glass tv-card tv-card-modern flex flex-col transition-all duration-500 rounded-xl sm:rounded-2xl ${
             announcingType === 'doctor' 
-              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
-              : 'border border-emerald-500/30 hover:border-emerald-400/50'
-          } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
-            {/* Header with animated gradient */}
-            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden ${
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call neon-glow-emerald' 
+              : 'border border-emerald-500/40 hover:border-emerald-400/60 neon-glow-emerald animate-card-lift'
+          } ${currentDoctorCall ? 'animate-card-pop' : 'animate-card-breathing'}`} style={{ animationDelay: '2s' }}>
+            {/* Header with animated gradient and glow */}
+            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden rounded-t-xl sm:rounded-t-2xl ${
               announcingType === 'doctor' ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' : 'animate-doctor-shift'
             }`}>
               {/* Shimmer overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+              {/* Top glow line */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-300/80 to-transparent" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
                 <Stethoscope className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
                   announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
                 }`} />
-                <span className="drop-shadow-md">
+                <span className={`drop-shadow-md ${announcingType === 'doctor' ? '' : 'ultra-shimmer-text'}`}>
                   {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
                 </span>
                 {announcingType === 'doctor' && (
@@ -2618,18 +2642,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </p>
             </div>
             <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px] relative">
-              {/* Subtle inner glow */}
+              {/* Enhanced inner glow with mesh */}
               <div className={`absolute inset-0 pointer-events-none ${
                 announcingType === 'doctor' 
-                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
-                  : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
+                  ? 'bg-gradient-to-b from-yellow-500/25 via-orange-500/10 to-transparent' 
+                  : 'bg-gradient-to-b from-emerald-500/10 via-green-500/5 to-transparent'
               }`} />
+              <div className="absolute inset-0 mesh-gradient-bg opacity-20 pointer-events-none" />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-110' : ''}`}>
                   <h2 className={`tv-font-display font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'doctor' 
-                      ? 'text-yellow-300 animate-name-mega-pulse' 
-                      : 'shimmer-text animate-text-reveal'
+                      ? 'text-yellow-300 animate-name-mega-pulse animate-glitch' 
+                      : 'holo-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
@@ -2641,8 +2666,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
-                    <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-emerald-400/50" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-500/30 via-green-500/20 to-teal-500/10 flex items-center justify-center animate-pulse ring-2 ring-emerald-400/30">
+                    <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-emerald-400/60" />
                   </div>
                   <p className="text-slate-400 text-center text-xs sm:text-sm lg:text-base 3xl:text-lg 4k:text-xl">
                     Aguardando próxima chamada...
@@ -2653,11 +2678,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* Right Column: History Panel - 3D Glass effect */}
-        <div className="col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-2 sm:p-3 lg:p-4 flex-col min-h-0 border border-purple-500/20">
+        {/* Right Column: History Panel - Ultra Modern Glass effect */}
+        <div className="col-span-3 flex ultra-glass tv-card rounded-xl sm:rounded-2xl neon-glow-purple tv-card-modern p-2 sm:p-3 lg:p-4 flex-col min-h-0 border border-purple-500/30 animate-card-breathing" style={{ animationDelay: '1s' }}>
           <h3 className="tv-font-heading font-bold text-white mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs sm:text-sm lg:text-base drop-shadow-md">
             <Clock className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-cyan-400 shrink-0 animate-pulse" />
-            <span className="shimmer-text">Últimas Chamadas</span>
+            <span className="holo-text">Últimas Chamadas</span>
           </h3>
           <div className="space-y-1 sm:space-y-1.5 lg:space-y-2 flex-1 overflow-y-auto scrollbar-thin">
             {historyItems.length === 0 ? (

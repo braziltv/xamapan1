@@ -1405,3 +1405,307 @@
 .animate-doctor-icon {
   animation: doctorIconSwing 3s ease-in-out infinite, doctorIconBounce 2s ease-in-out infinite;
 }
+
+/* ===== MODERN TV DISPLAY ENHANCEMENTS ===== */
+
+/* Neon glow effects */
+.neon-glow-blue {
+  box-shadow: 
+    0 0 20px rgba(59, 130, 246, 0.4),
+    0 0 40px rgba(59, 130, 246, 0.2),
+    0 0 60px rgba(59, 130, 246, 0.1),
+    inset 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.neon-glow-emerald {
+  box-shadow: 
+    0 0 20px rgba(16, 185, 129, 0.4),
+    0 0 40px rgba(16, 185, 129, 0.2),
+    0 0 60px rgba(16, 185, 129, 0.1),
+    inset 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.neon-glow-purple {
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.4),
+    0 0 40px rgba(139, 92, 246, 0.2),
+    0 0 60px rgba(139, 92, 246, 0.1),
+    inset 0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+/* Ultra modern glass morphism */
+.ultra-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Animated gradient border */
+@keyframes gradientBorderFlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-border-animated {
+  position: relative;
+}
+
+.gradient-border-animated::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    45deg,
+    #6366f1,
+    #8b5cf6,
+    #a855f7,
+    #d946ef,
+    #ec4899,
+    #f43f5e,
+    #6366f1
+  );
+  background-size: 300% 300%;
+  animation: gradientBorderFlow 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+/* Holographic text effect */
+@keyframes holoShift {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(15deg);
+  }
+}
+
+.holo-text {
+  background: linear-gradient(
+    90deg,
+    #fff 0%,
+    #a5f3fc 25%,
+    #c4b5fd 50%,
+    #f9a8d4 75%,
+    #fff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: holoShift 3s ease infinite;
+}
+
+/* Floating particle effect */
+@keyframes floatParticle {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-5px) scale(1);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(-25px) translateX(15px) scale(0.9);
+    opacity: 0.5;
+  }
+}
+
+.animate-float-particle {
+  animation: floatParticle 6s ease-in-out infinite;
+}
+
+/* Card hover lift effect */
+@keyframes cardLift {
+  0%, 100% {
+    transform: translateY(0) rotateX(0);
+  }
+  50% {
+    transform: translateY(-5px) rotateX(2deg);
+  }
+}
+
+.animate-card-lift {
+  animation: cardLift 4s ease-in-out infinite;
+}
+
+/* Pulsing ring animation */
+@keyframes pulsingRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.animate-pulsing-ring {
+  animation: pulsingRing 2s ease-out infinite;
+}
+
+/* Modern card 3D transform */
+.tv-card-modern {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tv-card-modern:hover {
+  transform: translateZ(20px) rotateX(2deg);
+}
+
+/* Gradient mesh background */
+@keyframes meshGradient {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+.mesh-gradient-bg {
+  background: 
+    radial-gradient(at 40% 20%, hsla(228, 100%, 74%, 0.3) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(340, 100%, 76%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(22, 100%, 77%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, hsla(242, 100%, 70%, 0.3) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(269, 100%, 77%, 0.2) 0px, transparent 50%);
+  background-size: 200% 200%;
+  animation: meshGradient 15s ease infinite;
+}
+
+/* Subtle breathing animation for cards */
+@keyframes cardBreathing {
+  0%, 100% {
+    box-shadow: 
+      0 4px 20px -4px rgba(0, 0, 0, 0.3),
+      0 0 40px -10px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 8px 30px -4px rgba(0, 0, 0, 0.4),
+      0 0 60px -10px rgba(99, 102, 241, 0.3);
+  }
+}
+
+.animate-card-breathing {
+  animation: cardBreathing 4s ease-in-out infinite;
+}
+
+/* Glitch effect for name announcement */
+@keyframes glitchText {
+  0%, 100% {
+    text-shadow: 
+      -2px 0 #ff00ff,
+      2px 0 #00ffff;
+    transform: translate(0);
+  }
+  20% {
+    text-shadow: 
+      2px 0 #ff00ff,
+      -2px 0 #00ffff;
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    text-shadow: 
+      -2px 0 #ff00ff,
+      2px 0 #00ffff;
+    transform: translate(2px, -2px);
+  }
+  60% {
+    text-shadow: 
+      2px 0 #ff00ff,
+      -2px 0 #00ffff;
+    transform: translate(-1px, 1px);
+  }
+  80% {
+    text-shadow: 
+      -2px 0 #ff00ff,
+      2px 0 #00ffff;
+    transform: translate(1px, -1px);
+  }
+}
+
+.animate-glitch {
+  animation: glitchText 0.3s ease-in-out infinite;
+}
+
+/* Enhanced shimmer for text */
+@keyframes ultraShimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.ultra-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #fff 0%,
+    #fff 40%,
+    #a5f3fc 45%,
+    #c4b5fd 50%,
+    #f9a8d4 55%,
+    #fff 60%,
+    #fff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ultraShimmer 4s linear infinite;
+}
+
+/* Aurora background effect */
+@keyframes auroraFlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-20px) scale(1.1);
+  }
+}
+
+.aurora-glow {
+  position: absolute;
+  filter: blur(80px);
+  animation: auroraFlow 8s ease-in-out infinite;
+}
