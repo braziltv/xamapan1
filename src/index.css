@@ -897,3 +897,136 @@
 .depth-layer-3 {
   transform: translateZ(30px);
 }
+
+/* ========== ENHANCED TV VISUAL EFFECTS ========== */
+
+/* Active call card glow (blue for triage) */
+@keyframes activeTriageGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(59, 130, 246, 0.4),
+      0 0 40px rgba(59, 130, 246, 0.2),
+      0 0 60px rgba(59, 130, 246, 0.1),
+      inset 0 0 30px rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(59, 130, 246, 0.6),
+      0 0 60px rgba(59, 130, 246, 0.3),
+      0 0 90px rgba(59, 130, 246, 0.15),
+      inset 0 0 40px rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.8);
+  }
+}
+
+.animate-active-triage-glow {
+  animation: activeTriageGlow 2s ease-in-out infinite;
+}
+
+/* Active call card glow (green for doctor) */
+@keyframes activeDoctorGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(16, 185, 129, 0.4),
+      0 0 40px rgba(16, 185, 129, 0.2),
+      0 0 60px rgba(16, 185, 129, 0.1),
+      inset 0 0 30px rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.6);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(16, 185, 129, 0.6),
+      0 0 60px rgba(16, 185, 129, 0.3),
+      0 0 90px rgba(16, 185, 129, 0.15),
+      inset 0 0 40px rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.8);
+  }
+}
+
+.animate-active-doctor-glow {
+  animation: activeDoctorGlow 2s ease-in-out infinite;
+}
+
+/* Heartbeat animation for triage icon */
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.15);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* Soft pulse for stethoscope */
+@keyframes softPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+/* ECG pattern background */
+.ecg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='40' viewBox='0 0 100 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 L15 20 L20 10 L25 30 L30 5 L35 35 L40 15 L45 20 L100 20' stroke='rgba(59,130,246,0.08)' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+/* Circles pattern background */
+.circles-pattern {
+  background-image: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+                    radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+}
+
+/* Timeline connector line */
+.timeline-connector::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, 
+    rgba(139, 92, 246, 0.4) 0%, 
+    rgba(139, 92, 246, 0.1) 100%);
+}
+
+/* Idle state dimmed */
+.idle-dimmed {
+  opacity: 0.4;
+  filter: grayscale(20%);
+}
+
+/* Enhanced high contrast text */
+.high-contrast-title {
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.high-contrast-secondary {
+  color: #D1D5DB;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

@@ -155,24 +155,26 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Compact date+clock for landscape mode
+  // Compact date+clock for landscape mode - ENHANCED: bigger clock, smaller date
   const renderDateTimeCompact = () => (
-    <div className="flex flex-col items-center gap-0.5 sm:gap-1 shrink-0">
-      <div className="text-center bg-white/10 rounded px-1.5 sm:px-2 lg:px-3 py-0.5">
-        <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
-          {safeFormatTime(currentTime, 'EEEE')}
-        </p>
-        <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
-          {safeFormatTime(currentTime, 'dd/MM/yyyy')}
-        </p>
-      </div>
-      <div className="flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded px-1.5 sm:px-2 lg:px-3 py-0.5 sm:py-1 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.3)]">
-        <span className="font-mono font-black text-cyan-300 tracking-tight drop-shadow-[0_2px_6px_rgba(6,182,212,0.7)] text-lg sm:text-xl lg:text-2xl xl:text-3xl 3xl:text-4xl 4k:text-5xl">
+    <div className="flex flex-col items-center gap-0.5 shrink-0">
+      {/* Clock - MUCH BIGGER */}
+      <div className="flex items-baseline justify-center whitespace-nowrap bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-lg px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 border border-cyan-400/40 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+        <span className="font-mono font-black text-white tracking-tight drop-shadow-[0_2px_8px_rgba(6,182,212,0.8)] text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 3xl:text-6xl 4k:text-7xl">
           {safeFormatTime(currentTime, 'HH:mm')}
         </span>
-        <span className="font-mono font-bold text-amber-300 animate-pulse text-xs sm:text-sm lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl">
+        <span className="font-mono font-bold text-cyan-300 animate-pulse text-sm sm:text-base lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl">
           :{safeFormatTime(currentTime, 'ss')}
         </span>
+      </div>
+      {/* Date - smaller and more subtle */}
+      <div className="text-center bg-white/5 rounded px-1.5 sm:px-2 py-0.5">
+        <p className="font-semibold text-amber-300/90 leading-tight whitespace-nowrap uppercase text-[7px] sm:text-[8px] lg:text-[9px] xl:text-xs 3xl:text-sm 4k:text-base">
+          {safeFormatTime(currentTime, 'EEEE')}
+        </p>
+        <p className="font-medium text-slate-400 leading-tight whitespace-nowrap text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-xs 4k:text-sm">
+          {safeFormatTime(currentTime, 'dd/MM/yyyy')}
+        </p>
       </div>
     </div>
   );
@@ -205,23 +207,23 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 justify-end flex-nowrap overflow-visible">
-      {/* City + Weather Icon */}
-      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+    <div className="w-full flex items-center gap-1 sm:gap-1.5 lg:gap-2 xl:gap-3 3xl:gap-4 justify-end flex-nowrap overflow-visible">
+      {/* City + Weather Icon - More compact */}
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <div className="flex flex-col items-center">
-          <span className="font-black text-white uppercase tracking-wider text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
-            Previsão
+          <span className="font-bold text-white/80 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg">
+            Tempo
           </span>
           <div className="flex items-center gap-0.5 text-amber-300">
-            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 animate-bounce shrink-0" />
-            <span className="font-black whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl">
-              {displayCity}-MG
+            <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5 animate-bounce shrink-0" />
+            <span className="font-bold whitespace-nowrap text-[9px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
+              {displayCity}
             </span>
           </div>
         </div>
         <div className="relative shrink-0">
-          <div className="absolute inset-0 bg-yellow-400/20 blur-lg rounded-full" />
-          <div className="relative bg-white/10 rounded-lg p-1 lg:p-1.5 backdrop-blur-sm border border-white/10">
+          <div className="absolute inset-0 bg-yellow-400/15 blur-md rounded-full" />
+          <div className="relative bg-white/5 rounded-md p-0.5 lg:p-1 backdrop-blur-sm border border-white/5">
             {getWeatherIcon(weather.current.description, 'lg')}
           </div>
         </div>
