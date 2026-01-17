@@ -62,9 +62,6 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                 <p className="text-[10px] text-muted-foreground truncate">
                   {unitName}
                 </p>
-                <p className="text-[8px] text-muted-foreground/70 truncate">
-                  Solução criada por Kalebe Gomes
-                </p>
               </div>
             </div>
             <Button
