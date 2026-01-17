@@ -2321,19 +2321,41 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
             </div>
             
-            {/* Patient name - MEGA SIZE */}
-            <div className="text-center max-w-[90vw]">
+            {/* Patient name - MEGA SIZE with INTENSE glow effects */}
+            <div className="text-center max-w-[90vw] relative">
+              {/* Background glow layer */}
+              <div 
+                className="absolute inset-0 blur-3xl opacity-60"
+                style={{
+                  background: `radial-gradient(ellipse at center, ${
+                    announcingType === 'triage' 
+                      ? 'rgba(59, 130, 246, 0.5)' 
+                      : 'rgba(16, 185, 129, 0.5)'
+                  } 0%, transparent 70%)`
+                }}
+              />
               <h1 
-                className={`font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse ${
-                  announcingType === 'triage' ? 'text-yellow-300' : 'text-yellow-300'
-                }`}
+                className="font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse text-yellow-300 relative z-10"
                 style={{ 
                   wordBreak: 'break-word',
-                  textShadow: '0 0 40px rgba(253, 224, 71, 0.8), 0 0 80px rgba(253, 224, 71, 0.5)'
+                  WebkitTextStroke: '2px rgba(255, 200, 0, 0.3)',
+                  letterSpacing: '0.05em'
                 }}
               >
                 {currentCallName}
               </h1>
+              {/* Reflection effect */}
+              <div 
+                className="absolute -bottom-4 left-0 right-0 h-16 opacity-20 blur-sm scale-y-[-0.3] pointer-events-none overflow-hidden"
+                style={{ 
+                  maskImage: 'linear-gradient(to bottom, white, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, white, transparent)'
+                }}
+              >
+                <span className="font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] text-yellow-300">
+                  {currentCallName}
+                </span>
+              </div>
             </div>
             
             {/* Destination */}
