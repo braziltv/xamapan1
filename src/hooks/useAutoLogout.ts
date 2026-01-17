@@ -6,12 +6,17 @@ interface UseAutoLogoutOptions {
   onLogout: () => void;
 }
 
+/**
+ * Auto-logout hook that triggers logout at 07:04 and 19:04
+ * IMPORTANT: TV mode is ALWAYS exempted from auto-logout to ensure
+ * continuous display operation without interruption.
+ */
 export function useAutoLogout({ isTvMode, onLogout }: UseAutoLogoutOptions) {
   const lastCheckRef = useRef<string>('');
   const warningShownRef = useRef<string>('');
 
   const checkAutoLogout = useCallback(() => {
-    // Skip if TV mode - TV stays logged in
+    // CRITICAL: NEVER auto-logout TV mode - must stay active 24/7
     if (isTvMode) return;
 
     const now = new Date();
