@@ -689,55 +689,36 @@
   animation: colorShift 30s ease-in-out infinite;
 }
 
-/* Floating 3D orbs with hue rotation */
-@keyframes floatOrbHue {
+/* Floating 3D orbs */
+@keyframes floatOrb {
   0%, 100% {
     transform: translate(0, 0) scale(1) rotateZ(0deg);
     opacity: 0.15;
-    filter: hue-rotate(0deg);
   }
-  14% {
-    transform: translate(20px, -30px) scale(1.05) rotateZ(50deg);
-    opacity: 0.22;
-    filter: hue-rotate(30deg);
-  }
-  28% {
-    transform: translate(35px, -50px) scale(1.12) rotateZ(100deg);
+  25% {
+    transform: translate(30px, -40px) scale(1.1) rotateZ(90deg);
     opacity: 0.25;
-    filter: hue-rotate(60deg);
   }
-  42% {
-    transform: translate(10px, -65px) scale(0.95) rotateZ(150deg);
+  50% {
+    transform: translate(-20px, -60px) scale(0.9) rotateZ(180deg);
     opacity: 0.2;
-    filter: hue-rotate(120deg);
   }
-  57% {
-    transform: translate(-25px, -55px) scale(0.88) rotateZ(200deg);
+  75% {
+    transform: translate(-40px, -20px) scale(1.15) rotateZ(270deg);
     opacity: 0.18;
-    filter: hue-rotate(180deg);
-  }
-  71% {
-    transform: translate(-40px, -35px) scale(1.08) rotateZ(250deg);
-    opacity: 0.23;
-    filter: hue-rotate(240deg);
-  }
-  85% {
-    transform: translate(-30px, -15px) scale(1.15) rotateZ(310deg);
-    opacity: 0.19;
-    filter: hue-rotate(300deg);
   }
 }
 
 .animate-float-orb {
-  animation: floatOrbHue 60s ease-in-out infinite;
+  animation: floatOrb 20s ease-in-out infinite;
 }
 
 .animate-float-orb-slow {
-  animation: floatOrbHue 80s ease-in-out infinite reverse;
+  animation: floatOrb 35s ease-in-out infinite reverse;
 }
 
 .animate-float-orb-fast {
-  animation: floatOrbHue 45s ease-in-out infinite;
+  animation: floatOrb 15s ease-in-out infinite;
 }
 
 /* 3D Card hover effect */
