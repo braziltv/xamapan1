@@ -2264,59 +2264,120 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     );
   }
 
+  // Get the current call name for the dramatic overlay
+  const currentCallName = announcingType === 'triage' 
+    ? currentTriageCall?.name 
+    : announcingType === 'doctor' 
+      ? currentDoctorCall?.name 
+      : null;
+  
+  const currentCallDestination = announcingType === 'triage' 
+    ? currentTriageCall?.destination 
+    : announcingType === 'doctor' 
+      ? currentDoctorCall?.destination 
+      : null;
+
   return (
     <div 
       ref={containerRef}
-      className={`h-dvh w-full animate-color-shift tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''}`}
+      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
+        announcingType ? 'animate-calling-background' : 'animate-waiting-background'
+      }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
-      {/* Flash overlay during announcement */}
-      {announcingType && (
-        <div className="absolute inset-0 z-50 pointer-events-none animate-flash">
-          <div className={`absolute inset-0 ${
-            announcingType === 'triage' 
-              ? 'bg-blue-500/30' 
-              : 'bg-emerald-500/30'
-          }`} />
-        </div>
-      )}
-
-      {/* Voice Announcement Indicator */}
-      {announcingType && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[55] pointer-events-none">
-          <div className={`flex flex-col items-center gap-4 p-6 sm:p-8 rounded-2xl backdrop-blur-lg shadow-2xl ${
-            announcingType === 'triage'
-              ? 'bg-blue-900/90 border-2 border-blue-400 shadow-blue-500/50'
-              : 'bg-emerald-900/90 border-2 border-emerald-400 shadow-emerald-500/50'
-          }`}>
-            {/* Animated Sound Wave Icon */}
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
+      {/* ========== DRAMATIC FULL-SCREEN CALLING OVERLAY ========== */}
+      {announcingType && currentCallName && (
+        <div className="fixed inset-0 z-[100] pointer-events-none animate-calling-overlay-enter">
+          {/* Dark backdrop with blur */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+          
+          {/* Radar rings emanating from center */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+              announcingType === 'triage' ? 'border-blue-400/50' : 'border-emerald-400/50'
+            } animate-radar-ring`} />
+            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+              announcingType === 'triage' ? 'border-blue-400/40' : 'border-emerald-400/40'
+            } animate-radar-ring-delayed`} />
+            <div className={`absolute w-[40vw] h-[40vw] rounded-full border-4 ${
+              announcingType === 'triage' ? 'border-blue-400/30' : 'border-emerald-400/30'
+            } animate-radar-ring-delayed-2`} />
+          </div>
+          
+          {/* Central content - Name prominently displayed */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-8">
+            {/* Status badge */}
+            <div className={`mb-6 px-8 py-3 rounded-full animate-status-badge ${
+              announcingType === 'triage' 
+                ? 'bg-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.6)]' 
+                : 'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.6)]'
+            }`}>
+              <div className="flex items-center gap-3">
+                <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-megaphone-shake" />
+                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-wider uppercase">
+                  🔔 CHAMANDO AGORA
+                </span>
+                <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-megaphone-shake" style={{ animationDelay: '0.25s' }} />
+              </div>
+            </div>
+            
+            {/* Patient name - MEGA SIZE */}
+            <div className="text-center max-w-[90vw]">
+              <h1 
+                className={`font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[10rem] leading-tight tracking-wide animate-name-mega-pulse ${
+                  announcingType === 'triage' ? 'text-yellow-300' : 'text-yellow-300'
+                }`}
+                style={{ 
+                  wordBreak: 'break-word',
+                  textShadow: '0 0 40px rgba(253, 224, 71, 0.8), 0 0 80px rgba(253, 224, 71, 0.5)'
+                }}
+              >
+                {currentCallName}
+              </h1>
+            </div>
+            
+            {/* Destination */}
+            <div className={`mt-6 px-6 py-2 rounded-xl ${
+              announcingType === 'triage' 
+                ? 'bg-blue-900/80 border-2 border-blue-400' 
+                : 'bg-emerald-900/80 border-2 border-emerald-400'
+            }`}>
+              <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
+                announcingType === 'triage' ? 'text-blue-200' : 'text-emerald-200'
+              }`}>
+                {announcingType === 'triage' ? '🏥' : '👨‍⚕️'} {currentCallDestination || (announcingType === 'triage' ? 'Triagem' : 'Consultório')}
+              </p>
+            </div>
+            
+            {/* Sound wave indicator */}
+            <div className="mt-8 flex items-center gap-2">
+              {[...Array(7)].map((_, i) => (
                 <div
                   key={i}
-                  className={`w-2 sm:w-3 rounded-full ${
+                  className={`w-3 sm:w-4 rounded-full ${
                     announcingType === 'triage' ? 'bg-blue-400' : 'bg-emerald-400'
                   }`}
                   style={{
-                    height: `${20 + Math.random() * 30}px`,
-                    animation: `soundWave 0.5s ease-in-out infinite alternate`,
-                    animationDelay: `${i * 0.1}s`
+                    height: `${30 + Math.sin(Date.now() / 200 + i) * 25}px`,
+                    animation: `soundWave 0.4s ease-in-out infinite alternate`,
+                    animationDelay: `${i * 0.08}s`
                   }}
                 />
               ))}
             </div>
-            
-            <div className="text-center">
-              <p className={`text-lg sm:text-2xl font-bold ${
-                announcingType === 'triage' ? 'text-blue-100' : 'text-emerald-100'
-              }`}>
-                🔊 Reproduzindo Anúncio
-              </p>
-              <p className={`text-sm sm:text-base mt-1 ${
-                announcingType === 'triage' ? 'text-blue-300' : 'text-emerald-300'
-              }`}>
-                Por favor, aguarde...
-              </p>
+          </div>
+        </div>
+      )}
+
+      {/* ========== WAITING/IDLE STATE INDICATOR ========== */}
+      {!announcingType && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <div className="px-6 py-2 rounded-full bg-slate-800/60 backdrop-blur-md border border-slate-600/50">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
+              <span className="text-sm sm:text-base font-medium text-slate-300 tracking-wide">
+                🟦 AGUARDANDO CHAMADA
+              </span>
             </div>
           </div>
         </div>
@@ -2418,34 +2479,46 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Triage Call - 3D Modern Card */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'triage' 
-              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_50px_rgba(239,68,68,0.6)] scale-[1.02]' 
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
               : 'border border-indigo-500/30 hover:border-indigo-400/50'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
-            <div className="animate-triage-shift px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden">
+            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden ${
+              announcingType === 'triage' ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' : 'animate-triage-shift'
+            }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md" />
-                <span className="drop-shadow-md">TRIAGEM</span>
+                <Activity className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
+                  announcingType === 'triage' ? 'animate-pulse' : ''
+                }`} />
+                <span className="drop-shadow-md">
+                  {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
+                </span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-yellow-300 animate-bounce ml-auto shrink-0 drop-shadow-lg" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
                 )}
               </p>
             </div>
             <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px] relative">
               {/* Subtle inner glow */}
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
+              <div className={`absolute inset-0 pointer-events-none ${
+                announcingType === 'triage' 
+                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
+                  : 'bg-gradient-to-b from-blue-500/5 to-transparent'
+              }`} />
               {currentTriageCall ? (
-                <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
+                <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-110' : ''}`}>
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'triage' 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_40px_rgba(253,224,71,0.9)]' 
-                      : 'shimmer-text'
+                      ? 'text-yellow-300 animate-name-mega-pulse' 
+                      : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentTriageCall.name}>
                     {currentTriageCall.name}
                   </h2>
-                  <p className="text-cyan-400 mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
+                  <p className={`mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
+                    announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-400'
+                  }`}>
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
@@ -2465,34 +2538,46 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Doctor Call - 3D Modern Card */}
           <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
             announcingType === 'doctor' 
-              ? 'border-4 border-red-500 animate-border-pulse shadow-[0_0_50px_rgba(239,68,68,0.6)] scale-[1.02]' 
+              ? 'border-4 animate-border-glow-intense animate-card-zoom-call' 
               : 'border border-emerald-500/30 hover:border-emerald-400/50'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
-            <div className="animate-doctor-shift px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden">
+            <div className={`px-2 py-1.5 sm:px-3 sm:py-2 lg:px-4 lg:py-3 3xl:px-6 3xl:py-4 4k:px-8 4k:py-5 shrink-0 relative overflow-hidden ${
+              announcingType === 'doctor' ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' : 'animate-doctor-shift'
+            }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="text-white font-bold flex items-center gap-1.5 sm:gap-2 3xl:gap-3 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
-                <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md" />
-                <span className="drop-shadow-md">CONSULTÓRIO</span>
+                <Stethoscope className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md ${
+                  announcingType === 'doctor' ? 'animate-pulse' : ''
+                }`} />
+                <span className="drop-shadow-md">
+                  {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
+                </span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-yellow-300 animate-bounce ml-auto shrink-0 drop-shadow-lg" />
+                  <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
                 )}
               </p>
             </div>
             <div className="p-2 sm:p-3 lg:p-4 xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[100px] sm:min-h-[120px] lg:min-h-[150px] 3xl:min-h-[200px] 4k:min-h-[280px] relative">
               {/* Subtle inner glow */}
-              <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
+              <div className={`absolute inset-0 pointer-events-none ${
+                announcingType === 'doctor' 
+                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
+                  : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
+              }`} />
               {currentDoctorCall ? (
-                <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 animate-text-reveal text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
+                <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-110' : ''}`}>
+                  <h2 className={`font-black tracking-wide leading-tight break-words transition-all duration-300 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl ${
                     announcingType === 'doctor' 
-                      ? 'text-yellow-300 animate-pulse drop-shadow-[0_0_40px_rgba(253,224,71,0.9)]' 
-                      : 'shimmer-text'
+                      ? 'text-yellow-300 animate-name-mega-pulse' 
+                      : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word' }} key={currentDoctorCall.name}>
                     {currentDoctorCall.name}
                   </h2>
-                  <p className="text-emerald-400 mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
+                  <p className={`mt-1 sm:mt-2 3xl:mt-4 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md ${
+                    announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-400'
+                  }`}>
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
