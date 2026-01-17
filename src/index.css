@@ -1325,7 +1325,27 @@
   }
 }
 
-/* TV Icon Animations - Triage (Activity) */
+/* TV Icon Animations - Triage (Activity) - Mobile */
+@keyframes triageIconPulseMobile {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.4));
+  }
+  25% {
+    transform: scale(1.08) rotate(-3deg);
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+  }
+  50% {
+    transform: scale(1.03) rotate(0deg);
+    filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5));
+  }
+  75% {
+    transform: scale(1.08) rotate(3deg);
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+  }
+}
+
+/* TV Icon Animations - Triage (Activity) - Desktop */
 @keyframes triageIconPulse {
   0%, 100% {
     transform: scale(1);
@@ -1342,6 +1362,26 @@
   75% {
     transform: scale(1.15) rotate(5deg);
     filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.8));
+  }
+}
+
+/* TV Icon Animations - Triage (Activity) - Large Screens */
+@keyframes triageIconPulseLarge {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.6));
+  }
+  25% {
+    transform: scale(1.2) rotate(-8deg);
+    filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.9));
+  }
+  50% {
+    transform: scale(1.08) rotate(0deg);
+    filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.8));
+  }
+  75% {
+    transform: scale(1.2) rotate(8deg);
+    filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.9));
   }
 }
 
@@ -1363,7 +1403,27 @@
   }
 }
 
-/* TV Icon Animations - Doctor (Stethoscope) */
+/* TV Icon Animations - Doctor (Stethoscope) - Mobile */
+@keyframes doctorIconSwingMobile {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.4));
+  }
+  25% {
+    transform: rotate(-6deg) scale(1.05);
+    filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.6));
+  }
+  50% {
+    transform: rotate(0deg) scale(1.03);
+    filter: drop-shadow(0 0 3px rgba(52, 211, 153, 0.5));
+  }
+  75% {
+    transform: rotate(6deg) scale(1.05);
+    filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.6));
+  }
+}
+
+/* TV Icon Animations - Doctor (Stethoscope) - Desktop */
 @keyframes doctorIconSwing {
   0%, 100% {
     transform: rotate(0deg) scale(1);
@@ -1383,6 +1443,26 @@
   }
 }
 
+/* TV Icon Animations - Doctor (Stethoscope) - Large Screens */
+@keyframes doctorIconSwingLarge {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));
+  }
+  25% {
+    transform: rotate(-15deg) scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.9));
+  }
+  50% {
+    transform: rotate(0deg) scale(1.08);
+    filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.7));
+  }
+  75% {
+    transform: rotate(15deg) scale(1.15);
+    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.9));
+  }
+}
+
 @keyframes doctorIconBounce {
   0%, 100% {
     transform: translateY(0) scale(1);
@@ -1398,10 +1478,48 @@
   }
 }
 
+@keyframes doctorIconBounceLarge {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-5px) scale(1.12);
+  }
+  50% {
+    transform: translateY(0) scale(1);
+  }
+  75% {
+    transform: translateY(-3px) scale(1.08);
+  }
+}
+
+/* Responsive animation classes */
 .animate-triage-icon {
-  animation: triageIconPulse 2s ease-in-out infinite, triageIconBeat 1.5s ease-in-out infinite;
+  animation: triageIconPulseMobile 2s ease-in-out infinite, triageIconBeat 1.5s ease-in-out infinite;
 }
 
 .animate-doctor-icon {
-  animation: doctorIconSwing 3s ease-in-out infinite, doctorIconBounce 2s ease-in-out infinite;
+  animation: doctorIconSwingMobile 3s ease-in-out infinite, doctorIconBounce 2s ease-in-out infinite;
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  .animate-triage-icon {
+    animation: triageIconPulse 2s ease-in-out infinite, triageIconBeat 1.5s ease-in-out infinite;
+  }
+  
+  .animate-doctor-icon {
+    animation: doctorIconSwing 3s ease-in-out infinite, doctorIconBounce 2s ease-in-out infinite;
+  }
+}
+
+/* Large screens (3xl and up) */
+@media (min-width: 1920px) {
+  .animate-triage-icon {
+    animation: triageIconPulseLarge 2s ease-in-out infinite, triageIconBeat 1.5s ease-in-out infinite;
+  }
+  
+  .animate-doctor-icon {
+    animation: doctorIconSwingLarge 3s ease-in-out infinite, doctorIconBounceLarge 2s ease-in-out infinite;
+  }
 }
