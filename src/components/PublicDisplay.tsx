@@ -2528,7 +2528,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <p className="tv-font-body text-amber-300 leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap drop-shadow-md">
                   {unitName || 'Unidade de Saúde'}
                 </p>
-                <p className="tv-font-body text-white/60 leading-tight font-normal text-[8px] sm:text-[9px] lg:text-[10px] xl:text-[11px] 3xl:text-sm 4k:text-base whitespace-nowrap">
+                <p className="tv-font-body leading-tight font-medium text-[8px] sm:text-[9px] lg:text-[10px] xl:text-[11px] 3xl:text-sm 4k:text-base whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">
                   Solução criada por Kalebe Gomes
                 </p>
               </div>
