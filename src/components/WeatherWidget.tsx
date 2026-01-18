@@ -364,7 +364,13 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
             <div className="flex items-center justify-center gap-1 w-full overflow-hidden">
               <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
               <span 
-                className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-[10px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-md leading-tight whitespace-nowrap"
+                className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight whitespace-nowrap ${
+                  displayCity.length > 18 
+                    ? 'text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm' 
+                    : displayCity.length > 12 
+                      ? 'text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base' 
+                      : 'text-[10px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg'
+                }`}
               >
                 {displayCity}-MG
               </span>
