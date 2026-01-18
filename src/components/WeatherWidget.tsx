@@ -357,19 +357,19 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           {/* Glow effect behind city info */}
           <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/15 to-orange-500/10 rounded-xl blur-sm" />
           
-          <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 border border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[120px] sm:min-w-[150px] lg:min-w-[180px] xl:min-w-[200px] max-w-[160px] sm:max-w-[200px] lg:max-w-[240px] xl:max-w-[280px]">
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[8px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-md whitespace-nowrap">
+          <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 via-slate-900/90 to-black/80 rounded-xl px-3 sm:px-4 lg:px-5 xl:px-6 py-2 sm:py-2.5 lg:py-3 border border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.1)] min-w-[140px] sm:min-w-[180px] lg:min-w-[220px] xl:min-w-[260px] max-w-[180px] sm:max-w-[240px] lg:max-w-[300px] xl:max-w-[360px]">
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[9px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg drop-shadow-md whitespace-nowrap">
               Previsão do Tempo
             </span>
-            <div className="flex items-center justify-center gap-1 w-full overflow-hidden">
-              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
+            <div className="flex items-center justify-center gap-1.5 w-full overflow-hidden mt-0.5">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 text-amber-400 animate-bounce shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]" />
               <span 
                 className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight whitespace-nowrap ${
                   displayCity.length > 18 
-                    ? 'text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm' 
+                    ? 'text-[9px] sm:text-[10px] lg:text-[11px] xl:text-xs 3xl:text-sm 4k:text-base' 
                     : displayCity.length > 12 
-                      ? 'text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base' 
-                      : 'text-[10px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg'
+                      ? 'text-[10px] sm:text-[11px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg' 
+                      : 'text-[11px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl'
                 }`}
               >
                 {displayCity}-MG
