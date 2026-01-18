@@ -373,7 +373,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
               Previsão do Tempo
             </span>
             <div className="flex items-center justify-center gap-1.5 w-full overflow-hidden mt-0.5">
-              <MapPin className={`w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 3xl:w-6 3xl:h-6 text-amber-400 shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
+              <MapPin className={`w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 3xl:w-4 3xl:h-4 text-amber-400 shrink-0 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
               <span 
                 className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-md leading-tight whitespace-nowrap transition-all duration-300 ${
                   isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
