@@ -6,6 +6,9 @@ import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { usePreventSleep } from '@/hooks/usePreventSleep';
+import { AnalogClock } from './AnalogClock';
+import { SpotlightOverlay } from './SpotlightOverlay';
+import { ParticleBackground } from './ParticleBackground';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -95,6 +98,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastSpeakCallRef = useRef<number>(0);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
+  const [showAnalogClock, setShowAnalogClock] = useState(false);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -428,6 +432,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
     }, 1000);
     return () => clearInterval(countdownInterval);
+  }, []);
+
+  // Alternate between analog and digital clock every 30 seconds
+  useEffect(() => {
+    const clockInterval = setInterval(() => {
+      setShowAnalogClock(prev => !prev);
+    }, 30000);
+    return () => clearInterval(clockInterval);
   }, []);
 
   // Re-check localStorage periodically for unit name/id (reduced frequency)
