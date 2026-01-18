@@ -121,6 +121,30 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return restOfName ? `${firstName} ${restOfName}` : firstName;
   };
 
+  // Get dynamic font size based on name length to prevent truncation
+  const getNameFontSize = (name: string): string => {
+    const length = name?.length || 0;
+    
+    // Very short names (1-15 chars) - largest size
+    if (length <= 15) {
+      return 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl';
+    }
+    // Short names (16-25 chars) - large size
+    if (length <= 25) {
+      return 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl 4k:text-7xl';
+    }
+    // Medium names (26-35 chars) - medium size
+    if (length <= 35) {
+      return 'text-lg sm:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl';
+    }
+    // Long names (36-45 chars) - smaller size
+    if (length <= 45) {
+      return 'text-base sm:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl';
+    }
+    // Very long names (46+ chars) - smallest readable size
+    return 'text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl';
+  };
+
   // Resolve unit_name used by marketing tables (they store the unit "name")
   // Prefer resolving by selectedUnitId (more reliable than matching display text).
   useEffect(() => {
@@ -2596,15 +2620,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl 4k:text-7xl ${
+                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                    getNameFontSize(currentTriageCall.name)
+                  } ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-semibold text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md ${
-                    announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-400'
+                  <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-light text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md tracking-wide ${
+                    announcingType === 'triage' ? 'text-yellow-200/80' : 'text-cyan-400/80'
                   }`}>
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
@@ -2655,15 +2681,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl 4k:text-7xl ${
+                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                    getNameFontSize(currentDoctorCall.name)
+                  } ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-semibold text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md ${
-                    announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-400'
+                  <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-light text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md tracking-wide ${
+                    announcingType === 'doctor' ? 'text-yellow-200/80' : 'text-emerald-400/80'
                   }`}>
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
