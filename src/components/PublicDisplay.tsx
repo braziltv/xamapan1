@@ -1,5 +1,6 @@
-import { Clock, Stethoscope, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X } from 'lucide-react';
+import { Clock, Activity, Megaphone, VolumeX, LogOut, Minimize2, AlertTriangle, X } from 'lucide-react';
 import { HealthCrossIcon } from './HealthCrossIcon';
+import stethoscopeHeart from '@/assets/stethoscope-heart.jpg';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherWidget } from './WeatherWidget';
@@ -2621,9 +2622,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
               <p className="tv-font-heading text-white font-bold flex items-center gap-1 sm:gap-1.5 lg:gap-2 3xl:gap-3 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl relative z-10 drop-shadow-lg">
-                <Stethoscope className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 shrink-0 drop-shadow-md ${
-                  announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
-                }`} />
+                <img 
+                  src={stethoscopeHeart} 
+                  alt="Consultório" 
+                  className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 drop-shadow-md rounded-full object-cover ${
+                    announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
+                  }`} 
+                />
                 <span className="drop-shadow-md">
                   {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
                 </span>
@@ -2656,9 +2661,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 mx-auto mb-1 sm:mb-2 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
-                    <Stethoscope className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-emerald-400/50" />
-                  </div>
+                  <img 
+                    src={stethoscopeHeart} 
+                    alt="Aguardando" 
+                    className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 3xl:w-28 3xl:h-28 4k:w-32 4k:h-32 mx-auto mb-1 sm:mb-2 rounded-full object-cover animate-pulse opacity-60 drop-shadow-lg" 
+                  />
                   <p className="text-slate-400 text-center text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
                     Aguardando próxima chamada...
                   </p>
@@ -2697,7 +2704,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       {item.type === 'triage' ? (
                         <Activity className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-white" />
                       ) : (
-                        <Stethoscope className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-white" />
+                        <img src={stethoscopeHeart} alt="" className="w-full h-full object-cover rounded-full" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
