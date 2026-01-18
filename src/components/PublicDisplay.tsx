@@ -9,6 +9,7 @@ import { usePreventSleep } from '@/hooks/usePreventSleep';
 import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { ParticleBackground } from './ParticleBackground';
+import { Stethoscope3D } from './Stethoscope3D';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -2655,9 +2656,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   </p>
                 </div>
               ) : (
-                <div className="text-center">
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 mx-auto mb-1 sm:mb-2 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
-                    <Stethoscope className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-emerald-400/50" />
+                <div className="text-center flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 3xl:w-32 3xl:h-32 4k:w-40 4k:h-40 mx-auto mb-1 sm:mb-2">
+                    <Stethoscope3D className="w-full h-full" isActive={false} />
                   </div>
                   <p className="text-slate-400 text-center text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl">
                     Aguardando próxima chamada...
