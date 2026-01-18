@@ -121,6 +121,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return restOfName ? `${firstName} ${restOfName}` : firstName;
   };
 
+  // Render patient name with micro-typography: first name 100% opacity, surname 80% opacity
+  const renderPatientName = (name: string, isAnnouncing: boolean, callType: 'triage' | 'doctor') => {
+    if (!name) return null;
+    const words = name.trim().split(/\s+/);
+    if (words.length === 0) return null;
+    
+    const firstName = words[0].toUpperCase();
+    const restOfName = words.slice(1).map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+    
+    return (
+      <>
+        <span className="opacity-100">{firstName}</span>
+        {restOfName && (
+          <span className="opacity-80"> {restOfName}</span>
+        )}
+      </>
+    );
+  };
+
   // Get dynamic font size based on name length to prevent truncation
   const getNameFontSize = (name: string): string => {
     const length = name?.length || 0;
@@ -2634,7 +2655,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentTriageCall.name}>
-                    {formatPatientName(currentTriageCall.name)}
+                    {renderPatientName(currentTriageCall.name, announcingType === 'triage', 'triage')}
                   </h2>
                   <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-light text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md tracking-wide ${
                     announcingType === 'triage' ? 'text-yellow-200/80' : 'text-cyan-400/80'
@@ -2697,7 +2718,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentDoctorCall.name}>
-                    {formatPatientName(currentDoctorCall.name)}
+                    {renderPatientName(currentDoctorCall.name, announcingType === 'doctor', 'doctor')}
                   </h2>
                   <p className={`tv-font-body mt-0.5 sm:mt-1 lg:mt-2 3xl:mt-3 font-light text-[10px] sm:text-xs lg:text-sm xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-md tracking-wide ${
                     announcingType === 'doctor' ? 'text-yellow-200/80' : 'text-emerald-400/80'
