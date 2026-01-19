@@ -336,10 +336,10 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 3xl:gap-4 justify-end flex-nowrap overflow-hidden">
+    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 3xl:gap-4 justify-end flex-nowrap">
       {/* City + Weather Icon - Compact 3D Glass Card */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
-        <div className="relative min-w-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="relative">
           {/* Glow effect behind city info */}
           <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/15 to-orange-500/10 rounded-xl blur-sm" />
           
