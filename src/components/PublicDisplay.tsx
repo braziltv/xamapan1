@@ -2792,9 +2792,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                           {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                         </p>
                         {currentTime && getMaskLevel(item.time, currentTime) !== 'none' && (
-                          <div className={`shrink-0 ${getMaskLevel(item.time, currentTime) === 'full' ? 'text-amber-400' : 'text-slate-400'}`} title={getMaskLevel(item.time, currentTime) === 'full' ? 'Nome protegido (privacidade total)' : 'Nome parcialmente protegido'}>
+                          <div 
+                            className={`shrink-0 animate-fade-in transition-all duration-500 ${getMaskLevel(item.time, currentTime) === 'full' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} 
+                            title={getMaskLevel(item.time, currentTime) === 'full' ? 'Nome protegido (privacidade total)' : 'Nome parcialmente protegido'}
+                          >
                             {getMaskLevel(item.time, currentTime) === 'full' ? (
-                              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5" />
+                              <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]" />
                             ) : (
                               <Lock className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3" />
                             )}
