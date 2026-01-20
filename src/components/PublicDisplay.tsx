@@ -52,23 +52,29 @@ interface CommercialPhrase {
   display_order: number;
 }
 
-// Mascara os nomes após 1 minuto, deixando primeiro e segundo nome visíveis
+// Mascara nomes progressivamente: 3min = mascara do 3º em diante, 10min = só primeiro nome
 const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
   const threeMinutesMs = 3 * 60 * 1000;
+  const tenMinutesMs = 10 * 60 * 1000;
   const elapsed = currentTime.getTime() - callTime.getTime();
+  
+  const parts = name.trim().split(/\s+/);
+  
+  // Após 10 minutos, mostra apenas o primeiro nome
+  if (elapsed >= tenMinutesMs) {
+    return parts[0];
+  }
   
   // Se passou menos de 3 minutos, mostra o nome completo
   if (elapsed < threeMinutesMs) {
     return name;
   }
   
-  // Após 1 minuto, mascara a partir do terceiro nome
-  const parts = name.trim().split(/\s+/);
+  // Entre 3-10 minutos: primeiro e segundo nome visíveis, demais mascarados
   if (parts.length <= 2) {
     return name; // Até 2 nomes, não mascara
   }
   
-  // Primeiro e segundo nome + demais mascarados
   const visibleNames = parts.slice(0, 2);
   const maskedNames = parts.slice(2).map(part => {
     if (part.length <= 2) return '***';
