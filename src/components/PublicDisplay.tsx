@@ -52,7 +52,7 @@ interface CommercialPhrase {
   display_order: number;
 }
 
-// Mascara o sobrenome após 1 minuto, deixando apenas o primeiro nome visível
+// Mascara os nomes após 1 minuto, deixando primeiro e segundo nome visíveis
 const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
   const oneMinuteMs = 60 * 1000;
   const elapsed = currentTime.getTime() - callTime.getTime();
@@ -62,20 +62,20 @@ const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date)
     return name;
   }
   
-  // Após 1 minuto, mascara os sobrenomes
+  // Após 1 minuto, mascara a partir do terceiro nome
   const parts = name.trim().split(/\s+/);
-  if (parts.length <= 1) {
-    return name; // Nome único, não mascara
+  if (parts.length <= 2) {
+    return name; // Até 2 nomes, não mascara
   }
   
-  // Primeiro nome + sobrenomes mascarados
-  const firstName = parts[0];
-  const maskedSurnames = parts.slice(1).map(part => {
+  // Primeiro e segundo nome + demais mascarados
+  const visibleNames = parts.slice(0, 2);
+  const maskedNames = parts.slice(2).map(part => {
     if (part.length <= 2) return '***';
     return part[0] + '***';
   });
   
-  return [firstName, ...maskedSurnames].join(' ');
+  return [...visibleNames, ...maskedNames].join(' ');
 };
 
 export function PublicDisplay(_props: PublicDisplayProps) {
