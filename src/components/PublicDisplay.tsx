@@ -54,11 +54,11 @@ interface CommercialPhrase {
 
 // Mascara os nomes após 1 minuto, deixando primeiro e segundo nome visíveis
 const maskNameAfterOneMinute = (name: string, callTime: Date, currentTime: Date): string => {
-  const oneMinuteMs = 60 * 1000;
+  const threeMinutesMs = 3 * 60 * 1000;
   const elapsed = currentTime.getTime() - callTime.getTime();
   
-  // Se passou menos de 1 minuto, mostra o nome completo
-  if (elapsed < oneMinuteMs) {
+  // Se passou menos de 3 minutos, mostra o nome completo
+  if (elapsed < threeMinutesMs) {
     return name;
   }
   
