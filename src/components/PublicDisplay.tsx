@@ -2849,7 +2849,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     <Activity className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-blue-400/50" />
                   </div>
                   <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
-                    Aguarde um momento, já chamaremos você
+                    Aguarde um momento, já chamaremos você. Obrigado pela paciência.
                   </p>
                 </div>
               )}
@@ -2912,7 +2912,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                     <Stethoscope className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-emerald-400/50" />
                   </div>
                   <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
-                    Aguarde um momento, já chamaremos você
+                    Aguarde um momento, já chamaremos você. Obrigado pela paciência.
                   </p>
                 </div>
               )}
