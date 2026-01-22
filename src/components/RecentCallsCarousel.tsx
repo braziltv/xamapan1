@@ -16,7 +16,7 @@ interface RecentCallsCarouselProps {
   isAnnouncing?: boolean;
 }
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 5;
 const SLIDE_INTERVAL = 30000; // 30 seconds
 
 export function RecentCallsCarousel({ 
@@ -71,27 +71,11 @@ export function RecentCallsCarousel({
   return (
     <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
       {/* Header with page indicator */}
-      <div className="flex items-center justify-between mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 shrink-0">
+      <div className="flex items-center mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 shrink-0">
         <h3 className="tv-font-heading font-bold text-white flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
           <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0 animate-pulse" />
           <span className="shimmer-text">Últimas Chamadas</span>
         </h3>
-        
-        {/* Page dots indicator */}
-        {totalPages > 1 && (
-          <div className="flex items-center gap-0.5 xs:gap-1">
-            {Array.from({ length: totalPages }).map((_, idx) => (
-              <div
-                key={idx}
-                className={`rounded-full transition-all duration-300 ${
-                  idx === currentPage 
-                    ? 'w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 bg-cyan-400' 
-                    : 'w-1 h-1 xs:w-1.5 xs:h-1.5 sm:w-2 sm:h-2 bg-slate-600'
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Carousel content */}
