@@ -151,7 +151,7 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* TV Mode Modern Typography - ClearType Enhanced */
+  /* TV Mode Modern Typography - ClearType Enhanced with contrast shadows */
   .tv-font-display {
     font-family: 'Outfit', 'Space Grotesk', 'Inter', sans-serif;
     letter-spacing: -0.02em;
@@ -160,7 +160,7 @@
     text-rendering: geometricPrecision;
     font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
   .tv-font-heading {
@@ -170,6 +170,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: geometricPrecision;
     font-feature-settings: "kern" 1, "liga" 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 
   .tv-font-body {
@@ -179,12 +180,26 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1, "liga" 1;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
   }
 
   /* ClearType global enhancement */
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* TV text contrast utilities */
+  .tv-text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .tv-text-shadow-lg {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .tv-text-glow {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 }
 
