@@ -481,32 +481,22 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Weather Tip + Humidity - Combined Card */}
-      <div className="relative shrink-0 hidden xl:block">
-        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-2 py-1 border border-white/10 max-w-[140px] 3xl:max-w-[180px] 4k:max-w-[220px]">
-          {/* Contextual Weather Tip */}
+      {/* Weather Tip + Humidity - Combined Card - Always visible */}
+      <div className="relative shrink-0">
+        <div className="relative flex flex-col items-start bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-white/10 max-w-[100px] sm:max-w-[120px] lg:max-w-[140px] xl:max-w-[160px] 3xl:max-w-[180px] 4k:max-w-[220px]">
+          {/* Contextual Weather Tip - Always displayed */}
           {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity) && (
-            <span className="text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/70 leading-tight animate-weather-tip line-clamp-2">
+            <span className="text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs text-white/80 leading-tight animate-weather-tip line-clamp-2">
               {getWeatherTip(weather.current.description, weather.current.temperature, weather.current.humidity)}
             </span>
           )}
           {/* Humidity inline */}
-          <div className="flex items-center gap-1 mt-0.5">
-            <Droplets className="w-2.5 h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-            <span className="font-medium text-cyan-300/80 tabular-nums text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
+          <div className="flex items-center gap-0.5 sm:gap-1 mt-0.5">
+            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 3xl:w-3.5 3xl:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
+            <span className="font-medium text-cyan-300/80 tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm">
               {weather.current.humidity}%
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* Humidity only on smaller screens */}
-      <div className="relative shrink-0 xl:hidden opacity-60 hover:opacity-100 transition-opacity duration-300">
-        <div className="relative flex items-center gap-1 bg-slate-900/60 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 border border-blue-500/20">
-          <Droplets className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-cyan-400/70 shrink-0" strokeWidth={1.5} />
-          <span className="font-medium text-cyan-300/80 tabular-nums text-[9px] sm:text-[10px] lg:text-[11px]">
-            {weather.current.humidity}%
-          </span>
         </div>
       </div>
 
