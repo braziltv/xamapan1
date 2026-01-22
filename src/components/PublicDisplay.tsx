@@ -237,75 +237,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, unitId]);
 
-  // Load and sync patient voice settings from Supabase
-  useEffect(() => {
-    if (!marketingUnitName) return;
-
-    let alive = true;
-
-    const loadVoiceSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('unit_settings')
-          .select('patient_call_voice')
-          .eq('unit_name', marketingUnitName)
-          .maybeSingle();
-
-        if (!alive) return;
-        if (error) {
-          console.warn('Error loading voice settings:', error);
-          return;
-        }
-
-        if (data?.patient_call_voice) {
-          try {
-            const voiceSettings = JSON.parse(data.patient_call_voice);
-            localStorage.setItem('patientVoiceSettings', JSON.stringify(voiceSettings));
-            console.log('🎙️ Voice settings synced from Supabase:', voiceSettings);
-          } catch (parseErr) {
-            console.warn('Failed to parse voice settings:', parseErr);
-          }
-        }
-      } catch (e) {
-        console.warn('Error loading voice settings:', e);
-      }
-    };
-
-    // Load initial settings
-    loadVoiceSettings();
-
-    // Subscribe to realtime changes
-    const channel = supabase
-      .channel('voice-settings-sync')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'unit_settings',
-          filter: `unit_name=eq.${marketingUnitName}`,
-        },
-        (payload) => {
-          console.log('🔔 Voice settings updated via realtime:', payload);
-          const newRecord = payload.new as any;
-          if (newRecord?.patient_call_voice) {
-            try {
-              const voiceSettings = JSON.parse(newRecord.patient_call_voice);
-              localStorage.setItem('patientVoiceSettings', JSON.stringify(voiceSettings));
-              console.log('🎙️ Voice settings updated in real-time:', voiceSettings);
-            } catch (parseErr) {
-              console.warn('Failed to parse voice settings from realtime:', parseErr);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      alive = false;
-      supabase.removeChannel(channel);
-    };
-  }, [marketingUnitName]);
+  // Fixed voice configuration: pt-BR-Neural2-C (Female Premium)
+  // No customization needed - this is the standard voice for all patient calls
+  const FIXED_VOICE_ID = 'pt-BR-Neural2-C';
+  const FIXED_SPEAKING_RATE = 1.0;
 
   // Fetch news from database cache
   useEffect(() => {
@@ -1143,25 +1078,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (name: string, destinationPhrase: string): Promise<void> => {
       const cleanName = name.trim();
       const cleanDestination = destinationPhrase.trim();
-      console.log('🔊 Speaking with Google Cloud TTS (concatenated):', { name: cleanName, destinationPhrase: cleanDestination });
+      console.log('🔊 Speaking with Google Cloud TTS (Neural2-C):', { name: cleanName, destinationPhrase: cleanDestination });
 
       // Clear previous error
       setTtsError(null);
 
-      // Get patient voice settings from localStorage (configured in admin panel)
-      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
-      try {
-        const saved = localStorage.getItem('patientVoiceSettings');
-        if (saved) {
-          patientVoiceSettings = JSON.parse(saved);
-        }
-      } catch {
-        console.warn('Failed to parse patientVoiceSettings, using defaults');
-      }
-
-      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
-      const ttsVolume = patientVoiceSettings.volume ?? 1;
-      const speakingRate = patientVoiceSettings.speed ?? 1;
+      // Fixed voice: pt-BR-Neural2-C (Female Premium) - no customization
+      const ttsVolume = readVolume('volume-tts', 1);
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
@@ -1170,7 +1093,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice, speed: speakingRate });
+      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: FIXED_VOICE_ID });
 
       try {
         // Generate unified audio with name + destination in a single API call
@@ -1183,8 +1106,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               prefix: '',
               destination: cleanDestination,
             },
-            voiceName: configuredVoice,
-            speakingRate: speakingRate,
+            voiceName: FIXED_VOICE_ID,
+            speakingRate: FIXED_SPEAKING_RATE,
           }),
         });
 
@@ -1224,25 +1147,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   const speakWithGoogleTTS = useCallback(
     async (text: string): Promise<void> => {
-      console.log('Speaking with Google Cloud TTS:', text);
+      console.log('Speaking with Google Cloud TTS (Neural2-C):', text);
       
       // Clear previous error
       setTtsError(null);
       
-      // Get patient voice settings from localStorage (configured in admin panel)
-      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
-      try {
-        const saved = localStorage.getItem('patientVoiceSettings');
-        if (saved) {
-          patientVoiceSettings = JSON.parse(saved);
-        }
-      } catch {
-        console.warn('Failed to parse patientVoiceSettings, using defaults');
-      }
-
-      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
-      const ttsVolume = patientVoiceSettings.volume ?? 1;
-      const speakingRate = patientVoiceSettings.speed ?? 1;
+      // Fixed voice: pt-BR-Neural2-C (Female Premium) - no customization
+      const ttsVolume = readVolume('volume-tts', 1);
       
       try {
         const response = await fetch(
@@ -1254,7 +1165,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
-            body: JSON.stringify({ text, voiceName: configuredVoice, speakingRate }),
+            body: JSON.stringify({ text, voiceName: FIXED_VOICE_ID, speakingRate: FIXED_SPEAKING_RATE }),
           }
         );
 

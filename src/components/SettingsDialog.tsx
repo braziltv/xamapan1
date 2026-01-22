@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic, Save, RefreshCw, User } from 'lucide-react';
+import { Settings, Volume2, Play, CheckCircle, XCircle, Loader2, Bell, Clock, Megaphone, Sunrise, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import { setManualThemeOverride } from './AutoNightMode';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,30 +24,7 @@ interface VolumeSettings {
   timeAnnouncement: number;
 }
 
-interface PatientVoiceSettings {
-  voiceId: string;
-  volume: number;
-  speed: number;
-}
-
-// Todas as vozes Google Cloud TTS disponíveis para pt-BR
-const ALL_GOOGLE_VOICES = [
-  // Vozes Femininas - Neural2 (Premium)
-  { id: 'pt-BR-Neural2-A', name: 'Neural2-A (Feminina)', gender: 'female', quality: 'premium' },
-  { id: 'pt-BR-Neural2-C', name: 'Neural2-C (Feminina)', gender: 'female', quality: 'premium' },
-  // Vozes Masculinas - Neural2 (Premium)
-  { id: 'pt-BR-Neural2-B', name: 'Neural2-B (Masculina)', gender: 'male', quality: 'premium' },
-  // Vozes Femininas - Wavenet (Alta Qualidade)
-  { id: 'pt-BR-Wavenet-A', name: 'Wavenet-A (Feminina)', gender: 'female', quality: 'high' },
-  { id: 'pt-BR-Wavenet-C', name: 'Wavenet-C (Feminina)', gender: 'female', quality: 'high' },
-  // Vozes Masculinas - Wavenet (Alta Qualidade)
-  { id: 'pt-BR-Wavenet-B', name: 'Wavenet-B (Masculina)', gender: 'male', quality: 'high' },
-  // Vozes Femininas - Standard (Econômico)
-  { id: 'pt-BR-Standard-A', name: 'Standard-A (Feminina)', gender: 'female', quality: 'standard' },
-  { id: 'pt-BR-Standard-C', name: 'Standard-C (Feminina)', gender: 'female', quality: 'standard' },
-  // Vozes Masculinas - Standard (Econômico)
-  { id: 'pt-BR-Standard-B', name: 'Standard-B (Masculina)', gender: 'male', quality: 'standard' },
-];
+// Note: ALL_GOOGLE_VOICES removed - Patient calls now use fixed pt-BR-Neural2-C voice
 
 // Vozes Google Cloud TTS disponíveis para pt-BR (para hora)
 const GOOGLE_VOICES = {
@@ -66,49 +43,7 @@ const GOOGLE_VOICES = {
   ]
 };
 
-// Frases padrão para pré-cachear (hora e repetição)
-const STANDARD_HOUR_PHRASES = [
-  'Hora certa, são zero horas.',
-  'Hora certa, é uma hora.',
-  'Hora certa, são duas horas.',
-  'Hora certa, são três horas.',
-  'Hora certa, são quatro horas.',
-  'Hora certa, são cinco horas.',
-  'Hora certa, são seis horas.',
-  'Hora certa, são sete horas.',
-  'Hora certa, são oito horas.',
-  'Hora certa, são nove horas.',
-  'Hora certa, são dez horas.',
-  'Hora certa, são onze horas.',
-  'Hora certa, são doze horas.',
-  'Hora certa, são treze horas.',
-  'Hora certa, são quatorze horas.',
-  'Hora certa, são quinze horas.',
-  'Hora certa, são dezesseis horas.',
-  'Hora certa, são dezessete horas.',
-  'Hora certa, são dezoito horas.',
-  'Hora certa, são dezenove horas.',
-  'Hora certa, são vinte horas.',
-  'Hora certa, são vinte e uma horas.',
-  'Hora certa, são vinte e duas horas.',
-  'Hora certa, são vinte e três horas.',
-  'Repita.',
-];
-
-// Função para gerar frase de destino com artigo correto
-const generateDestinationPhrase = (displayName: string): string => {
-  const name = displayName.trim();
-  const lowerName = name.toLowerCase();
-  
-  // Palavras femininas comuns
-  const feminineKeywords = ['sala', 'recepção', 'triagem', 'enfermaria', 'farmácia', 'secretaria', 'clínica'];
-  const isFeminine = feminineKeywords.some(kw => lowerName.includes(kw));
-  
-  // Determinar artigo
-  const article = isFeminine ? 'à' : 'ao';
-  
-  return `Por favor, dirija-se ${article} ${name}.`;
-};
+// Note: STANDARD_HOUR_PHRASES and generateDestinationPhrase removed - Patient voice customization has been removed
 
 const DEFAULT_VOLUMES: VolumeSettings = {
   notification: 1,
@@ -117,40 +52,20 @@ const DEFAULT_VOLUMES: VolumeSettings = {
   timeAnnouncement: 1,
 };
 
-const DEFAULT_PATIENT_VOICE: PatientVoiceSettings = {
-  voiceId: 'pt-BR-Neural2-A',
-  volume: 1,
-  speed: 1,
-};
-
 const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
-const PATIENT_VOICE_KEY = 'patientVoiceSettings';
 
 export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
   const [isTestingGoogleTTS, setIsTestingGoogleTTS] = useState(false);
-  const [isTestingPatientVoice, setIsTestingPatientVoice] = useState(false);
-  const [isCachingPhrases, setIsCachingPhrases] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
-  
-  // Patient voice settings
-  const [patientVoice, setPatientVoice] = useState<PatientVoiceSettings>(() => {
-    try {
-      const saved = localStorage.getItem(PATIENT_VOICE_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_PATIENT_VOICE;
-    } catch {
-      return DEFAULT_PATIENT_VOICE;
-    }
-  });
-  const [patientVoiceChanged, setPatientVoiceChanged] = useState(false);
   
   // Google Cloud TTS voice settings (for hour announcements)
   const [googleVoiceFemale, setGoogleVoiceFemale] = useState(() => 
@@ -175,49 +90,6 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
     setVolumes(prev => ({ ...prev, [key]: value }));
     localStorage.setItem(`volume-${key === 'timeNotification' ? 'time-notification' : key === 'timeAnnouncement' ? 'time-announcement' : key}`, value.toString());
   }, []);
-
-  const updatePatientVoice = useCallback((key: keyof PatientVoiceSettings, value: string | number) => {
-    setPatientVoice(prev => {
-      const updated = { ...prev, [key]: value };
-      return updated;
-    });
-    setPatientVoiceChanged(true);
-  }, []);
-
-  const savePatientVoice = useCallback(async () => {
-    // Save to localStorage (for local use)
-    localStorage.setItem(PATIENT_VOICE_KEY, JSON.stringify(patientVoice));
-    setPatientVoiceChanged(false);
-    
-    // Also save to Supabase for cross-device sync (especially TV displays)
-    try {
-      const unitName = localStorage.getItem('selectedUnit') || '';
-      if (unitName) {
-        const voiceSettingsJson = JSON.stringify(patientVoice);
-        const { error } = await supabase
-          .from('unit_settings')
-          .upsert({
-            unit_name: unitName,
-            patient_call_voice: voiceSettingsJson,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'unit_name' });
-        
-        if (error) {
-          console.error('Error saving voice settings to Supabase:', error);
-          toast.warning('Configurações salvas localmente, mas não sincronizadas com a nuvem.');
-        } else {
-          console.log('Voice settings synced to Supabase');
-          toast.success('Configurações de voz salvas e sincronizadas!');
-        }
-      } else {
-        toast.success('Configurações de voz salvas!');
-      }
-    } catch (err) {
-      console.error('Error syncing voice settings:', err);
-      toast.success('Configurações de voz salvas localmente!');
-    }
-  }, [patientVoice]);
-
   const loadVoices = useCallback(() => {
     const voices = window.speechSynthesis.getVoices();
     if (voices.length > 0) {
@@ -306,170 +178,6 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
       audio.play().catch(reject);
     });
   }, []);
-
-  // Test patient voice
-  const testPatientVoice = useCallback(async () => {
-    setIsTestingPatientVoice(true);
-    
-    try {
-      toast.info('Testando voz de chamada de paciente...');
-      
-      const testText = `${testName}. Por favor, dirija-se ao ${testDestination}.`;
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ 
-            text: testText,
-            voiceName: patientVoice.voiceId,
-            speakingRate: patientVoice.speed,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao gerar áudio');
-      }
-
-      const audioBuffer = await response.arrayBuffer();
-      await playAudioBuffer(audioBuffer, patientVoice.volume);
-
-      toast.success('Teste de voz concluído!');
-    } catch (error) {
-      console.error('Erro ao testar voz de paciente:', error);
-      toast.error(`Erro: ${error instanceof Error ? error.message : 'Falha no teste'}`);
-    } finally {
-      setIsTestingPatientVoice(false);
-    }
-  }, [testName, testDestination, patientVoice, playAudioBuffer]);
-
-  // Cache standard phrases and unit destinations
-  const cacheStandardPhrases = useCallback(async () => {
-    setIsCachingPhrases(true);
-    
-    try {
-      // Get current unit from localStorage
-      const unitName = localStorage.getItem('selectedUnit') || '';
-      
-      // Fetch destinations for the current unit
-      let destinationPhrases: string[] = [];
-      
-      if (unitName) {
-        // First get unit ID
-        const { data: unitData } = await supabase
-          .from('units')
-          .select('id')
-          .eq('name', unitName)
-          .single();
-        
-        if (unitData?.id) {
-          // Fetch destinations for this unit
-          const { data: destinations } = await supabase
-            .from('destinations')
-            .select('display_name')
-            .eq('unit_id', unitData.id)
-            .eq('is_active', true);
-          
-          if (destinations && destinations.length > 0) {
-            destinationPhrases = destinations.map(d => generateDestinationPhrase(d.display_name));
-            console.log(`[Cache] Found ${destinations.length} destinations for unit ${unitName}`);
-          }
-        }
-      }
-      
-      // Combine standard phrases with dynamic destination phrases
-      const allPhrases = [...STANDARD_HOUR_PHRASES, ...destinationPhrases];
-      
-      toast.info(`Gerando cache de ${allPhrases.length} frases... Isso pode demorar alguns minutos.`);
-      
-      let cached = 0;
-      let errors = 0;
-      
-      for (const phrase of allPhrases) {
-        try {
-          // Generate TTS audio
-          const response = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              },
-              body: JSON.stringify({ 
-                text: phrase,
-                voiceName: patientVoice.voiceId,
-                speakingRate: patientVoice.speed,
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            errors++;
-            continue;
-          }
-
-          const audioBuffer = await response.arrayBuffer();
-          
-          // Generate hash for the phrase
-          const encoder = new TextEncoder();
-          const data = encoder.encode(`${phrase}_${patientVoice.voiceId}_${patientVoice.speed}`);
-          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-          
-          // Upload to storage
-          const fileName = `${hashHex}.mp3`;
-          const { error: uploadError } = await supabase.storage
-            .from('tts-cache')
-            .upload(fileName, audioBuffer, {
-              contentType: 'audio/mpeg',
-              upsert: true,
-            });
-          
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
-            errors++;
-          } else {
-            cached++;
-          }
-          
-          // Small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200));
-          
-        } catch (err) {
-          console.error('Error caching phrase:', phrase, err);
-          errors++;
-        }
-      }
-      
-      const destCount = destinationPhrases.length;
-      const hourCount = STANDARD_HOUR_PHRASES.length;
-      
-      if (errors > 0) {
-        toast.warning(`Cache concluído: ${cached} frases salvas (${hourCount} hora + ${destCount} destinos), ${errors} erros`);
-      } else {
-        toast.success(`Cache concluído: ${cached} frases salvas (${hourCount} hora + ${destCount} destinos)!`);
-      }
-      
-      // Save the voice settings after successful caching
-      savePatientVoice();
-      
-    } catch (error) {
-      console.error('Erro ao cachear frases:', error);
-      toast.error(`Erro: ${error instanceof Error ? error.message : 'Falha no cache'}`);
-    } finally {
-      setIsCachingPhrases(false);
-    }
-  }, [patientVoice, savePatientVoice]);
 
   // Função para testar vozes do Google Cloud TTS (hora)
   const testGoogleTTS = useCallback(async () => {
@@ -691,131 +399,7 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
             </div>
           </div>
 
-          {/* ===================== PATIENT CALL VOICE SECTION ===================== */}
-          <div className="space-y-4 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20">
-            <div className="flex items-center gap-2 text-sm font-medium pb-2">
-              <User className="w-4 h-4 text-primary" />
-              <span className="text-primary">Voz de Chamada de Pacientes</span>
-            </div>
-
-            {/* Voice Selector */}
-            <div className="space-y-2">
-              <Label className="text-sm">Voz Google Cloud TTS</Label>
-              <Select 
-                value={patientVoice.voiceId} 
-                onValueChange={(value) => updatePatientVoice('voiceId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ALL_GOOGLE_VOICES.map(voice => (
-                    <SelectItem key={voice.id} value={voice.id}>
-                      <span className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${voice.gender === 'female' ? 'bg-pink-500' : 'bg-blue-500'}`}></span>
-                        {voice.name}
-                        {getQualityBadge(voice.quality)}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Volume Control */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Volume2 className="w-4 h-4 text-green-500" />
-                  <Label className="text-sm">Volume</Label>
-                </div>
-                <span className="text-xs text-muted-foreground">{Math.round(patientVoice.volume * 100)}%</span>
-              </div>
-              <Slider
-                value={[patientVoice.volume]}
-                onValueChange={([value]) => updatePatientVoice('volume', value)}
-                min={0.1}
-                max={1}
-                step={0.05}
-                className="w-full"
-              />
-            </div>
-
-            {/* Speed Control */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 text-amber-500" />
-                  <Label className="text-sm">Velocidade</Label>
-                </div>
-                <span className="text-xs text-muted-foreground">{patientVoice.speed.toFixed(2)}x</span>
-              </div>
-              <Slider
-                value={[patientVoice.speed]}
-                onValueChange={([value]) => updatePatientVoice('speed', value)}
-                min={0.5}
-                max={1.5}
-                step={0.05}
-                className="w-full"
-              />
-            </div>
-
-            {/* Test Voice Button */}
-            <Button 
-              variant="outline"
-              onClick={testPatientVoice} 
-              disabled={isTestingPatientVoice}
-              className="w-full gap-2"
-            >
-              {isTestingPatientVoice ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Reproduzindo...
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" />
-                  Testar Voz
-                </>
-              )}
-            </Button>
-
-            {/* Save and Cache Button */}
-            {patientVoiceChanged && (
-              <div className="flex gap-2">
-                <Button 
-                  variant="default"
-                  onClick={savePatientVoice}
-                  className="flex-1 gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Salvar
-                </Button>
-                <Button 
-                  variant="secondary"
-                  onClick={cacheStandardPhrases}
-                  disabled={isCachingPhrases}
-                  className="flex-1 gap-2"
-                >
-                  {isCachingPhrases ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Cacheando...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-4 h-4" />
-                      Salvar + Cache
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-
-            <p className="text-xs text-muted-foreground">
-              💡 "Salvar + Cache" gera áudio prévio para frases de hora e destinos comuns, economizando API.
-            </p>
-          </div>
+          {/* Note: Voice customization has been removed. Patient calls use fixed pt-BR-Neural2-C (Female Premium) voice */}
 
           {/* Volume Controls Section */}
           <div className="space-y-4">
