@@ -119,6 +119,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitId, setUnitId] = useState(() =>
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
+
+  // Reset de estado quando a unidade muda (evita replays e loops)
+  useEffect(() => {
+    processedCallsRef.current.clear();
+    announcementQueueRef.current = [];
+    isProcessingQueueRef.current = false;
+    pollInitializedRef.current = false;
+  }, [unitName]);
   const [marketingUnitName, setMarketingUnitName] = useState<string>('');
   const marketingTimeKey = currentTime
     ? `${currentTime.getFullYear()}-${currentTime.getMonth()}-${currentTime.getDate()}-${currentTime.getHours()}-${currentTime.getMinutes()}`
@@ -2229,9 +2237,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
 
     console.log('Setting up realtime subscription for unit:', unitName);
-    
-    // Clear processed calls on new subscription
-    processedCallsRef.current.clear();
     
     // Use unique channel name per unit to avoid conflicts
     const channelName = `public-display-${unitName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
