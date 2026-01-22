@@ -34,7 +34,7 @@ export function CNNStyleNewsTicker({
   // Build items array with commercial phrases interleaved
   const buildItemsArray = () => {
     const creditItem = { 
-      title: 'Solução criada e cedida gratuitamente por Kalebe Gomes', 
+      title: 'Solução Criada Por Kalebe Gomes',
       source: 'Créditos', 
       link: '' 
     };
