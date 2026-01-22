@@ -183,7 +183,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     "O atendimento prioriza os casos mais urgentes.",
     "Estamos aqui para cuidar de você.",
     "Trabalhamos para oferecer um atendimento seguro e humanizado.",
-    "O atendimento segue critérios de urgência e risco."
+    "O atendimento segue critérios de urgência e risco.",
+    "Lembre-se de beber água regularmente para manter-se hidratado.",
+    "Uma boa alimentação é essencial para sua saúde e bem-estar.",
+    "Pratique atividades físicas regularmente para uma vida mais saudável.",
+    "Dormir bem é fundamental para o funcionamento do seu corpo.",
+    "Cuide da sua saúde mental: respire fundo e mantenha a calma."
   ];
   const [currentWaitingPhraseIndex, setCurrentWaitingPhraseIndex] = useState(0);
   const [waitingPhraseVisible, setWaitingPhraseVisible] = useState(true);
