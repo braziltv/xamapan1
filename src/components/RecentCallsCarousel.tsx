@@ -16,7 +16,7 @@ interface RecentCallsCarouselProps {
   isAnnouncing?: boolean;
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 7;
 const SLIDE_INTERVAL = 30000; // 30 seconds
 
 export function RecentCallsCarousel({ 
