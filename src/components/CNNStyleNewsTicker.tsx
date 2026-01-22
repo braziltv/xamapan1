@@ -92,18 +92,25 @@ export function CNNStyleNewsTicker({
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-40 shrink-0 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
-      {/* CNN-style two-row footer */}
+      {/* CNN-style two-row footer with glassmorphism */}
       <div className="flex flex-col">
         {/* Bottom ticker row - scrolling news */}
         <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-18 2xl:h-20 3xl:h-24 4k:h-28">
-          {/* Scrolling News Section - Dark background like CNN */}
-          <div className="flex-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 overflow-hidden flex items-center relative">
-            {/* Top red accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[3px] lg:h-1 bg-gradient-to-r from-red-600 via-red-500 to-red-600" />
+          {/* Scrolling News Section - Glassmorphism background */}
+          <div className="flex-1 relative overflow-hidden flex items-center">
+            {/* Glassmorphism background layers */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/85 to-slate-900/90 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent" />
+            
+            {/* Top accent line with glow */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[3px] lg:h-1 bg-gradient-to-r from-red-600 via-red-400 to-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+            
+            {/* Subtle inner border glow */}
+            <div className="absolute inset-0 border-t border-white/10" />
             
             {/* Gradient fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-r from-gray-900 to-transparent z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-l from-gray-900 to-transparent z-10" />
+            <div className="absolute left-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-r from-slate-900 to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-l from-slate-900 to-transparent z-10" />
             
             {/* Scrolling content */}
             <div className="animate-marquee whitespace-nowrap inline-flex py-1">
@@ -150,7 +157,11 @@ export function CNNStyleNewsTicker({
               ))}
             </div>
           </div>
-
+        </div>
+        
+        {/* Reflection effect */}
+        <div className="h-2 xs:h-3 sm:h-4 md:h-5 lg:h-6 bg-gradient-to-b from-slate-900/60 via-slate-950/30 to-transparent backdrop-blur-sm">
+          <div className="w-full h-full bg-gradient-to-b from-white/[0.03] to-transparent" />
         </div>
       </div>
     </div>
