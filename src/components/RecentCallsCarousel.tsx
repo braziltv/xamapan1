@@ -86,7 +86,7 @@ export function RecentCallsCarousel({
           </p>
         ) : (
           <div 
-            className={`space-y-0.5 xs:space-y-0.5 sm:space-y-1 md:space-y-1 lg:space-y-1.5 xl:space-y-2 2xl:space-y-2.5 3xl:space-y-3 transition-all duration-300 ease-in-out ${
+            className={`space-y-1 xs:space-y-1.5 sm:space-y-2 md:space-y-2.5 lg:space-y-3 xl:space-y-4 2xl:space-y-5 3xl:space-y-6 4k:space-y-8 transition-all duration-300 ease-in-out ${
               isTransitioning ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
             }`}
           >
