@@ -173,17 +173,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   
   // Waiting phrases rotation
   const WAITING_PHRASES = [
-    "Aguarde um momento, já chamaremos você. Obrigado pela paciência.",
-    "Estamos organizando o atendimento. Em instantes, você será chamado.",
-    "Aguarde um momento, já chamaremos você.",
-    "Você está na fila de atendimento. Obrigado pela paciência.",
-    "Fique atento(a), sua chamada será exibida em instantes.",
-    "Seu atendimento está quase começando.",
-    "Siga sempre as orientações da equipe de saúde.",
-    "O atendimento prioriza os casos mais urgentes.",
-    "Estamos aqui para cuidar de você. ❤️🏥🧑‍⚕️",
-    "Trabalhamos para oferecer um atendimento seguro e humanizado.",
-    "O atendimento segue critérios de urgência e risco."
+    "⏳ Aguarde um momento, já chamaremos você. Obrigado pela paciência! 🙏",
+    "📋 Estamos organizando o atendimento. Em instantes, você será chamado. ✨",
+    "🔔 Aguarde um momento, já chamaremos você. 😊",
+    "👥 Você está na fila de atendimento. Obrigado pela paciência! 💙",
+    "👀 Fique atento(a), sua chamada será exibida em instantes. 📺",
+    "⏰ Seu atendimento está quase começando. 🌟",
+    "📝 Siga sempre as orientações da equipe de saúde. 👨‍⚕️",
+    "🚨 O atendimento prioriza os casos mais urgentes. 🏥",
+    "❤️ Estamos aqui para cuidar de você. 🏥🧑‍⚕️",
+    "🤝 Trabalhamos para oferecer um atendimento seguro e humanizado. 💚",
+    "⚕️ O atendimento segue critérios de urgência e risco. 🩺"
   ];
   const [currentWaitingPhraseIndex, setCurrentWaitingPhraseIndex] = useState(0);
   const [waitingPhraseVisible, setWaitingPhraseVisible] = useState(true);
