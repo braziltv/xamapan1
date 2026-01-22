@@ -2817,53 +2817,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 )}
               </p>
             </div>
-            <div className="p-1.5 xs:p-2 sm:p-3 md:p-3.5 lg:p-4 xl:p-5 2xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[70px] xs:min-h-[85px] sm:min-h-[110px] md:min-h-[120px] lg:min-h-[140px] xl:min-h-[180px] 2xl:min-h-[220px] 3xl:min-h-[280px] 4k:min-h-[380px] relative">
-              {/* Enhanced inner glow for active call */}
-              <div className={`absolute inset-0 pointer-events-none rounded-lg sm:rounded-xl transition-all duration-500 ${
+            <div className="p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 xl:p-4 2xl:p-5 3xl:p-6 4k:p-10 flex items-center justify-center flex-1 min-h-[60px] xs:min-h-[70px] sm:min-h-[90px] md:min-h-[100px] lg:min-h-[120px] xl:min-h-[150px] 2xl:min-h-[180px] 3xl:min-h-[220px] 4k:min-h-[300px] relative">
+              {/* Subtle inner glow */}
+              <div className={`absolute inset-0 pointer-events-none ${
                 announcingType === 'triage' 
-                  ? 'bg-gradient-to-b from-amber-500/30 via-yellow-500/15 to-transparent' 
-                  : currentTriageCall
-                    ? 'bg-gradient-to-b from-cyan-500/15 to-transparent'
-                    : 'bg-gradient-to-b from-blue-500/5 to-transparent'
+                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
+                  : 'bg-gradient-to-b from-blue-500/5 to-transparent'
               }`} />
-              {/* Highlighted background box for patient name */}
-              {currentTriageCall && (
-                <div className={`absolute inset-2 sm:inset-3 lg:inset-4 rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-500 ${
-                  announcingType === 'triage'
-                    ? 'bg-gradient-to-br from-amber-600/40 via-yellow-600/30 to-orange-600/20 border-2 sm:border-3 border-amber-400/60 animate-[pulse_1.5s_ease-in-out_infinite]'
-                    : 'bg-gradient-to-br from-slate-700/60 via-blue-900/40 to-slate-800/50 border border-cyan-500/30'
-                }`} />
-              )}
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105 sm:scale-110' : ''}`}>
-                  {/* Patient name - 40% larger with heavier weight */}
-                  <h2 className={`tv-font-display leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                    getNameFontSize(currentTriageCall.name)
+                  } ${
                     announcingType === 'triage' 
-                      ? 'text-amber-200 animate-name-mega-pulse drop-shadow-[0_0_30px_rgba(251,191,36,0.6)]' 
-                      : 'text-white drop-shadow-lg'
-                  }`} style={{ 
-                    wordBreak: 'break-word', 
-                    letterSpacing: '0.06em',
-                    fontWeight: 900,
-                    fontSize: 'clamp(1.5rem, 4vw + 1rem, 6rem)',
-                    textShadow: announcingType === 'triage' 
-                      ? '0 0 40px rgba(251,191,36,0.5), 0 4px 8px rgba(0,0,0,0.5)' 
-                      : '0 2px 4px rgba(0,0,0,0.5)'
-                  }} key={currentTriageCall.name}>
+                      ? 'text-yellow-300 animate-name-mega-pulse' 
+                      : 'shimmer-text animate-text-reveal'
+                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-3 xl:mt-3.5 3xl:mt-4 font-semibold text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md tracking-wide ${
-                    announcingType === 'triage' ? 'text-amber-300/90' : 'text-cyan-300/90'
+                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
+                    announcingType === 'triage' ? 'text-yellow-200/80' : 'text-cyan-400/80'
                   }`}>
-                    📍 {currentTriageCall.destination || 'Triagem'}
+                    {currentTriageCall.destination || 'Triagem'}
                   </p>
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 2xl:w-28 2xl:h-28 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
-                    <Activity className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 text-blue-400/50" />
+                  <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 mx-auto mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
+                    <Activity className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-blue-400/50" />
                   </div>
-                  <p className="text-slate-400 text-center text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl animate-[pulse_3s_ease-in-out_infinite]">
+                  <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
                     Aguardando próxima chamada...
                   </p>
                 </div>
@@ -2897,53 +2880,36 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 )}
               </p>
             </div>
-            <div className="p-1.5 xs:p-2 sm:p-3 md:p-3.5 lg:p-4 xl:p-5 2xl:p-6 3xl:p-8 4k:p-12 flex items-center justify-center flex-1 min-h-[70px] xs:min-h-[85px] sm:min-h-[110px] md:min-h-[120px] lg:min-h-[140px] xl:min-h-[180px] 2xl:min-h-[220px] 3xl:min-h-[280px] 4k:min-h-[380px] relative">
-              {/* Enhanced inner glow for active call */}
-              <div className={`absolute inset-0 pointer-events-none rounded-lg sm:rounded-xl transition-all duration-500 ${
+            <div className="p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 xl:p-4 2xl:p-5 3xl:p-6 4k:p-10 flex items-center justify-center flex-1 min-h-[60px] xs:min-h-[70px] sm:min-h-[90px] md:min-h-[100px] lg:min-h-[120px] xl:min-h-[150px] 2xl:min-h-[180px] 3xl:min-h-[220px] 4k:min-h-[300px] relative">
+              {/* Subtle inner glow */}
+              <div className={`absolute inset-0 pointer-events-none ${
                 announcingType === 'doctor' 
-                  ? 'bg-gradient-to-b from-amber-500/30 via-yellow-500/15 to-transparent' 
-                  : currentDoctorCall
-                    ? 'bg-gradient-to-b from-emerald-500/15 to-transparent'
-                    : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
+                  ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' 
+                  : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
               }`} />
-              {/* Highlighted background box for patient name */}
-              {currentDoctorCall && (
-                <div className={`absolute inset-2 sm:inset-3 lg:inset-4 rounded-lg sm:rounded-xl lg:rounded-2xl transition-all duration-500 ${
-                  announcingType === 'doctor'
-                    ? 'bg-gradient-to-br from-amber-600/40 via-yellow-600/30 to-orange-600/20 border-2 sm:border-3 border-amber-400/60 animate-[pulse_1.5s_ease-in-out_infinite]'
-                    : 'bg-gradient-to-br from-slate-700/60 via-emerald-900/40 to-slate-800/50 border border-emerald-500/30'
-                }`} />
-              )}
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105 sm:scale-110' : ''}`}>
-                  {/* Patient name - 40% larger with heavier weight */}
-                  <h2 className={`tv-font-display leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                    getNameFontSize(currentDoctorCall.name)
+                  } ${
                     announcingType === 'doctor' 
-                      ? 'text-amber-200 animate-name-mega-pulse drop-shadow-[0_0_30px_rgba(251,191,36,0.6)]' 
-                      : 'text-white drop-shadow-lg'
-                  }`} style={{ 
-                    wordBreak: 'break-word', 
-                    letterSpacing: '0.06em',
-                    fontWeight: 900,
-                    fontSize: 'clamp(1.5rem, 4vw + 1rem, 6rem)',
-                    textShadow: announcingType === 'doctor' 
-                      ? '0 0 40px rgba(251,191,36,0.5), 0 4px 8px rgba(0,0,0,0.5)' 
-                      : '0 2px 4px rgba(0,0,0,0.5)'
-                  }} key={currentDoctorCall.name}>
+                      ? 'text-yellow-300 animate-name-mega-pulse' 
+                      : 'shimmer-text animate-text-reveal'
+                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-3 xl:mt-3.5 3xl:mt-4 font-semibold text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md tracking-wide ${
-                    announcingType === 'doctor' ? 'text-amber-300/90' : 'text-emerald-300/90'
+                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
+                    announcingType === 'doctor' ? 'text-yellow-200/80' : 'text-emerald-400/80'
                   }`}>
-                    📍 {currentDoctorCall.destination || 'Consultório'}
+                    {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 2xl:w-28 2xl:h-28 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
-                    <Stethoscope className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 text-emerald-400/50" />
+                  <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 mx-auto mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
+                    <Stethoscope className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-emerald-400/50" />
                   </div>
-                  <p className="text-slate-400 text-center text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl animate-[pulse_3s_ease-in-out_infinite]">
+                  <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
                     Aguardando próxima chamada...
                   </p>
                 </div>
@@ -2952,47 +2918,47 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* Right Column: History Panel - More subtle, less competing with main calls */}
-        <div className={`col-span-3 flex glass-3d tv-card tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-slate-600/30 transition-opacity duration-300 bg-slate-900/60 ${announcingType ? 'opacity-20' : 'opacity-70'}`}>
-          <h3 className="tv-font-heading font-medium text-slate-300 mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
-            <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-7 4k:h-7 text-slate-400 shrink-0" />
-            <span className="text-slate-400">Últimas Chamadas</span>
+        {/* Right Column: History Panel - 3D Glass effect - Optimized for landscape TV */}
+        <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
+          <h3 className="tv-font-heading font-bold text-white mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
+            <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0 animate-pulse" />
+            <span className="shimmer-text">Últimas Chamadas</span>
           </h3>
-          <div className="space-y-0.5 xs:space-y-0.5 sm:space-y-0.5 md:space-y-1 lg:space-y-1 xl:space-y-1.5 2xl:space-y-2 3xl:space-y-2.5 flex-1 overflow-y-auto scrollbar-thin">
+          <div className="space-y-0.5 xs:space-y-0.5 sm:space-y-1 md:space-y-1 lg:space-y-1.5 xl:space-y-2 2xl:space-y-2.5 3xl:space-y-3 flex-1 overflow-y-auto scrollbar-thin">
             {historyItems.length === 0 ? (
-              <p className="text-slate-600 text-center py-1 sm:py-2 lg:py-3 xl:py-4 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+              <p className="text-slate-500 text-center py-1 sm:py-2 lg:py-3 xl:py-4 text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
                 Nenhuma chamada ainda
               </p>
             ) : (
               historyItems.slice(0, 8).map((item, index) => (
                 <div
                   key={item.id}
-                  className={`p-0.5 xs:p-0.5 sm:p-1 md:p-1 lg:p-1.5 xl:p-2 2xl:p-2.5 3xl:p-3 4k:p-3.5 rounded xs:rounded sm:rounded-md lg:rounded-lg transition-all ${
+                  className={`p-0.5 xs:p-1 sm:p-1.5 md:p-1.5 lg:p-2 xl:p-2.5 2xl:p-3 3xl:p-3.5 4k:p-4 rounded xs:rounded sm:rounded-md lg:rounded-lg ${
                     index === 0 
-                      ? 'bg-slate-700/40 border border-slate-500/30' 
-                      : 'bg-slate-800/30'
-                  }`}
-                  style={{ animationDelay: `${index * 50}ms`, opacity: index === 0 ? 0.9 : 0.6 }}
+                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-call-entrance' 
+                      : 'bg-slate-700/50'
+                  } transition-all`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center gap-0.5 xs:gap-0.5 sm:gap-1 lg:gap-1.5">
-                    <div className={`w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 rounded-full flex items-center justify-center shrink-0 ${
-                      item.type === 'triage' ? 'bg-blue-600/50' : 'bg-emerald-600/50'
+                  <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2">
+                    <div className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-1.5 h-1.5 xs:w-1.5 xs:h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 2xl:w-4 2xl:h-4 3xl:w-5 3xl:h-5 4k:w-6 4k:h-6 text-blue-300/80" />
+                        <Activity className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
                       ) : (
-                        <Stethoscope className="w-1.5 h-1.5 xs:w-1.5 xs:h-1.5 sm:w-2 sm:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 2xl:w-4 2xl:h-4 3xl:w-5 3xl:h-5 4k:w-6 4k:h-6 text-emerald-300/80" />
+                        <Stethoscope className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-medium text-slate-300/80 truncate text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
+                      <p className="tv-font-body font-semibold text-white truncate text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
                         {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                       </p>
-                      <p className="tv-font-body text-slate-500/70 text-[4px] xs:text-[5px] sm:text-[6px] md:text-[7px] lg:text-[8px] xl:text-[9px] 2xl:text-[10px] 3xl:text-xs 4k:text-sm">
+                      <p className="tv-font-body text-slate-400 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-slate-500/70 font-mono shrink-0 text-[4px] xs:text-[5px] sm:text-[6px] md:text-[7px] lg:text-[8px] xl:text-[9px] 2xl:text-[10px] 3xl:text-xs 4k:text-sm">
+                    <span className="text-slate-400 font-mono shrink-0 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>
