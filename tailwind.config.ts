@@ -242,14 +242,78 @@ export default {
             transform: "translateY(2px) translateX(-2px) rotate(-5deg)"
           },
         },
-        "weather-fog-drift": {
+        },
+        // Ticker polymorphic animations
+        "ticker-glow": {
           "0%, 100%": { 
-            transform: "translateX(0)",
-            opacity: "0.7"
+            filter: "drop-shadow(0 0 4px rgba(239, 68, 68, 0.5))"
           },
           "50%": { 
-            transform: "translateX(5px)",
-            opacity: "0.9"
+            filter: "drop-shadow(0 0 12px rgba(239, 68, 68, 0.9)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.5))"
+          },
+        },
+        "ticker-shine": {
+          "0%": { 
+            filter: "brightness(1) drop-shadow(0 0 2px rgba(251, 191, 36, 0.3))"
+          },
+          "50%": { 
+            filter: "brightness(1.2) drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))"
+          },
+          "100%": { 
+            filter: "brightness(1) drop-shadow(0 0 2px rgba(251, 191, 36, 0.3))"
+          },
+        },
+        "ticker-text-pulse": {
+          "0%, 100%": { 
+            textShadow: "0 0 4px rgba(239, 68, 68, 0.5)",
+            transform: "scale(1)"
+          },
+          "50%": { 
+            textShadow: "0 0 12px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.4)",
+            transform: "scale(1.02)"
+          },
+        },
+        "ticker-sparkle": {
+          "0%, 100%": { 
+            textShadow: "0 0 4px rgba(251, 191, 36, 0.4)"
+          },
+          "25%": { 
+            textShadow: "0 0 8px rgba(251, 191, 36, 0.7), 2px 0 10px rgba(251, 191, 36, 0.3)"
+          },
+          "75%": { 
+            textShadow: "0 0 8px rgba(251, 191, 36, 0.7), -2px 0 10px rgba(251, 191, 36, 0.3)"
+          },
+        },
+        "ticker-badge-glow": {
+          "0%, 100%": { 
+            boxShadow: "0 0 8px rgba(251, 191, 36, 0.3)"
+          },
+          "50%": { 
+            boxShadow: "0 0 16px rgba(251, 191, 36, 0.6), 0 0 24px rgba(251, 191, 36, 0.3)"
+          },
+        },
+        "ticker-megaphone": {
+          "0%, 100%": { 
+            transform: "rotate(-10deg) scale(1)"
+          },
+          "25%": { 
+            transform: "rotate(0deg) scale(1.1)"
+          },
+          "50%": { 
+            transform: "rotate(10deg) scale(1)"
+          },
+          "75%": { 
+            transform: "rotate(0deg) scale(1.1)"
+          },
+        },
+        "ticker-arrow-pulse": {
+          "0%, 100%": { 
+            opacity: "1",
+            transform: "translateX(0)"
+          },
+          "50%": { 
+            opacity: "0.6",
+            transform: "translateX(3px)"
           },
         },
       },

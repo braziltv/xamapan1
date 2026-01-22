@@ -107,47 +107,75 @@ export function CNNStyleNewsTicker({
             
             {/* Scrolling content */}
             <div className="animate-marquee whitespace-nowrap inline-flex py-1">
-              {items.map((item, index) => (
-                <span key={index} className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                  <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
-                    {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
-                      <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
-                      </>
-                    ) : item.source}
+              {items.map((item, index) => {
+                const getItemAnimation = () => {
+                  if (item.source === '📢 Informativo') return 'animate-[ticker-glow_2s_ease-in-out_infinite]';
+                  if (item.source === 'Créditos') return 'animate-[ticker-shine_3s_ease-in-out_infinite]';
+                  return 'hover:scale-105 transition-transform duration-300';
+                };
+                
+                const getTextAnimation = () => {
+                  if (item.source === '📢 Informativo') return 'animate-[ticker-text-pulse_1.5s_ease-in-out_infinite]';
+                  if (item.source === 'Créditos') return 'animate-[ticker-sparkle_2s_ease-in-out_infinite]';
+                  return '';
+                };
+
+                return (
+                  <span key={index} className={`mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl ${getItemAnimation()}`} style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                    <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse shadow-lg shadow-red-500/50' : item.source === 'Créditos' ? 'animate-[ticker-badge-glow_2s_ease-in-out_infinite]' : ''}`}>
+                      {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
+                        <>
+                          <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-[ticker-megaphone_0.8s_ease-in-out_infinite]" />
+                          <span className="hidden xs:inline">INFORMATIVO</span>
+                        </>
+                      ) : item.source}
+                    </span>
+                    <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${getTextAnimation()} ${
+                      item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                      item.source === 'Créditos' ? 'text-amber-300' : 
+                      'text-white'
+                    }`}>
+                      {item.title}
+                    </span>
+                    <span className={`text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl ${item.source === '📢 Informativo' ? 'animate-[ticker-arrow-pulse_1s_ease-in-out_infinite]' : ''}`}>▸</span>
                   </span>
-                  <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
-                    item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
-                    item.source === 'Créditos' ? 'text-amber-300' : 
-                    'text-white'
-                  }`}>
-                    {item.title}
-                  </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
-                </span>
-              ))}
+                );
+              })}
               {/* Duplicate for seamless loop */}
-              {items.map((item, index) => (
-                <span key={`dup-${index}`} className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                  <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
-                    {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
-                      <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
-                      </>
-                    ) : item.source}
+              {items.map((item, index) => {
+                const getItemAnimation = () => {
+                  if (item.source === '📢 Informativo') return 'animate-[ticker-glow_2s_ease-in-out_infinite]';
+                  if (item.source === 'Créditos') return 'animate-[ticker-shine_3s_ease-in-out_infinite]';
+                  return 'hover:scale-105 transition-transform duration-300';
+                };
+                
+                const getTextAnimation = () => {
+                  if (item.source === '📢 Informativo') return 'animate-[ticker-text-pulse_1.5s_ease-in-out_infinite]';
+                  if (item.source === 'Créditos') return 'animate-[ticker-sparkle_2s_ease-in-out_infinite]';
+                  return '';
+                };
+
+                return (
+                  <span key={`dup-${index}`} className={`mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl ${getItemAnimation()}`} style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                    <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse shadow-lg shadow-red-500/50' : item.source === 'Créditos' ? 'animate-[ticker-badge-glow_2s_ease-in-out_infinite]' : ''}`}>
+                      {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
+                        <>
+                          <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-[ticker-megaphone_0.8s_ease-in-out_infinite]" />
+                          <span className="hidden xs:inline">INFORMATIVO</span>
+                        </>
+                      ) : item.source}
+                    </span>
+                    <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${getTextAnimation()} ${
+                      item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                      item.source === 'Créditos' ? 'text-amber-300' : 
+                      'text-white'
+                    }`}>
+                      {item.title}
+                    </span>
+                    <span className={`text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl ${item.source === '📢 Informativo' ? 'animate-[ticker-arrow-pulse_1s_ease-in-out_infinite]' : ''}`}>▸</span>
                   </span>
-                  <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
-                    item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
-                    item.source === 'Créditos' ? 'text-amber-300' : 
-                    'text-white'
-                  }`}>
-                    {item.title}
-                  </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
-                </span>
-              ))}
+                );
+              })}
             </div>
           </div>
 
