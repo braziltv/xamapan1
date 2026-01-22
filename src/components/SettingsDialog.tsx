@@ -61,6 +61,7 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
   const [isTestingGoogleTTS, setIsTestingGoogleTTS] = useState(false);
+  const [isCachingPhrases, setIsCachingPhrases] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   
@@ -571,6 +572,50 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
                   <>
                     <Play className="w-4 h-4" />
                     Testar Vozes de Hora
+                  </>
+                )}
+              </Button>
+
+              {/* Cache Destination Phrases Button */}
+              <Button 
+                variant="secondary"
+                onClick={async () => {
+                  const unitId = localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id');
+                  if (!unitId) {
+                    toast.error('Nenhuma unidade selecionada');
+                    return;
+                  }
+                  
+                  setIsCachingPhrases(true);
+                  toast.info('Gerando cache de frases de destino...');
+                  
+                  try {
+                    const { data, error } = await supabase.functions.invoke('cache-destination-phrases', {
+                      body: { unitId, force: true }
+                    });
+                    
+                    if (error) throw error;
+                    
+                    toast.success(`Cache gerado: ${data.cached} frases cacheadas, ${data.skipped} já existiam`);
+                  } catch (e) {
+                    console.error('Cache error:', e);
+                    toast.error('Erro ao gerar cache: ' + (e instanceof Error ? e.message : 'Erro desconhecido'));
+                  } finally {
+                    setIsCachingPhrases(false);
+                  }
+                }} 
+                disabled={isCachingPhrases}
+                className="w-full gap-2"
+              >
+                {isCachingPhrases ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Gerando cache...
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-4 h-4" />
+                    Pré-cachear Frases de Destino
                   </>
                 )}
               </Button>

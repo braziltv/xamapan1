@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.tv-reload-command]
 verify_jwt = false
+
+[functions.cache-destination-phrases]
+verify_jwt = false
