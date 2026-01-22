@@ -55,18 +55,25 @@ const DEFAULT_VOLUMES: VolumeSettings = {
 const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
+const PATIENT_CALL_PITCH_KEY = 'patientCallPitch';
 
 export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
   const [isTesting, setIsTesting] = useState(false);
   const [isTestingGoogleTTS, setIsTestingGoogleTTS] = useState(false);
+  const [isTestingPatientPitch, setIsTestingPatientPitch] = useState(false);
   const [isCachingPhrases, setIsCachingPhrases] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
+  
+  // Patient call pitch setting (-2.0 to 2.0, default -0.8 for warmer tone)
+  const [patientCallPitch, setPatientCallPitch] = useState(() => 
+    parseFloat(localStorage.getItem(PATIENT_CALL_PITCH_KEY) || '-0.8')
+  );
   
   // Google Cloud TTS voice settings (for hour announcements)
   const [googleVoiceFemale, setGoogleVoiceFemale] = useState(() => 
@@ -488,6 +495,98 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
                 step={0.05}
                 className="w-full"
               />
+            </div>
+          </div>
+
+          {/* Patient Call Voice Pitch Setting */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium border-b pb-2">
+              <Megaphone className="w-4 h-4" />
+              Voz de Chamada de Paciente
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Tom da Voz (Pitch)</Label>
+                  <span className="text-xs text-muted-foreground font-mono">{patientCallPitch.toFixed(1)}</span>
+                </div>
+                <Slider
+                  value={[patientCallPitch]}
+                  onValueChange={([value]) => {
+                    setPatientCallPitch(value);
+                    localStorage.setItem(PATIENT_CALL_PITCH_KEY, value.toString());
+                  }}
+                  min={-2}
+                  max={2}
+                  step={0.1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Grave (-2.0)</span>
+                  <span>Normal (0)</span>
+                  <span>Agudo (+2.0)</span>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setIsTestingPatientPitch(true);
+                  try {
+                    const response = await fetch(
+                      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                        },
+                        body: JSON.stringify({
+                          text: 'Paciente Maria da Silva, dirija-se à Triagem.',
+                          voiceName: 'pt-BR-Neural2-C',
+                          pitch: patientCallPitch,
+                        }),
+                      }
+                    );
+
+                    if (!response.ok) throw new Error('Falha ao gerar áudio');
+
+                    const audioBuffer = await response.arrayBuffer();
+                    const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.onended = () => URL.revokeObjectURL(audioUrl);
+                    await audio.play();
+                    toast.success(`Testando pitch ${patientCallPitch.toFixed(1)}`);
+                  } catch (error) {
+                    console.error('Error testing pitch:', error);
+                    toast.error('Erro ao testar pitch');
+                  } finally {
+                    setIsTestingPatientPitch(false);
+                  }
+                }}
+                disabled={isTestingPatientPitch}
+                className="w-full"
+              >
+                {isTestingPatientPitch ? (
+                  <>
+                    <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3 h-3 mr-2" />
+                    Testar Voz com Pitch {patientCallPitch.toFixed(1)}
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                Valores negativos = voz mais grave e quente. Recomendado: -0.8
+              </p>
             </div>
           </div>
 

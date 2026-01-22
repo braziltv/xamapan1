@@ -317,8 +317,9 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   const handleTestAnnouncement = async (announcement: VoiceAnnouncement) => {
     setTesting(announcement.id);
     try {
+      // Usa a mesma edge function de marketing para preview consistente
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-marketing-audio`,
         {
           method: 'POST',
           headers: {
@@ -328,7 +329,6 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
           },
           body: JSON.stringify({
             text: announcement.text_content,
-            voiceName: localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A',
           }),
         }
       );
@@ -338,7 +338,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
         throw new Error(errorData.error || 'Falha ao gerar áudio');
       }
 
-      // A edge function retorna o áudio como binário, não como JSON
+      // A edge function retorna o áudio como binário
       const audioBuffer = await response.arrayBuffer();
       const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -351,7 +351,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
       };
       
       await audio.play();
-      toast.success('Reproduzindo anúncio');
+      toast.success('Reproduzindo com voz Chirp3-HD-Kore');
     } catch (error) {
       console.error('Error testing announcement:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao reproduzir anúncio');
@@ -363,8 +363,9 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   const handleGenerateAudioCache = async (announcement: VoiceAnnouncement) => {
     setGeneratingAudio(announcement.id);
     try {
+      // Usa a edge function de marketing para gerar o cache com a voz correta
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-marketing-audio`,
         {
           method: 'POST',
           headers: {
@@ -373,16 +374,16 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
+            action: 'generate-single',
+            announcementId: announcement.id,
             text: announcement.text_content,
-            voiceName: localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A',
-            cacheForAnnouncement: announcement.id,
           }),
         }
       );
 
       if (!response.ok) throw new Error('Falha ao gerar cache de áudio');
 
-      toast.success('Cache de áudio gerado com sucesso');
+      toast.success('Cache de áudio gerado com voz Chirp3-HD-Kore');
       loadData();
     } catch (error) {
       console.error('Error generating audio cache:', error);
