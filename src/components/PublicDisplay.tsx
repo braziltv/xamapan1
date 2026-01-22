@@ -141,6 +141,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
+  
+  // Cache de frases de destino pré-geradas (hash -> URL pública)
+  const destinationPhraseCacheRef = useRef<Map<string, string>>(new Map());
+  const destinationCacheLoadedRef = useRef(false);
 
   const readVolume = (key: string, fallback = 1) => {
     const raw = localStorage.getItem(key);
@@ -251,6 +255,78 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // No customization needed - this is the standard voice for all patient calls
   const FIXED_VOICE_ID = 'pt-BR-Neural2-C';
   const FIXED_SPEAKING_RATE = 1.0;
+
+  // Gerar hash para buscar frase de destino no cache
+  const hashDestinationPhrase = async (phrase: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(`${phrase}_${FIXED_VOICE_ID}_${FIXED_SPEAKING_RATE}`);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+  };
+
+  // Carregar cache de frases de destino do storage público
+  useEffect(() => {
+    if (!unitId || destinationCacheLoadedRef.current) return;
+
+    const loadDestinationCache = async () => {
+      try {
+        console.log('📦 Loading destination phrase cache for unit:', unitId);
+
+        // Buscar destinos da unidade
+        const { data: destinations, error } = await supabase
+          .from('destinations')
+          .select('name, display_name')
+          .eq('unit_id', unitId)
+          .eq('is_active', true);
+
+        if (error) {
+          console.error('Error loading destinations:', error);
+          return;
+        }
+
+        if (!destinations || destinations.length === 0) {
+          console.log('No destinations found for unit');
+          return;
+        }
+
+        const STORAGE_BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tts-cache/destinations`;
+
+        // Gerar hash para cada frase e montar map de cache
+        for (const dest of destinations) {
+          const destName = dest.display_name || dest.name;
+          const lowerName = destName.toLowerCase();
+          const feminineKeywords = ['sala', 'triagem', 'enfermaria', 'recepção', 'farmácia', 'emergência'];
+          const useFeminine = feminineKeywords.some(kw => lowerName.startsWith(kw));
+          const phrase = `Por favor, dirija-se ${useFeminine ? 'à' : 'ao'} ${destName}`;
+
+          const hash = await hashDestinationPhrase(phrase);
+          const cacheUrl = `${STORAGE_BASE_URL}/${hash}.mp3`;
+
+          destinationPhraseCacheRef.current.set(phrase, cacheUrl);
+        }
+
+        destinationCacheLoadedRef.current = true;
+        console.log(`📦 Destination cache loaded: ${destinationPhraseCacheRef.current.size} phrases`);
+
+        // Disparar pré-cache em background (não bloqueia)
+        supabase.functions.invoke('cache-destination-phrases', {
+          body: { unitId }
+        }).then(res => {
+          if (res.error) {
+            console.warn('Background cache-destination-phrases error:', res.error);
+          } else {
+            console.log('✅ Background cache-destination-phrases result:', res.data);
+          }
+        }).catch(e => console.warn('Background cache failed:', e));
+
+      } catch (e) {
+        console.error('Error loading destination cache:', e);
+      }
+    };
+
+    loadDestinationCache();
+  }, [unitId]);
 
   // Fetch news from database cache
   useEffect(() => {
@@ -1093,9 +1169,57 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Clear previous error
       setTtsError(null);
 
-      // Fixed voice: pt-BR-Neural2-C (Female Premium) - no customization
-      const ttsVolume = readVolume('volume-tts', 1);
+      // Tentar usar cache de frase de destino para reduzir latência
+      // Se a frase de destino estiver no cache, buscamos ela pré-gerada + geramos só o nome
+      const cachedDestinationUrl = destinationPhraseCacheRef.current.get(cleanDestination);
+      
+      if (cachedDestinationUrl) {
+        console.log('📦 Using cached destination phrase:', cachedDestinationUrl);
+        
+        try {
+          // Buscar áudio do nome via API (mais curto, mais rápido)
+          const nameUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
+          const [nameResponse, destResponse] = await Promise.all([
+            fetch(nameUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({
+                text: cleanName,
+                voiceName: FIXED_VOICE_ID,
+                speakingRate: FIXED_SPEAKING_RATE,
+              }),
+            }),
+            fetch(cachedDestinationUrl)
+          ]);
 
+          if (nameResponse.ok && destResponse.ok) {
+            const [nameBuffer, destBuffer] = await Promise.all([
+              nameResponse.arrayBuffer(),
+              destResponse.arrayBuffer()
+            ]);
+
+            if (nameBuffer.byteLength > 0 && destBuffer.byteLength > 0) {
+              // Concatenar os dois buffers (nome + destino)
+              const combined = new Uint8Array(nameBuffer.byteLength + destBuffer.byteLength);
+              combined.set(new Uint8Array(nameBuffer), 0);
+              combined.set(new Uint8Array(destBuffer), nameBuffer.byteLength);
+              console.log('✅ Combined audio from cache + API:', { nameSize: nameBuffer.byteLength, destSize: destBuffer.byteLength });
+              return combined.buffer;
+            }
+          }
+          
+          // Se falhar, cai no fluxo normal abaixo
+          console.log('⚠️ Cache fetch failed, falling back to full API call');
+        } catch (cacheError) {
+          console.warn('⚠️ Cache error, falling back to API:', cacheError);
+        }
+      }
+
+      // Fallback: gerar tudo via API (modo concatenado)
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
         'Content-Type': 'application/json',
@@ -1103,10 +1227,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: FIXED_VOICE_ID });
+      console.log('🌐 Calling TTS API (full):', { name: cleanName, destination: cleanDestination, voice: FIXED_VOICE_ID });
 
       try {
-        // Generate unified audio with name + destination in a single API call
         const response = await fetch(url, {
           method: 'POST',
           headers,
