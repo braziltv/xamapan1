@@ -159,9 +159,9 @@ export function CNNStyleNewsTicker({
           </div>
         </div>
         
-        {/* Reflection effect */}
-        <div className="h-2 xs:h-3 sm:h-4 md:h-5 lg:h-6 bg-gradient-to-b from-slate-900/60 via-slate-950/30 to-transparent backdrop-blur-sm">
-          <div className="w-full h-full bg-gradient-to-b from-white/[0.03] to-transparent" />
+        {/* Reflection effect - intensified */}
+        <div className="h-3 xs:h-4 sm:h-5 md:h-6 lg:h-8 bg-gradient-to-b from-slate-800/70 via-slate-900/50 to-transparent backdrop-blur-md">
+          <div className="w-full h-full bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent" />
         </div>
       </div>
     </div>
