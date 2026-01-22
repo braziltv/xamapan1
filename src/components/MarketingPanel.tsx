@@ -252,19 +252,30 @@ export function MarketingPanel() {
     }
   };
 
-  // Delete cached audio for announcement
+  // Delete cached audio for announcement using edge function
   const deleteAudioCache = async (announcementId: string) => {
     try {
-      const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
-      
-      const { error } = await supabase.storage
-        .from('tts-cache')
-        .remove([cacheFileName]);
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-marketing-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            action: 'delete-audio',
+            announcementId
+          }),
+        }
+      );
 
-      if (error) {
-        console.error('Error deleting audio cache:', error);
-      } else {
-        console.log('🗑️ Audio cache deleted:', cacheFileName);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          console.log('🗑️ Audio cache deleted via edge function:', result.deleted);
+        }
       }
     } catch (error) {
       console.error('Error deleting audio cache:', error);

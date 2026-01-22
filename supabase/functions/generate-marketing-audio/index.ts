@@ -156,18 +156,183 @@ serve(async (req) => {
       );
     }
 
-    // Load credentials
-    const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
-    if (!credentialsJson) {
-      throw new Error('GOOGLE_CLOUD_CREDENTIALS not configured');
-    }
-    const credentials = JSON.parse(credentialsJson);
-
     // Create Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Action: Delete single audio file
+    if (action === 'delete-audio') {
+      if (!announcementId) {
+        throw new Error('announcementId is required');
+      }
+
+      const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
+      
+      const { error: deleteError } = await supabase.storage
+        .from('tts-cache')
+        .remove([cacheFileName]);
+
+      if (deleteError) {
+        console.error(`[generate-marketing-audio] Delete error: ${deleteError.message}`);
+      } else {
+        console.log(`[generate-marketing-audio] 🗑️ Deleted: ${cacheFileName}`);
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: !deleteError, 
+          deleted: cacheFileName,
+          error: deleteError?.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Action: Cleanup expired announcements
+    if (action === 'cleanup-expired') {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Find expired announcements with cached audio
+      const { data: expiredAnnouncements, error: fetchError } = await supabase
+        .from('scheduled_announcements')
+        .select('id, audio_cache_url')
+        .lt('valid_until', today)
+        .not('audio_cache_url', 'is', null);
+
+      if (fetchError) {
+        throw new Error(`Fetch error: ${fetchError.message}`);
+      }
+
+      if (!expiredAnnouncements || expiredAnnouncements.length === 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'No expired announcements with cached audio',
+            cleaned: 0
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      let cleaned = 0;
+      const results: any[] = [];
+
+      for (const announcement of expiredAnnouncements) {
+        const cacheFileName = `announcements/announcement_${announcement.id}.mp3`;
+        
+        // Delete audio file
+        const { error: deleteError } = await supabase.storage
+          .from('tts-cache')
+          .remove([cacheFileName]);
+
+        if (!deleteError) {
+          // Clear cache URL in database
+          await supabase
+            .from('scheduled_announcements')
+            .update({ audio_cache_url: null, audio_generated_at: null })
+            .eq('id', announcement.id);
+
+          cleaned++;
+          results.push({ id: announcement.id, status: 'cleaned' });
+          console.log(`[generate-marketing-audio] 🧹 Cleaned expired: ${announcement.id}`);
+        } else {
+          results.push({ id: announcement.id, status: 'error', error: deleteError.message });
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          total: expiredAnnouncements.length,
+          cleaned,
+          results
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Action: Delete all orphaned audio files (files without matching announcement)
+    if (action === 'cleanup-orphaned') {
+      // List all files in announcements folder
+      const { data: files, error: listError } = await supabase.storage
+        .from('tts-cache')
+        .list('announcements');
+
+      if (listError) {
+        throw new Error(`List error: ${listError.message}`);
+      }
+
+      if (!files || files.length === 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'No announcement audio files found',
+            cleaned: 0
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get all announcement IDs
+      const { data: announcements, error: fetchError } = await supabase
+        .from('scheduled_announcements')
+        .select('id');
+
+      if (fetchError) {
+        throw new Error(`Fetch error: ${fetchError.message}`);
+      }
+
+      const activeIds = new Set((announcements || []).map(a => a.id));
+      const orphanedFiles: string[] = [];
+
+      // Find orphaned files
+      for (const file of files) {
+        const match = file.name.match(/announcement_(.+)\.mp3/);
+        if (match) {
+          const announcementId = match[1];
+          if (!activeIds.has(announcementId)) {
+            orphanedFiles.push(`announcements/${file.name}`);
+          }
+        }
+      }
+
+      if (orphanedFiles.length === 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'No orphaned files found',
+            cleaned: 0
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Delete orphaned files
+      const { error: deleteError } = await supabase.storage
+        .from('tts-cache')
+        .remove(orphanedFiles);
+
+      console.log(`[generate-marketing-audio] 🧹 Cleaned ${orphanedFiles.length} orphaned files`);
+
+      return new Response(
+        JSON.stringify({ 
+          success: !deleteError, 
+          cleaned: orphanedFiles.length,
+          files: orphanedFiles,
+          error: deleteError?.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Load credentials for audio generation actions
+    const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
+    if (!credentialsJson) {
+      throw new Error('GOOGLE_CLOUD_CREDENTIALS not configured');
+    }
+    const credentials = JSON.parse(credentialsJson);
 
     // Action: Generate single announcement audio
     if (action === 'generate-single') {
@@ -313,17 +478,6 @@ serve(async (req) => {
       );
     }
 
-    // Action: Regenerate all (force)
-    if (action === 'regenerate-all') {
-      // Call generate-all with force flag
-      const response = await fetch(req.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'generate-all', unitName, force: true })
-      });
-      return response;
-    }
-
     // Default: just generate audio and return it
     if (text) {
       const audioBuffer = await generateAudioWithChirp3Kore(text, credentials);
@@ -337,7 +491,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ error: 'Invalid request. Use action: generate-single, generate-all, or provide text' }),
+      JSON.stringify({ error: 'Invalid request. Use action: generate-single, generate-all, delete-audio, cleanup-expired, cleanup-orphaned, or provide text' }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
