@@ -2747,42 +2747,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="fixed inset-0 z-[15] bg-black/70 animate-[fadeIn_0.3s_ease-out] pointer-events-none" />
       )}
 
-      {/* Header - 3D Modern gradient bar with glow - optimized for landscape TV */}
-      <div className={`relative z-10 mb-0.5 xs:mb-1 sm:mb-1.5 md:mb-2 lg:mb-2.5 xl:mb-3 3xl:mb-4 4k:mb-6 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
-        <div className="glass-3d animate-header-glow rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl px-2 py-1 xs:px-3 xs:py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2 lg:px-6 lg:py-2.5 xl:px-8 xl:py-3 3xl:px-10 3xl:py-4 4k:px-14 4k:py-6 relative overflow-visible tv-card-3d mx-1 xs:mx-2 sm:mx-3 lg:mx-4 xl:mx-6 3xl:mx-8 4k:mx-12">
+      {/* Header - 3D Modern gradient bar with glow - optimized for 4K landscape TV */}
+      <div className={`relative z-10 mb-1 xs:mb-1.5 sm:mb-2 md:mb-2.5 lg:mb-3 xl:mb-4 2xl:mb-5 3xl:mb-6 4k:mb-8 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
+        <div className="glass-3d animate-header-glow rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl px-2.5 py-1.5 xs:px-3 xs:py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 lg:px-6 lg:py-3.5 xl:px-8 xl:py-4 2xl:px-10 2xl:py-5 3xl:px-12 3xl:py-6 4k:px-16 4k:py-8 relative overflow-visible tv-card-3d mx-1.5 xs:mx-2 sm:mx-3 lg:mx-4 xl:mx-6 2xl:mx-8 3xl:mx-10 4k:mx-14">
           {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 via-purple-600/40 to-indigo-600/30 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl opacity-80" />
           {/* Top highlight line */}
-          <div className="absolute top-0 left-[10%] w-[80%] h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          <div className="absolute top-0 left-[10%] w-[80%] h-px sm:h-0.5 3xl:h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           {/* Bottom subtle line */}
-          <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute bottom-0 left-[20%] w-[60%] h-px sm:h-0.5 3xl:h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
-          <div className="flex items-center relative z-10 w-full gap-1.5 xs:gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 3xl:gap-8 4k:gap-10">
+          <div className="flex items-center relative z-10 w-full gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 2xl:gap-8 3xl:gap-10 4k:gap-14">
             {/* Left: Logo + Title with 3D effect - fixed width */}
-            <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0">
-              <div className="relative w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-13 md:h-13 lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-18 2xl:h-18 3xl:w-20 3xl:h-20 4k:w-28 4k:h-28 shrink-0">
+            <div className="flex items-center gap-2 xs:gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8 shrink-0">
+              <div className="relative w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 3xl:w-28 3xl:h-28 4k:w-36 4k:h-36 shrink-0">
                 {/* Glow behind logo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md sm:blur-lg opacity-70" />
-                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl sm:shadow-2xl">
-                  <HealthCrossIcon size={32} className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 3xl:w-14 3xl:h-14 4k:w-20 4k:h-20" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl blur-lg sm:blur-xl opacity-70" />
+                <div className="relative w-full h-full rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl bg-white/95 flex items-center justify-center shadow-xl sm:shadow-2xl">
+                  <HealthCrossIcon size={32} className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 3xl:w-18 3xl:h-18 4k:w-24 4k:h-24" />
                 </div>
               </div>
-              <div className="shrink-0 min-w-[90px] xs:min-w-[110px] sm:min-w-[140px] md:min-w-[170px] lg:min-w-[200px] xl:min-w-[260px] 2xl:min-w-[300px] 3xl:min-w-[380px] 4k:min-w-[520px]">
-                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-lg">
+              <div className="shrink-0 min-w-[100px] xs:min-w-[120px] sm:min-w-[160px] md:min-w-[200px] lg:min-w-[240px] xl:min-w-[300px] 2xl:min-w-[360px] 3xl:min-w-[450px] 4k:min-w-[600px]">
+                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-300 leading-tight font-semibold text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
+                <p className="tv-font-body text-amber-300 leading-tight font-semibold text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
                   {unitName || 'Unidade de Saúde'}
                 </p>
                 {/* Kalebe Credits - Responsive */}
-                <p className="tv-font-body leading-tight font-bold text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5">
+                <p className="tv-font-body leading-tight font-bold text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5 sm:mt-1">
                   ✨ Solução criada por Kalebe Gomes
                 </p>
               </div>
             </div>
             
             {/* Animated separator - hidden on very small screens */}
-            <div className="hidden xs:block w-px h-6 sm:h-8 md:h-9 lg:h-10 xl:h-12 2xl:h-14 3xl:h-16 4k:h-20 bg-gradient-to-b from-transparent via-white/50 to-transparent shrink-0" />
+            <div className="hidden xs:block w-px h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16 2xl:h-20 3xl:h-24 4k:h-32 bg-gradient-to-b from-transparent via-white/50 to-transparent shrink-0" />
             
             {/* Right: Weather + Clock - takes remaining space */}
             <div className="flex-1 flex items-center justify-end min-w-0">
@@ -2810,15 +2810,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
-              <p className="tv-font-heading text-white font-bold flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-2 xl:gap-3 3xl:gap-4 text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
-                <Activity className={`w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 ${
+              <p className="tv-font-heading text-white font-bold flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 4k:gap-6 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl relative z-10 drop-shadow-lg">
+                <Activity className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14 shrink-0 ${
                   announcingType === 'triage' ? 'animate-pulse' : 'animate-triage-icon'
                 }`} style={{ filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)) drop-shadow(0 0 16px rgba(99, 102, 241, 0.6)) drop-shadow(0 0 24px rgba(99, 102, 241, 0.4))' }} />
                 <span className="drop-shadow-md">
                   {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
                 </span>
                 {announcingType === 'triage' && (
-                  <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
+                  <Megaphone className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
                 )}
               </p>
             </div>
@@ -2873,15 +2873,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             }`}>
               {/* Shimmer overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
-              <p className="tv-font-heading text-white font-bold flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-2 xl:gap-3 3xl:gap-4 text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-2xl 4k:text-3xl relative z-10 drop-shadow-lg">
-                <Stethoscope className={`w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 shrink-0 ${
+              <p className="tv-font-heading text-white font-bold flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 4k:gap-6 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl relative z-10 drop-shadow-lg">
+                <Stethoscope className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14 shrink-0 ${
                   announcingType === 'doctor' ? 'animate-pulse' : 'animate-doctor-icon'
                 }`} style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)) drop-shadow(0 0 16px rgba(16, 185, 129, 0.6)) drop-shadow(0 0 24px rgba(16, 185, 129, 0.4))' }} />
                 <span className="drop-shadow-md">
                   {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
                 </span>
                 {announcingType === 'doctor' && (
-                  <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
+                  <Megaphone className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14 text-white animate-megaphone-shake ml-auto shrink-0 drop-shadow-lg" />
                 )}
               </p>
             </div>
@@ -2925,8 +2925,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* Right Column: History Panel - 3D Glass effect - Optimized for landscape TV */}
         <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
-          <h3 className="tv-font-heading font-bold text-white mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
-            <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0 animate-pulse" />
+          <h3 className="tv-font-heading font-bold text-white mb-1 xs:mb-1.5 sm:mb-2 lg:mb-2.5 xl:mb-3 3xl:mb-4 flex items-center gap-1 xs:gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 3xl:gap-4 shrink-0 text-[9px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-md">
+            <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 3xl:w-10 3xl:h-10 4k:w-12 4k:h-12 text-cyan-400 shrink-0 animate-pulse" />
             <span className="shimmer-text">Últimas Chamadas</span>
           </h3>
           <div className="space-y-0.5 xs:space-y-0.5 sm:space-y-1 md:space-y-1 lg:space-y-1.5 xl:space-y-2 2xl:space-y-2.5 3xl:space-y-3 flex-1 overflow-y-auto scrollbar-thin">
@@ -2946,24 +2946,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2">
-                    <div className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                    <div className={`w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 3xl:w-14 3xl:h-14 4k:w-16 4k:h-16 rounded-full flex items-center justify-center shrink-0 ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
+                        <Activity className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white" />
                       ) : (
-                        <Stethoscope className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
+                        <Stethoscope className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-8 3xl:h-8 4k:w-10 4k:h-10 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-semibold text-white truncate text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                      <p className="tv-font-body font-semibold text-white truncate text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
                         {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                       </p>
-                      <p className="tv-font-body text-slate-400 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
+                      <p className="tv-font-body text-slate-400 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-slate-400 font-mono shrink-0 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
+                    <span className="text-slate-400 font-mono shrink-0 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>

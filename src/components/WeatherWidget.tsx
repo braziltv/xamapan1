@@ -30,12 +30,12 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
   const desc = description.toLowerCase();
   
   const sizeClasses = size === 'lg' 
-    ? 'w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 3xl:w-14 3xl:h-14 4k:w-16 4k:h-16' 
-    : 'w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-7 3xl:h-7';
+    ? 'w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 3xl:w-24 3xl:h-24 4k:w-32 4k:h-32' 
+    : 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 4k:w-12 4k:h-12';
 
   const iconSizeClasses = size === 'lg'
-    ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12'
-    : 'w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5';
+    ? 'w-6 h-6 sm:w-7 sm:h-7 lg:w-9 lg:h-9 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 3xl:w-16 3xl:h-16 4k:w-20 4k:h-20'
+    : 'w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8';
 
   // Determine icon type, colors and animation with custom weather animations
   let IconComponent = CloudSun;
@@ -256,14 +256,14 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     return (
       <div className="flex flex-col items-center gap-1 shrink-0">
         {/* Date pills */}
-        <div className="flex items-center gap-1.5">
-          <div className="bg-gradient-to-r from-amber-500/25 via-amber-400/35 to-amber-500/25 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-amber-400/50 backdrop-blur-sm shadow-[0_0_10px_rgba(251,191,36,0.2)]">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+        <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3 3xl:gap-4 4k:gap-5">
+          <div className="bg-gradient-to-r from-amber-500/25 via-amber-400/35 to-amber-500/25 rounded-full px-2.5 sm:px-3 lg:px-4 xl:px-5 3xl:px-6 4k:px-8 py-1 sm:py-1.5 lg:py-2 3xl:py-2.5 4k:py-3 border border-amber-400/50 backdrop-blur-sm shadow-[0_0_10px_rgba(251,191,36,0.2)]">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
-          <div className="bg-white/15 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-cyan-400/40 backdrop-blur-sm shadow-[0_0_8px_rgba(6,182,212,0.15)]">
-            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]">
+          <div className="bg-white/15 rounded-full px-2.5 sm:px-3 lg:px-4 xl:px-5 3xl:px-6 4k:px-8 py-1 sm:py-1.5 lg:py-2 3xl:py-2.5 4k:py-3 border border-cyan-400/40 backdrop-blur-sm shadow-[0_0_8px_rgba(6,182,212,0.15)]">
+            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]">
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
@@ -273,26 +273,26 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         <div className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/25 via-blue-500/25 to-cyan-500/25 rounded-xl blur-md opacity-80" />
           
-          <div className="relative flex items-center gap-1 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-lg sm:rounded-xl px-2.5 sm:px-3 lg:px-4 xl:px-5 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.25),inset_0_2px_0_rgba(255,255,255,0.1)]">
+          <div className="relative flex items-center gap-1.5 sm:gap-2 lg:gap-3 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-lg sm:rounded-xl lg:rounded-2xl 3xl:rounded-3xl px-3 sm:px-4 lg:px-5 xl:px-6 2xl:px-8 3xl:px-10 4k:px-14 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 4k:py-6 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.25),inset_0_2px_0_rgba(255,255,255,0.1)]">
             
             {/* Hours */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {hours}
             </span>
             
             {/* Colon separator */}
-            <div className="flex flex-col items-center justify-center gap-1 mx-1">
-              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
-              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" style={{ animationDelay: '0.5s' }} />
+            <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 lg:gap-2.5 3xl:gap-3 4k:gap-4 mx-1.5 sm:mx-2 lg:mx-3 3xl:mx-4 4k:mx-5">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3 3xl:w-4 3xl:h-4 4k:w-5 4k:h-5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3 3xl:w-4 3xl:h-4 4k:w-5 4k:h-5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" style={{ animationDelay: '0.5s' }} />
             </div>
             
             {/* Minutes */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {minutes}
             </span>
             
             {/* Seconds */}
-            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-orange-400 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)] ml-1" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
+            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-orange-400 text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)] ml-1.5 sm:ml-2 lg:ml-3 3xl:ml-4 4k:ml-5" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
               {seconds}
             </span>
           </div>
