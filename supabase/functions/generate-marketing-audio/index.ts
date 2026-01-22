@@ -110,7 +110,7 @@ async function generateAudioWithChirp3Kore(text: string, credentials: any): Prom
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.92, // Slightly slower for natural, conversational pacing
+          speakingRate: 0.96, // Natural conversational pacing
           // Note: Chirp3-HD voices don't support pitch parameter
           volumeGainDb: 2.5, // Enhanced volume for clarity in public spaces
           effectsProfileId: ['large-home-entertainment-class-device'] // Optimized audio profile
