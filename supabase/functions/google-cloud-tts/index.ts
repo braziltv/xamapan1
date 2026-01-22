@@ -212,7 +212,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
-            pitch: -0.9, // Lower pitch for warmer, more natural tone
+            pitch: -0.8, // Lower pitch for warmer, more natural tone
             volumeGainDb: 1.5, // Slightly louder for clarity
             effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
           }
