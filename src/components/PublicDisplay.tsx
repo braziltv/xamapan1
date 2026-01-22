@@ -237,6 +237,76 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, unitId]);
 
+  // Load and sync patient voice settings from Supabase
+  useEffect(() => {
+    if (!marketingUnitName) return;
+
+    let alive = true;
+
+    const loadVoiceSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('unit_settings')
+          .select('patient_call_voice')
+          .eq('unit_name', marketingUnitName)
+          .maybeSingle();
+
+        if (!alive) return;
+        if (error) {
+          console.warn('Error loading voice settings:', error);
+          return;
+        }
+
+        if (data?.patient_call_voice) {
+          try {
+            const voiceSettings = JSON.parse(data.patient_call_voice);
+            localStorage.setItem('patientVoiceSettings', JSON.stringify(voiceSettings));
+            console.log('🎙️ Voice settings synced from Supabase:', voiceSettings);
+          } catch (parseErr) {
+            console.warn('Failed to parse voice settings:', parseErr);
+          }
+        }
+      } catch (e) {
+        console.warn('Error loading voice settings:', e);
+      }
+    };
+
+    // Load initial settings
+    loadVoiceSettings();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('voice-settings-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'unit_settings',
+          filter: `unit_name=eq.${marketingUnitName}`,
+        },
+        (payload) => {
+          console.log('🔔 Voice settings updated via realtime:', payload);
+          const newRecord = payload.new as any;
+          if (newRecord?.patient_call_voice) {
+            try {
+              const voiceSettings = JSON.parse(newRecord.patient_call_voice);
+              localStorage.setItem('patientVoiceSettings', JSON.stringify(voiceSettings));
+              console.log('🎙️ Voice settings updated in real-time:', voiceSettings);
+            } catch (parseErr) {
+              console.warn('Failed to parse voice settings from realtime:', parseErr);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      alive = false;
+      supabase.removeChannel(channel);
+    };
+  }, [marketingUnitName]);
+
   // Fetch news from database cache
   useEffect(() => {
     const loadNewsFromDB = async () => {
@@ -1078,11 +1148,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Clear previous error
       setTtsError(null);
 
-      // Get TTS volume from localStorage
-      const ttsVolume = readVolume('volume-tts', 1);
-      
-      // Get configured voice from localStorage
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      // Get patient voice settings from localStorage (configured in admin panel)
+      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
+      try {
+        const saved = localStorage.getItem('patientVoiceSettings');
+        if (saved) {
+          patientVoiceSettings = JSON.parse(saved);
+        }
+      } catch {
+        console.warn('Failed to parse patientVoiceSettings, using defaults');
+      }
+
+      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
+      const ttsVolume = patientVoiceSettings.volume ?? 1;
+      const speakingRate = patientVoiceSettings.speed ?? 1;
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`;
       const headers = {
@@ -1091,7 +1170,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       } as const;
 
-      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice });
+      console.log('🌐 Calling TTS API:', { url, name: cleanName, destination: cleanDestination, voice: configuredVoice, speed: speakingRate });
 
       try {
         // Generate unified audio with name + destination in a single API call
@@ -1105,6 +1184,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               destination: cleanDestination,
             },
             voiceName: configuredVoice,
+            speakingRate: speakingRate,
           }),
         });
 
@@ -1149,11 +1229,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Clear previous error
       setTtsError(null);
       
-      // Get TTS volume from localStorage
-      const ttsVolume = readVolume('volume-tts', 1);
-      
-      // Get configured voice from localStorage
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      // Get patient voice settings from localStorage (configured in admin panel)
+      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
+      try {
+        const saved = localStorage.getItem('patientVoiceSettings');
+        if (saved) {
+          patientVoiceSettings = JSON.parse(saved);
+        }
+      } catch {
+        console.warn('Failed to parse patientVoiceSettings, using defaults');
+      }
+
+      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
+      const ttsVolume = patientVoiceSettings.volume ?? 1;
+      const speakingRate = patientVoiceSettings.speed ?? 1;
       
       try {
         const response = await fetch(
@@ -1165,7 +1254,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
-            body: JSON.stringify({ text, voiceName: configuredVoice }),
+            body: JSON.stringify({ text, voiceName: configuredVoice, speakingRate }),
           }
         );
 
@@ -1756,8 +1845,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     async (phrase: string): Promise<void> => {
       console.log('Speaking destination phrase:', phrase);
       
-      const ttsVolume = readVolume('volume-tts', 1);
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
+      // Get patient voice settings from localStorage (configured in admin panel)
+      let patientVoiceSettings = { voiceId: 'pt-BR-Neural2-A', volume: 1, speed: 1 };
+      try {
+        const saved = localStorage.getItem('patientVoiceSettings');
+        if (saved) {
+          patientVoiceSettings = JSON.parse(saved);
+        }
+      } catch {
+        console.warn('Failed to parse patientVoiceSettings, using defaults');
+      }
+
+      const configuredVoice = patientVoiceSettings.voiceId || 'pt-BR-Neural2-A';
+      const ttsVolume = patientVoiceSettings.volume ?? 1;
+      const speakingRate = patientVoiceSettings.speed ?? 1;
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -1768,7 +1869,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: phrase, voiceName: configuredVoice }),
+          body: JSON.stringify({ text: phrase, voiceName: configuredVoice, speakingRate }),
         }
       );
 

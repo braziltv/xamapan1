@@ -184,10 +184,38 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
     setPatientVoiceChanged(true);
   }, []);
 
-  const savePatientVoice = useCallback(() => {
+  const savePatientVoice = useCallback(async () => {
+    // Save to localStorage (for local use)
     localStorage.setItem(PATIENT_VOICE_KEY, JSON.stringify(patientVoice));
     setPatientVoiceChanged(false);
-    toast.success('Configurações de voz salvas!');
+    
+    // Also save to Supabase for cross-device sync (especially TV displays)
+    try {
+      const unitName = localStorage.getItem('selectedUnit') || '';
+      if (unitName) {
+        const voiceSettingsJson = JSON.stringify(patientVoice);
+        const { error } = await supabase
+          .from('unit_settings')
+          .upsert({
+            unit_name: unitName,
+            patient_call_voice: voiceSettingsJson,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'unit_name' });
+        
+        if (error) {
+          console.error('Error saving voice settings to Supabase:', error);
+          toast.warning('Configurações salvas localmente, mas não sincronizadas com a nuvem.');
+        } else {
+          console.log('Voice settings synced to Supabase');
+          toast.success('Configurações de voz salvas e sincronizadas!');
+        }
+      } else {
+        toast.success('Configurações de voz salvas!');
+      }
+    } catch (err) {
+      console.error('Error syncing voice settings:', err);
+      toast.success('Configurações de voz salvas localmente!');
+    }
   }, [patientVoice]);
 
   const loadVoices = useCallback(() => {
