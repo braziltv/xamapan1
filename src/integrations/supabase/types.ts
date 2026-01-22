@@ -74,6 +74,54 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_operator_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          operator_id: string | null
+          role: Database["public"]["Enums"]["operator_auth_role"]
+          unit_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          operator_id?: string | null
+          role?: Database["public"]["Enums"]["operator_auth_role"]
+          unit_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          operator_id?: string | null
+          role?: Database["public"]["Enums"]["operator_auth_role"]
+          unit_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_operator_profiles_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auth_operator_profiles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_history: {
         Row: {
           call_type: string
@@ -901,8 +949,26 @@ export type Database = {
         Args: { days_to_keep?: number }
         Returns: number
       }
+      get_user_unit_id: { Args: never; Returns: string }
+      get_user_unit_name: { Args: never; Returns: string }
+      has_operator_role: {
+        Args: { _role: Database["public"]["Enums"]["operator_auth_role"] }
+        Returns: boolean
+      }
+      is_unit_admin: { Args: never; Returns: boolean }
+      validate_unit_access: {
+        Args: { target_unit_name: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      operator_auth_role:
+        | "admin"
+        | "recepcao"
+        | "triagem"
+        | "medico"
+        | "enfermagem"
+        | "tv"
       user_role:
         | "admin"
         | "recepcao"
@@ -1037,6 +1103,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      operator_auth_role: [
+        "admin",
+        "recepcao",
+        "triagem",
+        "medico",
+        "enfermagem",
+        "tv",
+      ],
       user_role: [
         "admin",
         "recepcao",
