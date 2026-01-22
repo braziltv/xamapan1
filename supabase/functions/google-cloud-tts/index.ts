@@ -114,9 +114,6 @@ const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: s
   'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
   'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
   'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
-  // Chirp3-HD voices (do NOT support pitch parameter)
-  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
 };
 
 // Vozes padrão por gênero
@@ -147,7 +144,7 @@ serve(async (req) => {
       );
     }
     
-    const { text, voice = 'female', voiceName, speakingRate = 1.0, pitch, concatenate } = body;
+    const { text, voice = 'female', voiceName, speakingRate = 1.0, concatenate } = body;
 
     // Modo concatenado: nome + destino em uma única frase natural
     let finalText = text;
@@ -201,21 +198,6 @@ serve(async (req) => {
     const accessToken = await getAccessToken(credentials);
 
     // Chamar Google Cloud TTS API
-    // Check if the voice supports pitch (Chirp3-HD voices do NOT support pitch)
-    const isChirp3Voice = selectedVoiceName.includes('Chirp3');
-    
-    const audioConfig: Record<string, any> = {
-      audioEncoding: 'MP3',
-      speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
-      volumeGainDb: 1.5, // Slightly louder for clarity
-      effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
-    };
-    
-    // Only add pitch for voices that support it (non-Chirp3 voices)
-    if (!isChirp3Voice) {
-      audioConfig.pitch = pitch !== undefined ? pitch : -0.8; // Use provided pitch or default -0.8 for warmer tone
-    }
-    
     const ttsResponse = await fetch(
       'https://texttospeech.googleapis.com/v1/text:synthesize',
       {
@@ -227,7 +209,13 @@ serve(async (req) => {
         body: JSON.stringify({
           input: { text: finalText },
           voice: selectedVoice,
-          audioConfig
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
+            pitch: -0.8, // Lower pitch for warmer, more natural tone
+            volumeGainDb: 1.5, // Slightly louder for clarity
+            effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
+          }
         })
       }
     );

@@ -268,12 +268,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // No customization needed - this is the standard voice for all patient calls
   const FIXED_VOICE_ID = 'pt-BR-Neural2-C';
   const FIXED_SPEAKING_RATE = 1.0;
-  
-  // Get configured pitch from localStorage (default -0.8 for warmer tone)
-  const getConfiguredPitch = () => {
-    const storedPitch = localStorage.getItem('patientCallPitch');
-    return storedPitch ? parseFloat(storedPitch) : -0.8;
-  };
 
   // Gerar hash para buscar frase de destino no cache
   const hashDestinationPhrase = async (phrase: string): Promise<string> => {
@@ -1210,7 +1204,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 text: cleanName,
                 voiceName: FIXED_VOICE_ID,
                 speakingRate: FIXED_SPEAKING_RATE,
-                pitch: getConfiguredPitch(),
               }),
             }),
             fetch(cachedDestinationUrl)
@@ -1261,7 +1254,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             },
             voiceName: FIXED_VOICE_ID,
             speakingRate: FIXED_SPEAKING_RATE,
-            pitch: getConfiguredPitch(),
           }),
         });
 
@@ -1315,7 +1307,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
-            body: JSON.stringify({ text, voiceName: FIXED_VOICE_ID, speakingRate: FIXED_SPEAKING_RATE, pitch: getConfiguredPitch() }),
+            body: JSON.stringify({ text, voiceName: FIXED_VOICE_ID, speakingRate: FIXED_SPEAKING_RATE }),
           }
         );
 
@@ -1921,8 +1913,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           body: JSON.stringify({ 
             text: phrase, 
             voiceName: FIXED_VOICE_ID, 
-            speakingRate: FIXED_SPEAKING_RATE,
-            pitch: getConfiguredPitch()
+            speakingRate: FIXED_SPEAKING_RATE 
           }),
         }
       );
