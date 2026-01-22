@@ -2578,33 +2578,34 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* Bottom subtle line */}
           <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
-          <div className="flex items-center relative z-10 w-full gap-3 sm:gap-4 lg:gap-5 xl:gap-6 3xl:gap-8 4k:gap-10">
-            {/* Left: Logo + Title with 3D effect - fixed width to prevent overlap */}
+          <div className="flex items-center relative z-10 w-full gap-2 sm:gap-3 lg:gap-4 xl:gap-5 3xl:gap-6 4k:gap-8">
+            {/* Left: Logo + Title with 3D effect - fixed width */}
             <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3 xl:gap-4 3xl:gap-5 shrink-0">
-              <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 3xl:w-18 3xl:h-18 4k:w-26 4k:h-26 shrink-0">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 3xl:w-20 3xl:h-20 4k:w-28 4k:h-28 shrink-0">
                 {/* Glow behind logo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-md opacity-60" />
-                <div className="relative w-full h-full rounded-md sm:rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-xl">
-                  <HealthCrossIcon size={32} className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-9 xl:h-9 3xl:w-12 3xl:h-12 4k:w-18 4k:h-18" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-lg lg:rounded-xl 3xl:rounded-2xl blur-lg opacity-70" />
+                <div className="relative w-full h-full rounded-lg lg:rounded-xl 3xl:rounded-2xl bg-white/95 flex items-center justify-center shadow-2xl">
+                  <HealthCrossIcon size={32} className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 3xl:w-14 3xl:h-14 4k:w-20 4k:h-20" />
                 </div>
               </div>
-              <div className="shrink-0 max-w-[160px] sm:max-w-[200px] lg:max-w-[260px] xl:max-w-[320px] 3xl:max-w-[400px] 4k:max-w-[550px]">
-                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4k:text-4xl drop-shadow-lg">
+              <div className="shrink-0 min-w-[120px] sm:min-w-[150px] lg:min-w-[200px] xl:min-w-[260px] 3xl:min-w-[340px] 4k:min-w-[480px]">
+                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-5xl drop-shadow-lg">
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-300 leading-tight font-medium text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
+                <p className="tv-font-body text-amber-300 leading-tight font-semibold text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-2xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
                   {unitName || 'Unidade de Saúde'}
                 </p>
-                <p className="tv-font-body leading-tight font-medium text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[11px] 4k:text-sm whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">
-                  Solução criada por Kalebe Gomes
+                {/* Kalebe Credits - Larger and more prominent */}
+                <p className="tv-font-body leading-tight font-bold text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5">
+                  ✨ Solução criada por Kalebe Gomes
                 </p>
               </div>
             </div>
             
             {/* Animated separator */}
-            <div className="hidden sm:block w-px h-6 lg:h-8 xl:h-10 3xl:h-12 4k:h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent shrink-0 animate-pulse" />
+            <div className="hidden sm:block w-px h-8 lg:h-10 xl:h-12 3xl:h-14 4k:h-20 bg-gradient-to-b from-transparent via-white/50 to-transparent shrink-0" />
             
-            {/* Right: Weather + Clock - takes remaining space, no overflow hidden */}
+            {/* Right: Weather + Clock - takes remaining space */}
             <div className="flex-1 flex items-center justify-end min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
