@@ -2808,13 +2808,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div className="relative z-10 flex-1 grid grid-cols-12 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8 min-h-0 pb-12 xs:pb-14 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 3xl:pb-24 4k:pb-28 px-0.5 xs:px-1 sm:px-1.5 lg:px-2">
         {/* Current Calls - Always side by side on landscape screens */}
         <div className="col-span-9 grid grid-cols-2 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 lg:gap-3 xl:gap-4 2xl:gap-5 3xl:gap-6 4k:gap-8">
-          {/* Triage Call - 3D Modern Card - Optimized for landscape TV */}
-          <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
+          {/* Triage Call - Glassmorphism Card - Optimized for landscape TV */}
+          <div className={`backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl tv-card tv-card-3d flex flex-col transition-all duration-500 rounded-xl sm:rounded-2xl lg:rounded-3xl ${
             announcingType === 'triage' 
-              ? 'border-2 sm:border-3 lg:border-4 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_40px_10px_rgba(234,179,8,0.3)] sm:shadow-[0_0_60px_20px_rgba(234,179,8,0.4)]' 
+              ? 'border-2 sm:border-3 lg:border-4 border-yellow-400/60 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_40px_10px_rgba(234,179,8,0.3)] sm:shadow-[0_0_60px_20px_rgba(234,179,8,0.4)] bg-white/15' 
               : announcingType === 'doctor'
-                ? 'border border-indigo-500/30 opacity-30'
-                : 'border border-indigo-500/30 hover:border-indigo-400/50'
+                ? 'border-white/10 opacity-30'
+                : 'border-white/20 hover:border-white/30 hover:bg-white/15'
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
             <div className={`px-1 py-0.5 xs:px-1.5 xs:py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 3xl:px-6 3xl:py-3 4k:px-8 4k:py-4 shrink-0 relative overflow-hidden ${
@@ -2871,13 +2871,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </div>
           </div>
 
-          {/* Doctor Call - 3D Modern Card - Optimized for landscape TV */}
-          <div className={`glass-3d tv-card tv-card-3d flex flex-col transition-all duration-500 ${
+          {/* Doctor Call - Glassmorphism Card - Optimized for landscape TV */}
+          <div className={`backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl tv-card tv-card-3d flex flex-col transition-all duration-500 rounded-xl sm:rounded-2xl lg:rounded-3xl ${
             announcingType === 'doctor' 
-              ? 'border-2 sm:border-3 lg:border-4 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_40px_10px_rgba(16,185,129,0.3)] sm:shadow-[0_0_60px_20px_rgba(16,185,129,0.4)]' 
+              ? 'border-2 sm:border-3 lg:border-4 border-emerald-400/60 animate-border-glow-intense animate-card-zoom-call relative z-20 shadow-[0_0_40px_10px_rgba(16,185,129,0.3)] sm:shadow-[0_0_60px_20px_rgba(16,185,129,0.4)] bg-white/15' 
               : announcingType === 'triage'
-                ? 'border border-emerald-500/30 opacity-30'
-                : 'border border-emerald-500/30 hover:border-emerald-400/50'
+                ? 'border-white/10 opacity-30'
+                : 'border-white/20 hover:border-white/30 hover:bg-white/15'
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}>
             {/* Header with animated gradient */}
             <div className={`px-1 py-0.5 xs:px-1.5 xs:py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 xl:px-4 xl:py-2.5 2xl:px-5 2xl:py-3 3xl:px-6 3xl:py-3 4k:px-8 4k:py-4 shrink-0 relative overflow-hidden ${

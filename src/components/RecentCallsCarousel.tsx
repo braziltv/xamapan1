@@ -69,7 +69,7 @@ export function RecentCallsCarousel({
   };
 
   return (
-    <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
+    <div className={`col-span-3 flex backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-xl sm:rounded-2xl lg:rounded-3xl tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
       {/* Header with page indicator */}
       <div className="flex items-center mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 shrink-0">
         <h3 className="tv-font-heading font-bold text-white flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
@@ -97,10 +97,10 @@ export function RecentCallsCarousel({
               return (
                 <div
                   key={item.id}
-                  className={`p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 xl:p-3.5 2xl:p-4 3xl:p-5 4k:p-6 rounded xs:rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-500 ${
+                  className={`p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 xl:p-3.5 2xl:p-4 3xl:p-5 4k:p-6 rounded xs:rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-500 backdrop-blur-md ${
                     globalIndex === 0 
-                      ? 'bg-primary/25 border-2 border-primary/50 ring-2 ring-primary/30 shadow-lg shadow-primary/20' 
-                      : 'bg-slate-700/60 border border-slate-600/30'
+                      ? 'bg-white/20 border-2 border-white/40 ring-2 ring-white/20 shadow-lg' 
+                      : 'bg-white/10 border border-white/20'
                   }`}
                   style={{ 
                     opacity,
