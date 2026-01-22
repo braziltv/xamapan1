@@ -2826,16 +2826,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105 sm:scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
-                    getNameFontSize(currentTriageCall.name)
-                  } ${
+                  {/* Patient name box with highlighted background */}
+                  <div className={`inline-block px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-14 4k:px-16 py-2 xs:py-2.5 sm:py-3 md:py-3.5 lg:py-4 xl:py-5 2xl:py-6 3xl:py-7 4k:py-8 rounded-lg sm:rounded-xl lg:rounded-2xl ${
                     announcingType === 'triage' 
-                      ? 'text-yellow-300 animate-name-mega-pulse' 
-                      : 'shimmer-text animate-text-reveal'
-                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentTriageCall.name}>
-                    {formatPatientName(currentTriageCall.name)}
-                  </h2>
-                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
+                      ? 'bg-yellow-500/20 border-2 border-yellow-400/50' 
+                      : 'bg-cyan-600/20 border border-cyan-400/40'
+                  }`}>
+                    <h2 className={`tv-font-display leading-tight break-words transition-all duration-300 ${
+                      getNameFontSize(currentTriageCall.name)
+                    } ${
+                      announcingType === 'triage' 
+                        ? 'text-yellow-300 animate-name-mega-pulse' 
+                        : 'shimmer-text animate-text-reveal'
+                    }`} style={{ 
+                      wordBreak: 'break-word', 
+                      letterSpacing: '0.05em',
+                      fontWeight: 900,
+                      transform: 'scale(1.22)',
+                      transformOrigin: 'center'
+                    }} key={currentTriageCall.name}>
+                      {formatPatientName(currentTriageCall.name)}
+                    </h2>
+                  </div>
+                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-2.5 xl:mt-3 3xl:mt-4 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
                     announcingType === 'triage' ? 'text-yellow-200/80' : 'text-cyan-400/80'
                   }`}>
                     {currentTriageCall.destination || 'Triagem'}
@@ -2889,16 +2902,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105 sm:scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
-                    getNameFontSize(currentDoctorCall.name)
-                  } ${
+                  {/* Patient name box with highlighted background */}
+                  <div className={`inline-block px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12 3xl:px-14 4k:px-16 py-2 xs:py-2.5 sm:py-3 md:py-3.5 lg:py-4 xl:py-5 2xl:py-6 3xl:py-7 4k:py-8 rounded-lg sm:rounded-xl lg:rounded-2xl ${
                     announcingType === 'doctor' 
-                      ? 'text-yellow-300 animate-name-mega-pulse' 
-                      : 'shimmer-text animate-text-reveal'
-                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentDoctorCall.name}>
-                    {formatPatientName(currentDoctorCall.name)}
-                  </h2>
-                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
+                      ? 'bg-yellow-500/20 border-2 border-yellow-400/50' 
+                      : 'bg-emerald-600/20 border border-emerald-400/40'
+                  }`}>
+                    <h2 className={`tv-font-display leading-tight break-words transition-all duration-300 ${
+                      getNameFontSize(currentDoctorCall.name)
+                    } ${
+                      announcingType === 'doctor' 
+                        ? 'text-yellow-300 animate-name-mega-pulse' 
+                        : 'shimmer-text animate-text-reveal'
+                    }`} style={{ 
+                      wordBreak: 'break-word', 
+                      letterSpacing: '0.05em',
+                      fontWeight: 900,
+                      transform: 'scale(1.22)',
+                      transformOrigin: 'center'
+                    }} key={currentDoctorCall.name}>
+                      {formatPatientName(currentDoctorCall.name)}
+                    </h2>
+                  </div>
+                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-2.5 xl:mt-3 3xl:mt-4 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
                     announcingType === 'doctor' ? 'text-yellow-200/80' : 'text-emerald-400/80'
                   }`}>
                     {currentDoctorCall.destination || 'Consultório'}
