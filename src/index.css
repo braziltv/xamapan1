@@ -135,6 +135,12 @@
     -webkit-tap-highlight-color: transparent;
     /* Prevent text size adjustment on orientation change */
     -webkit-text-size-adjust: 100%;
+    /* ClearType font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    font-variant-ligatures: common-ligatures;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -145,14 +151,16 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* TV Mode Modern Typography - Enhanced for sharpness */
+  /* TV Mode Modern Typography - ClearType Enhanced */
   .tv-font-display {
     font-family: 'Outfit', 'Space Grotesk', 'Inter', sans-serif;
     letter-spacing: -0.02em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: geometricPrecision;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
   }
 
   .tv-font-heading {
@@ -160,7 +168,8 @@
     letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    text-rendering: geometricPrecision;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
 
   .tv-font-body {
@@ -169,6 +178,13 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* ClearType global enhancement */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
