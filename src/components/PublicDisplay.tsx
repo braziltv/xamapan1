@@ -181,7 +181,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     "Seu atendimento está quase começando.",
     "Siga sempre as orientações da equipe de saúde.",
     "O atendimento prioriza os casos mais urgentes.",
-    "Estamos aqui para cuidar de você.",
+    "Estamos aqui para cuidar de você. ❤️🏥🧑‍⚕️",
     "Trabalhamos para oferecer um atendimento seguro e humanizado.",
     "O atendimento segue critérios de urgência e risco."
   ];
