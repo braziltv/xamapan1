@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.cache-destination-phrases]
 verify_jwt = false
+
+[functions.generate-marketing-audio]
+verify_jwt = false

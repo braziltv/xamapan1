@@ -211,14 +211,12 @@ export function MarketingPanel() {
     setVoiceDialogOpen(true);
   };
 
-  // Generate and cache audio for announcement
+  // Generate and cache audio for announcement using Chirp 3 HD Kore voice
   const generateAudioCache = async (announcementId: string, textContent: string): Promise<string | null> => {
     try {
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
-      
-      // Generate audio via Google Cloud TTS
+      // Use dedicated marketing audio edge function with Chirp 3 HD Kore voice
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-marketing-audio`,
         {
           method: 'POST',
           headers: {
@@ -227,42 +225,27 @@ export function MarketingPanel() {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ 
-            text: textContent, 
-            voiceName: configuredVoice
+            action: 'generate-single',
+            announcementId,
+            text: textContent
           }),
         }
       );
 
       if (!response.ok) {
-        console.error('Error generating audio cache:', response.status);
+        const errorText = await response.text();
+        console.error('Error generating audio cache:', response.status, errorText);
         return null;
       }
 
-      const audioBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+      const result = await response.json();
       
-      // Upload to storage with permanent prefix
-      const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('tts-cache')
-        .upload(cacheFileName, audioBlob, {
-          contentType: 'audio/mpeg',
-          upsert: true,
-        });
-
-      if (uploadError) {
-        console.error('Error uploading audio cache:', uploadError);
-        return null;
+      if (result.success && result.url) {
+        console.log('📢 Audio cache generated with Chirp 3 HD Kore:', result.url);
+        return result.url;
       }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('tts-cache')
-        .getPublicUrl(cacheFileName);
-
-      console.log('📢 Audio cache generated:', cacheFileName);
-      return urlData.publicUrl;
+      
+      return null;
     } catch (error) {
       console.error('Error generating audio cache:', error);
       return null;
