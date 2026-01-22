@@ -2837,8 +2837,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
-                    announcingType === 'triage' ? 'text-yellow-200/80' : 'text-cyan-400/80'
+                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-3 xl:mt-4 3xl:mt-5 font-semibold text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-lg tracking-wide uppercase ${
+                    announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-300'
                   }`}>
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
@@ -2900,8 +2900,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
-                  <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
-                    announcingType === 'doctor' ? 'text-yellow-200/80' : 'text-emerald-400/80'
+                  <p className={`tv-font-body mt-1 xs:mt-1.5 sm:mt-2 lg:mt-3 xl:mt-4 3xl:mt-5 font-semibold text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl drop-shadow-lg tracking-wide uppercase ${
+                    announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'
                   }`}>
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
