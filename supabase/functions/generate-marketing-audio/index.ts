@@ -110,9 +110,10 @@ async function generateAudioWithChirp3Kore(text: string, credentials: any): Prom
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 1.0,
-          pitch: 0,
-          volumeGainDb: 0
+          speakingRate: 0.92, // Slightly slower for natural, conversational pacing
+          pitch: -1.0, // Lower pitch for warmer, more human tone
+          volumeGainDb: 2.0, // Enhanced volume for clarity in public spaces
+          effectsProfileId: ['large-home-entertainment-class-device'] // Optimized audio profile
         }
       })
     }

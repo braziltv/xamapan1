@@ -211,9 +211,10 @@ serve(async (req) => {
           voice: selectedVoice,
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: speakingRate,
-            pitch: 0,
-            volumeGainDb: 0
+            speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
+            pitch: -0.5, // Slightly lower pitch for warmer, more natural tone
+            volumeGainDb: 1.5, // Slightly louder for clarity
+            effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
           }
         })
       }

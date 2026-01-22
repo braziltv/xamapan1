@@ -152,9 +152,10 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       },
       audioConfig: {
         audioEncoding: 'MP3',
-        speakingRate: 1.0,
-        pitch: 0,
-        volumeGainDb: 0,
+        speakingRate: 0.90, // Slower for clear, natural time announcements
+        pitch: -0.8, // Warmer, more human-like tone
+        volumeGainDb: 1.5, // Enhanced clarity
+        effectsProfileId: ['large-home-entertainment-class-device'], // Optimized for TV/speakers
       },
     }),
   });
