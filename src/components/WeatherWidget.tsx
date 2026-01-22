@@ -421,8 +421,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Forecast Cards - Compact */}
-      <div className="flex gap-1 sm:gap-1.5 lg:gap-2 xl:gap-2.5 3xl:gap-3 shrink-0">
+      {/* Forecast Cards - Animated with larger icons */}
+      <div className="flex gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 3xl:gap-4 shrink-0">
         {weather.forecast?.slice(0, 2).map((day, index) => {
           const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
           const today = currentTime;
@@ -433,35 +433,39 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           return (
             <div 
               key={`forecast-${index}-${day.date}`} 
-              className="relative"
+              className="relative group"
             >
-              <div className={`absolute -inset-1 rounded-xl blur-md transition-all duration-500 ${
+              {/* Animated glow background */}
+              <div className={`absolute -inset-1.5 rounded-xl blur-lg transition-all duration-500 ${
                 index === 0 
-                  ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/20 opacity-60' 
-                  : 'bg-gradient-to-br from-purple-500/25 to-indigo-500/20 opacity-60'
-              }`} />
+                  ? 'bg-gradient-to-br from-amber-500/40 to-orange-500/30 opacity-70 animate-pulse' 
+                  : 'bg-gradient-to-br from-purple-500/35 to-indigo-500/25 opacity-70 animate-pulse'
+              }`} style={{ animationDelay: index === 0 ? '0s' : '0.5s' }} />
               
-              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-1.5 sm:px-2 lg:px-2.5 xl:px-3 3xl:px-4 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] ${
-                index === 0 ? 'border-amber-500/50' : 'border-purple-500/40'
+              <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 4k:px-6 py-2 sm:py-2.5 lg:py-3 xl:py-4 3xl:py-5 border shadow-[0_4px_20px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.15)] transition-transform duration-300 hover:scale-105 ${
+                index === 0 ? 'border-amber-500/60' : 'border-purple-500/50'
               }`}>
-                <span className={`font-bold text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm tracking-wide ${
+                <span className={`font-bold text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base tracking-wider uppercase ${
                   index === 0 
-                    ? 'text-amber-300 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]' 
-                    : 'text-purple-300 drop-shadow-[0_0_5px_rgba(168,85,247,0.4)]'
+                    ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' 
+                    : 'text-purple-300 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]'
                 }`}>
                   {dayName}
                 </span>
                 
-                <div className="my-1 sm:my-1.5 lg:my-2 scale-90 lg:scale-100 xl:scale-110">
-                  <Weather3DIcon description={day.icon || 'cloud'} size="sm" />
+                {/* LARGER animated weather icon */}
+                <div className={`my-1.5 sm:my-2 lg:my-2.5 xl:my-3 scale-110 sm:scale-125 lg:scale-150 xl:scale-[1.75] 3xl:scale-[2] 4k:scale-[2.5] ${
+                  index === 0 ? 'animate-bounce' : 'animate-pulse'
+                }`} style={{ animationDuration: index === 0 ? '2s' : '3s' }}>
+                  <Weather3DIcon description={day.icon || 'cloud'} size="lg" />
                 </div>
                 
-                <div className="flex items-center gap-1 lg:gap-1.5">
-                  <span className="text-cyan-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-md">
+                <div className="flex items-center gap-1.5 lg:gap-2 mt-1">
+                  <span className="text-cyan-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-lg">
                     {day.minTemp}°
                   </span>
-                  <span className="text-white/50 font-bold text-[6px] lg:text-[8px]">/</span>
-                  <span className="text-orange-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-md">
+                  <span className="text-white/60 font-bold text-[7px] lg:text-[9px]">/</span>
+                  <span className="text-orange-300 font-bold tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-lg">
                     {day.maxTemp}°
                   </span>
                 </div>

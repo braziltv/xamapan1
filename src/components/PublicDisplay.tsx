@@ -2595,8 +2595,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <p className="tv-font-body text-amber-300 leading-tight font-semibold text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-2xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
                   {unitName || 'Unidade de Saúde'}
                 </p>
-                {/* Kalebe Credits - Larger and more prominent */}
-                <p className="tv-font-body leading-tight font-bold text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-xl whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5">
+                {/* Kalebe Credits - White color with elegant font */}
+                <p className="leading-tight font-medium text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-2xl whitespace-nowrap text-white/90 drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)] mt-0.5 tracking-wide" style={{ fontFamily: "'Georgia', 'Times New Roman', serif", fontStyle: 'italic' }}>
                   ✨ Solução criada por Kalebe Gomes
                 </p>
               </div>
