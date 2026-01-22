@@ -2892,7 +2892,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-700 text-white' :
                         'bg-gray-600 text-white shadow-gray-600/40'
                         }`}>
-                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 inline animate-bounce" /> <span className="hidden xs:inline">AO VIVO</span></> : item.source}
+                          {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 inline animate-bounce" /> <span className="hidden xs:inline">Informativo</span></> : item.source}
                         </span>
                         <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] sm:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
                           item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
@@ -2987,7 +2987,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         item.source === 'Opera Mundi' ? 'bg-gradient-to-r from-amber-700 to-orange-700 text-white' :
                         'bg-gray-600 text-white shadow-gray-600/40'
                       }`}>
-                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 inline animate-bounce" /> <span className="hidden xs:inline">AO VIVO</span></> : item.source}
+                        {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? <><Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 inline animate-bounce" /> <span className="hidden xs:inline">Informativo</span></> : item.source}
                       </span>
                       <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] sm:drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
                         item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
