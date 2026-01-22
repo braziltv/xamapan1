@@ -10,6 +10,7 @@ import { usePreventSleep } from '@/hooks/usePreventSleep';
 import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { ParticleBackground } from './ParticleBackground';
+import { RecentCallsCarousel } from './RecentCallsCarousel';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -2919,55 +2920,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* Right Column: History Panel - 3D Glass effect - Optimized for landscape TV */}
-        <div className={`col-span-3 flex glass-3d tv-card animate-history-glow tv-card-3d p-0.5 xs:p-1 sm:p-1.5 md:p-2 lg:p-2.5 xl:p-3 2xl:p-3.5 3xl:p-4 4k:p-6 flex-col min-h-0 border border-purple-500/20 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}>
-          <h3 className="tv-font-heading font-bold text-white mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2 shrink-0 text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md">
-            <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-8 4k:h-8 text-cyan-400 shrink-0 animate-pulse" />
-            <span className="shimmer-text">Últimas Chamadas</span>
-          </h3>
-          <div className="space-y-0.5 xs:space-y-0.5 sm:space-y-1 md:space-y-1 lg:space-y-1.5 xl:space-y-2 2xl:space-y-2.5 3xl:space-y-3 flex-1 overflow-y-auto scrollbar-thin">
-            {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-1 sm:py-2 lg:py-3 xl:py-4 text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
-                Nenhuma chamada ainda
-              </p>
-            ) : (
-              historyItems.slice(0, 8).map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`p-0.5 xs:p-1 sm:p-1.5 md:p-1.5 lg:p-2 xl:p-2.5 2xl:p-3 3xl:p-3.5 4k:p-4 rounded xs:rounded sm:rounded-md lg:rounded-lg ${
-                    index === 0 
-                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20 animate-call-entrance' 
-                      : 'bg-slate-700/50'
-                  } transition-all`}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2">
-                    <div className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12 rounded-full flex items-center justify-center shrink-0 ${
-                      item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
-                    }`}>
-                      {item.type === 'triage' ? (
-                        <Activity className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
-                      ) : (
-                        <Stethoscope className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-semibold text-white truncate text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
-                        {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
-                      </p>
-                      <p className="tv-font-body text-slate-400 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
-                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
-                      </p>
-                    </div>
-                    <span className="text-slate-400 font-mono shrink-0 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
-                      {formatBrazilTime(item.time, 'HH:mm')}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        {/* Right Column: Recent Calls Carousel */}
+        <RecentCallsCarousel
+          historyItems={historyItems}
+          currentTime={currentTime}
+          maskNameAfterOneMinute={maskNameAfterOneMinute}
+          isAnnouncing={!!announcingType}
+        />
       </div>
 
       {/* CNN-Style News Ticker */}

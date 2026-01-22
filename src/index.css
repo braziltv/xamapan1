@@ -1749,3 +1749,17 @@
 .animate-spotlight-cone {
   animation: spotlightCone 3s ease-in-out infinite;
 }
+
+/* Carousel progress bar animation */
+@keyframes carouselProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-carousel-progress {
+  animation: carouselProgress 12s linear infinite;
+}
