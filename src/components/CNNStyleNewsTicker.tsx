@@ -112,8 +112,8 @@ export function CNNStyleNewsTicker({
                   <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
                     {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
                       <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
+                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce text-white" />
+                        <span className="hidden xs:inline text-white">INFORMATIVO</span>
                       </>
                     ) : item.source}
                   </span>
@@ -133,8 +133,8 @@ export function CNNStyleNewsTicker({
                   <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
                     {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
                       <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
+                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce text-white" />
+                        <span className="hidden xs:inline text-white">INFORMATIVO</span>
                       </>
                     ) : item.source}
                   </span>
