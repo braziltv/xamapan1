@@ -151,19 +151,6 @@ export function RecentCallsCarousel({
           </div>
         )}
       </div>
-
-      {/* Progress bar for next slide */}
-      {totalPages > 1 && (
-        <div className="mt-1 xs:mt-1.5 sm:mt-2 h-0.5 xs:h-1 bg-slate-700/50 rounded-full overflow-hidden shrink-0">
-          <div 
-            className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full animate-carousel-progress"
-            style={{ 
-              animationDuration: `${SLIDE_INTERVAL}ms`,
-              animationIterationCount: 'infinite'
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }
