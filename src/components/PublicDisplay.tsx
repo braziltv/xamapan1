@@ -100,9 +100,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
 
-  // User request: remove on-screen animations/overlays.
-  // Keep the business logic (announcements) intact, but disable the cinematic visual effects.
-  const ENABLE_CALL_ANIMATIONS = false;
+  // Background color animation enabled, but dramatic overlays/flash effects disabled
+  const ENABLE_BACKGROUND_ANIMATION = true;
+  const ENABLE_CALL_OVERLAYS = false;
 
   type PatientCallType = 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria' | 'custom';
   type AnnouncementQueueItem = {
@@ -2547,21 +2547,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ? currentDoctorCall?.destination 
       : null;
 
-  // Static dark background when animations disabled
-  const staticBackground = !ENABLE_CALL_ANIMATIONS 
-    ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-black' 
-    : '';
-
   return (
     <div 
       ref={containerRef}
-      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${staticBackground} ${
-        ENABLE_CALL_ANIMATIONS ? (announcingType ? 'animate-calling-background' : 'animate-waiting-background') : ''
+      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
+        ENABLE_BACKGROUND_ANIMATION ? (announcingType ? 'animate-calling-background' : 'animate-waiting-background') : 'bg-gradient-to-br from-slate-900 via-slate-950 to-black'
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
       {/* ========== FLASH EFFECT ON CALL START ========== */}
-      {ENABLE_CALL_ANIMATIONS && showFlash && (
+      {ENABLE_CALL_OVERLAYS && showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
           {/* Main flash overlay */}
           <div className={`absolute inset-0 ${
@@ -2587,7 +2582,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* ========== DRAMATIC FULL-SCREEN CALLING OVERLAY ========== */}
-      {ENABLE_CALL_ANIMATIONS && announcingType && currentCallName && (
+      {ENABLE_CALL_OVERLAYS && announcingType && currentCallName && (
         <div className="fixed inset-0 z-[100] pointer-events-none animate-calling-overlay-enter">
           {/* Dark backdrop with blur */}
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
