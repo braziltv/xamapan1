@@ -2547,10 +2547,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       ? currentDoctorCall?.destination 
       : null;
 
+  // Static dark background when animations disabled
+  const staticBackground = !ENABLE_CALL_ANIMATIONS 
+    ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-black' 
+    : '';
+
   return (
     <div 
       ref={containerRef}
-      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
+      className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${staticBackground} ${
         ENABLE_CALL_ANIMATIONS ? (announcingType ? 'animate-calling-background' : 'animate-waiting-background') : ''
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
