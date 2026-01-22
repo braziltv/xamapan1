@@ -118,7 +118,7 @@ export function CNNStyleNewsTicker({
                     ) : item.source}
                   </span>
                   <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
-                    item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                    item.source === '📢 Informativo' ? 'text-white font-bold' : 
                     item.source === 'Créditos' ? 'text-amber-300' : 
                     'text-white'
                   }`}>
@@ -139,7 +139,7 @@ export function CNNStyleNewsTicker({
                     ) : item.source}
                   </span>
                   <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
-                    item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
+                    item.source === '📢 Informativo' ? 'text-white font-bold' : 
                     item.source === 'Créditos' ? 'text-amber-300' : 
                     'text-white'
                   }`}>
