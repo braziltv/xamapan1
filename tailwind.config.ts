@@ -13,12 +13,13 @@ export default {
       },
     },
     screens: {
-      'xs': '400px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+      'xxs': '320px',    // Small phones/compact landscape
+      'xs': '400px',     // Phones landscape
+      'sm': '640px',     // Small tablets landscape
+      'md': '768px',     // Tablets landscape
+      'lg': '1024px',    // Small monitors/large tablets
+      'xl': '1280px',    // Standard monitors
+      '2xl': '1536px',   // Large monitors
       '3xl': '1920px',   // Full HD TVs
       '4k': '2560px',    // 4K TVs
       '5k': '3840px',    // 5K/Ultra-wide
