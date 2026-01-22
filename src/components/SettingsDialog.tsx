@@ -66,9 +66,8 @@ const GOOGLE_VOICES = {
   ]
 };
 
-// Frases padrão para pré-cachear
-const STANDARD_PHRASES = [
-  // Frases de hora
+// Frases padrão para pré-cachear (hora e repetição)
+const STANDARD_HOUR_PHRASES = [
   'Hora certa, são zero horas.',
   'Hora certa, é uma hora.',
   'Hora certa, são duas horas.',
@@ -93,20 +92,23 @@ const STANDARD_PHRASES = [
   'Hora certa, são vinte e uma horas.',
   'Hora certa, são vinte e duas horas.',
   'Hora certa, são vinte e três horas.',
-  // Frases de destino comuns
-  'Por favor, dirija-se à Triagem.',
-  'Por favor, dirija-se ao Consultório 1.',
-  'Por favor, dirija-se ao Consultório 2.',
-  'Por favor, dirija-se ao Consultório 3.',
-  'Por favor, dirija-se à Sala de Curativos.',
-  'Por favor, dirija-se à Sala de Medicação.',
-  'Por favor, dirija-se à Enfermaria.',
-  'Por favor, dirija-se ao Raio-X.',
-  'Por favor, dirija-se ao ECG.',
-  'Por favor, dirija-se à Recepção.',
-  // Repetição
   'Repita.',
 ];
+
+// Função para gerar frase de destino com artigo correto
+const generateDestinationPhrase = (displayName: string): string => {
+  const name = displayName.trim();
+  const lowerName = name.toLowerCase();
+  
+  // Palavras femininas comuns
+  const feminineKeywords = ['sala', 'recepção', 'triagem', 'enfermaria', 'farmácia', 'secretaria', 'clínica'];
+  const isFeminine = feminineKeywords.some(kw => lowerName.includes(kw));
+  
+  // Determinar artigo
+  const article = isFeminine ? 'à' : 'ao';
+  
+  return `Por favor, dirija-se ${article} ${name}.`;
+};
 
 const DEFAULT_VOLUMES: VolumeSettings = {
   notification: 1,
@@ -320,17 +322,49 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
     }
   }, [testName, testDestination, patientVoice, playAudioBuffer]);
 
-  // Cache standard phrases
+  // Cache standard phrases and unit destinations
   const cacheStandardPhrases = useCallback(async () => {
     setIsCachingPhrases(true);
     
     try {
-      toast.info('Gerando cache de frases padrão... Isso pode demorar alguns minutos.');
+      // Get current unit from localStorage
+      const unitName = localStorage.getItem('selectedUnit') || '';
+      
+      // Fetch destinations for the current unit
+      let destinationPhrases: string[] = [];
+      
+      if (unitName) {
+        // First get unit ID
+        const { data: unitData } = await supabase
+          .from('units')
+          .select('id')
+          .eq('name', unitName)
+          .single();
+        
+        if (unitData?.id) {
+          // Fetch destinations for this unit
+          const { data: destinations } = await supabase
+            .from('destinations')
+            .select('display_name')
+            .eq('unit_id', unitData.id)
+            .eq('is_active', true);
+          
+          if (destinations && destinations.length > 0) {
+            destinationPhrases = destinations.map(d => generateDestinationPhrase(d.display_name));
+            console.log(`[Cache] Found ${destinations.length} destinations for unit ${unitName}`);
+          }
+        }
+      }
+      
+      // Combine standard phrases with dynamic destination phrases
+      const allPhrases = [...STANDARD_HOUR_PHRASES, ...destinationPhrases];
+      
+      toast.info(`Gerando cache de ${allPhrases.length} frases... Isso pode demorar alguns minutos.`);
       
       let cached = 0;
       let errors = 0;
       
-      for (const phrase of STANDARD_PHRASES) {
+      for (const phrase of allPhrases) {
         try {
           // Generate TTS audio
           const response = await fetch(
@@ -389,10 +423,13 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
         }
       }
       
+      const destCount = destinationPhrases.length;
+      const hourCount = STANDARD_HOUR_PHRASES.length;
+      
       if (errors > 0) {
-        toast.warning(`Cache concluído: ${cached} frases salvas, ${errors} erros`);
+        toast.warning(`Cache concluído: ${cached} frases salvas (${hourCount} hora + ${destCount} destinos), ${errors} erros`);
       } else {
-        toast.success(`Cache concluído: ${cached} frases salvas com sucesso!`);
+        toast.success(`Cache concluído: ${cached} frases salvas (${hourCount} hora + ${destCount} destinos)!`);
       }
       
       // Save the voice settings after successful caching
