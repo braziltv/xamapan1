@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone, Mic } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -15,7 +15,6 @@ import { SystemTestPanel } from './SystemTestPanel';
 import { TelegramManager } from './TelegramManager';
 import { DataStoragePanel } from './DataStoragePanel';
 import { MarketingPanel } from './MarketingPanel';
-import { VoiceConfigPanel } from './VoiceConfigPanel';
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
@@ -56,7 +55,7 @@ export function SystemConfigPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-12 mb-6">
+        <TabsList className="grid w-full grid-cols-11 mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -85,10 +84,6 @@ export function SystemConfigPanel() {
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Operadores</span>
           </TabsTrigger>
-          <TabsTrigger value="voices" className="flex items-center gap-2">
-            <Mic className="w-4 h-4" />
-            <span className="hidden sm:inline">Vozes</span>
-          </TabsTrigger>
           <TabsTrigger value="tts" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             <span className="hidden sm:inline">TTS</span>
@@ -108,7 +103,7 @@ export function SystemConfigPanel() {
         </TabsList>
 
         {/* Seletor de unidade (para abas que precisam) */}
-        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && activeTab !== 'sessions' && activeTab !== 'storage' && activeTab !== 'voices' && (
+        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && activeTab !== 'sessions' && activeTab !== 'storage' && (
           <Card className="mb-4">
             <CardContent className="py-4">
               <div className="flex items-center gap-4">
@@ -189,10 +184,6 @@ export function SystemConfigPanel() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        <TabsContent value="voices">
-          <VoiceConfigPanel unitName={units.find(u => u.id === selectedUnitId)?.name || localStorage.getItem('selectedUnit') || ''} />
         </TabsContent>
 
         <TabsContent value="tts">
