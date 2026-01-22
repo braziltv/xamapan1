@@ -2845,10 +2845,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 mx-auto mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
-                    <Activity className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-blue-400/50" />
+                  <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 2xl:w-32 2xl:h-32 3xl:w-40 3xl:h-40 4k:w-48 4k:h-48 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 xl:mb-4 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
+                    <Activity className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24 text-blue-400/60" />
                   </div>
-                  <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
+                  <p className="text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-[pulse_3s_ease-in-out_infinite] drop-shadow-md">
                     Aguarde um momento, já chamaremos você. Obrigado pela paciência.
                   </p>
                 </div>
@@ -2908,10 +2908,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 mx-auto mb-0.5 xs:mb-1 sm:mb-1.5 lg:mb-2 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
-                    <Stethoscope className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 text-emerald-400/50" />
+                  <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 2xl:w-32 2xl:h-32 3xl:w-40 3xl:h-40 4k:w-48 4k:h-48 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 xl:mb-4 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
+                    <Stethoscope className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24 text-emerald-400/60" />
                   </div>
-                  <p className="text-slate-400 text-center text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl animate-[pulse_3s_ease-in-out_infinite]">
+                  <p className="text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-[pulse_3s_ease-in-out_infinite] drop-shadow-md">
                     Aguarde um momento, já chamaremos você. Obrigado pela paciência.
                   </p>
                 </div>
