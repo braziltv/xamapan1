@@ -129,6 +129,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     isProcessingQueueRef.current = false;
     pollInitializedRef.current = false;
   }, [unitName]);
+
+  // Limpar histórico de chamadas à meia-noite
+  useEffect(() => {
+    if (!currentTime) return;
+    
+    const hours = currentTime.getHours();
+    const minutes = currentTime.getMinutes();
+    
+    // Limpar às 00:00 (meia-noite)
+    if (hours === 0 && minutes === 0) {
+      setHistoryItems([]);
+      processedCallsRef.current.clear();
+      console.log('[PublicDisplay] Histórico limpo à meia-noite');
+    }
+  }, [currentTime?.getHours(), currentTime?.getMinutes()]);
   const [marketingUnitName, setMarketingUnitName] = useState<string>('');
   const marketingTimeKey = currentTime
     ? `${currentTime.getFullYear()}-${currentTime.getMonth()}-${currentTime.getDate()}-${currentTime.getHours()}-${currentTime.getMinutes()}`
