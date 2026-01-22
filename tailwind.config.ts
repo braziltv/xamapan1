@@ -242,7 +242,6 @@ export default {
             transform: "translateY(2px) translateX(-2px) rotate(-5deg)"
           },
         },
-        },
         // Ticker polymorphic animations
         "ticker-glow": {
           "0%, 100%": { 
