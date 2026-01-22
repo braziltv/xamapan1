@@ -17,7 +17,7 @@ interface RecentCallsCarouselProps {
 }
 
 const ITEMS_PER_PAGE = 4;
-const SLIDE_INTERVAL = 12000; // 12 seconds
+const SLIDE_INTERVAL = 20000; // 20 seconds
 
 export function RecentCallsCarousel({ 
   historyItems, 
@@ -59,13 +59,13 @@ export function RecentCallsCarousel({
   const startIndex = currentPage * ITEMS_PER_PAGE;
   const visibleItems = historyItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Calculate opacity based on item position (fade-out effect for older items)
+  // Calculate opacity based on item position (more visible fade-out effect)
   const getItemOpacity = (globalIndex: number): number => {
     if (globalIndex === 0) return 1;
-    if (globalIndex === 1) return 0.9;
-    if (globalIndex === 2) return 0.75;
-    if (globalIndex === 3) return 0.6;
-    return 0.5;
+    if (globalIndex === 1) return 0.95;
+    if (globalIndex === 2) return 0.88;
+    if (globalIndex === 3) return 0.8;
+    return 0.75;
   };
 
   return (
@@ -113,36 +113,35 @@ export function RecentCallsCarousel({
               return (
                 <div
                   key={item.id}
-                  className={`p-0.5 xs:p-1 sm:p-1.5 md:p-1.5 lg:p-2 xl:p-2.5 2xl:p-3 3xl:p-3.5 4k:p-4 rounded xs:rounded sm:rounded-md lg:rounded-lg transition-all duration-500 ${
+                  className={`p-1 xs:p-1.5 sm:p-2 md:p-2.5 lg:p-3 xl:p-3.5 2xl:p-4 3xl:p-5 4k:p-6 rounded xs:rounded-md sm:rounded-lg lg:rounded-xl transition-all duration-500 ${
                     globalIndex === 0 
-                      ? 'bg-primary/20 border border-primary/40 ring-1 ring-primary/20' 
-                      : 'bg-slate-700/50'
+                      ? 'bg-primary/25 border-2 border-primary/50 ring-2 ring-primary/30 shadow-lg shadow-primary/20' 
+                      : 'bg-slate-700/60 border border-slate-600/30'
                   }`}
                   style={{ 
                     opacity,
                     animationDelay: `${localIndex * 50}ms`,
-                    transform: `scale(${1 - (globalIndex * 0.01)})`
                   }}
                 >
-                  <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 lg:gap-2">
-                    <div className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 lg:gap-3">
+                    <div className={`w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 3xl:w-12 3xl:h-12 4k:w-14 4k:h-14 rounded-full flex items-center justify-center shrink-0 shadow-md ${
                       item.type === 'triage' ? 'bg-blue-500' : 'bg-emerald-500'
                     }`}>
                       {item.type === 'triage' ? (
-                        <Activity className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
+                        <Activity className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 text-white" />
                       ) : (
-                        <Stethoscope className="w-1.5 h-1.5 xs:w-2 xs:h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 2xl:w-5 2xl:h-5 3xl:w-6 3xl:h-6 4k:w-8 4k:h-8 text-white" />
+                        <Stethoscope className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-4.5 lg:h-4.5 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 3xl:w-7 3xl:h-7 4k:w-9 4k:h-9 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-semibold text-white truncate text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] lg:text-[10px] xl:text-xs 2xl:text-sm 3xl:text-base 4k:text-lg">
+                      <p className="tv-font-body font-bold text-white truncate text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-sm">
                         {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                       </p>
-                      <p className="tv-font-body text-slate-400 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
+                      <p className="tv-font-body text-slate-300 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
-                    <span className="text-slate-400 font-mono shrink-0 text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm 4k:text-base">
+                    <span className="text-slate-300 font-mono font-semibold shrink-0 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg 4k:text-xl">
                       {formatBrazilTime(item.time, 'HH:mm')}
                     </span>
                   </div>

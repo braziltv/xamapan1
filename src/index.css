@@ -1761,5 +1761,5 @@
 }
 
 .animate-carousel-progress {
-  animation: carouselProgress 12s linear infinite;
+  animation: carouselProgress 20s linear infinite;
 }
