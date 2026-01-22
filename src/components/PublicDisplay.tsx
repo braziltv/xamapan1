@@ -174,27 +174,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Get dynamic font size based on name length to prevent truncation
   // Optimized for landscape TV displays from small (32") to large (85"+)
+  // Increased by ~25% for better visibility
   const getNameFontSize = (name: string): string => {
     const length = name?.length || 0;
     
-    // Very short names (1-15 chars) - largest size
+    // Very short names (1-15 chars) - largest size (+25%)
     if (length <= 15) {
+      return 'text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl 3xl:text-9xl 4k:text-[10rem]';
+    }
+    // Short names (16-25 chars) - large size (+25%)
+    if (length <= 25) {
       return 'text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 3xl:text-8xl 4k:text-9xl';
     }
-    // Short names (16-25 chars) - large size
-    if (length <= 25) {
+    // Medium names (26-35 chars) - medium size (+25%)
+    if (length <= 35) {
       return 'text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl 4k:text-8xl';
     }
-    // Medium names (26-35 chars) - medium size
-    if (length <= 35) {
+    // Long names (36-45 chars) - smaller size (+25%)
+    if (length <= 45) {
       return 'text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl 4k:text-7xl';
     }
-    // Long names (36-45 chars) - smaller size
-    if (length <= 45) {
-      return 'text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl';
-    }
-    // Very long names (46+ chars) - smallest readable size
-    return 'text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl 4k:text-5xl';
+    // Very long names (46+ chars) - smallest readable size (+25%)
+    return 'text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl 4k:text-6xl';
   };
 
   // Resolve unit_name used by marketing tables (they store the unit "name")
@@ -2826,13 +2827,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105 sm:scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display font-[900] leading-tight break-words transition-all duration-300 ${
                     getNameFontSize(currentTriageCall.name)
                   } ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
-                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentTriageCall.name}>
+                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
                   <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
@@ -2889,13 +2890,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105 sm:scale-110' : ''}`}>
-                  <h2 className={`tv-font-display font-black leading-tight break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display font-[900] leading-tight break-words transition-all duration-300 ${
                     getNameFontSize(currentDoctorCall.name)
                   } ${
                     announcingType === 'doctor' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
-                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em' }} key={currentDoctorCall.name}>
+                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
                   <p className={`tv-font-body mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 xl:mt-2.5 3xl:mt-3 font-light text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl drop-shadow-md tracking-wide ${
