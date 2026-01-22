@@ -247,52 +247,52 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Modern digital clock design - compact version
+  // Modern digital clock design - larger and more visible
   const renderDateTimeCompact = () => {
     const hours = safeFormatTime(currentTime, 'HH');
     const minutes = safeFormatTime(currentTime, 'mm');
     const seconds = safeFormatTime(currentTime, 'ss');
     
     return (
-      <div className="flex flex-col items-center gap-0.5 shrink-0">
-        {/* Date pills - compact */}
-        <div className="flex items-center gap-1">
-          <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-amber-400/40 backdrop-blur-sm">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs drop-shadow-[0_0_5px_rgba(251,191,36,0.4)]">
+      <div className="flex flex-col items-center gap-1 shrink-0">
+        {/* Date pills */}
+        <div className="flex items-center gap-1.5">
+          <div className="bg-gradient-to-r from-amber-500/25 via-amber-400/35 to-amber-500/25 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-amber-400/50 backdrop-blur-sm shadow-[0_0_10px_rgba(251,191,36,0.2)]">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
-          <div className="bg-white/10 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-cyan-400/30 backdrop-blur-sm">
-            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[6px] sm:text-[7px] lg:text-[8px] xl:text-[9px] 3xl:text-[10px] 4k:text-xs drop-shadow-[0_0_3px_rgba(6,182,212,0.3)]">
+          <div className="bg-white/15 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-cyan-400/40 backdrop-blur-sm shadow-[0_0_8px_rgba(6,182,212,0.15)]">
+            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]">
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
         </div>
         
-        {/* Digital Clock Display - compact */}
+        {/* Digital Clock Display - larger */}
         <div className="relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/15 via-blue-500/15 to-cyan-500/15 rounded-lg blur-sm opacity-60" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/25 via-blue-500/25 to-cyan-500/25 rounded-xl blur-md opacity-80" />
           
-          <div className="relative flex items-center gap-0.5 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-md sm:rounded-lg px-1.5 sm:px-2 lg:px-2.5 py-0.5 border border-cyan-500/35 shadow-[0_0_8px_rgba(6,182,212,0.15),inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <div className="relative flex items-center gap-1 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-lg sm:rounded-xl px-2.5 sm:px-3 lg:px-4 xl:px-5 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.25),inset_0_2px_0_rgba(255,255,255,0.1)]">
             
             {/* Hours */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {hours}
             </span>
             
             {/* Colon separator */}
-            <div className="flex flex-col items-center justify-center gap-0.5 mx-0.5">
-              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1 lg:h-1 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_4px_rgba(6,182,212,0.7)]" />
-              <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 lg:w-1 lg:h-1 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_4px_rgba(6,182,212,0.7)]" style={{ animationDelay: '0.5s' }} />
+            <div className="flex flex-col items-center justify-center gap-1 mx-1">
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" />
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.9)]" style={{ animationDelay: '0.5s' }} />
             </div>
             
             {/* Minutes */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-200 via-cyan-300 to-cyan-400 tracking-tight text-base sm:text-lg lg:text-xl xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {minutes}
             </span>
             
             {/* Seconds */}
-            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-orange-400 text-[8px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg animate-pulse drop-shadow-[0_0_6px_rgba(251,191,36,0.5)] ml-0.5" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
+            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-orange-400 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)] ml-1" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
               {seconds}
             </span>
           </div>
