@@ -10,9 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { VoicePitchSettings } from './VoicePitchSettings';
 
 interface MarketingPanelProps {
   unitName: string;
@@ -463,7 +464,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="voice" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="voice" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             Anúncios de Voz
@@ -471,6 +472,10 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
           <TabsTrigger value="text" className="flex items-center gap-2">
             <Type className="w-4 h-4" />
             Frases no Rodapé
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Config. Voz
           </TabsTrigger>
         </TabsList>
 
@@ -672,6 +677,10 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-4">
+          <VoicePitchSettings unitName={unitName} />
         </TabsContent>
       </Tabs>
 
