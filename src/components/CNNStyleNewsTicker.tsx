@@ -1,5 +1,4 @@
 import { Megaphone } from 'lucide-react';
-import { AnalogClock } from './AnalogClock';
 
 interface NewsItem {
   title: string;
@@ -97,19 +96,6 @@ export function CNNStyleNewsTicker({
       <div className="flex flex-col">
         {/* Bottom ticker row - scrolling news */}
         <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-18 2xl:h-20 3xl:h-24 4k:h-28">
-          {/* Analog Clock - CNN style red box */}
-          <div className="bg-gradient-to-b from-red-600 to-red-700 flex items-center justify-center px-1 xs:px-1.5 sm:px-2 md:px-3 lg:px-4 xl:px-5 3xl:px-6 4k:px-8 shrink-0 relative">
-            {/* Inner shadow effect */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            <div className="relative z-10">
-              <AnalogClock 
-                time={currentTime} 
-                size={28}
-                className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24"
-              />
-            </div>
-          </div>
-
           {/* Scrolling News Section - Dark background like CNN */}
           <div className="flex-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 overflow-hidden flex items-center relative">
             {/* Top red accent line */}
