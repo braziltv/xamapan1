@@ -144,7 +144,7 @@ serve(async (req) => {
       );
     }
     
-    const { text, voice = 'female', voiceName, speakingRate = 1.0, concatenate } = body;
+    const { text, voice = 'female', voiceName, speakingRate = 1.0, pitch, concatenate } = body;
 
     // Modo concatenado: nome + destino em uma única frase natural
     let finalText = text;
@@ -212,7 +212,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
-            pitch: -0.8, // Lower pitch for warmer, more natural tone
+            pitch: pitch !== undefined ? pitch : -0.8, // Use provided pitch or default -0.8 for warmer tone
             volumeGainDb: 1.5, // Slightly louder for clarity
             effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
           }
