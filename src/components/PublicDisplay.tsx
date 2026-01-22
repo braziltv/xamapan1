@@ -100,6 +100,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
 
+  // User request: remove on-screen animations/overlays.
+  // Keep the business logic (announcements) intact, but disable the cinematic visual effects.
+  const ENABLE_CALL_ANIMATIONS = false;
+
   type PatientCallType = 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria' | 'custom';
   type AnnouncementQueueItem = {
     id: string;
@@ -2209,11 +2213,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Store callbacks in refs to avoid recreating the subscription
   const speakNameRef = useRef(speakName);
   const speakCustomTextRef = useRef(speakCustomText);
+  const enqueueAnnouncementRef = useRef(enqueueAnnouncement);
   
   useEffect(() => {
     speakNameRef.current = speakName;
     speakCustomTextRef.current = speakCustomText;
-  }, [speakName, speakCustomText]);
+    enqueueAnnouncementRef.current = enqueueAnnouncement;
+  }, [speakName, speakCustomText, enqueueAnnouncement]);
 
   // Subscribe to realtime updates - stable subscription without callback dependencies
   useEffect(() => {
@@ -2279,7 +2285,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
           // Handle custom announcements (just speak the text, no destination display)
             if (validCallTypes.includes(call.call_type as ValidCallType)) {
-              enqueueAnnouncement({
+              enqueueAnnouncementRef.current({
                 id: call.id,
                 call_type: call.call_type,
                 patient_name: call.patient_name,
@@ -2331,8 +2337,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             const validCallTypes = ['triage', 'doctor', 'ecg', 'curativos', 'raiox', 'enfermaria', 'custom'] as const;
             type ValidCallType = typeof validCallTypes[number];
 
-             if (validCallTypes.includes(call.call_type as ValidCallType)) {
-               enqueueAnnouncement({
+              if (validCallTypes.includes(call.call_type as ValidCallType)) {
+                enqueueAnnouncementRef.current({
                  id: call.id,
                  call_type: call.call_type,
                  patient_name: call.patient_name,
@@ -2343,7 +2349,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
           if (call.status === 'completed') {
             // Evita “sumir” a tela durante uma chamada em andamento.
-            if (announcingType || isSpeakingRef.current) return;
+            if (isSpeakingRef.current) return;
 
             if (call.call_type === 'triage') {
               setCurrentTriageCall(null);
@@ -2416,7 +2422,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.log('🔌 Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
-   }, [unitName, enqueueAnnouncement, announcingType]);
+   }, [unitName]);
 
   // Fallback polling: algumas TVs não mantêm realtime/websocket ativo; então buscamos chamadas ativas periodicamente
   useEffect(() => {
@@ -2540,12 +2546,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     <div 
       ref={containerRef}
       className={`h-dvh w-full tv-safe-area relative overflow-hidden flex flex-col tv-font-body landscape:flex-col ${!cursorVisible ? 'cursor-none' : ''} ${
-        announcingType ? 'animate-calling-background' : 'animate-waiting-background'
+        ENABLE_CALL_ANIMATIONS ? (announcingType ? 'animate-calling-background' : 'animate-waiting-background') : ''
       }`}
       style={{ cursor: cursorVisible ? 'auto' : 'none' }}
     >
       {/* ========== FLASH EFFECT ON CALL START ========== */}
-      {showFlash && (
+      {ENABLE_CALL_ANIMATIONS && showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
           {/* Main flash overlay */}
           <div className={`absolute inset-0 ${
@@ -2571,7 +2577,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       )}
 
       {/* ========== DRAMATIC FULL-SCREEN CALLING OVERLAY ========== */}
-      {announcingType && currentCallName && (
+      {ENABLE_CALL_ANIMATIONS && announcingType && currentCallName && (
         <div className="fixed inset-0 z-[100] pointer-events-none animate-calling-overlay-enter">
           {/* Dark backdrop with blur */}
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
