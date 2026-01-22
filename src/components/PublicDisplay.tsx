@@ -171,6 +171,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
   
+  // Waiting phrases rotation
+  const WAITING_PHRASES = [
+    "Aguarde um momento, já chamaremos você. Obrigado pela paciência.",
+    "Estamos organizando o atendimento. Em instantes, você será chamado.",
+    "Aguarde um momento, já chamaremos você.",
+    "Você está na fila de atendimento. Obrigado pela paciência.",
+    "Fique atento(a), sua chamada será exibida em instantes.",
+    "Seu atendimento está quase começando."
+  ];
+  const [currentWaitingPhraseIndex, setCurrentWaitingPhraseIndex] = useState(0);
+  const [waitingPhraseVisible, setWaitingPhraseVisible] = useState(true);
+  
   // Cache de frases de destino pré-geradas (hash -> URL pública)
   const destinationPhraseCacheRef = useRef<Map<string, string>>(new Map());
   const destinationCacheLoadedRef = useRef(false);
@@ -357,6 +369,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
     loadDestinationCache();
   }, [unitId]);
+
+  // Waiting phrases rotation every 15 seconds with fade effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Fade out
+      setWaitingPhraseVisible(false);
+      
+      // After fade out completes, change phrase and fade in
+      setTimeout(() => {
+        setCurrentWaitingPhraseIndex(prev => (prev + 1) % WAITING_PHRASES.length);
+        setWaitingPhraseVisible(true);
+      }, 500); // 500ms for fade out animation
+    }, 15000); // 15 seconds
+
+    return () => clearInterval(interval);
+  }, [WAITING_PHRASES.length]);
 
   // Fetch news from database cache
   useEffect(() => {
@@ -2863,8 +2891,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 2xl:w-32 2xl:h-32 3xl:w-40 3xl:h-40 4k:w-48 4k:h-48 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 xl:mb-4 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse">
                     <Activity className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24 text-blue-400/60" />
                   </div>
-                  <p className="text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-[pulse_3s_ease-in-out_infinite] drop-shadow-md">
-                    Aguarde um momento, já chamaremos você. Obrigado pela paciência.
+                  <p className={`text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-md transition-opacity duration-500 ${
+                    waitingPhraseVisible ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
                 </div>
               )}
@@ -2926,8 +2956,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 2xl:w-32 2xl:h-32 3xl:w-40 3xl:h-40 4k:w-48 4k:h-48 mx-auto mb-1 xs:mb-1.5 sm:mb-2 lg:mb-3 xl:mb-4 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse">
                     <Stethoscope className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 3xl:w-20 3xl:h-20 4k:w-24 4k:h-24 text-emerald-400/60" />
                   </div>
-                  <p className="text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl animate-[pulse_3s_ease-in-out_infinite] drop-shadow-md">
-                    Aguarde um momento, já chamaremos você. Obrigado pela paciência.
+                  <p className={`text-slate-300 text-center font-medium text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl 4k:text-4xl drop-shadow-md transition-opacity duration-500 ${
+                    waitingPhraseVisible ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
                 </div>
               )}
