@@ -27,7 +27,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("cadastro");
   const [isTvMode, setIsTvMode] = useState(false);
   const [pendingAdminTab, setPendingAdminTab] = useState<string | null>(null);
-  const [justLoggedIn, setJustLoggedIn] = useState(false);
+  
   const quickHelpRef = useRef<QuickHelpPanelRef>(null);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   
@@ -251,23 +251,9 @@ const Index = () => {
     
     if (tvMode) {
       setActiveTab("display");
-    } else {
-      // Mark that user just logged in (to open quick help)
-      setJustLoggedIn(true);
     }
   };
 
-  // Open quick help automatically after login (non-TV mode)
-  useEffect(() => {
-    if (justLoggedIn && !isTvMode && quickHelpRef.current) {
-      // Small delay to ensure UI is ready
-      const timer = setTimeout(() => {
-        quickHelpRef.current?.openWithAutoClose(10);
-        setJustLoggedIn(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [justLoggedIn, isTvMode]);
 
   if (!isLoggedIn) {
     return <LoginScreen onLogin={handleLogin} />;
