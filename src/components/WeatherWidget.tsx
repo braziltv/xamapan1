@@ -223,7 +223,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       currentIndex = (currentIndex + 1) % sortedCities.length;
       changeCityWithTransition(sortedCities[currentIndex]);
       setRotationCount(prev => prev + 1);
-    }, 8000); // 8 segundos por cidade para mostrar todas
+    }, 5000); // 5 segundos por cidade
     
     return () => clearInterval(interval);
   }, [availableCities.length, weatherCache, changeCityWithTransition]);
