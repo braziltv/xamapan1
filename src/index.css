@@ -1799,6 +1799,28 @@
   animation-delay: 1s;
 }
 
+/* Continuous news shine effect - follows the news as it scrolls */
+@keyframes newsShine {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.animate-news-shine {
+  animation: newsShine 2s ease-in-out infinite;
+}
+
 /* Badge sparkle effects */
 @keyframes sparkle {
   0%, 100% {
