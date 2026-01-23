@@ -508,43 +508,44 @@
 
 @keyframes marquee {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .animate-marquee {
   display: inline-flex;
-  /* Ciclo de 2500 segundos */
-  animation: marquee 2500s linear infinite;
+  /* Ciclo de 120 segundos - mais fluido com GPU acceleration */
+  animation: marquee 120s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* Animação de destaque para frases de espera - intensificada */
+/* Animação de destaque para frases de espera - sutil */
 @keyframes waitingPhraseGlow {
   0%, 100% {
     text-shadow: 
-      0 0 15px rgba(148, 163, 184, 0.5), 
-      0 0 30px rgba(59, 130, 246, 0.2),
-      0 4px 8px rgba(0, 0, 0, 0.6);
-    transform: scale(1);
-    filter: brightness(1);
+      0 0 8px rgba(148, 163, 184, 0.3), 
+      0 2px 4px rgba(0, 0, 0, 0.4);
+    opacity: 0.9;
   }
   50% {
     text-shadow: 
-      0 0 30px rgba(148, 163, 184, 0.9), 
-      0 0 60px rgba(59, 130, 246, 0.6), 
-      0 0 90px rgba(96, 165, 250, 0.4),
-      0 4px 8px rgba(0, 0, 0, 0.6);
-    transform: scale(1.03);
-    filter: brightness(1.15);
+      0 0 15px rgba(148, 163, 184, 0.5), 
+      0 0 25px rgba(59, 130, 246, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.4);
+    opacity: 1;
   }
 }
 
 .animate-waiting-phrase {
-  animation: waitingPhraseGlow 2.5s ease-in-out infinite;
+  animation: waitingPhraseGlow 4s ease-in-out infinite;
+  will-change: opacity, text-shadow;
 }
+
 
 @keyframes flash {
   0%, 100% {
