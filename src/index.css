@@ -1799,6 +1799,91 @@
   animation-delay: 1s;
 }
 
+/* Badge sparkle effects */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes sparkle-float {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-15px) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-25px) scale(0);
+  }
+}
+
+@keyframes sparkle-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2) rotate(90deg);
+  }
+  60% {
+    opacity: 0.8;
+    transform: scale(0.9) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(270deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle 1s ease-out forwards;
+}
+
+.animate-sparkle-float {
+  animation: sparkle-float 1.2s ease-out forwards;
+}
+
+.animate-sparkle-burst {
+  animation: sparkle-burst 0.8s ease-out forwards;
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
 /* Badge glow pulse */
 @keyframes badgeGlow {
   0%, 100% {
