@@ -7,6 +7,7 @@ import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { usePreventSleep } from '@/hooks/usePreventSleep';
+import { useInactivePatientCleanup } from '@/hooks/useInactivePatientCleanup';
 import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { ParticleBackground } from './ParticleBackground';
@@ -92,6 +93,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   
   // Previne modo de espera da TV Android
   usePreventSleep(true);
+  
+  // Get unit name for cleanup
+  const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
+  
+  // Cleanup inactive patients (10 min) and patients from previous days - only on TV module
+  useInactivePatientCleanup(cleanupUnitName);
   
   const [currentTriageCall, setCurrentTriageCall] = useState<{ name: string; destination?: string } | null>(null);
   const [currentDoctorCall, setCurrentDoctorCall] = useState<{ name: string; destination?: string } | null>(null);
