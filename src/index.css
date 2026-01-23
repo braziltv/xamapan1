@@ -517,8 +517,8 @@
 
 .animate-marquee {
   display: inline-flex;
-  /* Ciclo de 600 segundos - lento para facilitar leitura */
-  animation: marquee 600s linear infinite;
+  /* Ciclo de 800 segundos - bem lento para facilitar leitura */
+  animation: marquee 800s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
