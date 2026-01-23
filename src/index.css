@@ -517,8 +517,8 @@
 
 .animate-marquee {
   display: inline-flex;
-  /* Ciclo de 1300 segundos */
-  animation: marquee 1300s linear infinite;
+  /* Ciclo de 1500 segundos */
+  animation: marquee 1500s linear infinite;
 }
 
 @keyframes flash {
