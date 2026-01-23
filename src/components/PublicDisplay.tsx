@@ -718,6 +718,68 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     console.log('📡 Setting up remote command listener for TV');
     
+    // Function to perform hard reload with cache clearing
+    const performHardReload = async () => {
+      console.log('🧹 Starting hard reload with cache clearing...');
+      
+      // Show notification
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.95);
+        color: white;
+        padding: 2rem 3rem;
+        border-radius: 1rem;
+        font-size: 1.5rem;
+        z-index: 99999;
+        text-align: center;
+        border: 2px solid #22c55e;
+      `;
+      notification.innerHTML = '🔄 Limpando cache e recarregando...<br><small>Aguarde...</small>';
+      document.body.appendChild(notification);
+      
+      try {
+        // 1. Clear all caches
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          console.log('🗑️ Clearing caches:', cacheNames);
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        }
+        
+        // 2. Unregister all service workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          console.log('🔧 Unregistering service workers:', registrations.length);
+          await Promise.all(registrations.map(reg => reg.unregister()));
+        }
+        
+        // 3. Clear localStorage cache-related items
+        const keysToRemove = Object.keys(localStorage).filter(key => 
+          key.includes('cache') || key.includes('Cache') || key.includes('sw-')
+        );
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // 4. Clear sessionStorage
+        sessionStorage.clear();
+        
+        console.log('✅ Cache cleared, performing hard reload...');
+        
+        // 5. Force hard reload bypassing cache
+        // Add cache-busting timestamp to URL
+        const url = new URL(window.location.href);
+        url.searchParams.set('_reload', Date.now().toString());
+        window.location.replace(url.toString());
+        
+      } catch (error) {
+        console.error('❌ Error during cache clear:', error);
+        // Fallback to regular reload
+        window.location.reload();
+      }
+    };
+    
     const channel = supabase
       .channel('tv-commands')
       .on(
@@ -728,32 +790,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           const command = payload.payload;
           
-          // Check if command is for this unit or for all units
-          if (command.unit === 'all' || command.unit === unitName || command.unit === marketingUnitName) {
-            console.log('🔄 Executing remote reload command...');
+          // Check if command is for this unit or for all units (unitName or unit field)
+          const targetUnit = command.unitName || command.unit;
+          const isForThisUnit = !targetUnit || 
+            targetUnit === unitName || 
+            targetUnit === marketingUnitName ||
+            targetUnit.toLowerCase().includes('pronto') && unitName?.toLowerCase().includes('pronto');
             
-            // Show a brief notification before reload
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-              position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              background: rgba(0,0,0,0.9);
-              color: white;
-              padding: 2rem 3rem;
-              border-radius: 1rem;
-              font-size: 1.5rem;
-              z-index: 99999;
-              text-align: center;
-            `;
-            notification.innerHTML = '🔄 Recarregando...<br><small>Comando remoto recebido</small>';
-            document.body.appendChild(notification);
-            
-            // Reload after a short delay
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
+          if (isForThisUnit) {
+            console.log('🔄 Executing remote reload command for unit:', targetUnit || 'ALL');
+            performHardReload();
+          } else {
+            console.log('⏭️ Command not for this unit. Target:', targetUnit, 'Current:', unitName);
           }
         }
       )
