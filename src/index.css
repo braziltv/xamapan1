@@ -1763,3 +1763,52 @@
 .animate-carousel-progress {
   animation: carouselProgress 30s linear infinite;
 }
+
+/* News badge pop animation */
+@keyframes badgePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-badge-pop {
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Badge shine effect */
+@keyframes badgeShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-badge-shine {
+  animation: badgeShine 3s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Badge glow pulse */
+@keyframes badgeGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+.animate-badge-glow {
+  animation: badgeGlow 2s ease-in-out infinite;
+}
