@@ -508,17 +508,23 @@
 
 @keyframes marquee {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .animate-marquee {
   display: inline-flex;
-  /* 20% mais lento que anterior (1810 / 0.8 ≈ 2263s) */
-  animation: marquee 2263s linear infinite;
+  /* Animação lenta e suave - 120s por ciclo completo */
+  animation: marquee 120s linear infinite;
+  /* Otimizações de GPU para animação suave */
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
 
 @keyframes flash {
