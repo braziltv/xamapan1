@@ -521,6 +521,22 @@
   animation: marquee 2500s linear infinite;
 }
 
+/* Animação de destaque para frases de espera */
+@keyframes waitingPhraseGlow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(148, 163, 184, 0.3), 0 4px 6px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(148, 163, 184, 0.6), 0 0 40px rgba(59, 130, 246, 0.3), 0 4px 6px rgba(0, 0, 0, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+.animate-waiting-phrase {
+  animation: waitingPhraseGlow 3s ease-in-out infinite;
+}
+
 @keyframes flash {
   0%, 100% {
     opacity: 0;
