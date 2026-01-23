@@ -1802,23 +1802,26 @@
 /* Continuous news shine effect - follows the news as it scrolls */
 @keyframes newsShine {
   0% {
-    transform: translateX(-100%);
+    transform: translateX(-150%);
     opacity: 0;
   }
-  10% {
-    opacity: 1;
+  15% {
+    opacity: 0.6;
   }
-  90% {
-    opacity: 1;
+  50% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.6;
   }
   100% {
-    transform: translateX(200%);
+    transform: translateX(250%);
     opacity: 0;
   }
 }
 
 .animate-news-shine {
-  animation: newsShine 2s ease-in-out infinite;
+  animation: newsShine 4s ease-in-out infinite;
 }
 
 /* Badge sparkle effects */
