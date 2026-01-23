@@ -318,10 +318,9 @@ serve(async (req) => {
       }
     }
     
-    // Buscar notícias de todos os feeds (8 feeds aleatórios)
-    console.log('Fetching news from feeds...');
-    const shuffledFeeds = [...feeds].sort(() => Math.random() - 0.5).slice(0, 12);
-    const newsPromises = shuffledFeeds.map(feed => fetchNewsFromFeed(feed));
+    // Buscar notícias de todos os feeds (todos os 27 feeds para máxima variedade)
+    console.log('Fetching news from all feeds...');
+    const newsPromises = feeds.map(feed => fetchNewsFromFeed(feed));
     const newsResults = await Promise.all(newsPromises);
     const allNews = newsResults.flat();
     
