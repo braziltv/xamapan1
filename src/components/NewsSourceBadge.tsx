@@ -114,42 +114,63 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
   const animationDelay = `${(index % 10) * 0.1}s`;
 
   return (
-    <span 
-      className={`
-        relative overflow-hidden
-        px-2 xs:px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6 
-        py-1 xs:py-1.5 sm:py-2 md:py-2.5 
-        rounded-lg sm:rounded-xl
-        text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl 
-        font-bold inline-flex items-center gap-1.5 sm:gap-2
-        bg-gradient-to-br ${config.gradient}
-        ${isCreditos ? 'text-amber-950' : 'text-white'}
-        shadow-lg ${config.glow}
-        ring-1 ring-white/20
-        animate-badge-pop
-        hover:scale-105 hover:brightness-110
-        transition-all duration-300
-        ${isInformativo ? 'animate-pulse' : ''}
-      `}
-      style={{ animationDelay }}
-    >
-      {/* Shine effect overlay */}
-      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-badge-shine" />
+      <span 
+        className={`
+          group
+          relative overflow-hidden
+          px-2 xs:px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6 
+          py-1 xs:py-1.5 sm:py-2 md:py-2.5 
+          rounded-lg sm:rounded-xl
+          text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl 
+          font-bold inline-flex items-center gap-1.5 sm:gap-2
+          bg-gradient-to-br ${config.gradient}
+          ${isCreditos ? 'text-amber-950' : 'text-white'}
+          shadow-lg ${config.glow}
+          ring-1 ring-white/20
+          animate-badge-pop
+          hover:scale-110 hover:brightness-125 hover:shadow-2xl hover:ring-2 hover:ring-white/40
+          hover:-translate-y-0.5 hover:rotate-1
+          active:scale-105 active:brightness-110
+          transition-all duration-300 ease-out
+          cursor-pointer
+          ${isInformativo ? 'animate-pulse' : ''}
+        `}
+        style={{ animationDelay }}
+      >
+        {/* Ambient glow on hover */}
+        <span className={`
+          absolute -inset-1 rounded-xl opacity-0 blur-md
+          bg-gradient-to-br ${config.gradient}
+          group-hover:opacity-60
+          transition-opacity duration-300
+        `} />
+        
+        {/* Base shine effect */}
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-badge-shine" />
+        
+        {/* Hover shine sweep */}
+        <span className="
+          absolute inset-0 
+          bg-gradient-to-r from-transparent via-white/40 to-transparent 
+          -translate-x-full
+          group-hover:translate-x-full
+          transition-transform duration-700 ease-out
+        " />
       
-      {isInformativo ? (
-        <>
-          <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-          <span className="hidden xs:inline font-extrabold tracking-wide">INFORMATIVO</span>
-        </>
-      ) : (
-        <>
-          <span className="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg drop-shadow-sm">
-            {config.icon}
+        {isInformativo ? (
+          <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+            <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce group-hover:animate-none group-hover:scale-110 transition-transform" />
+            <span className="hidden xs:inline font-extrabold tracking-wide">INFORMATIVO</span>
           </span>
-          <span className="font-extrabold tracking-tight drop-shadow-sm">{source}</span>
-        </>
-      )}
-    </span>
+        ) : (
+          <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg drop-shadow-sm group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300">
+              {config.icon}
+            </span>
+            <span className="font-extrabold tracking-tight drop-shadow-sm group-hover:tracking-normal transition-all duration-300">{source}</span>
+          </span>
+        )}
+      </span>
   );
 }
 
