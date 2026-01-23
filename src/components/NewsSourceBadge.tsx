@@ -113,17 +113,11 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
   // Staggered animation delay based on index
   const animationDelay = `${(index % 10) * 0.1}s`;
 
-  // Minimal sparkle positions - just 2 subtle sparkles
-  const sparkles = [
-    { top: '-2px', right: '10%', delay: '0.1s' },
-    { top: '-2px', left: '15%', delay: '0.2s' },
-  ];
-
   return (
     <span 
       className={`
         group
-        relative overflow-visible
+        relative overflow-hidden
         px-2 xs:px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6 
         py-1 xs:py-1.5 sm:py-2 md:py-2.5 
         rounded-lg sm:rounded-xl
@@ -143,30 +137,6 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
       `}
       style={{ animationDelay }}
     >
-      {/* Subtle sparkle effects - only 2 small ones */}
-      {sparkles.map((sparkle, i) => (
-        <span
-          key={i}
-          className="absolute text-[5px] pointer-events-none animate-sparkle-burst text-white/60"
-          style={{
-            top: sparkle.top,
-            left: sparkle.left,
-            right: sparkle.right,
-            animationDelay: `calc(${animationDelay} + ${sparkle.delay})`,
-          }}
-        >
-          ✦
-        </span>
-      ))}
-      
-      {/* Single subtle corner twinkle */}
-      <span 
-        className="absolute -top-0.5 -right-0.5 text-[4px] pointer-events-none animate-twinkle text-white/40"
-        style={{ animationDelay: '0.5s' }}
-      >
-        ✦
-      </span>
-
       {/* Ambient glow on hover */}
       <span className={`
         absolute -inset-1 rounded-xl opacity-0 blur-md
@@ -175,8 +145,8 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
         transition-opacity duration-300
       `} />
       
-      {/* Base shine effect */}
-      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-badge-shine rounded-lg" />
+      {/* Continuous shine effect */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-news-shine rounded-lg" />
       
       {/* Hover shine sweep */}
       <span className="
