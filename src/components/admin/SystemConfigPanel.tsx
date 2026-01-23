@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone, RefreshCw, Loader2 } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -18,39 +18,13 @@ import { MarketingPanel } from './MarketingPanel';
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-
 
 export function SystemConfigPanel() {
   const { units, loading } = useUnits();
   const navigate = useNavigate();
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isReloadingTVs, setIsReloadingTVs] = useState(false);
 
-  // Função para recarregar todas as TVs
-  const handleReloadAllTVs = async () => {
-    setIsReloadingTVs(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('tv-reload-command', {
-        body: {}
-      });
-      
-      if (error) throw error;
-      
-      toast.success('Comando de reload enviado para todas as TVs!', {
-        description: 'As TVs conectadas serão recarregadas em instantes.'
-      });
-    } catch (error) {
-      console.error('Erro ao recarregar TVs:', error);
-      toast.error('Erro ao enviar comando de reload', {
-        description: 'Verifique a conexão e tente novamente.'
-      });
-    } finally {
-      setIsReloadingTVs(false);
-    }
-  };
   // Selecionar a primeira unidade automaticamente
   useEffect(() => {
     if (units.length > 0 && !selectedUnitId) {
@@ -66,22 +40,8 @@ export function SystemConfigPanel() {
           <h2 className="text-xl font-semibold">Configurações do Sistema</h2>
         </div>
         
-        {/* Botões de ação */}
+        {/* Links de instalação PWA */}
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleReloadAllTVs}
-            disabled={isReloadingTVs}
-            className="gap-2"
-          >
-            {isReloadingTVs ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <RefreshCw className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">Reload</span> TVs
-          </Button>
           <Button 
             variant="outline" 
             size="sm" 
