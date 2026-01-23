@@ -5,7 +5,7 @@ import { useAutoLogout } from '@/hooks/useAutoLogout';
 import { useUserSession } from '@/hooks/useUserSession';
 import { useAutoHideCursor } from '@/hooks/useAutoHideCursor';
 import { useAutoFullscreen } from '@/hooks/useAutoFullscreen';
-import { useInactivePatientCleanup } from '@/hooks/useInactivePatientCleanup';
+
 import { PanelHeader } from '@/components/PanelHeader';
 import { PatientRegistration } from '@/components/PatientRegistration';
 import { TriagePanel } from '@/components/TriagePanel';
@@ -49,9 +49,6 @@ const Index = () => {
     enabled: isTvMode && isLoggedIn, 
     targetRef: mainContainerRef 
   });
-
-  // Cleanup inactive patients (10 min) and patients from previous days
-  useInactivePatientCleanup(unitName);
 
   useEffect(() => {
     // Check for permanent TV configuration first
