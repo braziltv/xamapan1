@@ -58,20 +58,37 @@ Deno.serve(async (req) => {
     const oldPatientsDeleted = deletedOldPatients?.length || 0
     console.log(`Deleted ${oldPatientsDeleted} patient calls from previous days`)
 
-    // 2. Delete inactive active patient calls (>10 min without update)
-    const { data: deletedInactivePatients, error: inactivePatientsError } = await supabase
+    // 2. Delete inactive 'active' patient calls (>10 min without update)
+    const { data: deletedInactiveActivePatients, error: inactiveActivePatientsError } = await supabase
       .from('patient_calls')
       .delete()
       .eq('status', 'active')
       .lt('created_at', patientInactiveCutoff.toISOString())
       .select('id, patient_name, unit_name, call_type')
 
-    if (inactivePatientsError) {
-      console.error('Error deleting inactive patients:', inactivePatientsError)
+    if (inactiveActivePatientsError) {
+      console.error('Error deleting inactive active patients:', inactiveActivePatientsError)
     }
 
-    const inactivePatientsDeleted = deletedInactivePatients?.length || 0
-    console.log(`Deleted ${inactivePatientsDeleted} inactive patient calls (>10 min)`)
+    const inactiveActivePatientsDeleted = deletedInactiveActivePatients?.length || 0
+    console.log(`Deleted ${inactiveActivePatientsDeleted} inactive 'active' patient calls (>10 min)`)
+
+    // 3. Delete inactive 'waiting' patient calls (>10 min without being called)
+    const { data: deletedInactiveWaitingPatients, error: inactiveWaitingPatientsError } = await supabase
+      .from('patient_calls')
+      .delete()
+      .eq('status', 'waiting')
+      .lt('created_at', patientInactiveCutoff.toISOString())
+      .select('id, patient_name, unit_name, call_type')
+
+    if (inactiveWaitingPatientsError) {
+      console.error('Error deleting inactive waiting patients:', inactiveWaitingPatientsError)
+    }
+
+    const inactiveWaitingPatientsDeleted = deletedInactiveWaitingPatients?.length || 0
+    console.log(`Deleted ${inactiveWaitingPatientsDeleted} inactive 'waiting' patient calls (>10 min)`)
+
+    const inactivePatientsDeleted = inactiveActivePatientsDeleted + inactiveWaitingPatientsDeleted
 
     // ========== USER SESSIONS CLEANUP ==========
 

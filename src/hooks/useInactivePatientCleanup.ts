@@ -43,8 +43,8 @@ export function useInactivePatientCleanup(unitName: string) {
           oldPatients.map(p => p.patient_name).join(', '));
       }
 
-      // 2. Delete patients inactive for more than 10 minutes (active status with old timestamp)
-      const { data: inactivePatients, error: inactiveError } = await supabase
+      // 2. Delete patients with status 'active' that are inactive for more than 10 minutes
+      const { data: inactiveActivePatients, error: inactiveActiveError } = await supabase
         .from('patient_calls')
         .delete()
         .eq('unit_name', unitName)
@@ -52,11 +52,28 @@ export function useInactivePatientCleanup(unitName: string) {
         .lt('created_at', thresholdTime.toISOString())
         .select('id, patient_name, call_type');
 
-      if (inactiveError) {
-        console.error('Error deleting inactive patients:', inactiveError);
-      } else if (inactivePatients && inactivePatients.length > 0) {
-        console.log(`⏰ Removed ${inactivePatients.length} inactive patients (>10 min):`, 
-          inactivePatients.map(p => `${p.patient_name} (${p.call_type})`).join(', '));
+      if (inactiveActiveError) {
+        console.error('Error deleting inactive active patients:', inactiveActiveError);
+      } else if (inactiveActivePatients && inactiveActivePatients.length > 0) {
+        console.log(`⏰ Removed ${inactiveActivePatients.length} inactive 'active' patients (>10 min):`, 
+          inactiveActivePatients.map(p => `${p.patient_name} (${p.call_type})`).join(', '));
+      }
+
+      // 3. Delete patients with status 'waiting' that have been waiting for more than 10 minutes
+      //    These are patients who were called but never attended
+      const { data: inactiveWaitingPatients, error: inactiveWaitingError } = await supabase
+        .from('patient_calls')
+        .delete()
+        .eq('unit_name', unitName)
+        .eq('status', 'waiting')
+        .lt('created_at', thresholdTime.toISOString())
+        .select('id, patient_name, call_type');
+
+      if (inactiveWaitingError) {
+        console.error('Error deleting inactive waiting patients:', inactiveWaitingError);
+      } else if (inactiveWaitingPatients && inactiveWaitingPatients.length > 0) {
+        console.log(`⏰ Removed ${inactiveWaitingPatients.length} inactive 'waiting' patients (>10 min):`, 
+          inactiveWaitingPatients.map(p => `${p.patient_name} (${p.call_type})`).join(', '));
       }
 
       lastCleanupRef.current = now;
