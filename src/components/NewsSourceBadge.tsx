@@ -113,14 +113,10 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
   // Staggered animation delay based on index
   const animationDelay = `${(index % 10) * 0.1}s`;
 
-  // Generate sparkle positions
+  // Minimal sparkle positions - just 2 subtle sparkles
   const sparkles = [
-    { top: '-4px', left: '10%', delay: '0s', size: 'text-[8px]' },
-    { top: '-2px', right: '15%', delay: '0.1s', size: 'text-[10px]' },
-    { top: '50%', left: '-3px', delay: '0.2s', size: 'text-[6px]' },
-    { top: '50%', right: '-3px', delay: '0.15s', size: 'text-[8px]' },
-    { bottom: '-4px', left: '20%', delay: '0.25s', size: 'text-[7px]' },
-    { bottom: '-2px', right: '25%', delay: '0.05s', size: 'text-[9px]' },
+    { top: '-2px', right: '10%', delay: '0.1s' },
+    { top: '-2px', left: '15%', delay: '0.2s' },
   ];
 
   return (
@@ -147,16 +143,15 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
       `}
       style={{ animationDelay }}
     >
-      {/* Sparkle effects */}
+      {/* Subtle sparkle effects - only 2 small ones */}
       {sparkles.map((sparkle, i) => (
         <span
           key={i}
-          className={`absolute ${sparkle.size} pointer-events-none animate-sparkle-burst`}
+          className="absolute text-[5px] pointer-events-none animate-sparkle-burst text-white/60"
           style={{
             top: sparkle.top,
             left: sparkle.left,
             right: sparkle.right,
-            bottom: sparkle.bottom,
             animationDelay: `calc(${animationDelay} + ${sparkle.delay})`,
           }}
         >
@@ -164,42 +159,10 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
         </span>
       ))}
       
-      {/* Floating sparkles */}
+      {/* Single subtle corner twinkle */}
       <span 
-        className="absolute -top-1 left-1/4 text-[10px] pointer-events-none animate-sparkle-float text-yellow-200"
-        style={{ animationDelay: `calc(${animationDelay} + 0.3s)` }}
-      >
-        ✨
-      </span>
-      <span 
-        className="absolute -top-1 right-1/4 text-[8px] pointer-events-none animate-sparkle-float text-white"
-        style={{ animationDelay: `calc(${animationDelay} + 0.5s)` }}
-      >
-        ⭐
-      </span>
-      
-      {/* Corner twinkles (persistent) */}
-      <span 
-        className="absolute -top-1 -left-1 text-[6px] pointer-events-none animate-twinkle text-white/80"
-        style={{ animationDelay: '0s' }}
-      >
-        ✦
-      </span>
-      <span 
-        className="absolute -top-1 -right-1 text-[6px] pointer-events-none animate-twinkle text-white/80"
+        className="absolute -top-0.5 -right-0.5 text-[4px] pointer-events-none animate-twinkle text-white/40"
         style={{ animationDelay: '0.5s' }}
-      >
-        ✦
-      </span>
-      <span 
-        className="absolute -bottom-1 -left-1 text-[5px] pointer-events-none animate-twinkle text-white/60"
-        style={{ animationDelay: '1s' }}
-      >
-        ✦
-      </span>
-      <span 
-        className="absolute -bottom-1 -right-1 text-[5px] pointer-events-none animate-twinkle text-white/60"
-        style={{ animationDelay: '1.5s' }}
       >
         ✦
       </span>
