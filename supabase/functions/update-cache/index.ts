@@ -42,9 +42,9 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
 
 const cities = Object.keys(cityCoordinates);
 
-// Feeds de notícias (Tecmundo removido devido a erro de certificado SSL)
+// Feeds de notícias ATIVOS (apenas os que funcionam)
 const feeds = [
-  // G1 - Portal de notícias
+  // G1 - Portal de notícias (principal fonte)
   { url: 'https://g1.globo.com/dynamo/rss2.xml', source: 'G1' },
   { url: 'https://g1.globo.com/dynamo/brasil/rss2.xml', source: 'G1' },
   { url: 'https://g1.globo.com/dynamo/minas-gerais/rss2.xml', source: 'G1' },
@@ -59,25 +59,19 @@ const feeds = [
   // Folha de S.Paulo
   { url: 'https://feeds.folha.uol.com.br/emcimadahora/rss091.xml', source: 'Folha' },
   { url: 'https://feeds.folha.uol.com.br/cotidiano/rss091.xml', source: 'Folha' },
-  // Outros portais
-  { url: 'https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419', source: 'Google' },
+  // Portais ativos
   { url: 'https://www.cnnbrasil.com.br/feed/', source: 'CNN' },
   { url: 'https://www.metropoles.com/feed', source: 'Metrópoles' },
-  { url: 'https://noticias.r7.com/feed.xml', source: 'R7' },
   { url: 'https://exame.com/feed/', source: 'Exame' },
   // Tecnologia
   { url: 'https://olhardigital.com.br/feed/', source: 'Olhar Digital' },
   { url: 'https://canaltech.com.br/rss/', source: 'Canaltech' },
   { url: 'https://tecnoblog.net/feed/', source: 'Tecnoblog' },
-  { url: 'https://www.techtudo.com.br/rss', source: 'TechTudo' },
   // Economia
   { url: 'https://www.infomoney.com.br/feed/', source: 'InfoMoney' },
-  { url: 'https://valor.globo.com/rss/home/', source: 'Valor' },
   // Saúde
   { url: 'https://saude.ig.com.br/rss.xml', source: 'iG Saúde' },
-  { url: 'https://www.uol.com.br/vivabem/rss.xml', source: 'VivaBem' },
-  // Notícias gerais e internacionais
-  { url: 'https://www.noticiasaominuto.com.br/rss/brasil', source: 'Notícias ao Minuto' },
+  // Notícias gerais
   { url: 'https://news.un.org/feed/subscribe/pt/news/region/americas/feed/rss.xml', source: 'ONU News' },
   { url: 'https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml', source: 'Agência Brasil' },
   // Ciência e Tecnologia
