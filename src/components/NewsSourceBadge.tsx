@@ -113,49 +113,117 @@ export function NewsSourceBadge({ source, index }: NewsSourceBadgeProps) {
   // Staggered animation delay based on index
   const animationDelay = `${(index % 10) * 0.1}s`;
 
+  // Generate sparkle positions
+  const sparkles = [
+    { top: '-4px', left: '10%', delay: '0s', size: 'text-[8px]' },
+    { top: '-2px', right: '15%', delay: '0.1s', size: 'text-[10px]' },
+    { top: '50%', left: '-3px', delay: '0.2s', size: 'text-[6px]' },
+    { top: '50%', right: '-3px', delay: '0.15s', size: 'text-[8px]' },
+    { bottom: '-4px', left: '20%', delay: '0.25s', size: 'text-[7px]' },
+    { bottom: '-2px', right: '25%', delay: '0.05s', size: 'text-[9px]' },
+  ];
+
   return (
+    <span 
+      className={`
+        group
+        relative overflow-visible
+        px-2 xs:px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6 
+        py-1 xs:py-1.5 sm:py-2 md:py-2.5 
+        rounded-lg sm:rounded-xl
+        text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl 
+        font-bold inline-flex items-center gap-1.5 sm:gap-2
+        bg-gradient-to-br ${config.gradient}
+        ${isCreditos ? 'text-amber-950' : 'text-white'}
+        shadow-lg ${config.glow}
+        ring-1 ring-white/20
+        animate-badge-pop
+        hover:scale-110 hover:brightness-125 hover:shadow-2xl hover:ring-2 hover:ring-white/40
+        hover:-translate-y-0.5 hover:rotate-1
+        active:scale-105 active:brightness-110
+        transition-all duration-300 ease-out
+        cursor-pointer
+        ${isInformativo ? 'animate-pulse' : ''}
+      `}
+      style={{ animationDelay }}
+    >
+      {/* Sparkle effects */}
+      {sparkles.map((sparkle, i) => (
+        <span
+          key={i}
+          className={`absolute ${sparkle.size} pointer-events-none animate-sparkle-burst`}
+          style={{
+            top: sparkle.top,
+            left: sparkle.left,
+            right: sparkle.right,
+            bottom: sparkle.bottom,
+            animationDelay: `calc(${animationDelay} + ${sparkle.delay})`,
+          }}
+        >
+          ✦
+        </span>
+      ))}
+      
+      {/* Floating sparkles */}
       <span 
-        className={`
-          group
-          relative overflow-hidden
-          px-2 xs:px-2.5 sm:px-3 md:px-4 lg:px-5 xl:px-6 
-          py-1 xs:py-1.5 sm:py-2 md:py-2.5 
-          rounded-lg sm:rounded-xl
-          text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl 4k:text-2xl 
-          font-bold inline-flex items-center gap-1.5 sm:gap-2
-          bg-gradient-to-br ${config.gradient}
-          ${isCreditos ? 'text-amber-950' : 'text-white'}
-          shadow-lg ${config.glow}
-          ring-1 ring-white/20
-          animate-badge-pop
-          hover:scale-110 hover:brightness-125 hover:shadow-2xl hover:ring-2 hover:ring-white/40
-          hover:-translate-y-0.5 hover:rotate-1
-          active:scale-105 active:brightness-110
-          transition-all duration-300 ease-out
-          cursor-pointer
-          ${isInformativo ? 'animate-pulse' : ''}
-        `}
-        style={{ animationDelay }}
+        className="absolute -top-1 left-1/4 text-[10px] pointer-events-none animate-sparkle-float text-yellow-200"
+        style={{ animationDelay: `calc(${animationDelay} + 0.3s)` }}
       >
-        {/* Ambient glow on hover */}
-        <span className={`
-          absolute -inset-1 rounded-xl opacity-0 blur-md
-          bg-gradient-to-br ${config.gradient}
-          group-hover:opacity-60
-          transition-opacity duration-300
-        `} />
-        
-        {/* Base shine effect */}
-        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-badge-shine" />
-        
-        {/* Hover shine sweep */}
-        <span className="
-          absolute inset-0 
-          bg-gradient-to-r from-transparent via-white/40 to-transparent 
-          -translate-x-full
-          group-hover:translate-x-full
-          transition-transform duration-700 ease-out
-        " />
+        ✨
+      </span>
+      <span 
+        className="absolute -top-1 right-1/4 text-[8px] pointer-events-none animate-sparkle-float text-white"
+        style={{ animationDelay: `calc(${animationDelay} + 0.5s)` }}
+      >
+        ⭐
+      </span>
+      
+      {/* Corner twinkles (persistent) */}
+      <span 
+        className="absolute -top-1 -left-1 text-[6px] pointer-events-none animate-twinkle text-white/80"
+        style={{ animationDelay: '0s' }}
+      >
+        ✦
+      </span>
+      <span 
+        className="absolute -top-1 -right-1 text-[6px] pointer-events-none animate-twinkle text-white/80"
+        style={{ animationDelay: '0.5s' }}
+      >
+        ✦
+      </span>
+      <span 
+        className="absolute -bottom-1 -left-1 text-[5px] pointer-events-none animate-twinkle text-white/60"
+        style={{ animationDelay: '1s' }}
+      >
+        ✦
+      </span>
+      <span 
+        className="absolute -bottom-1 -right-1 text-[5px] pointer-events-none animate-twinkle text-white/60"
+        style={{ animationDelay: '1.5s' }}
+      >
+        ✦
+      </span>
+
+      {/* Ambient glow on hover */}
+      <span className={`
+        absolute -inset-1 rounded-xl opacity-0 blur-md
+        bg-gradient-to-br ${config.gradient}
+        group-hover:opacity-60
+        transition-opacity duration-300
+      `} />
+      
+      {/* Base shine effect */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-badge-shine rounded-lg" />
+      
+      {/* Hover shine sweep */}
+      <span className="
+        absolute inset-0 
+        bg-gradient-to-r from-transparent via-white/40 to-transparent 
+        -translate-x-full
+        group-hover:translate-x-full
+        transition-transform duration-700 ease-out
+        rounded-lg
+      " />
       
         {isInformativo ? (
           <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
