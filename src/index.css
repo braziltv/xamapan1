@@ -521,20 +521,29 @@
   animation: marquee 2500s linear infinite;
 }
 
-/* Animação de destaque para frases de espera */
+/* Animação de destaque para frases de espera - intensificada */
 @keyframes waitingPhraseGlow {
   0%, 100% {
-    text-shadow: 0 0 10px rgba(148, 163, 184, 0.3), 0 4px 6px rgba(0, 0, 0, 0.5);
+    text-shadow: 
+      0 0 15px rgba(148, 163, 184, 0.5), 
+      0 0 30px rgba(59, 130, 246, 0.2),
+      0 4px 8px rgba(0, 0, 0, 0.6);
     transform: scale(1);
+    filter: brightness(1);
   }
   50% {
-    text-shadow: 0 0 20px rgba(148, 163, 184, 0.6), 0 0 40px rgba(59, 130, 246, 0.3), 0 4px 6px rgba(0, 0, 0, 0.5);
-    transform: scale(1.02);
+    text-shadow: 
+      0 0 30px rgba(148, 163, 184, 0.9), 
+      0 0 60px rgba(59, 130, 246, 0.6), 
+      0 0 90px rgba(96, 165, 250, 0.4),
+      0 4px 8px rgba(0, 0, 0, 0.6);
+    transform: scale(1.03);
+    filter: brightness(1.15);
   }
 }
 
 .animate-waiting-phrase {
-  animation: waitingPhraseGlow 3s ease-in-out infinite;
+  animation: waitingPhraseGlow 2.5s ease-in-out infinite;
 }
 
 @keyframes flash {
