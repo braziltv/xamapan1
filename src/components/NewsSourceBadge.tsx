@@ -17,60 +17,36 @@ const sourceConfigs: Record<string, { gradient: string; icon: string; glow: stri
     icon: '⭐',
     glow: 'shadow-amber-400/50'
   },
+  // Portais principais
   'G1': { 
     gradient: 'from-red-600 via-red-500 to-rose-600', 
     icon: '🔴',
     glow: 'shadow-red-500/60'
   },
-  'O Globo': { 
-    gradient: 'from-blue-700 via-blue-600 to-indigo-600', 
-    icon: '🌐',
-    glow: 'shadow-blue-600/60'
+  'GE': { 
+    gradient: 'from-green-600 via-green-500 to-emerald-500', 
+    icon: '⚽',
+    glow: 'shadow-green-500/60'
   },
-  'Itatiaia': { 
-    gradient: 'from-yellow-400 via-amber-400 to-orange-400', 
-    icon: '📻',
-    glow: 'shadow-yellow-400/60'
-  },
-  'UOL': { 
-    gradient: 'from-orange-500 via-orange-400 to-amber-500', 
-    icon: '🟠',
-    glow: 'shadow-orange-500/60'
+  'ESPN': { 
+    gradient: 'from-red-700 via-red-600 to-rose-600', 
+    icon: '🏀',
+    glow: 'shadow-red-600/60'
   },
   'Folha': { 
     gradient: 'from-blue-600 via-sky-500 to-cyan-500', 
     icon: '📰',
     glow: 'shadow-blue-500/60'
   },
-  'Estadão': { 
-    gradient: 'from-slate-700 via-slate-600 to-zinc-600', 
-    icon: '📄',
-    glow: 'shadow-slate-600/60'
+  'Google': { 
+    gradient: 'from-blue-500 via-red-500 to-yellow-500', 
+    icon: '🔍',
+    glow: 'shadow-blue-500/60'
   },
   'CNN': { 
     gradient: 'from-red-700 via-red-600 to-rose-700', 
     icon: '📺',
     glow: 'shadow-red-600/60'
-  },
-  'Band': { 
-    gradient: 'from-green-600 via-emerald-500 to-teal-500', 
-    icon: '📡',
-    glow: 'shadow-green-500/60'
-  },
-  'Terra': { 
-    gradient: 'from-emerald-500 via-green-500 to-lime-500', 
-    icon: '🌍',
-    glow: 'shadow-emerald-500/60'
-  },
-  'IG': { 
-    gradient: 'from-pink-500 via-rose-500 to-fuchsia-500', 
-    icon: '💗',
-    glow: 'shadow-pink-500/60'
-  },
-  'Correio': { 
-    gradient: 'from-sky-600 via-cyan-500 to-teal-500', 
-    icon: '✉️',
-    glow: 'shadow-sky-500/60'
   },
   'Metrópoles': { 
     gradient: 'from-purple-600 via-violet-500 to-indigo-500', 
@@ -82,20 +58,84 @@ const sourceConfigs: Record<string, { gradient: string; icon: string; glow: stri
     icon: '7️⃣',
     glow: 'shadow-green-500/60'
   },
-  'Veja': { 
-    gradient: 'from-red-500 via-rose-500 to-pink-500', 
-    icon: '📕',
-    glow: 'shadow-red-500/60'
-  },
   'Exame': { 
     gradient: 'from-blue-800 via-blue-700 to-indigo-700', 
     icon: '📊',
     glow: 'shadow-blue-700/60'
   },
-  'IstoÉ': { 
-    gradient: 'from-amber-600 via-orange-500 to-red-500', 
-    icon: '📰',
+  // Tecnologia
+  'Olhar Digital': { 
+    gradient: 'from-cyan-600 via-blue-500 to-indigo-500', 
+    icon: '👁️',
+    glow: 'shadow-cyan-500/60'
+  },
+  'Canaltech': { 
+    gradient: 'from-orange-600 via-orange-500 to-amber-500', 
+    icon: '💻',
     glow: 'shadow-orange-500/60'
+  },
+  'Tecnoblog': { 
+    gradient: 'from-teal-600 via-cyan-500 to-blue-500', 
+    icon: '🔧',
+    glow: 'shadow-teal-500/60'
+  },
+  'TechTudo': { 
+    gradient: 'from-blue-600 via-blue-500 to-cyan-500', 
+    icon: '⚙️',
+    glow: 'shadow-blue-500/60'
+  },
+  // Economia
+  'InfoMoney': { 
+    gradient: 'from-green-700 via-emerald-600 to-teal-600', 
+    icon: '💰',
+    glow: 'shadow-green-600/60'
+  },
+  'Valor': { 
+    gradient: 'from-amber-700 via-orange-600 to-yellow-600', 
+    icon: '📈',
+    glow: 'shadow-amber-600/60'
+  },
+  // Saúde
+  'iG Saúde': { 
+    gradient: 'from-pink-600 via-rose-500 to-red-500', 
+    icon: '🏥',
+    glow: 'shadow-pink-500/60'
+  },
+  'VivaBem': { 
+    gradient: 'from-lime-600 via-green-500 to-emerald-500', 
+    icon: '💚',
+    glow: 'shadow-lime-500/60'
+  },
+  // Outros
+  'Notícias ao Minuto': { 
+    gradient: 'from-red-600 via-rose-500 to-pink-500', 
+    icon: '⏱️',
+    glow: 'shadow-red-500/60'
+  },
+  'ONU News': { 
+    gradient: 'from-sky-600 via-blue-500 to-indigo-500', 
+    icon: '🌍',
+    glow: 'shadow-sky-500/60'
+  },
+  'Agência Brasil': { 
+    gradient: 'from-green-600 via-yellow-500 to-blue-500', 
+    icon: '🇧🇷',
+    glow: 'shadow-green-500/60'
+  },
+  'Inovação Tec': { 
+    gradient: 'from-violet-600 via-purple-500 to-fuchsia-500', 
+    icon: '🚀',
+    glow: 'shadow-violet-500/60'
+  },
+  'Intercept': { 
+    gradient: 'from-slate-700 via-gray-600 to-zinc-600', 
+    icon: '🔎',
+    glow: 'shadow-slate-600/60'
+  },
+  'Opera Mundi': { 
+    gradient: 'from-indigo-600 via-blue-500 to-sky-500', 
+    icon: '🌐',
+    glow: 'shadow-indigo-500/60'
   },
 };
 
