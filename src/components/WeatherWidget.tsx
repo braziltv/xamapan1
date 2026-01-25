@@ -30,11 +30,11 @@ function Weather3DIcon({ description, size = 'sm' }: { description: string; size
   const desc = description.toLowerCase();
   
   const sizeClasses = size === 'lg' 
-    ? 'w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 3xl:w-14 3xl:h-14 4k:w-16 4k:h-16' 
+    ? 'w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 3xl:w-14 3xl:h-14' 
     : 'w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 3xl:w-7 3xl:h-7';
 
   const iconSizeClasses = size === 'lg'
-    ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9 4k:w-12 4k:h-12'
+    ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 3xl:w-9 3xl:h-9'
     : 'w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 3xl:w-5 3xl:h-5';
 
   // Determine icon type, colors and animation with custom weather animations
@@ -262,12 +262,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         {/* Date pills */}
         <div className="flex items-center gap-1.5">
           <div className="bg-gradient-to-r from-amber-500/25 via-amber-400/35 to-amber-500/25 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-amber-400/50 backdrop-blur-sm shadow-[0_0_10px_rgba(251,191,36,0.2)]">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
           <div className="bg-white/15 rounded-full px-2 sm:px-2.5 lg:px-3 xl:px-4 py-0.5 sm:py-1 border border-cyan-400/40 backdrop-blur-sm shadow-[0_0_8px_rgba(6,182,212,0.15)]">
-            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]">
+            <p className="font-semibold text-cyan-300 leading-tight whitespace-nowrap text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]">
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
@@ -280,7 +280,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           <div className="relative flex items-center gap-1 bg-gradient-to-b from-slate-900/95 to-black/95 rounded-lg sm:rounded-xl px-2.5 sm:px-3 lg:px-4 xl:px-5 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.25),inset_0_2px_0_rgba(255,255,255,0.1)]">
             
             {/* Hours */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {hours}
             </span>
             
@@ -291,12 +291,12 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
             </div>
             
             {/* Minutes */}
-            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl 4k:text-6xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
+            <span className="font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-100 via-cyan-300 to-cyan-400 tracking-tight text-xl sm:text-2xl lg:text-3xl xl:text-4xl 3xl:text-5xl drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", letterSpacing: '-0.02em' }}>
               {minutes}
             </span>
             
             {/* Seconds */}
-            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-orange-400 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl 4k:text-2xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)] ml-1" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
+            <span className="font-mono font-bold text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-400 to-orange-400 text-xs sm:text-sm lg:text-base xl:text-lg 3xl:text-xl animate-pulse drop-shadow-[0_0_10px_rgba(251,191,36,0.7)] ml-1" style={{ fontFamily: "'Orbitron', 'SF Mono', monospace" }}>
               {seconds}
             </span>
           </div>
@@ -333,26 +333,26 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 4k:gap-6 justify-end flex-nowrap">
+    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 xl:gap-4 3xl:gap-5 justify-end flex-nowrap">
       {/* City + Weather Info - Compact Card */}
       <div className="relative shrink-0">
         <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/25 to-purple-500/20 rounded-xl blur-md" />
         
-        <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2.5 sm:px-3 lg:px-4 xl:px-5 3xl:px-6 4k:px-8 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 4k:py-5 border border-indigo-500/50 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] min-w-[100px] sm:min-w-[120px] lg:min-w-[150px] xl:min-w-[180px] 3xl:min-w-[220px] 4k:min-w-[280px]">
-          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-lg whitespace-nowrap">
+        <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2.5 sm:px-3 lg:px-4 xl:px-5 3xl:px-6 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border border-indigo-500/50 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] min-w-[100px] sm:min-w-[120px] lg:min-w-[150px] xl:min-w-[180px] 3xl:min-w-[220px]">
+          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-white uppercase tracking-wider text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm drop-shadow-lg whitespace-nowrap">
             Previsão do Tempo
           </span>
           <div className="flex items-center justify-center gap-1 w-full mt-0.5">
-            <MapPin className={`w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 3xl:w-4 3xl:h-4 4k:w-5 4k:h-5 text-amber-400 shrink-0 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
+            <MapPin className={`w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 3xl:w-4 3xl:h-4 text-amber-400 shrink-0 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] transition-all duration-300 ${isTransitioning ? 'opacity-0 scale-75' : 'opacity-100 scale-100 animate-bounce'}`} />
             <span 
               className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 drop-shadow-lg leading-tight transition-all duration-300 ${
                 isTransitioning ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
               } ${
                 displayCity.length > 18 
-                  ? 'text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm' 
+                  ? 'text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs' 
                   : displayCity.length > 12 
-                    ? 'text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base' 
-                    : 'text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base 4k:text-lg'
+                    ? 'text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm' 
+                    : 'text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base'
               }`}
             >
               {displayCity}-MG
@@ -365,15 +365,15 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       <div className="relative shrink-0">
         <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500/25 to-blue-500/20 rounded-xl blur-md opacity-80" />
         
-        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 4k:px-6 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 4k:py-5 border border-cyan-500/50 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
-          <span className="font-bold text-cyan-400 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border border-cyan-500/50 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
+          <span className="font-bold text-cyan-400 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
             Agora
           </span>
           <div className="flex items-baseline">
-            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-50 to-cyan-100 tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-lg" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+            <span className="font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-50 to-cyan-100 tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl drop-shadow-lg" style={{ fontFamily: "'Orbitron', sans-serif" }}>
               {weather.current.temperature}
             </span>
-            <span className="font-bold text-cyan-400 text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]">°C</span>
+            <span className="font-bold text-cyan-400 text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]">°C</span>
           </div>
         </div>
       </div>
@@ -382,16 +382,16 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       <div className="relative shrink-0">
         <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/15 to-orange-500/10 rounded-xl blur-md opacity-70" />
         
-        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 4k:px-6 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 4k:py-5 border border-amber-500/35 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
+        <div className="relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border border-amber-500/35 shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)]">
           {/* Weather Icon */}
-          <div className="scale-100 lg:scale-110 xl:scale-125 3xl:scale-150 4k:scale-[1.75]">
+          <div className="scale-100 lg:scale-110 xl:scale-125 3xl:scale-150">
             <Weather3DIcon description={weather.current.description} size="lg" />
           </div>
           
           {/* Humidity below icon */}
           <div className="flex items-center gap-1 mt-1 lg:mt-1.5 xl:mt-2">
-            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 3xl:w-4 3xl:h-4 4k:w-5 4k:h-5 text-cyan-400 shrink-0 drop-shadow-[0_0_4px_rgba(34,211,238,0.4)]" strokeWidth={1.5} />
-            <span className="font-bold text-cyan-300 tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm 4k:text-base drop-shadow-md">
+            <Droplets className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5 3xl:w-4 3xl:h-4 text-cyan-400 shrink-0 drop-shadow-[0_0_4px_rgba(34,211,238,0.4)]" strokeWidth={1.5} />
+            <span className="font-bold text-cyan-300 tabular-nums text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs 3xl:text-sm drop-shadow-md">
               {weather.current.humidity}%
             </span>
           </div>
@@ -404,21 +404,21 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           showMaxTemp ? 'bg-gradient-to-br from-rose-500/30 to-red-500/20' : 'bg-gradient-to-br from-cyan-500/30 to-blue-500/20'
         }`} />
         
-        <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 4k:px-6 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 4k:py-5 border shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-500 ${
+        <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-2 sm:px-2.5 lg:px-3 xl:px-4 3xl:px-5 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-500 ${
           showMaxTemp ? 'border-rose-500/50' : 'border-cyan-500/50'
         }`}>
-          <span className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm transition-colors duration-500 ${
+          <span className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs transition-colors duration-500 ${
             showMaxTemp ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]' : 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]'
           }`}>
             {showMaxTemp ? 'Máx' : 'Mín'}
           </span>
           <div className="flex items-baseline">
-            <span className={`font-black text-transparent bg-clip-text tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl 4k:text-3xl drop-shadow-lg transition-all duration-500 ${
+            <span className={`font-black text-transparent bg-clip-text tabular-nums text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl drop-shadow-lg transition-all duration-500 ${
               showMaxTemp ? 'bg-gradient-to-b from-white via-rose-50 to-rose-100' : 'bg-gradient-to-b from-white via-cyan-50 to-cyan-100'
             }`} style={{ fontFamily: "'Orbitron', sans-serif" }}>
               {showMaxTemp ? maxTemp : minTemp}
             </span>
-            <span className={`font-bold text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm transition-colors duration-500 ${
+            <span className={`font-bold text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs transition-colors duration-500 ${
               showMaxTemp ? 'text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.5)]' : 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]'
             }`}>°C</span>
           </div>
@@ -448,7 +448,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
               <div className={`relative flex flex-col items-center bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black/90 rounded-lg lg:rounded-xl px-1.5 sm:px-2 lg:px-2.5 xl:px-3 3xl:px-4 py-1.5 sm:py-2 lg:py-2.5 xl:py-3 3xl:py-4 border shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] ${
                 index === 0 ? 'border-amber-500/50' : 'border-purple-500/40'
               }`}>
-                <span className={`font-bold text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm tracking-wide ${
+                <span className={`font-bold text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs tracking-wide ${
                   index === 0 
                     ? 'text-amber-300 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]' 
                     : 'text-purple-300 drop-shadow-[0_0_5px_rgba(168,85,247,0.4)]'
@@ -461,11 +461,11 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
                 </div>
                 
                 <div className="flex items-center gap-1 lg:gap-1.5">
-                  <span className="text-cyan-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-md">
+                  <span className="text-cyan-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs drop-shadow-md">
                     {day.minTemp}°
                   </span>
                   <span className="text-white/50 font-bold text-[6px] lg:text-[8px]">/</span>
-                  <span className="text-orange-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs 4k:text-sm drop-shadow-md">
+                  <span className="text-orange-300 font-bold tabular-nums text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] 3xl:text-xs drop-shadow-md">
                     {day.maxTemp}°
                   </span>
                 </div>
