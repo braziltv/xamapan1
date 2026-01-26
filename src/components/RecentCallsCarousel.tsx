@@ -118,16 +118,18 @@ export function RecentCallsCarousel({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="tv-font-body font-bold text-white truncate text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl drop-shadow-sm">
-                        {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
-                      </p>
-                      <p className={`tv-font-body font-semibold text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg ${
-                        item.type === 'triage' 
-                          ? 'text-cyan-400' 
-                          : 'text-emerald-400'
-                      }`}>
-                        {item.type === 'triage' ? 'Triagem' : 'Médico'}
-                      </p>
+                      <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+                        <p className="tv-font-body font-bold text-white truncate text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl drop-shadow-sm">
+                          {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
+                        </p>
+                        <span className={`shrink-0 px-1 xs:px-1.5 sm:px-2 py-0.5 rounded text-[5px] xs:text-[6px] sm:text-[7px] md:text-[8px] lg:text-[9px] xl:text-[10px] 2xl:text-xs 3xl:text-sm font-bold uppercase tracking-wide shadow-sm ${
+                          item.type === 'triage' 
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        }`}>
+                          {item.type === 'triage' ? 'Triagem' : 'Médico'}
+                        </span>
+                      </div>
                     </div>
                     <span className="text-slate-300 font-mono font-semibold shrink-0 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg">
                       {formatBrazilTime(item.time, 'HH:mm')}
