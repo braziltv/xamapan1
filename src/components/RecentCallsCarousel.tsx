@@ -121,7 +121,11 @@ export function RecentCallsCarousel({
                       <p className="tv-font-body font-bold text-white truncate text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl drop-shadow-sm">
                         {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                       </p>
-                      <p className="tv-font-body text-slate-300 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg">
+                      <p className={`tv-font-body font-semibold text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg ${
+                        item.type === 'triage' 
+                          ? 'text-cyan-400' 
+                          : 'text-emerald-400'
+                      }`}>
                         {item.type === 'triage' ? 'Triagem' : 'Médico'}
                       </p>
                     </div>
