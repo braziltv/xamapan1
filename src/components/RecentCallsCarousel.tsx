@@ -122,7 +122,7 @@ export function RecentCallsCarousel({
                         <p className="tv-font-body font-bold text-white truncate text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl drop-shadow-sm">
                           {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                         </p>
-                        <span className={`shrink-0 px-0.5 xs:px-1 sm:px-1 py-0.5 rounded text-[4px] xs:text-[5px] sm:text-[6px] md:text-[7px] lg:text-[8px] xl:text-[9px] 2xl:text-[10px] 3xl:text-xs font-bold uppercase tracking-wide shadow-sm overflow-hidden relative ${
+                        <span className={`shrink-0 px-1 xs:px-1.5 sm:px-2 md:px-2.5 lg:px-3 py-0.5 rounded text-[4px] xs:text-[5px] sm:text-[6px] md:text-[7px] lg:text-[8px] xl:text-[9px] 2xl:text-[10px] 3xl:text-xs font-bold uppercase tracking-wide shadow-sm overflow-hidden relative ${
                           item.type === 'triage' 
                             ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
                             : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
