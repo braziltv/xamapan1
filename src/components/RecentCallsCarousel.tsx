@@ -127,7 +127,7 @@ export function RecentCallsCarousel({
                             ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
                             : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                         }`}>
-                          <span className="relative z-10">{item.type === 'triage' ? 'Tri' : 'Méd'}</span>
+                          <span className="relative z-10">{item.type === 'triage' ? 'Triagem' : 'Médico'}</span>
                           <span className="absolute inset-0 animate-news-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                         </span>
                       </div>
