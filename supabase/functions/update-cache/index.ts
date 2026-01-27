@@ -118,7 +118,7 @@ function decodeHTMLEntities(text: string): string {
   return decoded;
 }
 
-async function fetchWeatherForCity(city: string): Promise<any | null> {
+async function fetchWeatherForCity(city: string, retryCount = 0): Promise<any | null> {
   try {
     const coords = cityCoordinates[city];
     if (!coords) {
@@ -128,10 +128,18 @@ async function fetchWeatherForCity(city: string): Promise<any | null> {
     
     const response = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America/Sao_Paulo&forecast_days=3`,
-      { signal: AbortSignal.timeout(10000) }
+      { signal: AbortSignal.timeout(15000) }
     );
     
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // Retry up to 2 times on failure
+      if (retryCount < 2) {
+        console.log(`Retrying weather fetch for ${city}, attempt ${retryCount + 2}`);
+        await new Promise(r => setTimeout(r, 1000 * (retryCount + 1)));
+        return fetchWeatherForCity(city, retryCount + 1);
+      }
+      return null;
+    }
     
     const data = await response.json();
     
