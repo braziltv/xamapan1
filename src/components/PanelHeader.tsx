@@ -18,6 +18,9 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName }: PanelHeaderProps) {
   const { currentTime } = useBrazilTime();
+  
+  // Abbreviate "Pronto Atendimento" to "P.A" for display
+  const displayUnitName = unitName.replace(/Pronto Atendimento/gi, 'P.A');
   const { theme, setTheme } = useTheme();
   const [showSettingsPasswordDialog, setShowSettingsPasswordDialog] = useState(false);
   const [isSettingsAuthenticated, setIsSettingsAuthenticated] = useState(false);
@@ -60,7 +63,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                   Chamada de Pacientes
                 </h1>
                 <p className="text-[10px] text-muted-foreground truncate">
-                  {unitName}
+                  {displayUnitName}
                 </p>
               </div>
             </div>
@@ -150,7 +153,7 @@ export function PanelHeader({ isAudioEnabled, onToggleAudio, onLogout, unitName 
                 Chamada de Pacientes
               </h1>
               <p className="text-xs text-muted-foreground truncate max-w-[200px] lg:max-w-none">
-                {unitName}
+                {displayUnitName}
               </p>
               <p className="text-xs text-muted-foreground/70 hidden lg:block">
                 Solução criada por Kalebe Gomes
