@@ -3002,17 +3002,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`tv-font-display break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display break-words transition-all duration-300 text-white ${
                     getNameFontSize(currentTriageCall.name)
-                  } ${
-                    announcingType === 'triage' 
-                      ? 'text-yellow-300 animate-name-mega-pulse' 
-                      : 'shimmer-text animate-text-reveal'
                   }`} style={{ 
                     wordBreak: 'break-word', 
-                    letterSpacing: '0.08em', 
-                    fontWeight: 900,
-                    textShadow: '0 4px 8px rgba(0,0,0,0.5), 0 0 30px rgba(255,255,255,0.2)',
+                    letterSpacing: '0.05em', 
+                    fontWeight: 800,
                   }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
@@ -3091,12 +3086,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className={`absolute inset-0 pointer-events-none ${announcingType === 'doctor' ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' : 'bg-gradient-to-b from-emerald-500/5 to-transparent'}`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`tv-font-display break-words transition-all duration-300 ${getNameFontSize(currentDoctorCall.name)} ${announcingType === 'doctor' ? 'text-yellow-300 animate-name-mega-pulse' : 'shimmer-text animate-text-reveal'}`} 
+                  <h2 className={`tv-font-display break-words transition-all duration-300 text-white ${getNameFontSize(currentDoctorCall.name)}`} 
                       style={{ 
                         wordBreak: 'break-word', 
-                        letterSpacing: '0.08em', 
-                        fontWeight: 900,
-                        textShadow: '0 4px 8px rgba(0,0,0,0.5), 0 0 30px rgba(255,255,255,0.2)',
+                        letterSpacing: '0.05em', 
+                        fontWeight: 800,
                       }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
