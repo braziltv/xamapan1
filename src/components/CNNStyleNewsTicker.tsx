@@ -105,47 +105,26 @@ export function CNNStyleNewsTicker({
             <div className="absolute left-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-r from-gray-900 to-transparent z-10" />
             <div className="absolute right-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-l from-gray-900 to-transparent z-10" />
             
-            {/* Scrolling content */}
-            <div className="animate-marquee whitespace-nowrap inline-flex py-1">
-              {items.map((item, index) => (
-                <span key={index} className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                  <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
+            {/* Scrolling content - GPU accelerated */}
+            <div className="animate-marquee whitespace-nowrap inline-flex py-1 will-change-transform" style={{ transform: 'translateZ(0)' }}>
+              {[...items, ...items].map((item, index) => (
+                <span key={index} className="mx-3 sm:mx-4 lg:mx-6 xl:mx-8 inline-flex items-center gap-1.5 sm:gap-2 lg:gap-3 font-semibold tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                  <span className={`px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 rounded text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-bold inline-flex items-center gap-1 shrink-0 ${getSourceStyle(item.source)}`}>
                     {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
                       <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
+                        <Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 inline" />
+                        <span className="hidden sm:inline">INFORMATIVO</span>
                       </>
                     ) : item.source}
                   </span>
-                  <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
+                  <span className={`${
                     item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
                     item.source === 'Créditos' ? 'text-amber-300' : 
                     'text-white'
                   }`}>
                     {item.title}
                   </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
-                </span>
-              ))}
-              {/* Duplicate for seamless loop */}
-              {items.map((item, index) => (
-                <span key={`dup-${index}`} className="mx-2 xs:mx-3 sm:mx-4 md:mx-5 lg:mx-6 xl:mx-8 inline-flex items-center gap-1 xs:gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 font-semibold tracking-wide text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                  <span className={`px-1.5 xs:px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 py-0.5 xs:py-1 sm:py-1.5 md:py-2 rounded-sm sm:rounded text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl font-bold inline-flex items-center gap-1 ${getSourceStyle(item.source)} ${item.source === '📢 Informativo' ? 'animate-pulse' : ''}`}>
-                    {item.source === 'Créditos' ? '⭐' : item.source === '📢 Informativo' ? (
-                      <>
-                        <Megaphone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-5 lg:h-5 xl:w-6 xl:h-6 inline animate-bounce" />
-                        <span className="hidden xs:inline">INFORMATIVO</span>
-                      </>
-                    ) : item.source}
-                  </span>
-                  <span className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] ${
-                    item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
-                    item.source === 'Créditos' ? 'text-amber-300' : 
-                    'text-white'
-                  }`}>
-                    {item.title}
-                  </span>
-                  <span className="text-red-500 mx-2 xs:mx-3 sm:mx-4 text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl">▸</span>
+                  <span className="text-red-500 mx-2 sm:mx-3 text-sm sm:text-base lg:text-lg xl:text-xl shrink-0">▸</span>
                 </span>
               ))}
             </div>

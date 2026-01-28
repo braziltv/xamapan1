@@ -150,11 +150,8 @@ export default {
           },
         },
         "marquee": {
-          "0%": { transform: "translateX(0%)" },
-          "15%": { transform: "translateX(0%)" },
-          "50%": { transform: "translateX(-100%)" },
-          "65%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(0%)" },
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
         // Weather animations
         "weather-sun-pulse": {
@@ -258,7 +255,7 @@ export default {
         "slide-down-bounce": "slide-down-bounce 0.5s ease-out forwards",
         "shake": "shake 0.5s ease-in-out",
         "glow-pulse": "glow-pulse 1s ease-in-out infinite",
-        "marquee": "marquee 6s linear infinite",
+        "marquee": "marquee 120s linear infinite",
         // Weather animations
         "weather-sun-pulse": "weather-sun-pulse 6s ease-in-out infinite",
         "weather-cloud-drift": "weather-cloud-drift 7s ease-in-out infinite",
