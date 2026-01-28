@@ -2824,7 +2824,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   Painel de Chamadas
                 </h1>
                 <p className="tv-font-body text-amber-300 leading-tight font-semibold text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base 2xl:text-lg 3xl:text-xl drop-shadow-md truncate" title={unitName || 'Unidade de Saúde'}>
-                  {unitName || 'Unidade de Saúde'}
+                  {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 {/* Kalebe Credits - Responsive */}
                 <p className="tv-font-body leading-tight font-bold text-[7px] xs:text-[8px] sm:text-[9px] md:text-[10px] lg:text-xs xl:text-sm 2xl:text-base 3xl:text-lg whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5">
