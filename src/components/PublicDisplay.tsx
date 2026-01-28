@@ -1212,10 +1212,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const playSimpleAudio = useCallback(
     (buffer: ArrayBuffer, volume: number): Promise<void> => {
       return new Promise((resolve, reject) => {
+        console.log('🎵 playSimpleAudio starting:', { bufferSize: buffer.byteLength, volume });
+        
+        if (buffer.byteLength === 0) {
+          const error = new Error('Empty audio buffer');
+          console.error('❌ playSimpleAudio error: empty buffer');
+          reject(error);
+          return;
+        }
+        
         const blob = new Blob([buffer], { type: 'audio/mpeg' });
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         audio.volume = Math.min(1.0, volume);
+        
+        audio.oncanplaythrough = () => {
+          console.log('✅ Audio can play through, duration:', audio.duration);
+        };
         
         audio.onended = () => {
           URL.revokeObjectURL(url);
@@ -1224,8 +1237,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         };
         audio.onerror = (err) => {
           URL.revokeObjectURL(url);
-          console.error('❌ Simple audio playback error:', err);
-          reject(new Error('Audio playback failed'));
+          console.error('❌ Simple audio playback error:', err, audio.error);
+          reject(new Error(`Audio playback failed: ${audio.error?.message || 'unknown error'}`));
         };
         audio.play().catch((err) => {
           URL.revokeObjectURL(url);
@@ -2054,12 +2067,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       destination?: string
     ) => {
       const now = Date.now();
-      console.log('📢 speakName called with:', { name, caller, destination, timestamp: now, isSpeaking: isSpeakingRef.current, audioUnlocked });
+      const audioContextState = audioContextRef.current?.state || 'not-created';
+      console.log('📢 speakName called with:', { 
+        name, 
+        caller, 
+        destination, 
+        timestamp: now, 
+        isSpeaking: isSpeakingRef.current, 
+        audioUnlocked,
+        audioContextState 
+      });
 
       // Check if audio is unlocked first
       if (!audioUnlocked) {
         console.warn('⚠️ Audio not unlocked, cannot speak. User needs to click the screen first.');
+        setTtsError({ message: 'Áudio não desbloqueado. Clique na tela primeiro.', timestamp: new Date() });
         return;
+      }
+
+      // Ensure AudioContext is running
+      if (audioContextRef.current?.state === 'suspended') {
+        console.log('🔄 Resuming suspended AudioContext...');
+        try {
+          await audioContextRef.current.resume();
+          console.log('✅ AudioContext resumed successfully');
+        } catch (err) {
+          console.error('❌ Failed to resume AudioContext:', err);
+        }
       }
 
       // Debounce: ignore calls within 2 seconds of each other FOR THE SAME NAME
@@ -2776,6 +2810,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <p className="text-red-400/70 text-[8px] sm:text-[10px] mt-1">
                   {formatBrazilTime(ttsError.timestamp, 'HH:mm:ss')}
                 </p>
+                {/* Retry button */}
+                <button
+                  onClick={() => {
+                    setTtsError(null);
+                    // Force re-unlock audio context
+                    if (audioContextRef.current?.state === 'suspended') {
+                      audioContextRef.current.resume().then(() => {
+                        console.log('✅ AudioContext resumed via retry button');
+                      }).catch(err => {
+                        console.error('❌ Failed to resume AudioContext:', err);
+                      });
+                    }
+                  }}
+                  className="mt-2 text-[10px] sm:text-xs text-red-300 underline hover:text-red-200 transition-colors"
+                >
+                  Tentar novamente
+                </button>
               </div>
               <button
                 onClick={() => setTtsError(null)}
