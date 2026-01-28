@@ -2851,14 +2851,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </button>
       )}
 
-      {/* Animated 3D background elements - Floating orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Primary orbs with 3D float animation */}
-        <div className="absolute top-[5%] left-[5%] w-[25vw] h-[25vw] max-w-[300px] max-h-[300px] bg-gradient-to-br from-indigo-500/20 to-purple-600/15 rounded-full blur-[80px] animate-float-orb" />
-        <div className="absolute bottom-[10%] right-[5%] w-[20vw] h-[20vw] max-w-[250px] max-h-[250px] bg-gradient-to-br from-emerald-500/20 to-cyan-500/15 rounded-full blur-[60px] animate-float-orb-slow" />
-        <div className="absolute top-[40%] right-[15%] w-[15vw] h-[15vw] max-w-[180px] max-h-[180px] bg-gradient-to-br from-rose-500/15 to-orange-500/10 rounded-full blur-[50px] animate-float-orb-fast" />
-        <div className="absolute bottom-[30%] left-[10%] w-[18vw] h-[18vw] max-w-[200px] max-h-[200px] bg-gradient-to-br from-blue-500/15 to-violet-500/10 rounded-full blur-[70px] animate-float-orb" style={{ animationDelay: '-5s' }} />
-        <div className="absolute top-[60%] left-[50%] w-[12vw] h-[12vw] max-w-[150px] max-h-[150px] bg-gradient-to-br from-teal-500/15 to-green-500/10 rounded-full blur-[40px] animate-float-orb-slow" style={{ animationDelay: '-10s' }} />
+      {/* Lightweight static background elements - reduced GPU load */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-60">
+        <div className="absolute top-[5%] left-[5%] w-[20vw] h-[20vw] max-w-[250px] max-h-[250px] bg-indigo-600/15 rounded-full blur-[60px]" />
+        <div className="absolute bottom-[10%] right-[5%] w-[18vw] h-[18vw] max-w-[200px] max-h-[200px] bg-emerald-600/15 rounded-full blur-[50px]" />
+        <div className="absolute top-[50%] left-[50%] w-[15vw] h-[15vw] max-w-[180px] max-h-[180px] bg-cyan-600/10 rounded-full blur-[50px] -translate-x-1/2 -translate-y-1/2" />
       </div>
 
       {/* Dimming overlay when announcing - darkens everything except active call */}
@@ -2866,59 +2863,66 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="fixed inset-0 z-[15] bg-black/70 animate-[fadeIn_0.3s_ease-out] pointer-events-none" />
       )}
 
-      {/* Header - 3D Modern gradient bar with glow - fully responsive for all TV resolutions */}
+      {/* Header - Optimized for TV performance with high contrast text */}
       <div className={`relative z-10 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}
-           style={{ marginBottom: `clamp(0.125rem, ${0.5 * responsiveScale}vw, 1rem)` }}>
-        <div className="glass-3d animate-header-glow tv-card-3d relative overflow-visible"
+           style={{ marginBottom: `clamp(0.25rem, ${0.6 * responsiveScale}vw, 1rem)` }}>
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-900/95 via-indigo-950/95 to-slate-900/95 border border-indigo-500/40"
              style={{
-               borderRadius: `clamp(0.375rem, ${1 * responsiveScale}vw, 1rem)`,
-               padding: `clamp(0.25rem, ${0.8 * responsiveScale}vw, 1rem) clamp(0.5rem, ${1.5 * responsiveScale}vw, 2.5rem)`,
-               margin: `0 clamp(0.25rem, ${1 * responsiveScale}vw, 2rem)`,
+               borderRadius: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.25rem)`,
+               padding: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.25rem) clamp(0.75rem, ${1.5 * responsiveScale}vw, 2.5rem)`,
+               margin: `0 clamp(0.5rem, ${1 * responsiveScale}vw, 2rem)`,
+               boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
              }}>
-          {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/30 via-purple-600/40 to-indigo-600/30 opacity-80" style={{ borderRadius: 'inherit' }} />
-          {/* Top highlight line */}
-          <div className="absolute top-0 left-[10%] w-[80%] h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
-          {/* Bottom subtle line */}
-          <div className="absolute bottom-0 left-[20%] w-[60%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          {/* Simple top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500" style={{ borderRadius: 'inherit' }} />
           
-          <div className="flex items-center relative z-10 w-full" style={{ gap: `clamp(0.375rem, ${1.5 * responsiveScale}vw, 2rem)` }}>
-            {/* Left: Logo + Title with 3D effect - fluid sizing */}
-            <div className="flex items-center shrink-0" style={{ gap: `clamp(0.375rem, ${0.8 * responsiveScale}vw, 1.25rem)` }}>
-              <div className="relative shrink-0" 
+          <div className="flex items-center relative z-10 w-full" style={{ gap: `clamp(0.5rem, ${1.5 * responsiveScale}vw, 2.5rem)` }}>
+            {/* Left: Logo + Title - Clean and Legible */}
+            <div className="flex items-center shrink-0" style={{ gap: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.5rem)` }}>
+              {/* Logo container - simplified */}
+              <div className="relative shrink-0 bg-white rounded-lg shadow-lg flex items-center justify-center" 
                    style={{ 
-                     width: `clamp(2rem, ${4 * responsiveScale}vw, 5rem)`,
-                     height: `clamp(2rem, ${4 * responsiveScale}vw, 5rem)`,
+                     width: `clamp(2.5rem, ${4 * responsiveScale}vw, 5rem)`,
+                     height: `clamp(2.5rem, ${4 * responsiveScale}vw, 5rem)`,
                    }}>
-                {/* Glow behind logo */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 blur-md opacity-70" style={{ borderRadius: `clamp(0.25rem, ${0.5 * responsiveScale}vw, 1rem)` }} />
-                <div className="relative w-full h-full bg-white/95 flex items-center justify-center shadow-2xl" style={{ borderRadius: `clamp(0.25rem, ${0.5 * responsiveScale}vw, 1rem)` }}>
-                  <HealthCrossIcon size={32} style={{ width: `clamp(1rem, ${2.5 * responsiveScale}vw, 3.5rem)`, height: `clamp(1rem, ${2.5 * responsiveScale}vw, 3.5rem)` }} />
-                </div>
+                <HealthCrossIcon size={32} style={{ width: `clamp(1.25rem, ${2.5 * responsiveScale}vw, 3.5rem)`, height: `clamp(1.25rem, ${2.5 * responsiveScale}vw, 3.5rem)` }} />
               </div>
-              <div className="shrink-0" style={{ minWidth: `clamp(5rem, ${15 * responsiveScale}vw, 24rem)` }}>
-                <h1 className="tv-font-heading font-bold shimmer-text leading-tight whitespace-nowrap drop-shadow-lg"
-                    style={{ fontSize: `clamp(0.75rem, ${1.8 * responsiveScale}vw, 2.5rem)` }}>
+              
+              {/* Text content - high contrast */}
+              <div className="flex flex-col justify-center">
+                <h1 className="tv-font-heading font-black text-white leading-none whitespace-nowrap tracking-tight"
+                    style={{ 
+                      fontSize: `clamp(1rem, ${2 * responsiveScale}vw, 2.75rem)`,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(6,182,212,0.3)',
+                    }}>
                   Painel de Chamadas
                 </h1>
-                <p className="tv-font-body text-amber-300 leading-tight font-semibold drop-shadow-md truncate" 
+                <p className="tv-font-body text-amber-400 leading-tight font-bold truncate max-w-[20vw] lg:max-w-[25vw]" 
                    title={unitName || 'Unidade de Saúde'}
-                   style={{ fontSize: `clamp(0.5rem, ${1 * responsiveScale}vw, 1.25rem)` }}>
+                   style={{ 
+                     fontSize: `clamp(0.625rem, ${1.1 * responsiveScale}vw, 1.5rem)`,
+                     textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                     marginTop: `clamp(0.125rem, ${0.2 * responsiveScale}vw, 0.375rem)`,
+                   }}>
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
-                {/* Kalebe Credits - Responsive */}
-                <p className="tv-font-body leading-tight font-bold whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] animate-pulse mt-0.5"
-                   style={{ fontSize: `clamp(0.4375rem, ${0.7 * responsiveScale}vw, 1rem)` }}>
+                {/* Kalebe Credits */}
+                <p className="tv-font-body leading-tight font-semibold whitespace-nowrap text-yellow-300/90"
+                   style={{ 
+                     fontSize: `clamp(0.5rem, ${0.7 * responsiveScale}vw, 1rem)`,
+                     marginTop: `clamp(0.125rem, ${0.15 * responsiveScale}vw, 0.25rem)`,
+                     textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                   }}>
                   ✨ Solução criada por Kalebe Gomes
                 </p>
               </div>
             </div>
             
-            {/* Animated separator - hidden on very small screens */}
-            <div className="hidden xs:block w-px bg-gradient-to-b from-transparent via-white/50 to-transparent shrink-0" 
-                 style={{ height: `clamp(1.5rem, ${3 * responsiveScale}vw, 4rem)` }} />
+            {/* Separator */}
+            <div className="hidden sm:block w-0.5 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent shrink-0" 
+                 style={{ height: `clamp(2rem, ${4 * responsiveScale}vw, 5rem)` }} />
             
-            {/* Right: Weather + Clock - takes remaining space */}
+            {/* Right: Weather + Clock */}
             <div className="flex-1 flex items-center justify-end min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
