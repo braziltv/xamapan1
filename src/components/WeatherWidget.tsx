@@ -334,18 +334,22 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 justify-end flex-nowrap">
-      {/* City Card - Compact */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-indigo-500/50 shadow-lg">
+      {/* City Card - Allow text wrap for long names */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-indigo-500/50 shadow-lg min-w-[70px] sm:min-w-[90px] lg:min-w-[110px] max-w-[120px] sm:max-w-[150px] lg:max-w-[180px]">
         <span className="font-bold text-slate-400 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] whitespace-nowrap">
           Previsão
         </span>
-        <div className="flex items-center gap-1 mt-0.5">
+        <div className="flex items-center gap-1 mt-0.5 w-full justify-center">
           <MapPin className={`w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
           <span 
-            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 whitespace-nowrap ${
+            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 text-center ${
               isTransitioning ? 'opacity-0' : 'opacity-100'
-            } text-[10px] sm:text-xs lg:text-sm xl:text-base`}
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
+            } text-[9px] sm:text-[10px] lg:text-xs xl:text-sm`}
+            style={{ 
+              textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+              wordBreak: 'break-word',
+              hyphens: 'auto',
+            }}
           >
             {displayCity}-MG
           </span>
