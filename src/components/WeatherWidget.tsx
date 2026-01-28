@@ -351,7 +351,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
               hyphens: 'auto',
             }}
           >
-            {displayCity}-MG
+            {displayCity}
           </span>
         </div>
       </div>
