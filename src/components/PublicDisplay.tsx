@@ -3037,12 +3037,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                        }}>
                     <Activity className="text-blue-400/60" style={{ width: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)`, height: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)` }} />
                   </div>
-                  <p className={`text-slate-200 text-center font-bold drop-shadow-lg transition-opacity duration-500 ${
+                  <p className={`text-white text-center font-black drop-shadow-lg transition-opacity duration-500 ${
                     waitingPhraseVisible ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{ 
-                    fontSize: `clamp(0.875rem, ${1.8 * responsiveScale}vw, 2.5rem)`,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                    fontSize: `clamp(1.25rem, ${3 * responsiveScale}vw, 4rem)`,
+                    textShadow: '0 3px 8px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.2)',
+                    letterSpacing: '0.05em',
                   }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
@@ -3114,10 +3115,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                        style={{ width: `clamp(3rem, ${8 * responsiveScale}vw, 10rem)`, height: `clamp(3rem, ${8 * responsiveScale}vw, 10rem)`, marginBottom: `clamp(0.25rem, ${0.6 * responsiveScale}vw, 1rem)` }}>
                     <Stethoscope className="text-emerald-400/60" style={{ width: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)`, height: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)` }} />
                   </div>
-                  <p className={`text-slate-200 text-center font-bold drop-shadow-lg transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  <p className={`text-white text-center font-black drop-shadow-lg transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                      style={{ 
-                       fontSize: `clamp(0.875rem, ${1.8 * responsiveScale}vw, 2.5rem)`,
-                       textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                       fontSize: `clamp(1.25rem, ${3 * responsiveScale}vw, 4rem)`,
+                       textShadow: '0 3px 8px rgba(0,0,0,0.7), 0 0 20px rgba(255,255,255,0.2)',
+                       letterSpacing: '0.05em',
                      }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
