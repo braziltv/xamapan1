@@ -217,32 +217,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   };
 
   // Get dynamic font size based on name length and current resolution
-  // Optimized for landscape TV displays - uses CSS clamp for fluid sizing
+  // Optimized for landscape TV displays - INCREASED SIZES for better visibility
   const getNameFontSize = useCallback((name: string): string => {
     const length = name?.length || 0;
     const { tier, scale } = tvResolution;
     
-    // Base classes that scale with viewport
+    // Base classes that scale with viewport - BOLDER and LARGER
     const baseClasses = 'leading-tight';
     
-    // Very short names (1-15 chars) - largest size
+    // Very short names (1-15 chars) - EXTRA LARGE size
     if (length <= 15) {
-      return `${baseClasses} text-[clamp(1.5rem,${6 * scale}vw,6rem)]`;
+      return `${baseClasses} text-[clamp(2.5rem,${8 * scale}vw,9rem)]`;
     }
-    // Short names (16-25 chars) - large size
+    // Short names (16-25 chars) - LARGE size
     if (length <= 25) {
-      return `${baseClasses} text-[clamp(1.25rem,${5 * scale}vw,5rem)]`;
+      return `${baseClasses} text-[clamp(2rem,${7 * scale}vw,7.5rem)]`;
     }
-    // Medium names (26-35 chars) - medium size
+    // Medium names (26-35 chars) - MEDIUM-LARGE size
     if (length <= 35) {
-      return `${baseClasses} text-[clamp(1rem,${4 * scale}vw,4rem)]`;
+      return `${baseClasses} text-[clamp(1.5rem,${5.5 * scale}vw,6rem)]`;
     }
-    // Long names (36-45 chars) - smaller size
+    // Long names (36-45 chars) - MEDIUM size
     if (length <= 45) {
-      return `${baseClasses} text-[clamp(0.875rem,${3.5 * scale}vw,3.5rem)]`;
+      return `${baseClasses} text-[clamp(1.25rem,${4.5 * scale}vw,5rem)]`;
     }
-    // Very long names (46+ chars) - smallest readable size
-    return `${baseClasses} text-[clamp(0.75rem,${3 * scale}vw,3rem)]`;
+    // Very long names (46+ chars) - readable size
+    return `${baseClasses} text-[clamp(1rem,${4 * scale}vw,4.5rem)]`;
   }, [tvResolution]);
 
   // Resolve unit_name used by marketing tables (they store the unit "name")
@@ -3002,21 +3002,27 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               }`} />
               {currentTriageCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
-                  <h2 className={`tv-font-display font-[900] break-words transition-all duration-300 ${
+                  <h2 className={`tv-font-display break-words transition-all duration-300 ${
                     getNameFontSize(currentTriageCall.name)
                   } ${
                     announcingType === 'triage' 
                       ? 'text-yellow-300 animate-name-mega-pulse' 
                       : 'shimmer-text animate-text-reveal'
-                  }`} style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentTriageCall.name}>
+                  }`} style={{ 
+                    wordBreak: 'break-word', 
+                    letterSpacing: '0.08em', 
+                    fontWeight: 900,
+                    textShadow: '0 4px 8px rgba(0,0,0,0.5), 0 0 30px rgba(255,255,255,0.2)',
+                  }} key={currentTriageCall.name}>
                     {formatPatientName(currentTriageCall.name)}
                   </h2>
-                  <p className={`tv-font-body font-semibold drop-shadow-lg tracking-wide uppercase ${
+                  <p className={`tv-font-body font-black drop-shadow-lg tracking-widest uppercase ${
                     announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-300'
                   }`}
                   style={{
-                    marginTop: `clamp(0.25rem, ${0.8 * responsiveScale}vw, 1.25rem)`,
-                    fontSize: `clamp(0.75rem, ${1.8 * responsiveScale}vw, 2.5rem)`,
+                    marginTop: `clamp(0.5rem, ${1.2 * responsiveScale}vw, 2rem)`,
+                    fontSize: `clamp(1rem, ${2.5 * responsiveScale}vw, 3.5rem)`,
+                    textShadow: '0 2px 6px rgba(0,0,0,0.6)',
                   }}>
                     {currentTriageCall.destination || 'Triagem'}
                   </p>
@@ -3031,10 +3037,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                        }}>
                     <Activity className="text-blue-400/60" style={{ width: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)`, height: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)` }} />
                   </div>
-                  <p className={`text-slate-300 text-center font-medium drop-shadow-md transition-opacity duration-500 ${
+                  <p className={`text-slate-200 text-center font-bold drop-shadow-lg transition-opacity duration-500 ${
                     waitingPhraseVisible ? 'opacity-100' : 'opacity-0'
                   }`}
-                  style={{ fontSize: `clamp(0.625rem, ${1.2 * responsiveScale}vw, 1.875rem)` }}>
+                  style={{ 
+                    fontSize: `clamp(0.875rem, ${1.8 * responsiveScale}vw, 2.5rem)`,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                  }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
                 </div>
@@ -3081,12 +3090,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className={`absolute inset-0 pointer-events-none ${announcingType === 'doctor' ? 'bg-gradient-to-b from-yellow-500/20 to-transparent' : 'bg-gradient-to-b from-emerald-500/5 to-transparent'}`} />
               {currentDoctorCall ? (
                 <div className={`text-center w-full transition-all duration-300 relative z-10 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
-                  <h2 className={`tv-font-display font-[900] break-words transition-all duration-300 ${getNameFontSize(currentDoctorCall.name)} ${announcingType === 'doctor' ? 'text-yellow-300 animate-name-mega-pulse' : 'shimmer-text animate-text-reveal'}`} 
-                      style={{ wordBreak: 'break-word', letterSpacing: '0.05em', fontWeight: 900 }} key={currentDoctorCall.name}>
+                  <h2 className={`tv-font-display break-words transition-all duration-300 ${getNameFontSize(currentDoctorCall.name)} ${announcingType === 'doctor' ? 'text-yellow-300 animate-name-mega-pulse' : 'shimmer-text animate-text-reveal'}`} 
+                      style={{ 
+                        wordBreak: 'break-word', 
+                        letterSpacing: '0.08em', 
+                        fontWeight: 900,
+                        textShadow: '0 4px 8px rgba(0,0,0,0.5), 0 0 30px rgba(255,255,255,0.2)',
+                      }} key={currentDoctorCall.name}>
                     {formatPatientName(currentDoctorCall.name)}
                   </h2>
-                  <p className={`tv-font-body font-semibold drop-shadow-lg tracking-wide uppercase ${announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'}`}
-                     style={{ marginTop: `clamp(0.25rem, ${0.8 * responsiveScale}vw, 1.25rem)`, fontSize: `clamp(0.75rem, ${1.8 * responsiveScale}vw, 2.5rem)` }}>
+                  <p className={`tv-font-body font-black drop-shadow-lg tracking-widest uppercase ${announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'}`}
+                     style={{ 
+                       marginTop: `clamp(0.5rem, ${1.2 * responsiveScale}vw, 2rem)`, 
+                       fontSize: `clamp(1rem, ${2.5 * responsiveScale}vw, 3.5rem)`,
+                       textShadow: '0 2px 6px rgba(0,0,0,0.6)',
+                     }}>
                     {currentDoctorCall.destination || 'Consultório'}
                   </p>
                 </div>
@@ -3096,8 +3114,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                        style={{ width: `clamp(3rem, ${8 * responsiveScale}vw, 10rem)`, height: `clamp(3rem, ${8 * responsiveScale}vw, 10rem)`, marginBottom: `clamp(0.25rem, ${0.6 * responsiveScale}vw, 1rem)` }}>
                     <Stethoscope className="text-emerald-400/60" style={{ width: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)`, height: `clamp(1.5rem, ${4 * responsiveScale}vw, 5rem)` }} />
                   </div>
-                  <p className={`text-slate-300 text-center font-medium drop-shadow-md transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
-                     style={{ fontSize: `clamp(0.625rem, ${1.2 * responsiveScale}vw, 1.875rem)` }}>
+                  <p className={`text-slate-200 text-center font-bold drop-shadow-lg transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                     style={{ 
+                       fontSize: `clamp(0.875rem, ${1.8 * responsiveScale}vw, 2.5rem)`,
+                       textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                     }}>
                     {WAITING_PHRASES[currentWaitingPhraseIndex]}
                   </p>
                 </div>
