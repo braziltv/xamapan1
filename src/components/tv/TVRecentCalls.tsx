@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Activity, Stethoscope, Clock } from 'lucide-react';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
+import { useTVResolution } from '@/hooks/useTVResolution';
 
 interface HistoryItem {
   id: string;
@@ -25,6 +26,7 @@ export function TVRecentCalls({
   maskNameAfterOneMinute,
   isAnnouncing
 }: TVRecentCallsProps) {
+  const { scale } = useTVResolution();
   const [currentPage, setCurrentPage] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 

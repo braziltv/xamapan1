@@ -251,52 +251,52 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Clean digital clock design - high contrast and legible
+  // Clean digital clock design - compact and responsive
   const renderDateTimeCompact = () => {
     const hours = safeFormatTime(currentTime, 'HH');
     const minutes = safeFormatTime(currentTime, 'mm');
     const seconds = safeFormatTime(currentTime, 'ss');
     
     return (
-      <div className="flex flex-col items-center gap-1.5 shrink-0">
-        {/* Date pills - solid colors for legibility */}
-        <div className="flex items-center gap-2">
-          <div className="bg-amber-500/30 rounded-full px-3 sm:px-3.5 lg:px-4 xl:px-5 py-1 sm:py-1.5 border border-amber-400/60">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base"
+      <div className="flex flex-col items-center gap-1 shrink-0">
+        {/* Date pills - compact */}
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <div className="bg-amber-500/30 rounded-full px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 border border-amber-400/60">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px]"
                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
-          <div className="bg-slate-800/80 rounded-full px-3 sm:px-3.5 lg:px-4 xl:px-5 py-1 sm:py-1.5 border border-slate-600/60">
-            <p className="font-semibold text-white leading-tight whitespace-nowrap text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 3xl:text-base"
+          <div className="bg-slate-800/80 rounded-full px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 border border-slate-600/60">
+            <p className="font-semibold text-white leading-tight whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px]"
                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
         </div>
         
-        {/* Digital Clock Display - clean and bold */}
-        <div className="flex items-center bg-slate-900/95 rounded-xl px-3 sm:px-4 lg:px-5 xl:px-6 py-1.5 sm:py-2 lg:py-2.5 border border-cyan-500/50 shadow-lg">
+        {/* Digital Clock Display - compact */}
+        <div className="flex items-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-lg">
           {/* Hours */}
-          <span className="font-mono font-black text-cyan-300 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 3xl:text-6xl" 
+          <span className="font-mono font-black text-cyan-300 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl" 
                 style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
             {hours}
           </span>
           
           {/* Colon separator */}
-          <div className="flex flex-col items-center justify-center gap-1.5 mx-1.5">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-2.5 lg:h-2.5 rounded-full bg-cyan-400" />
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 lg:w-2.5 lg:h-2.5 rounded-full bg-cyan-400" />
+          <div className="flex flex-col items-center justify-center gap-1 mx-1">
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400" />
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400" />
           </div>
           
           {/* Minutes */}
-          <span className="font-mono font-black text-cyan-300 tracking-tight text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 3xl:text-6xl" 
+          <span className="font-mono font-black text-cyan-300 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl" 
                 style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
             {minutes}
           </span>
           
           {/* Seconds */}
-          <span className="font-mono font-bold text-amber-400 text-sm sm:text-base lg:text-lg xl:text-xl 3xl:text-2xl ml-2" 
+          <span className="font-mono font-bold text-amber-400 text-xs sm:text-sm lg:text-base xl:text-lg ml-1.5" 
                 style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 10px rgba(251,191,36,0.5)' }}>
             {seconds}
           </span>
@@ -333,23 +333,22 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 xl:gap-3 justify-end flex-nowrap">
-      {/* City Card - Allow text wrap for long names */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-indigo-500/50 shadow-lg min-w-[70px] sm:min-w-[90px] lg:min-w-[110px] max-w-[120px] sm:max-w-[150px] lg:max-w-[180px]">
-        <span className="font-bold text-slate-400 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] whitespace-nowrap">
+    <div className="w-full flex items-center gap-1 sm:gap-1.5 lg:gap-2 justify-end flex-nowrap overflow-hidden">
+      {/* City Card - Compact and responsive */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-indigo-500/50 shadow-lg">
+        <span className="font-bold text-slate-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] whitespace-nowrap">
           Previsão
         </span>
-        <div className="flex items-center gap-1 mt-0.5 w-full justify-center">
-          <MapPin className={`w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
+        <div className="flex items-center gap-0.5 mt-0.5 justify-center max-w-[80px] sm:max-w-[100px] lg:max-w-[120px]">
+          <MapPin className={`w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-amber-400 shrink-0 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
           <span 
-            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 text-center ${
+            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 truncate ${
               isTransitioning ? 'opacity-0' : 'opacity-100'
-            } text-[9px] sm:text-[10px] lg:text-xs xl:text-sm`}
+            } text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs`}
             style={{ 
               textShadow: '0 1px 2px rgba(0,0,0,0.6)',
-              wordBreak: 'break-word',
-              hyphens: 'auto',
             }}
+            title={displayCity}
           >
             {displayCity}
           </span>
@@ -357,27 +356,27 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       </div>
 
       {/* Current Temperature - Compact */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-cyan-500/50 shadow-lg">
-        <span className="font-bold text-cyan-400 uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] whitespace-nowrap">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-lg">
+        <span className="font-bold text-cyan-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] whitespace-nowrap">
           Agora
         </span>
         <div className="flex items-baseline gap-0.5 whitespace-nowrap">
-          <span className="font-black text-white tabular-nums text-lg sm:text-xl lg:text-2xl xl:text-3xl" 
+          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-xl xl:text-2xl" 
                 style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 10px rgba(255,255,255,0.4)' }}>
             {weather.current.temperature}
           </span>
-          <span className="font-bold text-cyan-400 text-xs sm:text-sm lg:text-base">°C</span>
+          <span className="font-bold text-cyan-400 text-[8px] sm:text-[10px] lg:text-xs">°C</span>
         </div>
       </div>
 
       {/* Weather Icon + Humidity - Compact */}
-      <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-amber-500/50 shadow-lg">
-        <div className="scale-90 lg:scale-100">
-          <Weather3DIcon description={weather.current.description} size="lg" />
+      <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-amber-500/50 shadow-lg">
+        <div className="scale-75 lg:scale-90">
+          <Weather3DIcon description={weather.current.description} size="sm" />
         </div>
-        <div className="flex items-center gap-0.5 mt-1">
-          <Droplets className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-cyan-400 shrink-0" strokeWidth={1.5} />
-          <span className="font-bold text-cyan-300 tabular-nums text-[10px] sm:text-xs lg:text-sm"
+        <div className="flex items-center gap-0.5 mt-0.5">
+          <Droplets className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-cyan-400 shrink-0" strokeWidth={1.5} />
+          <span className="font-bold text-cyan-300 tabular-nums text-[8px] sm:text-[9px] lg:text-[10px]"
                 style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
             {weather.current.humidity}%
           </span>
@@ -385,46 +384,25 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       </div>
 
       {/* Max/Min Temperature - Compact */}
-      <div className={`shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border shadow-lg transition-colors duration-500 ${
+      <div className={`shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border shadow-lg transition-colors duration-500 ${
         showMaxTemp ? 'border-rose-500/50' : 'border-cyan-500/50'
       }`}>
-        <span className={`font-bold uppercase tracking-wider text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] transition-colors duration-500 ${
+        <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] transition-colors duration-500 ${
           showMaxTemp ? 'text-rose-400' : 'text-cyan-400'
         }`}>
           {showMaxTemp ? 'Máx' : 'Mín'}
         </span>
         <div className="flex items-baseline gap-0.5">
-          <span className={`font-black tabular-nums text-lg sm:text-xl lg:text-2xl xl:text-3xl transition-colors duration-500 ${
+          <span className={`font-black tabular-nums text-sm sm:text-base lg:text-xl xl:text-2xl transition-colors duration-500 ${
             showMaxTemp ? 'text-rose-300' : 'text-cyan-300'
           }`} style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 6px rgba(255,255,255,0.2)' }}>
             {showMaxTemp ? maxTemp : minTemp}
           </span>
-          <span className={`font-bold text-xs sm:text-sm lg:text-base transition-colors duration-500 ${
+          <span className={`font-bold text-[8px] sm:text-[10px] lg:text-xs transition-colors duration-500 ${
             showMaxTemp ? 'text-rose-400' : 'text-cyan-400'
           }`}>°C</span>
         </div>
       </div>
-
-      {/* Forecast - Only 1 card for space */}
-      {weather.forecast?.[0] && (
-        <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-purple-500/50 shadow-lg">
-          <span className="font-bold text-purple-400 text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px] tracking-wide">
-            HOJE
-          </span>
-          <div className="my-1 scale-75 lg:scale-90">
-            <Weather3DIcon description={weather.forecast[0].icon || 'cloud'} size="sm" />
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-cyan-300 font-bold tabular-nums text-[9px] sm:text-[10px] lg:text-xs">
-              {weather.forecast[0].minTemp}°
-            </span>
-            <span className="text-slate-500 text-[8px]">/</span>
-            <span className="text-orange-400 font-bold tabular-nums text-[9px] sm:text-[10px] lg:text-xs">
-              {weather.forecast[0].maxTemp}°
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Date + Clock - Compact */}
       {renderDateTimeCompact()}

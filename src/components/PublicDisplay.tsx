@@ -3013,17 +3013,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             ) : (
               <div className="text-center px-4">
                 <div 
-                  className="mx-auto rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse mb-4"
-                  style={{ width: '5rem', height: '5rem' }}
+                  className="mx-auto rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse mb-3"
+                  style={{ width: '4rem', height: '4rem' }}
                 >
-                  <Activity className="text-blue-400/60" style={{ width: '2.5rem', height: '2.5rem' }} />
+                  <Activity className="text-blue-400/60" style={{ width: '2rem', height: '2rem' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-black transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 max-w-[90%] mx-auto ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: '2.25rem',
-                    lineHeight: '1.3',
-                    textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.2)',
+                    fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
+                    lineHeight: '1.4',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
                     letterSpacing: '0.04em',
                   }}
                 >
@@ -3100,18 +3100,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             ) : (
               <div className="text-center px-4">
                 <div 
-                  className="mx-auto rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse mb-4"
-                  style={{ width: '5rem', height: '5rem' }}
+                  className="mx-auto rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse mb-3"
+                  style={{ width: '4rem', height: '4rem' }}
                 >
-                  <Stethoscope className="text-emerald-400/60" style={{ width: '2.5rem', height: '2.5rem' }} />
+                  <Stethoscope className="text-emerald-400/60" style={{ width: '2rem', height: '2rem' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-black transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 max-w-[90%] mx-auto ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: '2.25rem',
-                    lineHeight: '1.3',
-                    textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.2)',
-                    letterSpacing: '0.04em',
+                    fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
+                    lineHeight: '1.4',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
                   }}
                 >
                   {WAITING_PHRASES[currentWaitingPhraseIndex]}
