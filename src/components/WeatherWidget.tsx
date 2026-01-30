@@ -251,53 +251,53 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Clean digital clock design - compact and responsive
+  // Clean digital clock design - LARGER and more visible
   const renderDateTimeCompact = () => {
     const hours = safeFormatTime(currentTime, 'HH');
     const minutes = safeFormatTime(currentTime, 'mm');
     const seconds = safeFormatTime(currentTime, 'ss');
     
     return (
-      <div className="flex flex-col items-center gap-1 shrink-0">
-        {/* Date pills - compact */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <div className="bg-amber-500/30 rounded-full px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 border border-amber-400/60">
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px]"
-               style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+      <div className="flex flex-col items-center gap-1.5 shrink-0">
+        {/* Date pills - more visible */}
+        <div className="flex items-center gap-2">
+          <div className="bg-amber-500/30 rounded-full px-3 py-1 border border-amber-400/60">
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide"
+               style={{ fontSize: 'clamp(0.6rem, 1vw, 0.875rem)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
-          <div className="bg-slate-800/80 rounded-full px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 border border-slate-600/60">
-            <p className="font-semibold text-white leading-tight whitespace-nowrap text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px]"
-               style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+          <div className="bg-slate-800/80 rounded-full px-3 py-1 border border-slate-600/60">
+            <p className="font-semibold text-white leading-tight whitespace-nowrap"
+               style={{ fontSize: 'clamp(0.6rem, 1vw, 0.875rem)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
         </div>
         
-        {/* Digital Clock Display - compact */}
-        <div className="flex items-center bg-slate-900/95 rounded-lg px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-lg">
+        {/* Digital Clock Display - LARGER */}
+        <div className="flex items-center bg-slate-900/95 rounded-xl px-4 py-2 border-2 border-cyan-500/50 shadow-lg">
           {/* Hours */}
-          <span className="font-mono font-black text-cyan-300 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl" 
-                style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
+          <span className="font-mono font-black text-cyan-300 tracking-tight" 
+                style={{ fontSize: 'clamp(1.5rem, 3vw, 3rem)', fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
             {hours}
           </span>
           
           {/* Colon separator */}
-          <div className="flex flex-col items-center justify-center gap-1 mx-1">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400" />
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 rounded-full bg-cyan-400" />
+          <div className="flex flex-col items-center justify-center gap-1.5 mx-2">
+            <div className="w-2 h-2 rounded-full bg-cyan-400" />
+            <div className="w-2 h-2 rounded-full bg-cyan-400" />
           </div>
           
           {/* Minutes */}
-          <span className="font-mono font-black text-cyan-300 tracking-tight text-lg sm:text-xl lg:text-2xl xl:text-3xl" 
-                style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
+          <span className="font-mono font-black text-cyan-300 tracking-tight" 
+                style={{ fontSize: 'clamp(1.5rem, 3vw, 3rem)', fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 15px rgba(6,182,212,0.6)' }}>
             {minutes}
           </span>
           
           {/* Seconds */}
-          <span className="font-mono font-bold text-amber-400 text-xs sm:text-sm lg:text-base xl:text-lg ml-1.5" 
-                style={{ fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 10px rgba(251,191,36,0.5)' }}>
+          <span className="font-mono font-bold text-amber-400 ml-2" 
+                style={{ fontSize: 'clamp(0.875rem, 1.5vw, 1.5rem)', fontFamily: "'Orbitron', 'SF Mono', monospace", textShadow: '0 0 10px rgba(251,191,36,0.5)' }}>
             {seconds}
           </span>
         </div>
@@ -333,21 +333,20 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1 sm:gap-1.5 lg:gap-2 justify-end flex-nowrap overflow-hidden">
-      {/* City Card - Compact and responsive */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-indigo-500/50 shadow-lg">
-        <span className="font-bold text-slate-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] whitespace-nowrap">
+    <div className="w-full flex items-center gap-3 justify-end flex-nowrap overflow-hidden">
+      {/* City Card - LARGER */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-xl px-4 py-2 border border-indigo-500/50 shadow-lg">
+        <span className="font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"
+              style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)' }}>
           Previsão
         </span>
-        <div className="flex items-center gap-0.5 mt-0.5 justify-center max-w-[80px] sm:max-w-[100px] lg:max-w-[120px]">
-          <MapPin className={`w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-amber-400 shrink-0 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
+        <div className="flex items-center gap-1 mt-1 justify-center max-w-[150px]">
+          <MapPin className={`w-4 h-4 text-amber-400 shrink-0 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
           <span 
             className={`font-black text-amber-400 leading-tight transition-opacity duration-300 truncate ${
               isTransitioning ? 'opacity-0' : 'opacity-100'
-            } text-[8px] sm:text-[9px] lg:text-[10px] xl:text-xs`}
-            style={{ 
-              textShadow: '0 1px 2px rgba(0,0,0,0.6)',
-            }}
+            }`}
+            style={{ fontSize: 'clamp(0.7rem, 1.2vw, 1rem)', textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
             title={displayCity}
           >
             {displayCity}
@@ -355,56 +354,55 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         </div>
       </div>
 
-      {/* Current Temperature - Compact */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-cyan-500/50 shadow-lg">
-        <span className="font-bold text-cyan-400 uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] whitespace-nowrap">
+      {/* Current Temperature - LARGER */}
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-xl px-4 py-2 border border-cyan-500/50 shadow-lg">
+        <span className="font-bold text-cyan-400 uppercase tracking-wider whitespace-nowrap"
+              style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)' }}>
           Agora
         </span>
-        <div className="flex items-baseline gap-0.5 whitespace-nowrap">
-          <span className="font-black text-white tabular-nums text-sm sm:text-base lg:text-xl xl:text-2xl" 
-                style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 10px rgba(255,255,255,0.4)' }}>
+        <div className="flex items-baseline gap-1 whitespace-nowrap">
+          <span className="font-black text-white tabular-nums" 
+                style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.5rem)', fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 10px rgba(255,255,255,0.4)' }}>
             {weather.current.temperature}
           </span>
-          <span className="font-bold text-cyan-400 text-[8px] sm:text-[10px] lg:text-xs">°C</span>
+          <span className="font-bold text-cyan-400" style={{ fontSize: 'clamp(0.6rem, 1vw, 1rem)' }}>°C</span>
         </div>
       </div>
 
-      {/* Weather Icon + Humidity - Compact */}
-      <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border border-amber-500/50 shadow-lg">
-        <div className="scale-75 lg:scale-90">
-          <Weather3DIcon description={weather.current.description} size="sm" />
-        </div>
-        <div className="flex items-center gap-0.5 mt-0.5">
-          <Droplets className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-cyan-400 shrink-0" strokeWidth={1.5} />
-          <span className="font-bold text-cyan-300 tabular-nums text-[8px] sm:text-[9px] lg:text-[10px]"
-                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+      {/* Weather Icon + Humidity - LARGER */}
+      <div className="shrink-0 flex flex-col items-center bg-slate-900/95 rounded-xl px-4 py-2 border border-amber-500/50 shadow-lg">
+        <Weather3DIcon description={weather.current.description} size="lg" />
+        <div className="flex items-center gap-1 mt-1">
+          <Droplets className="w-4 h-4 text-cyan-400 shrink-0" strokeWidth={1.5} />
+          <span className="font-bold text-cyan-300 tabular-nums"
+                style={{ fontSize: 'clamp(0.6rem, 1vw, 0.875rem)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
             {weather.current.humidity}%
           </span>
         </div>
       </div>
 
-      {/* Max/Min Temperature - Compact */}
-      <div className={`shrink-0 flex flex-col items-center bg-slate-900/95 rounded-lg px-1.5 sm:px-2 lg:px-3 py-1 sm:py-1.5 lg:py-2 border shadow-lg transition-colors duration-500 ${
+      {/* Max/Min Temperature - LARGER */}
+      <div className={`shrink-0 flex flex-col items-center bg-slate-900/95 rounded-xl px-4 py-2 border shadow-lg transition-colors duration-500 ${
         showMaxTemp ? 'border-rose-500/50' : 'border-cyan-500/50'
       }`}>
-        <span className={`font-bold uppercase tracking-wider text-[6px] sm:text-[7px] lg:text-[8px] transition-colors duration-500 ${
+        <span className={`font-bold uppercase tracking-wider transition-colors duration-500 ${
           showMaxTemp ? 'text-rose-400' : 'text-cyan-400'
-        }`}>
+        }`} style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)' }}>
           {showMaxTemp ? 'Máx' : 'Mín'}
         </span>
-        <div className="flex items-baseline gap-0.5">
-          <span className={`font-black tabular-nums text-sm sm:text-base lg:text-xl xl:text-2xl transition-colors duration-500 ${
+        <div className="flex items-baseline gap-1">
+          <span className={`font-black tabular-nums transition-colors duration-500 ${
             showMaxTemp ? 'text-rose-300' : 'text-cyan-300'
-          }`} style={{ fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 6px rgba(255,255,255,0.2)' }}>
+          }`} style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.5rem)', fontFamily: "'Orbitron', sans-serif", textShadow: '0 0 6px rgba(255,255,255,0.2)' }}>
             {showMaxTemp ? maxTemp : minTemp}
           </span>
-          <span className={`font-bold text-[8px] sm:text-[10px] lg:text-xs transition-colors duration-500 ${
+          <span className={`font-bold transition-colors duration-500 ${
             showMaxTemp ? 'text-rose-400' : 'text-cyan-400'
-          }`}>°C</span>
+          }`} style={{ fontSize: 'clamp(0.6rem, 1vw, 1rem)' }}>°C</span>
         </div>
       </div>
 
-      {/* Date + Clock - Compact */}
+      {/* Date + Clock - LARGER */}
       {renderDateTimeCompact()}
     </div>
   );
