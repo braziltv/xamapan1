@@ -12,6 +12,7 @@ import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { ParticleBackground } from './ParticleBackground';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
+import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
 
 interface PublicDisplayProps {
@@ -3156,60 +3157,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             </h3>
           </div>
 
-          {/* List */}
+          {/* List with Carousel - 7 items per page */}
           <div className="flex-1 overflow-hidden">
             {historyItems.length === 0 ? (
               <p className="text-slate-500 text-center py-8" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}>
                 Nenhuma chamada ainda
               </p>
             ) : (
-              <div className="space-y-2">
-                {historyItems.slice(0, 7).map((item, index) => {
-                  const isTriage = item.type === 'triage';
-                  const opacity = index === 0 ? 1 : index === 1 ? 0.95 : index === 2 ? 0.9 : index === 3 ? 0.85 : 0.8;
-                  
-                  return (
-                    <div
-                      key={item.id}
-                      className={`rounded-xl ${
-                        index === 0 
-                          ? 'bg-primary/20 border-2 border-primary/50 ring-1 ring-primary/20' 
-                          : 'bg-slate-800/50 border border-slate-700/30'
-                      }`}
-                      style={{ opacity, padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(0.75rem, 1vw, 1rem)' }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className={`rounded-full flex items-center justify-center shrink-0 ${isTriage ? 'bg-blue-500' : 'bg-emerald-500'}`}
-                          style={{ width: 'clamp(1.75rem, 2.5vw, 2.5rem)', height: 'clamp(1.75rem, 2.5vw, 2.5rem)' }}
-                        >
-                          {isTriage 
-                            ? <Activity style={{ width: 'clamp(0.75rem, 1vw, 1rem)', height: 'clamp(0.75rem, 1vw, 1rem)' }} className="text-white" /> 
-                            : <Stethoscope style={{ width: 'clamp(0.75rem, 1vw, 1rem)', height: 'clamp(0.75rem, 1vw, 1rem)' }} className="text-white" />
-                          }
-                        </div>
-                        <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <p className="tv-font-body font-bold text-white truncate" style={{ fontSize: 'clamp(0.75rem, 1.2vw, 1.125rem)' }}>
-                            {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
-                          </p>
-                          <span 
-                            className={`shrink-0 px-1.5 py-0.5 rounded font-bold uppercase relative overflow-hidden ${
-                              isTriage ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            }`}
-                            style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.625rem)' }}
-                          >
-                            <span className="relative z-10">{isTriage ? 'Tri' : 'Méd'}</span>
-                            <span className="absolute inset-0 animate-news-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                          </span>
-                        </div>
-                        <span className="text-slate-300 font-mono font-semibold shrink-0" style={{ fontSize: 'clamp(0.7rem, 1vw, 0.9rem)' }}>
-                          {formatBrazilTime(item.time, 'HH:mm')}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <RecentCallsCarouselTV 
+                historyItems={historyItems}
+                currentTime={currentTime}
+                maskNameAfterOneMinute={maskNameAfterOneMinute}
+              />
             )}
           </div>
         </div>
