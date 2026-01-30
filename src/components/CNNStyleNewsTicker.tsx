@@ -95,7 +95,7 @@ export function CNNStyleNewsTicker({
       {/* CNN-style two-row footer */}
       <div className="flex flex-col">
         {/* Bottom ticker row - scrolling news */}
-        <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-18 2xl:h-20 3xl:h-24">
+        <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-[4.5rem] 2xl:h-20 3xl:h-24">
           {/* Scrolling News Section - Dark background like CNN */}
           <div className="flex-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 overflow-hidden flex items-center relative">
             {/* Top red accent line */}
