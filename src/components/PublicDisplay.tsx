@@ -2943,9 +2943,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div 
         className="relative z-10 flex-1 grid min-h-0"
         style={{
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) clamp(280px, 22vw, 380px)',
-          gap: 'clamp(0.75rem, 1.5vw, 1.5rem)',
-          padding: '0 clamp(1rem, 2vw, 2rem) clamp(4rem, 6vh, 6rem) clamp(1rem, 2vw, 2rem)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 380px)',
+          gap: '1rem',
+          padding: '0 1.5rem 5rem 1.5rem',
         }}
       >
         {/* ===== TRIAGE CARD ===== */}
