@@ -2941,16 +2941,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* ========== MAIN CONTENT - Responsive Grid ========== */}
       <div 
-        className="relative z-10 flex-1 grid min-h-0 overflow-hidden"
+        className="relative z-10 flex-1 grid overflow-hidden"
         style={{
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(240px, 320px)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(220px, 300px)',
+          gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
-          padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 1.5rem) clamp(4.5rem, 8vh, 6rem) clamp(1rem, 2vw, 1.5rem)',
+          padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
+          marginBottom: 'clamp(3.5rem, 6vh, 5rem)',
+          height: 'calc(100% - clamp(3.5rem, 6vh, 5rem))',
         }}
       >
         {/* ===== TRIAGE CARD ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/30 scale-[1.02] z-20' 
               : announcingType === 'doctor'
@@ -2959,6 +2962,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
+            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header */}
@@ -3042,7 +3046,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* ===== DOCTOR CARD ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/30 scale-[1.02] z-20' 
               : announcingType === 'triage'
@@ -3051,6 +3055,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
+            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header */}
@@ -3134,12 +3139,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* ===== RECENT CALLS SIDEBAR ===== */}
         <div 
-          className={`flex flex-col rounded-2xl border border-purple-500/30 transition-opacity duration-300 ${
+          className={`flex flex-col rounded-2xl border border-purple-500/30 transition-opacity duration-300 h-full ${
             announcingType ? 'opacity-30' : 'opacity-100'
           }`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
-            padding: 'clamp(0.75rem, 1.5vw, 1.25rem)',
+            padding: 'clamp(0.5rem, 1vw, 1rem)',
+            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header */}
