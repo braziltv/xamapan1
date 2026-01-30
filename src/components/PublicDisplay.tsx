@@ -2866,12 +2866,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== HEADER ========== */}
       <header 
         className={`relative z-10 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}
-        style={{ padding: '0.75rem 1.5rem' }}
+        style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 2rem)' }}
       >
         <div 
           className="relative overflow-hidden bg-gradient-to-r from-slate-900/95 via-indigo-950/95 to-slate-900/95 border border-indigo-500/40 rounded-xl"
           style={{
-            padding: '0.75rem 1.5rem',
+            padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 1.5rem)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
           }}
         >
@@ -2879,14 +2879,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-t-xl" />
           
           <div className="flex items-center justify-between gap-4 relative z-10">
-            {/* Left: Logo + Title */}
-            <div className="flex items-center gap-4 shrink-0">
+            {/* Left: Logo + Title - fixed width */}
+            <div className="flex items-center gap-3 shrink-0" style={{ minWidth: '280px' }}>
               {/* Logo */}
               <div 
                 className="relative shrink-0 bg-white rounded-lg shadow-lg flex items-center justify-center" 
-                style={{ width: '3.5rem', height: '3.5rem' }}
+                style={{ width: 'clamp(2.5rem, 4vw, 4rem)', height: 'clamp(2.5rem, 4vw, 4rem)' }}
               >
-                <HealthCrossIcon size={32} className="w-8 h-8" />
+                <HealthCrossIcon size={32} className="w-6 h-6 lg:w-8 lg:h-8" />
               </div>
               
               {/* Text */}
@@ -2894,19 +2894,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <h1 
                   className="tv-font-heading font-black text-white leading-none whitespace-nowrap tracking-tight"
                   style={{ 
-                    fontSize: '1.75rem',
+                    fontSize: 'clamp(1rem, 2vw, 1.75rem)',
                     textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(6,182,212,0.3)',
                   }}
                 >
                   Painel de Chamadas
                 </h1>
                 <p 
-                  className="tv-font-body text-amber-400 leading-tight font-black truncate max-w-[400px]" 
+                  className="tv-font-body text-amber-400 leading-tight font-black truncate" 
                   title={unitName || 'Unidade de Saúde'}
                   style={{ 
-                    fontSize: '1.25rem',
+                    fontSize: 'clamp(0.75rem, 1.5vw, 1.25rem)',
                     textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(251,191,36,0.3)',
-                    marginTop: '0.25rem',
+                    marginTop: '0.125rem',
+                    maxWidth: '250px',
                   }}
                 >
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
@@ -2914,7 +2915,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <p 
                   className="tv-font-body leading-tight font-bold whitespace-nowrap text-yellow-300"
                   style={{ 
-                    fontSize: '0.875rem',
+                    fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)',
                     marginTop: '0.125rem',
                     textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
                   }}
@@ -2926,25 +2927,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             
             {/* Separator */}
             <div 
-              className="w-0.5 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent shrink-0" 
-              style={{ height: '4rem' }} 
+              className="w-0.5 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent shrink-0 hidden lg:block" 
+              style={{ height: 'clamp(3rem, 5vh, 5rem)' }} 
             />
             
-            {/* Right: Weather Widget */}
-            <div className="flex-1 flex items-center justify-end overflow-hidden">
+            {/* Right: Weather Widget - takes remaining space */}
+            <div className="flex-1 flex items-center justify-end overflow-hidden min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
         </div>
       </header>
 
-      {/* ========== MAIN CONTENT - Optimized 1920x1080 Grid ========== */}
+      {/* ========== MAIN CONTENT - Responsive Grid ========== */}
       <div 
         className="relative z-10 flex-1 grid min-h-0"
         style={{
-          gridTemplateColumns: '1fr 1fr 320px',
-          gap: '1rem',
-          padding: '0 1.5rem 5rem 1.5rem',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) clamp(280px, 22vw, 380px)',
+          gap: 'clamp(0.75rem, 1.5vw, 1.5rem)',
+          padding: '0 clamp(1rem, 2vw, 2rem) clamp(4rem, 6vh, 6rem) clamp(1rem, 2vw, 2rem)',
         }}
       >
         {/* ===== TRIAGE CARD ===== */}
@@ -2967,25 +2968,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
                 : 'bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600'
             }`}
-            style={{ padding: '0.75rem 1.25rem' }}
+            style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
             <div className="flex items-center gap-3 relative z-10">
               <Activity 
                 className={`shrink-0 text-white ${announcingType === 'triage' ? 'animate-pulse' : ''}`}
-                style={{ width: '1.75rem', height: '1.75rem', filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.8))' }} 
+                style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)', filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.8))' }} 
               />
-              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: '1.25rem' }}>
+              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }}>
                 {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
               </span>
               {announcingType === 'triage' && (
-                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: '1.5rem', height: '1.5rem' }} />
+                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)' }} />
               )}
             </div>
           </div>
           
           {/* Content */}
-          <div className="flex-1 flex items-center justify-center relative p-6">
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 2rem)' }}>
             <div className={`absolute inset-0 pointer-events-none ${
               announcingType === 'triage' ? 'bg-gradient-to-b from-yellow-500/15 to-transparent' : 'bg-gradient-to-b from-indigo-500/5 to-transparent'
             }`} />
@@ -2995,7 +2996,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <h2 
                   className="tv-font-display break-words text-white font-extrabold leading-tight"
                   style={{ 
-                    fontSize: currentTriageCall.name.length <= 15 ? '4.5rem' : currentTriageCall.name.length <= 25 ? '3.75rem' : currentTriageCall.name.length <= 35 ? '3rem' : '2.5rem',
+                    fontSize: currentTriageCall.name.length <= 15 
+                      ? 'clamp(2.5rem, 6vw, 5rem)' 
+                      : currentTriageCall.name.length <= 25 
+                        ? 'clamp(2rem, 5vw, 4rem)' 
+                        : currentTriageCall.name.length <= 35 
+                          ? 'clamp(1.75rem, 4vw, 3.5rem)' 
+                          : 'clamp(1.5rem, 3vw, 3rem)',
                     wordBreak: 'break-word', 
                     letterSpacing: '0.03em',
                     textShadow: '0 2px 8px rgba(0,0,0,0.5)',
@@ -3004,27 +3011,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   {formatPatientName(currentTriageCall.name)}
                 </h2>
                 <p 
-                  className={`font-black uppercase tracking-widest mt-4 ${announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-300'}`}
-                  style={{ fontSize: '2rem', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
+                  className={`font-black uppercase tracking-widest ${announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-300'}`}
+                  style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.25rem)', textShadow: '0 2px 6px rgba(0,0,0,0.6)', marginTop: 'clamp(0.5rem, 1vh, 1rem)' }}
                 >
                   {currentTriageCall.destination || 'Triagem'}
                 </p>
               </div>
             ) : (
-              <div className="text-center px-4">
+              <div className="text-center px-4 max-w-[95%]">
                 <div 
                   className="mx-auto rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse mb-3"
-                  style={{ width: '4rem', height: '4rem' }}
+                  style={{ width: 'clamp(3rem, 5vw, 5rem)', height: 'clamp(3rem, 5vw, 5rem)' }}
                 >
-                  <Activity className="text-blue-400/60" style={{ width: '2rem', height: '2rem' }} />
+                  <Activity className="text-blue-400/60" style={{ width: 'clamp(1.5rem, 2.5vw, 2.5rem)', height: 'clamp(1.5rem, 2.5vw, 2.5rem)' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-bold transition-opacity duration-500 max-w-[90%] mx-auto ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
-                    lineHeight: '1.4',
+                    fontSize: 'clamp(0.875rem, 1.5vw, 1.25rem)',
+                    lineHeight: '1.5',
                     textShadow: '0 2px 8px rgba(0,0,0,0.7)',
-                    letterSpacing: '0.04em',
                   }}
                 >
                   {WAITING_PHRASES[currentWaitingPhraseIndex]}
@@ -3054,25 +3060,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
                 : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600'
             }`}
-            style={{ padding: '0.75rem 1.25rem' }}
+            style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
             <div className="flex items-center gap-3 relative z-10">
               <Stethoscope 
                 className={`shrink-0 text-white ${announcingType === 'doctor' ? 'animate-pulse' : ''}`}
-                style={{ width: '1.75rem', height: '1.75rem', filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8))' }} 
+                style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)', filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8))' }} 
               />
-              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: '1.25rem' }}>
+              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }}>
                 {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
               </span>
               {announcingType === 'doctor' && (
-                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: '1.5rem', height: '1.5rem' }} />
+                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)' }} />
               )}
             </div>
           </div>
           
           {/* Content */}
-          <div className="flex-1 flex items-center justify-center relative p-6">
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 2rem)' }}>
             <div className={`absolute inset-0 pointer-events-none ${
               announcingType === 'doctor' ? 'bg-gradient-to-b from-yellow-500/15 to-transparent' : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
             }`} />
@@ -3082,7 +3088,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <h2 
                   className="tv-font-display break-words text-white font-extrabold leading-tight"
                   style={{ 
-                    fontSize: currentDoctorCall.name.length <= 15 ? '4.5rem' : currentDoctorCall.name.length <= 25 ? '3.75rem' : currentDoctorCall.name.length <= 35 ? '3rem' : '2.5rem',
+                    fontSize: currentDoctorCall.name.length <= 15 
+                      ? 'clamp(2.5rem, 6vw, 5rem)' 
+                      : currentDoctorCall.name.length <= 25 
+                        ? 'clamp(2rem, 5vw, 4rem)' 
+                        : currentDoctorCall.name.length <= 35 
+                          ? 'clamp(1.75rem, 4vw, 3.5rem)' 
+                          : 'clamp(1.5rem, 3vw, 3rem)',
                     wordBreak: 'break-word', 
                     letterSpacing: '0.03em',
                     textShadow: '0 2px 8px rgba(0,0,0,0.5)',
@@ -3091,25 +3103,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   {formatPatientName(currentDoctorCall.name)}
                 </h2>
                 <p 
-                  className={`font-black uppercase tracking-widest mt-4 ${announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'}`}
-                  style={{ fontSize: '2rem', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
+                  className={`font-black uppercase tracking-widest ${announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'}`}
+                  style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.25rem)', textShadow: '0 2px 6px rgba(0,0,0,0.6)', marginTop: 'clamp(0.5rem, 1vh, 1rem)' }}
                 >
                   {currentDoctorCall.destination || 'Consultório'}
                 </p>
               </div>
             ) : (
-              <div className="text-center px-4">
+              <div className="text-center px-4 max-w-[95%]">
                 <div 
                   className="mx-auto rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse mb-3"
-                  style={{ width: '4rem', height: '4rem' }}
+                  style={{ width: 'clamp(3rem, 5vw, 5rem)', height: 'clamp(3rem, 5vw, 5rem)' }}
                 >
-                  <Stethoscope className="text-emerald-400/60" style={{ width: '2rem', height: '2rem' }} />
+                  <Stethoscope className="text-emerald-400/60" style={{ width: 'clamp(1.5rem, 2.5vw, 2.5rem)', height: 'clamp(1.5rem, 2.5vw, 2.5rem)' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-bold transition-opacity duration-500 max-w-[90%] mx-auto ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
-                    lineHeight: '1.4',
+                    fontSize: 'clamp(0.875rem, 1.5vw, 1.25rem)',
+                    lineHeight: '1.5',
                     textShadow: '0 2px 8px rgba(0,0,0,0.7)',
                   }}
                 >
@@ -3127,13 +3139,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           }`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
-            padding: '1rem',
+            padding: 'clamp(0.75rem, 1.5vw, 1.25rem)',
           }}
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-3 shrink-0">
-            <Clock className="text-cyan-400 shrink-0 animate-pulse" style={{ width: '1.5rem', height: '1.5rem' }} />
-            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: '1.25rem' }}>
+            <Clock className="text-cyan-400 shrink-0 animate-pulse" style={{ width: 'clamp(1.25rem, 2vw, 1.75rem)', height: 'clamp(1.25rem, 2vw, 1.75rem)' }} />
+            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
               Últimas Chamadas
             </h3>
           </div>
@@ -3141,14 +3153,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           {/* List */}
           <div className="flex-1 overflow-hidden">
             {historyItems.length === 0 ? (
-              <p className="text-slate-500 text-center py-8" style={{ fontSize: '1rem' }}>
+              <p className="text-slate-500 text-center py-8" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}>
                 Nenhuma chamada ainda
               </p>
             ) : (
               <div className="space-y-2">
-                {historyItems.slice(0, 6).map((item, index) => {
+                {historyItems.slice(0, 7).map((item, index) => {
                   const isTriage = item.type === 'triage';
-                  const opacity = index === 0 ? 1 : index === 1 ? 0.92 : index === 2 ? 0.84 : 0.76;
+                  const opacity = index === 0 ? 1 : index === 1 ? 0.95 : index === 2 ? 0.9 : index === 3 ? 0.85 : 0.8;
                   
                   return (
                     <div
@@ -3158,30 +3170,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                           ? 'bg-primary/20 border-2 border-primary/50 ring-1 ring-primary/20' 
                           : 'bg-slate-800/50 border border-slate-700/30'
                       }`}
-                      style={{ opacity, padding: '0.75rem 1rem' }}
+                      style={{ opacity, padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(0.75rem, 1vw, 1rem)' }}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <div 
                           className={`rounded-full flex items-center justify-center shrink-0 ${isTriage ? 'bg-blue-500' : 'bg-emerald-500'}`}
-                          style={{ width: '2.25rem', height: '2.25rem' }}
+                          style={{ width: 'clamp(1.75rem, 2.5vw, 2.5rem)', height: 'clamp(1.75rem, 2.5vw, 2.5rem)' }}
                         >
-                          {isTriage ? <Activity className="w-4 h-4 text-white" /> : <Stethoscope className="w-4 h-4 text-white" />}
+                          {isTriage 
+                            ? <Activity style={{ width: 'clamp(0.75rem, 1vw, 1rem)', height: 'clamp(0.75rem, 1vw, 1rem)' }} className="text-white" /> 
+                            : <Stethoscope style={{ width: 'clamp(0.75rem, 1vw, 1rem)', height: 'clamp(0.75rem, 1vw, 1rem)' }} className="text-white" />
+                          }
                         </div>
                         <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <p className="tv-font-body font-bold text-white truncate" style={{ fontSize: '1rem' }}>
+                          <p className="tv-font-body font-bold text-white truncate" style={{ fontSize: 'clamp(0.75rem, 1.2vw, 1.125rem)' }}>
                             {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                           </p>
                           <span 
-                            className={`shrink-0 px-2 py-0.5 rounded font-bold uppercase relative overflow-hidden ${
+                            className={`shrink-0 px-1.5 py-0.5 rounded font-bold uppercase relative overflow-hidden ${
                               isTriage ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                             }`}
-                            style={{ fontSize: '0.625rem' }}
+                            style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.625rem)' }}
                           >
                             <span className="relative z-10">{isTriage ? 'Tri' : 'Méd'}</span>
                             <span className="absolute inset-0 animate-news-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                           </span>
                         </div>
-                        <span className="text-slate-300 font-mono font-semibold shrink-0" style={{ fontSize: '0.875rem' }}>
+                        <span className="text-slate-300 font-mono font-semibold shrink-0" style={{ fontSize: 'clamp(0.7rem, 1vw, 0.9rem)' }}>
                           {formatBrazilTime(item.time, 'HH:mm')}
                         </span>
                       </div>
