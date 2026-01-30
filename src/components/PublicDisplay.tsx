@@ -2941,11 +2941,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* ========== MAIN CONTENT - Responsive Grid ========== */}
       <div 
-        className="relative z-10 flex-1 grid min-h-0"
+        className="relative z-10 flex-1 grid min-h-0 overflow-hidden"
         style={{
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 380px)',
-          gap: '1rem',
-          padding: '0 1.5rem 5rem 1.5rem',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(240px, 320px)',
+          gap: 'clamp(0.5rem, 1vw, 1rem)',
+          padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 1.5rem) clamp(4.5rem, 8vh, 6rem) clamp(1rem, 2vw, 1.5rem)',
         }}
       >
         {/* ===== TRIAGE CARD ===== */}
