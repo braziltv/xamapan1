@@ -58,29 +58,52 @@ export function TVCallCard({
     <div 
       className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden ${
         isThisCardAnnouncing 
-          ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/30 scale-[1.02] z-20' 
+          ? 'scale-[1.02] z-20' 
           : isOtherCardAnnouncing
             ? 'opacity-30 scale-95'
-            : 'border border-slate-700/50'
+            : ''
       } ${call ? 'animate-card-pop' : ''}`}
       style={{
-        background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
+        background: isTriage
+          ? 'linear-gradient(160deg, rgba(30,27,75,0.95) 0%, rgba(49,46,129,0.85) 50%, rgba(30,27,75,0.95) 100%)'
+          : 'linear-gradient(160deg, rgba(6,78,59,0.95) 0%, rgba(4,120,87,0.85) 50%, rgba(6,78,59,0.95) 100%)',
         minHeight: `${280 * scale}px`,
+        border: isThisCardAnnouncing 
+          ? '3px solid rgba(251,191,36,0.8)' 
+          : isTriage
+            ? '1px solid rgba(129,140,248,0.3)'
+            : '1px solid rgba(52,211,153,0.3)',
+        boxShadow: isThisCardAnnouncing 
+          ? '0 0 40px rgba(251,191,36,0.4), 0 0 80px rgba(251,191,36,0.2)' 
+          : isTriage
+            ? '0 8px 32px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
+            : '0 8px 32px rgba(16,185,129,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}
     >
       {/* Header */}
       <div 
-        className={`shrink-0 relative overflow-hidden ${
-          isThisCardAnnouncing 
-            ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
+        className="shrink-0 relative overflow-hidden"
+        style={{ 
+          padding: `${0.5 * scale}rem ${1 * scale}rem`,
+          background: isThisCardAnnouncing 
+            ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 50%, #f59e0b 100%)' 
             : isTriage 
-              ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600' 
-              : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600'
-        }`}
-        style={{ padding: `${0.5 * scale}rem ${1 * scale}rem` }}
+              ? 'linear-gradient(135deg, #4f46e5 0%, #6366f1 30%, #818cf8 70%, #4f46e5 100%)' 
+              : 'linear-gradient(135deg, #059669 0%, #10b981 30%, #34d399 70%, #059669 100%)',
+          boxShadow: isThisCardAnnouncing
+            ? '0 4px 20px rgba(245,158,11,0.4)'
+            : isTriage
+              ? '0 4px 20px rgba(99,102,241,0.3)'
+              : '0 4px 20px rgba(16,185,129,0.3)',
+        }}
       >
         {/* Shimmer overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+        <div 
+          className="absolute inset-0 animate-pulse"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+          }}
+        />
         
         <div className="flex items-center gap-2 relative z-10">
           <Icon 
@@ -111,14 +134,17 @@ export function TVCallCard({
         className="flex-1 flex items-center justify-center relative"
         style={{ padding: `${1 * scale}rem` }}
       >
-        {/* Subtle inner glow */}
-        <div className={`absolute inset-0 pointer-events-none ${
-          isThisCardAnnouncing 
-            ? 'bg-gradient-to-b from-yellow-500/15 to-transparent' 
-            : isTriage
-              ? 'bg-gradient-to-b from-indigo-500/5 to-transparent'
-              : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
-        }`} />
+        {/* Radial glow effect */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: isThisCardAnnouncing 
+              ? 'radial-gradient(ellipse at center top, rgba(251,191,36,0.2) 0%, transparent 60%)' 
+              : isTriage
+                ? 'radial-gradient(ellipse at center top, rgba(129,140,248,0.15) 0%, transparent 60%)'
+                : 'radial-gradient(ellipse at center top, rgba(52,211,153,0.15) 0%, transparent 60%)',
+          }}
+        />
         
         {call ? (
           <div className={`text-center w-full transition-all duration-300 relative z-10 ${isThisCardAnnouncing ? 'scale-105' : ''}`}>
