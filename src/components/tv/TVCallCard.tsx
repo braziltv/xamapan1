@@ -82,7 +82,7 @@ export function TVCallCard({
     >
       {/* Header */}
       <div 
-        className="shrink-0 relative overflow-hidden"
+        className={`shrink-0 relative overflow-hidden ${call ? 'animate-header-pulse' : ''}`}
         style={{ 
           padding: `${0.5 * scale}rem ${1 * scale}rem`,
           background: isThisCardAnnouncing 
@@ -97,17 +97,34 @@ export function TVCallCard({
               : '0 4px 20px rgba(16,185,129,0.3)',
         }}
       >
-        {/* Shimmer overlay */}
-        <div 
-          className="absolute inset-0 animate-pulse"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-          }}
-        />
+        {/* Animated shimmer when there's a call */}
+        {call && (
+          <div 
+            className="absolute inset-0 animate-shimmer-slide"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+            }}
+          />
+        )}
+        
+        {/* Subtle pulse glow overlay */}
+        {call && (
+          <div 
+            className="absolute inset-0 animate-pulse-glow"
+            style={{
+              background: isThisCardAnnouncing
+                ? 'rgba(251,191,36,0.2)'
+                : isTriage
+                  ? 'rgba(129,140,248,0.15)'
+                  : 'rgba(52,211,153,0.15)',
+            }}
+          />
+        )}
         
         <div className="flex items-center gap-2 relative z-10">
           <Icon 
-            className={`shrink-0 text-white ${isThisCardAnnouncing ? 'animate-pulse' : ''}`}
+            className={`shrink-0 text-white ${call ? 'animate-icon-bounce' : ''}`}
             style={{ 
               width: `${1.25 * scale}rem`, 
               height: `${1.25 * scale}rem`,
