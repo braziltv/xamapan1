@@ -119,7 +119,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const pollInitializedRef = useRef(false);
 
   // Background color animation enabled, but dramatic overlays/flash effects disabled
-  const ENABLE_BACKGROUND_ANIMATION = false;
+  const ENABLE_BACKGROUND_ANIMATION = true;
   const ENABLE_CALL_OVERLAYS = false;
 
   type PatientCallType = 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria' | 'custom';
