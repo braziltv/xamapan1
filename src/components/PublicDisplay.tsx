@@ -100,8 +100,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
-  // Auto-reload após 15 minutos sem chamadas
-  const { onCallMade } = useTVAutoReload(true);
+  // Auto-reload desabilitado
+  // const { onCallMade } = useTVAutoReload(true);
   
   // Get unit name for cleanup
   const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
@@ -2298,8 +2298,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         setCurrentDoctorCall({ name, destination: location });
       }
       
-      // Reset auto-reload timer - chamada foi feita
-      onCallMade();
+      // Auto-reload desabilitado
 
       const callType = caller === 'triage' ? 'triage' : 'doctor';
       setAnnouncingType(callType);

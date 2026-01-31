@@ -116,8 +116,8 @@ export function TriagePanel({
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'triage' | 'withdrawal' | 'default' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-reload após 10 minutos de inatividade
-  useInactivityReload();
+  // Auto-reload desabilitado
+  // useInactivityReload();
 
   const alertColors = {
     emergency: 'border-red-500 text-red-500',

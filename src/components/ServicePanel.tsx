@@ -126,8 +126,8 @@ export function ServicePanel({
   const [successAnimation, setSuccessAnimation] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-reload após 10 minutos de inatividade
-  useInactivityReload();
+  // Auto-reload desabilitado
+  // useInactivityReload();
 
   const alertColors = {
     emergency: 'bg-red-500/20 border-red-500',
