@@ -106,7 +106,7 @@ export const usePreventSleep = (enabled: boolean = true) => {
     // Cria vídeo como fallback
     createFallbackVideo();
 
-    // Inicia simulação de atividade a cada 30 segundos
+    // Inicia simulação de atividade a cada 15 segundos (para TVs mais agressivas)
     intervalRef.current = setInterval(() => {
       simulateActivity();
       
@@ -119,7 +119,7 @@ export const usePreventSleep = (enabled: boolean = true) => {
       if (videoRef.current && videoRef.current.paused) {
         videoRef.current.play().catch(() => {});
       }
-    }, 30000);
+    }, 15000);
 
     // Re-adquire Wake Lock quando a página volta a ser visível
     const handleVisibilityChange = () => {
