@@ -339,23 +339,20 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         <span className="font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap text-[0.5rem] sm:text-[0.6rem] lg:text-xs">
           Previsão
         </span>
-        <div className="flex items-center gap-1 mt-0.5 sm:mt-1 justify-center w-full h-[1.5rem] sm:h-[1.75rem] lg:h-[2rem] overflow-hidden">
+        <div className="flex items-center gap-1 mt-0.5 sm:mt-1 justify-center w-full h-[1.5rem] sm:h-[1.75rem] lg:h-[2rem]">
           <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
           <span 
-            className={`font-black text-amber-400 leading-tight transition-all duration-300 text-center ${
+            className={`font-black text-amber-400 leading-tight transition-all duration-300 text-center whitespace-nowrap ${
               isTransitioning ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
-            } ${
-              // Reduce font 10% for compound names (with space or hyphen)
-              (displayCity.includes(' ') || displayCity.includes('-'))
-                ? 'text-[0.65rem] sm:text-xs lg:text-sm xl:text-base'
-                : 'text-xs sm:text-sm lg:text-base xl:text-lg'
             }`}
             style={{ 
               textShadow: '0 1px 3px rgba(0,0,0,0.7)',
-              wordBreak: 'break-word',
-              hyphens: 'auto',
-              maxWidth: 'clamp(70px, 14vw, 130px)',
-              lineHeight: '1.1',
+              // Dynamic font size based on name length
+              fontSize: displayCity.length > 12 
+                ? 'clamp(0.45rem, 0.8vw, 0.65rem)' 
+                : displayCity.length > 8 
+                  ? 'clamp(0.5rem, 0.9vw, 0.75rem)' 
+                  : 'clamp(0.6rem, 1vw, 0.875rem)',
             }}
             title={displayCity}
           >
