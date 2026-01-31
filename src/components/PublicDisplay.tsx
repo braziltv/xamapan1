@@ -3055,11 +3055,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 <p 
-                  className="tv-font-body leading-tight font-bold whitespace-nowrap text-yellow-300"
+                  className="tv-font-body leading-tight font-medium whitespace-nowrap text-white/70"
                   style={{ 
-                    fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)',
+                    fontSize: 'clamp(0.35rem, 0.5vw, 0.5rem)',
                     marginTop: '0.125rem',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
                   }}
                 >
                   ✨ Solução criada por Kalebe Gomes
