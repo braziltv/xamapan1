@@ -2426,12 +2426,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         setCurrentDoctorCall(doctor ? { name: doctor.patient_name, destination: doctor.destination || undefined } : null);
       }
 
-      // Fetch history - same filtering logic (limit to last 10)
+      // Fetch history - only today's calls (Brazil timezone)
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartISO = todayStart.toISOString();
+      
       let historyQuery = supabase
         .from('call_history')
         .select('*')
+        .gte('created_at', todayStartISO)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
