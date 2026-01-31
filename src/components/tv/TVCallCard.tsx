@@ -134,15 +134,15 @@ export function TVCallCard({
         className="flex-1 flex items-center justify-center relative"
         style={{ padding: `${1 * scale}rem` }}
       >
-        {/* Radial glow effect */}
+        {/* Radial glow effect - enhanced intensity */}
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
             background: isThisCardAnnouncing 
-              ? 'radial-gradient(ellipse at center top, rgba(251,191,36,0.2) 0%, transparent 60%)' 
+              ? 'radial-gradient(ellipse 120% 80% at center top, rgba(251,191,36,0.35) 0%, rgba(251,191,36,0.15) 40%, transparent 70%)' 
               : isTriage
-                ? 'radial-gradient(ellipse at center top, rgba(129,140,248,0.15) 0%, transparent 60%)'
-                : 'radial-gradient(ellipse at center top, rgba(52,211,153,0.15) 0%, transparent 60%)',
+                ? 'radial-gradient(ellipse 120% 80% at center top, rgba(129,140,248,0.3) 0%, rgba(99,102,241,0.12) 40%, transparent 70%)'
+                : 'radial-gradient(ellipse 120% 80% at center top, rgba(52,211,153,0.3) 0%, rgba(16,185,129,0.12) 40%, transparent 70%)',
           }}
         />
         
