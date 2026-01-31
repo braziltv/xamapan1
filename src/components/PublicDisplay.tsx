@@ -3005,85 +3005,79 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="fixed inset-0 z-[15] bg-black/70 animate-[fadeIn_0.3s_ease-out] pointer-events-none" />
       )}
 
-      {/* ========== HEADER - Modern Premium Design ========== */}
+      {/* ========== HEADER - Clean Modern Design ========== */}
       <header 
         className={`relative z-10 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}
-        style={{ padding: 'clamp(0.5rem, 1vh, 0.85rem) clamp(1rem, 2vw, 1.5rem)' }}
+        style={{ padding: 'clamp(0.4rem, 0.8vh, 0.7rem) clamp(0.75rem, 1.5vw, 1.25rem)' }}
       >
         <div 
-          className="relative overflow-visible rounded-2xl"
+          className="relative overflow-visible rounded-xl"
           style={{
-            padding: 'clamp(0.6rem, 1.2vh, 1rem) clamp(1rem, 2vw, 1.5rem)',
-            background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.92) 50%, rgba(15,23,42,0.95) 100%)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(99,102,241,0.35)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.25)',
+            padding: 'clamp(0.5rem, 1vh, 0.85rem) clamp(0.85rem, 1.5vw, 1.25rem)',
+            background: 'linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,41,59,0.85) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(99,102,241,0.25)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
           }}
         >
-          {/* Animated gradient accent line - thicker */}
+          {/* Subtle accent line */}
           <div 
-            className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
+            className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl opacity-80"
             style={{
-              background: 'linear-gradient(90deg, #06b6d4, #6366f1, #a855f7, #6366f1, #06b6d4)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 3s linear infinite',
+              background: 'linear-gradient(90deg, #06b6d4, #6366f1, #a855f7)',
             }}
           />
           
-          {/* Subtle inner glow */}
-          <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{
-            background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 60%)',
-          }} />
-          
-          <div className="flex items-center justify-between gap-4 lg:gap-6 relative z-10 flex-nowrap">
-            {/* Left: Logo + Title - LARGER & BOLDER */}
-            <div className="flex items-center gap-4 shrink-0">
-              {/* Logo container - BIGGER with intense glow */}
+          <div className="flex items-center justify-between gap-5 lg:gap-8 relative z-10 flex-nowrap">
+            {/* Left: Logo + Title - Clean & Modern */}
+            <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+              {/* Logo container - Clean */}
               <div 
-                className="relative shrink-0 rounded-xl flex items-center justify-center" 
+                className="relative shrink-0 rounded-lg flex items-center justify-center" 
                 style={{ 
-                  width: 'clamp(3.5rem, 5.5vw, 5rem)', 
-                  height: 'clamp(3.5rem, 5.5vw, 5rem)',
-                  background: 'linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 0 30px rgba(6,182,212,0.3), 0 0 60px rgba(99,102,241,0.15), inset 0 2px 0 rgba(255,255,255,0.95)',
+                  width: 'clamp(2.75rem, 4vw, 3.75rem)', 
+                  height: 'clamp(2.75rem, 4vw, 3.75rem)',
+                  background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.25), 0 0 20px rgba(6,182,212,0.2)',
                 }}
               >
-                <HealthCrossIcon size={36} className="w-8 h-8 lg:w-10 lg:h-10" />
+                <HealthCrossIcon size={32} className="w-6 h-6 lg:w-8 lg:h-8" />
               </div>
               
-              {/* Title stack - MUCH LARGER text */}
-              <div className="flex flex-col justify-center gap-1">
+              {/* Title stack - Modern typography */}
+              <div className="flex flex-col justify-center">
                 <h1 
-                  className="tv-font-heading font-black text-white leading-none whitespace-nowrap"
+                  className="font-black text-white leading-none whitespace-nowrap tracking-tight"
                   style={{ 
-                    fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
-                    letterSpacing: '-0.01em',
-                    textShadow: '0 3px 12px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.25)',
+                    fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                    fontSize: 'clamp(1.25rem, 2.2vw, 1.85rem)',
+                    letterSpacing: '-0.025em',
                   }}
                 >
                   Painel de Chamadas
                 </h1>
                 <p 
-                  className="tv-font-body text-amber-400 leading-tight font-extrabold" 
+                  className="text-cyan-400 leading-tight font-semibold mt-0.5" 
                   title={unitName || 'Unidade de Saúde'}
                   style={{ 
-                    fontSize: 'clamp(0.95rem, 1.8vw, 1.5rem)',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(251,191,36,0.35)',
-                    maxWidth: 'clamp(200px, 28vw, 400px)',
+                    fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
+                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
+                    maxWidth: 'clamp(180px, 25vw, 350px)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    letterSpacing: '-0.01em',
                   }}
                 >
-                  {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
+                  📍 {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 <p 
-                  className="tv-font-body leading-tight font-bold whitespace-nowrap text-yellow-300"
+                  className="leading-tight font-medium whitespace-nowrap text-amber-400/80 mt-0.5"
                   style={{ 
-                    fontSize: 'clamp(0.55rem, 0.9vw, 0.8rem)',
-                    letterSpacing: '0.04em',
-                    textShadow: '0 2px 6px rgba(0,0,0,0.7)',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 'clamp(0.45rem, 0.7vw, 0.6rem)',
+                    letterSpacing: '0.02em',
                   }}
                 >
                   ✨ Solução criada por Kalebe Gomes
@@ -3091,20 +3085,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
             </div>
             
-            {/* Elegant separator with strong glow */}
+            {/* Minimal separator */}
             <div 
-              className="shrink-0 hidden md:block" 
+              className="shrink-0 hidden md:block opacity-50" 
               style={{ 
-                width: '3px', 
-                height: 'clamp(3.5rem, 5.5vh, 5.5rem)',
-                background: 'linear-gradient(180deg, transparent 0%, rgba(6,182,212,0.7) 25%, rgba(99,102,241,0.7) 75%, transparent 100%)',
-                boxShadow: '0 0 12px rgba(99,102,241,0.5), 0 0 24px rgba(6,182,212,0.3)',
-                borderRadius: '2px',
+                width: '1px', 
+                height: 'clamp(2.5rem, 4vh, 4rem)',
+                background: 'linear-gradient(180deg, transparent, rgba(99,102,241,0.6), transparent)',
               }} 
             />
             
-            {/* Right: Weather Widget - takes remaining space */}
-            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0 gap-4 lg:gap-5">
+            {/* Right: Weather Widget - more spacing */}
+            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
