@@ -547,50 +547,51 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 justify-end flex-nowrap overflow-hidden">
-      {/* City Card - Modern glassmorphism design with adaptive width */}
+    <div className="w-full flex items-center gap-1 sm:gap-1.5 lg:gap-2 justify-end flex-nowrap overflow-visible">
+      {/* City Card - Adaptive width with visible overflow */}
       <div 
-        className="shrink-0 flex flex-col items-center justify-center rounded-xl lg:rounded-2xl border border-indigo-500/40 overflow-hidden relative"
+        className="shrink-0 flex flex-col items-center justify-center rounded-lg lg:rounded-xl border border-indigo-500/50 relative"
         style={{
-          background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(49,46,129,0.4) 100%)',
-          boxShadow: '0 0 20px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-          padding: 'clamp(0.5rem, 1.2vw, 1rem) clamp(0.75rem, 2vw, 1.5rem)',
-          minWidth: 'clamp(110px, 15vw, 180px)',
+          background: 'linear-gradient(145deg, rgba(30,41,70,0.98) 0%, rgba(49,46,129,0.6) 100%)',
+          boxShadow: '0 0 25px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
+          padding: 'clamp(0.35rem, 0.8vw, 0.6rem) clamp(0.5rem, 1vw, 0.85rem)',
+          minWidth: 'fit-content',
         }}
       >
         {/* Animated top accent */}
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 animate-shimmer-slide" style={{ backgroundSize: '200% 100%' }} />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-500 rounded-t-lg animate-shimmer-slide" style={{ backgroundSize: '200% 100%' }} />
         
         {/* Title: Previsão do Tempo */}
-        <div className="flex items-center gap-1.5 mb-1">
+        <div className="flex items-center justify-center gap-1 mb-0.5">
           <span 
-            className="font-bold text-indigo-200 uppercase tracking-widest whitespace-nowrap"
+            className="font-bold text-cyan-300 uppercase tracking-wider whitespace-nowrap"
             style={{ 
-              fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)',
-              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+              fontSize: 'clamp(0.45rem, 0.65vw, 0.6rem)',
+              textShadow: '0 1px 4px rgba(0,0,0,0.7)',
+              letterSpacing: '0.08em',
             }}
           >
             ☁️ Previsão do Tempo
           </span>
         </div>
         
-        {/* City name with MapPin - larger font */}
-        <div className="flex items-center gap-1.5 justify-center w-full" style={{ minHeight: 'clamp(1.75rem, 3vw, 2.5rem)' }}>
-          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-amber-400 shrink-0 animate-bounce-subtle" strokeWidth={2.5} />
+        {/* City name with MapPin - adaptive sizing */}
+        <div className="flex items-center gap-1 justify-center w-full">
+          <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-4.5 lg:h-4.5 text-amber-400 shrink-0 animate-bounce-subtle" strokeWidth={2.5} />
           <span 
-            className={`font-black text-amber-300 leading-tight transition-all duration-300 text-center ${
-              isTransitioning ? 'opacity-0 transform translate-y-2 scale-95' : 'opacity-100 transform translate-y-0 scale-100'
+            className={`font-black text-amber-300 leading-none transition-all duration-300 text-center ${
+              isTransitioning ? 'opacity-0 transform translate-y-1 scale-95' : 'opacity-100 transform translate-y-0 scale-100'
             }`}
             style={{ 
-              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(251,191,36,0.4)',
-              fontSize: displayCity.length > 14 
-                ? 'clamp(0.85rem, 1.4vw, 1.1rem)' 
-                : displayCity.length > 10 
-                  ? 'clamp(0.95rem, 1.6vw, 1.25rem)' 
-                  : displayCity.length > 7
-                    ? 'clamp(1.05rem, 1.8vw, 1.4rem)'
-                    : 'clamp(1.15rem, 2vw, 1.6rem)',
-              letterSpacing: '-0.01em',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9), 0 0 12px rgba(251,191,36,0.5)',
+              fontSize: displayCity.length > 12 
+                ? 'clamp(0.75rem, 1.1vw, 0.95rem)' 
+                : displayCity.length > 8 
+                  ? 'clamp(0.85rem, 1.3vw, 1.1rem)' 
+                  : displayCity.length > 5
+                    ? 'clamp(0.95rem, 1.5vw, 1.25rem)'
+                    : 'clamp(1.05rem, 1.7vw, 1.4rem)',
+              letterSpacing: '0.01em',
               whiteSpace: 'nowrap',
             }}
             title={displayCity}
