@@ -3008,17 +3008,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== HEADER - Modern Glassmorphism ========== */}
       <header 
         className={`relative z-10 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}
-        style={{ padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(1rem, 2vw, 1.5rem)' }}
+        style={{ padding: 'clamp(0.35rem, 0.75vh, 0.6rem) clamp(0.75rem, 1.5vw, 1.25rem)' }}
       >
         <div 
-          className="relative overflow-hidden rounded-2xl"
+          className="relative overflow-visible rounded-xl lg:rounded-2xl"
           style={{
-            padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 2vw, 1.5rem)',
-            background: 'linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.85) 50%, rgba(15,23,42,0.9) 100%)',
+            padding: 'clamp(0.4rem, 0.8vh, 0.65rem) clamp(0.75rem, 1.5vw, 1.25rem)',
+            background: 'linear-gradient(135deg, rgba(15,23,42,0.92) 0%, rgba(30,41,59,0.88) 50%, rgba(15,23,42,0.92) 100%)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(99,102,241,0.25)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            boxShadow: '0 6px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.2)',
           }}
         >
           {/* Animated gradient accent line */}
@@ -3036,20 +3036,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.1) 0%, transparent 60%)',
           }} />
           
-          <div className="flex items-center justify-between gap-4 relative z-10">
-            {/* Left: Logo + Title */}
-            <div className="flex items-center gap-3 shrink-0" style={{ minWidth: '260px' }}>
+          <div className="flex items-center justify-between gap-2 lg:gap-4 relative z-10 flex-nowrap">
+            {/* Left: Logo + Title (compact) */}
+            <div className="flex items-center gap-2 shrink-0">
               {/* Logo container with glow */}
               <div 
-                className="relative shrink-0 rounded-xl flex items-center justify-center" 
+                className="relative shrink-0 rounded-lg lg:rounded-xl flex items-center justify-center" 
                 style={{ 
-                  width: 'clamp(2.5rem, 4vw, 3.5rem)', 
-                  height: 'clamp(2.5rem, 4vw, 3.5rem)',
+                  width: 'clamp(2rem, 3.5vw, 3rem)', 
+                  height: 'clamp(2rem, 3.5vw, 3rem)',
                   background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.3), 0 0 20px rgba(6,182,212,0.2)',
                 }}
               >
-                <HealthCrossIcon size={28} className="w-5 h-5 lg:w-7 lg:h-7" />
+                <HealthCrossIcon size={24} className="w-4 h-4 lg:w-6 lg:h-6" />
               </div>
               
               {/* Title stack */}
@@ -3057,7 +3057,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <h1 
                   className="tv-font-heading font-black text-white leading-none whitespace-nowrap"
                   style={{ 
-                    fontSize: 'clamp(0.95rem, 1.8vw, 1.5rem)',
+                    fontSize: 'clamp(0.8rem, 1.5vw, 1.3rem)',
                     letterSpacing: '-0.02em',
                     textShadow: '0 2px 8px rgba(0,0,0,0.5)',
                   }}
@@ -3068,20 +3068,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   className="tv-font-body text-amber-400 leading-tight font-bold truncate" 
                   title={unitName || 'Unidade de Saúde'}
                   style={{ 
-                    fontSize: 'clamp(0.7rem, 1.3vw, 1.1rem)',
+                    fontSize: 'clamp(0.6rem, 1.1vw, 0.95rem)',
                     textShadow: '0 1px 4px rgba(0,0,0,0.6)',
-                    marginTop: '0.125rem',
-                    maxWidth: '220px',
+                    marginTop: '0.1rem',
+                    maxWidth: '180px',
                   }}
                 >
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 <p 
-                  className="tv-font-body leading-tight font-medium whitespace-nowrap text-slate-400"
+                  className="tv-font-body leading-tight font-medium whitespace-nowrap text-yellow-400"
                   style={{ 
-                    fontSize: 'clamp(0.3rem, 0.45vw, 0.45rem)',
-                    marginTop: '0.1rem',
+                    fontSize: 'clamp(0.35rem, 0.5vw, 0.5rem)',
+                    marginTop: '0.05rem',
                     letterSpacing: '0.02em',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
                   }}
                 >
                   ✨ Solução criada por Kalebe Gomes
@@ -3094,13 +3095,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               className="shrink-0 hidden lg:block" 
               style={{ 
                 width: '1px', 
-                height: 'clamp(2.5rem, 4vh, 4rem)',
-                background: 'linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.4) 50%, transparent 100%)',
+                height: 'clamp(2rem, 3.5vh, 3.5rem)',
+                background: 'linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.5) 50%, transparent 100%)',
               }} 
             />
             
-            {/* Right: Weather Widget */}
-            <div className="flex-1 flex items-center justify-end overflow-hidden min-w-0">
+            {/* Right: Weather Widget - takes remaining space */}
+            <div className="flex-1 flex items-center justify-end overflow-visible min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
           </div>
