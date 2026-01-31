@@ -335,24 +335,26 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 justify-end flex-nowrap overflow-hidden">
       {/* City Card - Fixed size, only name animates */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg sm:rounded-xl px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 border border-indigo-500/50 shadow-lg w-[95px] sm:w-[115px] lg:w-[145px]">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg sm:rounded-xl px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 border border-indigo-500/50 shadow-lg w-[100px] sm:w-[120px] lg:w-[155px]">
         <span className="font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap text-[0.5rem] sm:text-[0.6rem] lg:text-xs">
           Previsão
         </span>
-        <div className="flex items-center gap-1 mt-0.5 sm:mt-1 justify-center w-full h-[1.5rem] sm:h-[1.75rem] lg:h-[2rem]">
+        <div className="flex items-center gap-1 mt-0.5 sm:mt-1 justify-center w-full h-[1.75rem] sm:h-[2rem] lg:h-[2.25rem]">
           <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
           <span 
-            className={`font-black text-amber-400 leading-tight transition-all duration-300 text-center whitespace-nowrap ${
+            className={`font-black text-amber-400 leading-none transition-all duration-300 text-center whitespace-nowrap ${
               isTransitioning ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
             }`}
             style={{ 
-              textShadow: '0 1px 3px rgba(0,0,0,0.7)',
-              // Dynamic font size based on name length
+              textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+              // Dynamic font size based on name length - taller fonts
               fontSize: displayCity.length > 12 
-                ? 'clamp(0.45rem, 0.8vw, 0.65rem)' 
+                ? 'clamp(0.55rem, 1vw, 0.8rem)' 
                 : displayCity.length > 8 
-                  ? 'clamp(0.5rem, 0.9vw, 0.75rem)' 
-                  : 'clamp(0.6rem, 1vw, 0.875rem)',
+                  ? 'clamp(0.65rem, 1.2vw, 0.95rem)' 
+                  : 'clamp(0.75rem, 1.4vw, 1.1rem)',
+              fontStretch: 'condensed',
+              letterSpacing: '-0.02em',
             }}
             title={displayCity}
           >
