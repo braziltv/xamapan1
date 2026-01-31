@@ -335,7 +335,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-3 justify-end flex-nowrap overflow-hidden">
       {/* City Card - Responsive with line break for long names */}
-      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 border border-indigo-500/50 shadow-lg min-w-[70px] sm:min-w-[90px] lg:min-w-[110px]">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-slate-900/95 rounded-lg sm:rounded-xl px-2.5 sm:px-3.5 lg:px-5 py-1.5 sm:py-2 border border-indigo-500/50 shadow-lg min-w-[85px] sm:min-w-[105px] lg:min-w-[130px]">
         <span className="font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap text-[0.5rem] sm:text-[0.6rem] lg:text-xs">
           Previsão
         </span>
@@ -349,7 +349,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
               textShadow: '0 1px 3px rgba(0,0,0,0.7)',
               wordBreak: 'break-word',
               hyphens: 'auto',
-              maxWidth: 'clamp(50px, 12vw, 120px)',
+              maxWidth: 'clamp(65px, 14vw, 140px)',
               lineHeight: '1.2',
             }}
             title={displayCity}
