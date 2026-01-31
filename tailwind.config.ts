@@ -268,6 +268,23 @@ export default {
             filter: "brightness(1.15)",
           },
         },
+        // Modern widget keyframes
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
+        "raindrop-fall": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "100%": { transform: "translateY(15px)", opacity: "0" },
+        },
+        "snowflake-fall": {
+          "0%": { transform: "translateY(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(12px) rotate(180deg)", opacity: "0" },
+        },
+        "lightning-flash": {
+          "0%, 90%, 100%": { opacity: "0" },
+          "92%, 94%": { opacity: "0.8" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -290,6 +307,12 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "icon-bounce": "icon-bounce 1.5s ease-in-out infinite",
         "header-pulse": "header-pulse 2.5s ease-in-out infinite",
+        // Modern widget animations
+        "spin-slow": "spin 8s linear infinite",
+        "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+        "raindrop-fall": "raindrop-fall 1s ease-in infinite",
+        "snowflake-fall": "snowflake-fall 2s ease-in-out infinite",
+        "lightning-flash": "lightning-flash 3s ease-in-out infinite",
       },
     },
   },
