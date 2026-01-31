@@ -1,65 +1,94 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 /**
- * Hook para recarregar a TV automaticamente a cada 15 minutos
- * Diferente do useInactivityReload, este hook recarrega independente de atividade
- * Útil para manter a TV sempre atualizada e evitar problemas de memória
+ * Hook para recarregar a TV automaticamente a cada 15 minutos de ociosidade
+ * Só recarrega se não houver chamadas durante esse período
  */
 export function useTVAutoReload(enabled: boolean = true) {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<Date>(new Date());
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastCallTimeRef = useRef<Date>(new Date());
 
-  useEffect(() => {
-    if (!enabled) return;
+  // Reset timer when a call happens
+  const onCallMade = useCallback(() => {
+    lastCallTimeRef.current = new Date();
+    console.log('⏰ Timer de auto-reload resetado - chamada detectada');
+    
+    // Reset the timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    if (enabled) {
+      timeoutRef.current = setTimeout(triggerReload, AUTO_RELOAD_INTERVAL);
+    }
+  }, [enabled]);
 
-    console.log('⏰ Auto-reload da TV configurado para 15 minutos');
-    startTimeRef.current = new Date();
-
-    intervalRef.current = setInterval(() => {
-      const now = new Date();
-      const elapsed = Math.round((now.getTime() - startTimeRef.current.getTime()) / 1000 / 60);
-      
-      console.log(`⏰ Auto-reload da TV: ${elapsed} minutos desde o último reload. Recarregando...`);
+  const triggerReload = () => {
+    const now = new Date();
+    const timeSinceLastCall = now.getTime() - lastCallTimeRef.current.getTime();
+    
+    // Only reload if no calls for 15 minutes
+    if (timeSinceLastCall >= AUTO_RELOAD_INTERVAL) {
+      console.log('⏰ 15 minutos sem chamadas. Recarregando TV...');
       
       // Show notification before reload
       const notification = document.createElement('div');
       notification.style.cssText = `
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.9);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.95);
         color: white;
-        padding: 2rem 3rem;
-        border-radius: 1rem;
-        font-size: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         z-index: 99999;
         text-align: center;
+        font-family: system-ui, -apple-system, sans-serif;
       `;
-      notification.innerHTML = '🔄 Atualizando...<br><small>Atualização automática programada</small>';
+      notification.innerHTML = `
+        <div style="font-size: 3rem; margin-bottom: 1.5rem;">🔄</div>
+        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Só um momentinho 😊</div>
+        <div style="font-size: 1.5rem; color: #a0aec0; line-height: 1.6;">
+          Estamos atualizando o aplicativo.<br>
+          Em instantes, as chamadas serão exibidas novamente.
+        </div>
+      `;
       document.body.appendChild(notification);
       
-      // Reload after a short delay
+      // Reload after 5 seconds
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
-    }, AUTO_RELOAD_INTERVAL);
+      }, 5000);
+    } else {
+      // Schedule next check
+      const remainingTime = AUTO_RELOAD_INTERVAL - timeSinceLastCall;
+      console.log(`⏰ Última chamada há ${Math.round(timeSinceLastCall / 1000 / 60)} min. Próxima verificação em ${Math.round(remainingTime / 1000 / 60)} min.`);
+      timeoutRef.current = setTimeout(triggerReload, remainingTime);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    console.log('⏰ Auto-reload da TV configurado: recarrega após 15 minutos sem chamadas');
+    lastCallTimeRef.current = new Date();
+
+    // Start initial timeout
+    timeoutRef.current = setTimeout(triggerReload, AUTO_RELOAD_INTERVAL);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
   }, [enabled]);
 
-  return {
-    nextReloadIn: () => {
-      const elapsed = Date.now() - startTimeRef.current.getTime();
-      const remaining = Math.max(0, AUTO_RELOAD_INTERVAL - elapsed);
-      return Math.round(remaining / 1000 / 60); // minutes
-    }
-  };
+  return { onCallMade };
 }
