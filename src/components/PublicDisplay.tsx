@@ -3085,7 +3085,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div 
         className="relative z-10 flex-1 grid overflow-hidden"
         style={{
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(220px, 300px)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 240px)',
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
@@ -3286,14 +3286,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           }`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
-            padding: 'clamp(0.5rem, 1vw, 1rem)',
-            minHeight: 'clamp(200px, 35vh, 400px)',
+            padding: 'clamp(0.4rem, 0.8vw, 0.75rem)',
+            minHeight: 'clamp(150px, 25vh, 300px)',
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 mb-3 shrink-0">
-            <Clock className="text-cyan-400 shrink-0 animate-pulse" style={{ width: 'clamp(1.25rem, 2vw, 1.75rem)', height: 'clamp(1.25rem, 2vw, 1.75rem)' }} />
-            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
+          <div className="flex items-center gap-2 mb-2 shrink-0">
+            <Clock className="text-cyan-400 shrink-0 animate-pulse" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
+            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.25rem)' }}>
               Últimas Chamadas
             </h3>
           </div>

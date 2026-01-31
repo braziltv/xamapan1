@@ -83,7 +83,7 @@ export function RecentCallsCarouselTV({
 
       {/* Items list */}
       <div 
-        className={`flex-1 space-y-1.5 transition-all duration-300 ease-in-out ${
+        className={`flex-1 space-y-1 transition-all duration-300 ease-in-out ${
           isTransitioning ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
         }`}
       >
@@ -96,14 +96,14 @@ export function RecentCallsCarouselTV({
           return (
             <div
               key={item.id}
-              className={`rounded-xl ${
+              className={`rounded-lg ${
                 isFirst 
                   ? 'bg-primary/20 border-2 border-primary/50 ring-1 ring-primary/20' 
                   : 'bg-slate-800/50 border border-slate-700/30'
               }`}
               style={{ 
                 opacity, 
-                padding: 'clamp(0.4rem, 0.8vh, 0.75rem) clamp(0.5rem, 0.8vw, 0.875rem)' 
+                padding: 'clamp(0.25rem, 0.5vh, 0.5rem) clamp(0.4rem, 0.6vw, 0.625rem)' 
               }}
             >
               <div className="flex items-center gap-2">
@@ -113,17 +113,17 @@ export function RecentCallsCarouselTV({
                     isTriage ? 'bg-blue-500' : 'bg-emerald-500'
                   }`}
                   style={{ 
-                    width: 'clamp(1.5rem, 2vw, 2rem)', 
-                    height: 'clamp(1.5rem, 2vw, 2rem)' 
+                    width: 'clamp(1.25rem, 1.5vw, 1.5rem)', 
+                    height: 'clamp(1.25rem, 1.5vw, 1.5rem)' 
                   }}
                 >
                   {isTriage 
                     ? <Activity 
-                        style={{ width: 'clamp(0.7rem, 0.9vw, 0.9rem)', height: 'clamp(0.7rem, 0.9vw, 0.9rem)' }} 
+                        style={{ width: 'clamp(0.6rem, 0.7vw, 0.75rem)', height: 'clamp(0.6rem, 0.7vw, 0.75rem)' }} 
                         className="text-white" 
                       /> 
                     : <Stethoscope 
-                        style={{ width: 'clamp(0.7rem, 0.9vw, 0.9rem)', height: 'clamp(0.7rem, 0.9vw, 0.9rem)' }} 
+                        style={{ width: 'clamp(0.6rem, 0.7vw, 0.75rem)', height: 'clamp(0.6rem, 0.7vw, 0.75rem)' }} 
                         className="text-white" 
                       />
                   }
@@ -133,17 +133,17 @@ export function RecentCallsCarouselTV({
                 <div className="flex-1 min-w-0 flex items-center gap-1.5">
                   <p 
                     className="tv-font-body font-bold text-white truncate" 
-                    style={{ fontSize: 'clamp(0.7rem, 1.1vw, 1rem)' }}
+                    style={{ fontSize: 'clamp(0.6rem, 0.9vw, 0.85rem)' }}
                   >
                     {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                   </p>
                   <span 
-                    className={`shrink-0 px-1.5 py-0.5 rounded font-bold uppercase relative overflow-hidden ${
+                    className={`shrink-0 px-1 py-0.5 rounded font-bold uppercase relative overflow-hidden ${
                       isTriage 
                         ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
                         : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                     }`}
-                    style={{ fontSize: 'clamp(0.45rem, 0.6vw, 0.55rem)' }}
+                    style={{ fontSize: 'clamp(0.4rem, 0.5vw, 0.5rem)' }}
                   >
                     <span className="relative z-10">{isTriage ? 'Tri' : 'Méd'}</span>
                     <span className="absolute inset-0 animate-news-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -153,7 +153,7 @@ export function RecentCallsCarouselTV({
                 {/* Time */}
                 <span 
                   className="text-slate-300 font-mono font-semibold shrink-0" 
-                  style={{ fontSize: 'clamp(0.65rem, 0.9vw, 0.85rem)' }}
+                  style={{ fontSize: 'clamp(0.55rem, 0.75vw, 0.75rem)' }}
                 >
                   {formatBrazilTime(item.time, 'HH:mm')}
                 </span>
