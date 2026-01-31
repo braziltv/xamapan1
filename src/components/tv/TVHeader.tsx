@@ -102,7 +102,7 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
           />
           
           {/* Right: Weather Widget */}
-          <div className="flex items-center justify-end overflow-visible shrink-0">
+          <div className="flex items-center justify-end overflow-hidden shrink-0">
             <WeatherWidget currentTime={currentTime} formatTime={formatTime} />
           </div>
         </div>
