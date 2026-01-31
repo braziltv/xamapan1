@@ -74,6 +74,81 @@ export const usePreventSleep = (enabled: boolean = true) => {
     }
   }, [enabled]);
 
+  // Simula movimento do mouse ou toque virtual
+  const simulateMouseMove = useCallback(() => {
+    if (!enabled) return;
+
+    try {
+      // Gera posição aleatória na tela
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+
+      // Técnica 1: Dispara evento de movimento do mouse
+      const mouseEvent = new MouseEvent('mousemove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y,
+        screenX: x,
+        screenY: y,
+      });
+      document.dispatchEvent(mouseEvent);
+
+      // Técnica 2: Dispara evento de toque virtual (para Android TV)
+      if ('TouchEvent' in window) {
+        try {
+          const touch = new Touch({
+            identifier: Date.now(),
+            target: document.body,
+            clientX: x,
+            clientY: y,
+            screenX: x,
+            screenY: y,
+            pageX: x,
+            pageY: y,
+          });
+          
+          const touchEvent = new TouchEvent('touchstart', {
+            bubbles: true,
+            cancelable: true,
+            touches: [touch],
+            targetTouches: [touch],
+            changedTouches: [touch],
+          });
+          document.dispatchEvent(touchEvent);
+
+          // Touch end imediato
+          const touchEndEvent = new TouchEvent('touchend', {
+            bubbles: true,
+            cancelable: true,
+            touches: [],
+            targetTouches: [],
+            changedTouches: [touch],
+          });
+          document.dispatchEvent(touchEndEvent);
+        } catch (touchErr) {
+          // TouchEvent pode não ser suportado em alguns navegadores
+        }
+      }
+
+      // Técnica 3: Dispara evento de pointermove (mais moderno)
+      const pointerEvent = new PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y,
+        screenX: x,
+        screenY: y,
+        pointerType: 'mouse',
+      });
+      document.dispatchEvent(pointerEvent);
+
+      console.log('🖱️ Movimento virtual simulado');
+    } catch (err) {
+      console.log('⚠️ Erro ao simular movimento:', err);
+    }
+  }, [enabled]);
+
   // Simulação de atividade leve (não trava o navegador)
   const simulateActivity = useCallback(() => {
     if (!enabled) return;
@@ -92,7 +167,10 @@ export const usePreventSleep = (enabled: boolean = true) => {
     } catch (e) {
       // Ignora erros de localStorage
     }
-  }, [enabled]);
+
+    // Técnica 4: Simula movimento do mouse/toque
+    simulateMouseMove();
+  }, [enabled, simulateMouseMove]);
 
   // Inicia tudo
   useEffect(() => {
