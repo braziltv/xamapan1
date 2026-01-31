@@ -787,11 +787,88 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, marketingUnitName]);
 
+  // Debounced reload to avoid multiple rapid reloads
+  const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const triggerAutoReload = useCallback((reason: string) => {
+    if (reloadTimeoutRef.current) {
+      clearTimeout(reloadTimeoutRef.current);
+    }
+    
+    reloadTimeoutRef.current = setTimeout(() => {
+      console.log(`🔄 Auto-reloading TV: ${reason}`);
+      
+      // Show notification with spinner
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.95);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        text-align: center;
+        font-family: system-ui, -apple-system, sans-serif;
+      `;
+      
+      // Add keyframes for spinner animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      notification.innerHTML = `
+        <div style="position: relative; width: 80px; height: 80px; margin-bottom: 2rem;">
+          <div style="
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+          ">🔄</div>
+        </div>
+        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Atualizando...</div>
+        <div style="font-size: 1.5rem; color: #a0aec0; line-height: 1.6; animation: pulse 2s ease-in-out infinite;">
+          ${reason}<br>
+          Em instantes, as chamadas serão exibidas novamente.
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 2500);
+    }, 1500); // Wait 1.5 seconds before reloading to batch multiple changes
+  }, []);
+
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
     
-    // Channel to listen for unit_settings changes
+    // Channel to listen for all configuration changes
     const settingsChannel = supabase
       .channel('tv-settings-changes')
       .on(
@@ -799,12 +876,31 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'unit_settings',
-          filter: `unit_name=eq.${unitName}`
+          table: 'unit_settings'
         },
         (payload) => {
-          console.log('⚙️ Unit settings changed, reloading TV...', payload);
-          triggerAutoReload('Configurações atualizadas');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_name === unitName || record?.unit_name === marketingUnitName) {
+            console.log('⚙️ Unit settings changed, reloading TV...', payload);
+            triggerAutoReload('Configurações atualizadas');
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'units'
+        },
+        (payload) => {
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.id === unitId || record?.name === unitName || record?.name === marketingUnitName) {
+            console.log('🏥 Unit config changed, reloading TV...', payload);
+            triggerAutoReload('Configuração da unidade atualizada');
+          }
         }
       )
       .on(
@@ -815,8 +911,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'tts_phrases'
         },
         (payload) => {
-          console.log('🔊 TTS phrases changed, reloading TV...', payload);
-          triggerAutoReload('Frases TTS atualizadas');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_id === unitId) {
+            console.log('🔊 TTS phrases changed, reloading TV...', payload);
+            triggerAutoReload('Frases TTS atualizadas');
+          }
         }
       )
       .on(
@@ -827,8 +927,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'destinations'
         },
         (payload) => {
-          console.log('📍 Destinations changed, reloading TV...', payload);
-          triggerAutoReload('Destinos atualizados');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_id === unitId) {
+            console.log('📍 Destinations changed, reloading TV...', payload);
+            triggerAutoReload('Destinos atualizados');
+          }
         }
       )
       .on(
@@ -839,8 +943,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'modules'
         },
         (payload) => {
-          console.log('📦 Modules changed, reloading TV...', payload);
-          triggerAutoReload('Módulos atualizados');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_id === unitId) {
+            console.log('📦 Modules changed, reloading TV...', payload);
+            triggerAutoReload('Módulos atualizados');
+          }
         }
       )
       .on(
@@ -851,8 +959,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'scheduled_announcements'
         },
         (payload) => {
-          console.log('📢 Announcements changed, reloading TV...', payload);
-          triggerAutoReload('Anúncios atualizados');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_name === unitName || record?.unit_name === marketingUnitName) {
+            console.log('📢 Announcements changed, reloading TV...', payload);
+            triggerAutoReload('Anúncios atualizados');
+          }
         }
       )
       .on(
@@ -863,57 +975,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           table: 'scheduled_commercial_phrases'
         },
         (payload) => {
-          console.log('💬 Commercial phrases changed, reloading TV...', payload);
-          triggerAutoReload('Frases comerciais atualizadas');
+          // Check if change is for this unit
+          const record = payload.new as any || payload.old as any;
+          if (record?.unit_name === unitName || record?.unit_name === marketingUnitName) {
+            console.log('💬 Commercial phrases changed, reloading TV...', payload);
+            triggerAutoReload('Frases comerciais atualizadas');
+          }
         }
       )
       .subscribe((status) => {
         console.log('📡 TV config change channel status:', status);
       });
 
-    // Debounced reload to avoid multiple rapid reloads
-    let reloadTimeout: NodeJS.Timeout | null = null;
-    
-    const triggerAutoReload = (reason: string) => {
-      if (reloadTimeout) {
-        clearTimeout(reloadTimeout);
-      }
-      
-      reloadTimeout = setTimeout(() => {
-        console.log(`🔄 Auto-reloading TV: ${reason}`);
-        
-        // Show notification
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: rgba(0,0,0,0.9);
-          color: white;
-          padding: 2rem 3rem;
-          border-radius: 1rem;
-          font-size: 1.5rem;
-          z-index: 99999;
-          text-align: center;
-        `;
-        notification.innerHTML = `🔄 Atualizando...<br><small>${reason}</small>`;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }, 3000); // Wait 3 seconds before reloading to batch multiple changes
-    };
-
     return () => {
       console.log('📡 Removing config change listener');
-      if (reloadTimeout) {
-        clearTimeout(reloadTimeout);
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
       }
       supabase.removeChannel(settingsChannel);
     };
-  }, [unitName]);
+  }, [unitName, unitId, marketingUnitName, triggerAutoReload]);
 
   // Hide cursor after inactivity
   useEffect(() => {
