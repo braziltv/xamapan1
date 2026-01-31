@@ -3044,8 +3044,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 <HealthCrossIcon size={32} className="w-6 h-6 lg:w-8 lg:h-8" />
               </div>
               
-              {/* Title stack - Modern typography */}
-              <div className="flex flex-col justify-center">
+              {/* Title stack - Modern typography - Centered */}
+              <div className="flex flex-col items-center justify-center text-center">
                 <h1 
                   className="font-black text-white leading-none whitespace-nowrap tracking-tight"
                   style={{ 
@@ -3057,12 +3057,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   Painel de Chamadas
                 </h1>
                 <p 
-                  className="text-cyan-400 leading-tight font-semibold mt-0.5" 
+                  className="text-cyan-400 leading-tight font-semibold mt-1" 
                   title={unitName || 'Unidade de Saúde'}
                   style={{ 
                     fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
-                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
-                    maxWidth: 'clamp(180px, 25vw, 350px)',
+                    fontSize: 'clamp(0.85rem, 1.5vw, 1.25rem)',
+                    maxWidth: 'clamp(200px, 28vw, 400px)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -3072,11 +3072,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                   📍 {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 <p 
-                  className="leading-tight font-medium whitespace-nowrap text-amber-400/80 mt-0.5"
+                  className="leading-tight font-semibold whitespace-nowrap text-amber-300 mt-1.5"
                   style={{ 
                     fontFamily: "'Inter', system-ui, sans-serif",
-                    fontSize: 'clamp(0.45rem, 0.7vw, 0.6rem)',
-                    letterSpacing: '0.02em',
+                    fontSize: 'clamp(0.55rem, 0.85vw, 0.75rem)',
+                    letterSpacing: '0.03em',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
                   }}
                 >
                   ✨ Solução criada por Kalebe Gomes
