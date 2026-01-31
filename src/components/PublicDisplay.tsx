@@ -3005,60 +3005,83 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         <div className="fixed inset-0 z-[15] bg-black/70 animate-[fadeIn_0.3s_ease-out] pointer-events-none" />
       )}
 
-      {/* ========== HEADER ========== */}
+      {/* ========== HEADER - Modern Glassmorphism ========== */}
       <header 
         className={`relative z-10 shrink-0 transition-opacity duration-300 ${announcingType ? 'opacity-30' : 'opacity-100'}`}
-        style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 2rem)' }}
+        style={{ padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(1rem, 2vw, 1.5rem)' }}
       >
         <div 
-          className="relative overflow-hidden bg-gradient-to-r from-slate-900/95 via-indigo-950/95 to-slate-900/95 border border-indigo-500/40 rounded-xl"
+          className="relative overflow-hidden rounded-2xl"
           style={{
-            padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 2vw, 1.5rem)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+            padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 2vw, 1.5rem)',
+            background: 'linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.85) 50%, rgba(15,23,42,0.9) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(99,102,241,0.25)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)',
           }}
         >
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-t-xl" />
+          {/* Animated gradient accent line */}
+          <div 
+            className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+            style={{
+              background: 'linear-gradient(90deg, #06b6d4, #6366f1, #a855f7, #6366f1, #06b6d4)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 3s linear infinite',
+            }}
+          />
+          
+          {/* Subtle inner glow */}
+          <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.1) 0%, transparent 60%)',
+          }} />
           
           <div className="flex items-center justify-between gap-4 relative z-10">
-            {/* Left: Logo + Title - fixed width */}
-            <div className="flex items-center gap-3 shrink-0" style={{ minWidth: '280px' }}>
-              {/* Logo */}
+            {/* Left: Logo + Title */}
+            <div className="flex items-center gap-3 shrink-0" style={{ minWidth: '260px' }}>
+              {/* Logo container with glow */}
               <div 
-                className="relative shrink-0 bg-white rounded-lg shadow-lg flex items-center justify-center" 
-                style={{ width: 'clamp(2.5rem, 4vw, 4rem)', height: 'clamp(2.5rem, 4vw, 4rem)' }}
+                className="relative shrink-0 rounded-xl flex items-center justify-center" 
+                style={{ 
+                  width: 'clamp(2.5rem, 4vw, 3.5rem)', 
+                  height: 'clamp(2.5rem, 4vw, 3.5rem)',
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3), 0 0 20px rgba(6,182,212,0.2)',
+                }}
               >
-                <HealthCrossIcon size={32} className="w-6 h-6 lg:w-8 lg:h-8" />
+                <HealthCrossIcon size={28} className="w-5 h-5 lg:w-7 lg:h-7" />
               </div>
               
-              {/* Text */}
+              {/* Title stack */}
               <div className="flex flex-col justify-center">
                 <h1 
-                  className="tv-font-heading font-black text-white leading-none whitespace-nowrap tracking-tight"
+                  className="tv-font-heading font-black text-white leading-none whitespace-nowrap"
                   style={{ 
-                    fontSize: 'clamp(1rem, 2vw, 1.75rem)',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(6,182,212,0.3)',
+                    fontSize: 'clamp(0.95rem, 1.8vw, 1.5rem)',
+                    letterSpacing: '-0.02em',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.5)',
                   }}
                 >
                   Painel de Chamadas
                 </h1>
                 <p 
-                  className="tv-font-body text-amber-400 leading-tight font-black truncate" 
+                  className="tv-font-body text-amber-400 leading-tight font-bold truncate" 
                   title={unitName || 'Unidade de Saúde'}
                   style={{ 
-                    fontSize: 'clamp(0.75rem, 1.5vw, 1.25rem)',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(251,191,36,0.3)',
+                    fontSize: 'clamp(0.7rem, 1.3vw, 1.1rem)',
+                    textShadow: '0 1px 4px rgba(0,0,0,0.6)',
                     marginTop: '0.125rem',
-                    maxWidth: '250px',
+                    maxWidth: '220px',
                   }}
                 >
                   {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
                 <p 
-                  className="tv-font-body leading-tight font-medium whitespace-nowrap text-white/70"
+                  className="tv-font-body leading-tight font-medium whitespace-nowrap text-slate-400"
                   style={{ 
-                    fontSize: 'clamp(0.35rem, 0.5vw, 0.5rem)',
-                    marginTop: '0.125rem',
+                    fontSize: 'clamp(0.3rem, 0.45vw, 0.45rem)',
+                    marginTop: '0.1rem',
+                    letterSpacing: '0.02em',
                   }}
                 >
                   ✨ Solução criada por Kalebe Gomes
@@ -3066,13 +3089,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               </div>
             </div>
             
-            {/* Separator */}
+            {/* Elegant separator */}
             <div 
-              className="w-0.5 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent shrink-0 hidden lg:block" 
-              style={{ height: 'clamp(3rem, 5vh, 5rem)' }} 
+              className="shrink-0 hidden lg:block" 
+              style={{ 
+                width: '1px', 
+                height: 'clamp(2.5rem, 4vh, 4rem)',
+                background: 'linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.4) 50%, transparent 100%)',
+              }} 
             />
             
-            {/* Right: Weather Widget - takes remaining space */}
+            {/* Right: Weather Widget */}
             <div className="flex-1 flex items-center justify-end overflow-hidden min-w-0">
               <WeatherWidget currentTime={currentTime} formatTime={formatBrazilTime} />
             </div>
@@ -3092,49 +3119,81 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           height: 'calc(100% - clamp(3.5rem, 6vh, 5rem))',
         }}
       >
-        {/* ===== TRIAGE CARD ===== */}
+        {/* ===== TRIAGE CARD - Premium Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
-              ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/30 scale-[1.02] z-20' 
+              ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'doctor'
                 ? 'opacity-30 scale-95'
-                : 'border border-slate-700/50'
+                : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
+            background: 'linear-gradient(160deg, rgba(20,30,55,0.97) 0%, rgba(30,41,70,0.95) 50%, rgba(20,30,55,0.97) 100%)',
+            border: announcingType === 'triage' ? 'none' : '1px solid rgba(99,102,241,0.2)',
+            boxShadow: announcingType === 'triage' 
+              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
+              : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
-          {/* Header */}
+          {/* Header with refined gradient */}
           <div 
-            className={`shrink-0 relative overflow-hidden ${
-              announcingType === 'triage' 
-                ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
-                : 'bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600'
-            }`}
-            style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 1.5vw, 1.5rem)' }}
+            className="shrink-0 relative overflow-hidden"
+            style={{ 
+              padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 1.5vw, 1.5rem)',
+              background: announcingType === 'triage'
+                ? 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f59e0b 100%)'
+                : 'linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #4f46e5 100%)',
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+            {/* Shimmer effect */}
+            <div 
+              className="absolute inset-0" 
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 2s linear infinite',
+              }}
+            />
             <div className="flex items-center gap-3 relative z-10">
               <Activity 
                 className={`shrink-0 text-white ${announcingType === 'triage' ? 'animate-pulse' : ''}`}
-                style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)', filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.8))' }} 
+                style={{ 
+                  width: 'clamp(1.25rem, 2vw, 1.75rem)', 
+                  height: 'clamp(1.25rem, 2vw, 1.75rem)', 
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' 
+                }} 
               />
-              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }}>
+              <span 
+                className="text-white font-bold tracking-wide" 
+                style={{ 
+                  fontSize: 'clamp(0.95rem, 1.6vw, 1.35rem)',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                }}
+              >
                 {announcingType === 'triage' ? '🔔 CHAMANDO!' : 'TRIAGEM'}
               </span>
               {announcingType === 'triage' && (
-                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)' }} />
+                <Megaphone 
+                  className="text-white animate-megaphone-shake ml-auto shrink-0" 
+                  style={{ width: 'clamp(1.25rem, 2vw, 1.75rem)', height: 'clamp(1.25rem, 2vw, 1.75rem)' }} 
+                />
               )}
             </div>
           </div>
           
-          {/* Content */}
-          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 2rem)' }}>
-            <div className={`absolute inset-0 pointer-events-none ${
-              announcingType === 'triage' ? 'bg-gradient-to-b from-yellow-500/15 to-transparent' : 'bg-gradient-to-b from-indigo-500/5 to-transparent'
-            }`} />
+          {/* Content area */}
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
+            {/* Subtle radial glow */}
+            <div 
+              className="absolute inset-0 pointer-events-none" 
+              style={{
+                background: announcingType === 'triage'
+                  ? 'radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 70%)',
+              }}
+            />
             
             {currentTriageCall ? (
               <div className={`text-center w-full relative z-10 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
@@ -3149,15 +3208,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                           ? 'clamp(1.75rem, 4vw, 3.5rem)' 
                           : 'clamp(1.5rem, 3vw, 3rem)',
                     wordBreak: 'break-word', 
-                    letterSpacing: '0.03em',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.02em',
+                    textShadow: '0 4px 12px rgba(0,0,0,0.5)',
                   }}
                 >
                   {formatPatientName(currentTriageCall.name)}
                 </h2>
                 <p 
-                  className={`font-black uppercase tracking-widest ${announcingType === 'triage' ? 'text-yellow-200' : 'text-cyan-300'}`}
-                  style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.25rem)', textShadow: '0 2px 6px rgba(0,0,0,0.6)', marginTop: 'clamp(0.5rem, 1vh, 1rem)' }}
+                  className={`font-bold uppercase tracking-widest ${announcingType === 'triage' ? 'text-amber-300' : 'text-cyan-300'}`}
+                  style={{ 
+                    fontSize: 'clamp(1.1rem, 2.2vw, 2rem)', 
+                    textShadow: '0 2px 6px rgba(0,0,0,0.5)', 
+                    marginTop: 'clamp(0.5rem, 1vh, 1rem)' 
+                  }}
                 >
                   {currentTriageCall.destination || 'Triagem'}
                 </p>
@@ -3165,17 +3228,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             ) : (
               <div className="text-center px-4 max-w-[95%]">
                 <div 
-                  className="mx-auto rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center animate-pulse mb-3"
-                  style={{ width: 'clamp(3rem, 5vw, 5rem)', height: 'clamp(3rem, 5vw, 5rem)' }}
+                  className="mx-auto rounded-full flex items-center justify-center animate-pulse mb-3"
+                  style={{ 
+                    width: 'clamp(3rem, 5vw, 4.5rem)', 
+                    height: 'clamp(3rem, 5vw, 4.5rem)',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(79,70,229,0.1) 100%)',
+                    boxShadow: '0 4px 16px rgba(99,102,241,0.2)',
+                  }}
                 >
-                  <Activity className="text-blue-400/60" style={{ width: 'clamp(1.5rem, 2.5vw, 2.5rem)', height: 'clamp(1.5rem, 2.5vw, 2.5rem)' }} />
+                  <Activity className="text-indigo-400/70" style={{ width: 'clamp(1.5rem, 2.5vw, 2.25rem)', height: 'clamp(1.5rem, 2.5vw, 2.25rem)' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-slate-300 text-center font-semibold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(0.875rem, 1.5vw, 1.25rem)',
+                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
                     lineHeight: '1.5',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                   }}
                 >
                   {WAITING_PHRASES[currentWaitingPhraseIndex]}
@@ -3185,49 +3253,81 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== DOCTOR CARD ===== */}
+        {/* ===== DOCTOR CARD - Premium Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
-              ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/30 scale-[1.02] z-20' 
+              ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'triage'
                 ? 'opacity-30 scale-95'
-                : 'border border-slate-700/50'
+                : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
+            background: 'linear-gradient(160deg, rgba(20,35,45,0.97) 0%, rgba(25,50,55,0.95) 50%, rgba(20,35,45,0.97) 100%)',
+            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(16,185,129,0.2)',
+            boxShadow: announcingType === 'doctor' 
+              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
+              : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
-          {/* Header */}
+          {/* Header with refined gradient */}
           <div 
-            className={`shrink-0 relative overflow-hidden ${
-              announcingType === 'doctor' 
-                ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
-                : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600'
-            }`}
-            style={{ padding: 'clamp(0.5rem, 1vh, 1rem) clamp(1rem, 1.5vw, 1.5rem)' }}
+            className="shrink-0 relative overflow-hidden"
+            style={{ 
+              padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 1.5vw, 1.5rem)',
+              background: announcingType === 'doctor'
+                ? 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f59e0b 100%)'
+                : 'linear-gradient(135deg, #059669 0%, #10b981 50%, #059669 100%)',
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+            {/* Shimmer effect */}
+            <div 
+              className="absolute inset-0" 
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 2s linear infinite',
+              }}
+            />
             <div className="flex items-center gap-3 relative z-10">
               <Stethoscope 
                 className={`shrink-0 text-white ${announcingType === 'doctor' ? 'animate-pulse' : ''}`}
-                style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)', filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.8))' }} 
+                style={{ 
+                  width: 'clamp(1.25rem, 2vw, 1.75rem)', 
+                  height: 'clamp(1.25rem, 2vw, 1.75rem)', 
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' 
+                }} 
               />
-              <span className="text-white font-bold tracking-wide drop-shadow-md" style={{ fontSize: 'clamp(1rem, 1.8vw, 1.5rem)' }}>
+              <span 
+                className="text-white font-bold tracking-wide" 
+                style={{ 
+                  fontSize: 'clamp(0.95rem, 1.6vw, 1.35rem)',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                }}
+              >
                 {announcingType === 'doctor' ? '🔔 CHAMANDO!' : 'CONSULTÓRIO'}
               </span>
               {announcingType === 'doctor' && (
-                <Megaphone className="text-white animate-megaphone-shake ml-auto shrink-0" style={{ width: 'clamp(1.25rem, 2vw, 2rem)', height: 'clamp(1.25rem, 2vw, 2rem)' }} />
+                <Megaphone 
+                  className="text-white animate-megaphone-shake ml-auto shrink-0" 
+                  style={{ width: 'clamp(1.25rem, 2vw, 1.75rem)', height: 'clamp(1.25rem, 2vw, 1.75rem)' }} 
+                />
               )}
             </div>
           </div>
           
-          {/* Content */}
-          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 2rem)' }}>
-            <div className={`absolute inset-0 pointer-events-none ${
-              announcingType === 'doctor' ? 'bg-gradient-to-b from-yellow-500/15 to-transparent' : 'bg-gradient-to-b from-emerald-500/5 to-transparent'
-            }`} />
+          {/* Content area */}
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
+            {/* Subtle radial glow */}
+            <div 
+              className="absolute inset-0 pointer-events-none" 
+              style={{
+                background: announcingType === 'doctor'
+                  ? 'radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 70%)',
+              }}
+            />
             
             {currentDoctorCall ? (
               <div className={`text-center w-full relative z-10 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
@@ -3242,15 +3342,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                           ? 'clamp(1.75rem, 4vw, 3.5rem)' 
                           : 'clamp(1.5rem, 3vw, 3rem)',
                     wordBreak: 'break-word', 
-                    letterSpacing: '0.03em',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.02em',
+                    textShadow: '0 4px 12px rgba(0,0,0,0.5)',
                   }}
                 >
                   {formatPatientName(currentDoctorCall.name)}
                 </h2>
                 <p 
-                  className={`font-black uppercase tracking-widest ${announcingType === 'doctor' ? 'text-yellow-200' : 'text-emerald-300'}`}
-                  style={{ fontSize: 'clamp(1.25rem, 2.5vw, 2.25rem)', textShadow: '0 2px 6px rgba(0,0,0,0.6)', marginTop: 'clamp(0.5rem, 1vh, 1rem)' }}
+                  className={`font-bold uppercase tracking-widest ${announcingType === 'doctor' ? 'text-amber-300' : 'text-emerald-300'}`}
+                  style={{ 
+                    fontSize: 'clamp(1.1rem, 2.2vw, 2rem)', 
+                    textShadow: '0 2px 6px rgba(0,0,0,0.5)', 
+                    marginTop: 'clamp(0.5rem, 1vh, 1rem)' 
+                  }}
                 >
                   {currentDoctorCall.destination || 'Consultório'}
                 </p>
@@ -3258,17 +3362,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             ) : (
               <div className="text-center px-4 max-w-[95%]">
                 <div 
-                  className="mx-auto rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/10 flex items-center justify-center animate-pulse mb-3"
-                  style={{ width: 'clamp(3rem, 5vw, 5rem)', height: 'clamp(3rem, 5vw, 5rem)' }}
+                  className="mx-auto rounded-full flex items-center justify-center animate-pulse mb-3"
+                  style={{ 
+                    width: 'clamp(3rem, 5vw, 4.5rem)', 
+                    height: 'clamp(3rem, 5vw, 4.5rem)',
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(5,150,105,0.1) 100%)',
+                    boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
+                  }}
                 >
-                  <Stethoscope className="text-emerald-400/60" style={{ width: 'clamp(1.5rem, 2.5vw, 2.5rem)', height: 'clamp(1.5rem, 2.5vw, 2.5rem)' }} />
+                  <Stethoscope className="text-emerald-400/70" style={{ width: 'clamp(1.5rem, 2.5vw, 2.25rem)', height: 'clamp(1.5rem, 2.5vw, 2.25rem)' }} />
                 </div>
                 <p 
-                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-slate-300 text-center font-semibold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(0.875rem, 1.5vw, 1.25rem)',
+                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
                     lineHeight: '1.5',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                   }}
                 >
                   {WAITING_PHRASES[currentWaitingPhraseIndex]}
