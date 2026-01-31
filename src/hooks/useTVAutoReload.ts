@@ -51,10 +51,42 @@ export function useTVAutoReload(enabled: boolean = true) {
         text-align: center;
         font-family: system-ui, -apple-system, sans-serif;
       `;
+      
+      // Add keyframes for spinner animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(style);
+      
       notification.innerHTML = `
-        <div style="font-size: 3rem; margin-bottom: 1.5rem;">🔄</div>
-        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Só um momentinho 😊</div>
-        <div style="font-size: 1.5rem; color: #a0aec0; line-height: 1.6;">
+        <div style="position: relative; width: 80px; height: 80px; margin-bottom: 2rem;">
+          <div style="
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          "></div>
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+          ">😊</div>
+        </div>
+        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Só um momentinho</div>
+        <div style="font-size: 1.5rem; color: #a0aec0; line-height: 1.6; animation: pulse 2s ease-in-out infinite;">
           Estamos atualizando o aplicativo.<br>
           Em instantes, as chamadas serão exibidas novamente.
         </div>
