@@ -342,8 +342,13 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         <div className="flex items-start gap-1 mt-0.5 sm:mt-1 justify-center w-full">
           <MapPin className={`w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0 mt-0.5 transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`} />
           <span 
-            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 text-xs sm:text-sm lg:text-base xl:text-lg text-center ${
+            className={`font-black text-amber-400 leading-tight transition-opacity duration-300 text-center ${
               isTransitioning ? 'opacity-0' : 'opacity-100'
+            } ${
+              // Reduce font 10% for compound names (with space or hyphen)
+              (displayCity.includes(' ') || displayCity.includes('-'))
+                ? 'text-[0.65rem] sm:text-xs lg:text-sm xl:text-base'
+                : 'text-xs sm:text-sm lg:text-base xl:text-lg'
             }`}
             style={{ 
               textShadow: '0 1px 3px rgba(0,0,0,0.7)',
