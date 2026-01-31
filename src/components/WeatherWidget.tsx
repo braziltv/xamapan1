@@ -548,37 +548,50 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   return (
     <div className="w-full flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 justify-end flex-nowrap overflow-hidden">
-      {/* City Card - Modern glassmorphism design */}
+      {/* City Card - Modern glassmorphism design with adaptive width */}
       <div 
-        className="shrink-0 flex flex-col items-center justify-center rounded-xl lg:rounded-2xl border border-indigo-500/40 overflow-hidden"
+        className="shrink-0 flex flex-col items-center justify-center rounded-xl lg:rounded-2xl border border-indigo-500/40 overflow-hidden relative"
         style={{
           background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(49,46,129,0.4) 100%)',
           boxShadow: '0 0 20px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-          padding: 'clamp(0.375rem, 1vw, 0.75rem) clamp(0.625rem, 1.5vw, 1.25rem)',
-          minWidth: 'clamp(85px, 12vw, 140px)',
+          padding: 'clamp(0.5rem, 1.2vw, 1rem) clamp(0.75rem, 2vw, 1.5rem)',
+          minWidth: 'clamp(110px, 15vw, 180px)',
         }}
       >
         {/* Animated top accent */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 animate-shimmer-slide" style={{ backgroundSize: '200% 100%' }} />
         
-        <span className="font-bold text-indigo-300 uppercase tracking-wider whitespace-nowrap" style={{ fontSize: 'clamp(0.4rem, 0.6vw, 0.6rem)' }}>
-          📍 Previsão
-        </span>
-        <div className="flex items-center gap-1 mt-0.5 justify-center w-full" style={{ height: 'clamp(1.5rem, 2.5vw, 2rem)' }}>
-          <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0 animate-bounce-subtle" strokeWidth={2} />
+        {/* Title: Previsão do Tempo */}
+        <div className="flex items-center gap-1.5 mb-1">
           <span 
-            className={`font-black text-amber-400 leading-none transition-all duration-300 text-center whitespace-nowrap ${
+            className="font-bold text-indigo-200 uppercase tracking-widest whitespace-nowrap"
+            style={{ 
+              fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)',
+              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+            }}
+          >
+            ☁️ Previsão do Tempo
+          </span>
+        </div>
+        
+        {/* City name with MapPin - larger font */}
+        <div className="flex items-center gap-1.5 justify-center w-full" style={{ minHeight: 'clamp(1.75rem, 3vw, 2.5rem)' }}>
+          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-amber-400 shrink-0 animate-bounce-subtle" strokeWidth={2.5} />
+          <span 
+            className={`font-black text-amber-300 leading-tight transition-all duration-300 text-center ${
               isTransitioning ? 'opacity-0 transform translate-y-2 scale-95' : 'opacity-100 transform translate-y-0 scale-100'
             }`}
             style={{ 
-              textShadow: '0 2px 6px rgba(0,0,0,0.8), 0 0 10px rgba(251,191,36,0.3)',
-              fontSize: displayCity.length > 12 
-                ? 'clamp(0.5rem, 0.9vw, 0.75rem)' 
-                : displayCity.length > 8 
-                  ? 'clamp(0.6rem, 1.1vw, 0.9rem)' 
-                  : 'clamp(0.7rem, 1.3vw, 1rem)',
-              fontStretch: 'condensed',
-              letterSpacing: '-0.02em',
+              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 15px rgba(251,191,36,0.4)',
+              fontSize: displayCity.length > 14 
+                ? 'clamp(0.85rem, 1.4vw, 1.1rem)' 
+                : displayCity.length > 10 
+                  ? 'clamp(0.95rem, 1.6vw, 1.25rem)' 
+                  : displayCity.length > 7
+                    ? 'clamp(1.05rem, 1.8vw, 1.4rem)'
+                    : 'clamp(1.15rem, 2vw, 1.6rem)',
+              letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap',
             }}
             title={displayCity}
           >
