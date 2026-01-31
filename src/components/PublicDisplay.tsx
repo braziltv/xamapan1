@@ -7,6 +7,7 @@ import { WeatherWidget } from './WeatherWidget';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { usePreventSleep } from '@/hooks/usePreventSleep';
+import { useTVAutoReload } from '@/hooks/useTVAutoReload';
 import { useInactivePatientCleanup } from '@/hooks/useInactivePatientCleanup';
 import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
@@ -99,6 +100,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
+  // Auto-reload a cada 15 minutos para manter TV atualizada
+  useTVAutoReload(true);
   // Get unit name for cleanup
   const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
   
