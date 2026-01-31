@@ -247,6 +247,27 @@ export default {
             opacity: "0.9"
           },
         },
+        // Header pulse animations for TV cards
+        "shimmer-slide": {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "0" },
+          "50%": { opacity: "1" },
+        },
+        "icon-bounce": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.15)" },
+        },
+        "header-pulse": {
+          "0%, 100%": { 
+            filter: "brightness(1)",
+          },
+          "50%": { 
+            filter: "brightness(1.15)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -264,6 +285,11 @@ export default {
         "weather-storm": "weather-storm 8s ease-in-out infinite",
         "weather-snow-float": "weather-snow-float 6s ease-in-out infinite",
         "weather-fog-drift": "weather-fog-drift 7s ease-in-out infinite",
+        // TV card header animations
+        "shimmer-slide": "shimmer-slide 3s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "icon-bounce": "icon-bounce 1.5s ease-in-out infinite",
+        "header-pulse": "header-pulse 2.5s ease-in-out infinite",
       },
     },
   },
