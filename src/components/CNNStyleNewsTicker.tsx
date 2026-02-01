@@ -74,7 +74,7 @@ export function CNNStyleNewsTicker({
 
   const getSourceStyle = (source: string) => {
     if (source === '📢 Informativo') return 'bg-gradient-to-r from-red-700 to-red-600 text-white shadow-red-700/50';
-    if (source === 'Créditos') return 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950';
+    if (source === 'Créditos') return 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 animate-pulse';
     if (source === 'G1') return 'bg-red-600 text-white';
     if (source === 'O Globo') return 'bg-blue-700 text-white';
     if (source === 'Itatiaia') return 'bg-yellow-500 text-yellow-950';
@@ -119,7 +119,7 @@ export function CNNStyleNewsTicker({
                   </span>
                   <span className={`${
                     item.source === '📢 Informativo' ? 'text-red-400 font-bold' : 
-                    item.source === 'Créditos' ? 'text-amber-300' : 
+                    item.source === 'Créditos' ? 'text-white font-bold animate-pulse' : 
                     'text-white'
                   }`}>
                     {item.title}
