@@ -14,7 +14,7 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
   const minutes = time.getMinutes().toString().padStart(2, '0');
   const seconds = time.getSeconds().toString().padStart(2, '0');
 
-  const size = 100;
+  const size = 50;
   const center = size / 2;
 
   return (
@@ -83,11 +83,11 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
           <circle
             cx={center}
             cy={center}
-            r={center - 5}
+            r={center - 3}
             fill="none"
             stroke={`url(#blue-glow-${uniqueId})`}
-            strokeWidth="2"
-            strokeDasharray="60 30 20 40"
+            strokeWidth="1"
+            strokeDasharray="30 15 10 20"
             filter={`url(#blur-blue-${uniqueId})`}
             opacity="0.9"
           />
@@ -98,11 +98,11 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
           <circle
             cx={center}
             cy={center}
-            r={center - 12}
+            r={center - 7}
             fill="none"
             stroke={`url(#orange-glow-${uniqueId})`}
-            strokeWidth="2.5"
-            strokeDasharray="40 60 30 20"
+            strokeWidth="1.5"
+            strokeDasharray="20 30 15 10"
             filter={`url(#blur-orange-${uniqueId})`}
             opacity="0.85"
           />
@@ -113,11 +113,11 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
           <circle
             cx={center}
             cy={center}
-            r={center - 22}
+            r={center - 11}
             fill="none"
             stroke={`url(#cyan-glow-${uniqueId})`}
-            strokeWidth="1.5"
-            strokeDasharray="15 10 25 15 35"
+            strokeWidth="1"
+            strokeDasharray="8 5 12 8 18"
             filter={`url(#blur-blue-${uniqueId})`}
             opacity="0.7"
           />
@@ -126,10 +126,10 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
         {/* Accent arcs - Blue left side */}
         <g style={{ transformOrigin: 'center', animation: 'spin-slow 30s linear infinite' }}>
           <path
-            d={`M ${center - 50} ${center} A 50 50 0 0 1 ${center} ${center - 50}`}
+            d={`M ${center - 20} ${center} A 20 20 0 0 1 ${center} ${center - 20}`}
             fill="none"
             stroke="#38bdf8"
-            strokeWidth="3"
+            strokeWidth="1.5"
             strokeLinecap="round"
             filter={`url(#blur-blue-${uniqueId})`}
             opacity="0.8"
@@ -139,10 +139,10 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
         {/* Accent arcs - Orange right side */}
         <g style={{ transformOrigin: 'center', animation: 'spin-reverse 25s linear infinite' }}>
           <path
-            d={`M ${center + 50} ${center} A 50 50 0 0 1 ${center} ${center + 50}`}
+            d={`M ${center + 20} ${center} A 20 20 0 0 1 ${center} ${center + 20}`}
             fill="none"
             stroke="#fb923c"
-            strokeWidth="3"
+            strokeWidth="1.5"
             strokeLinecap="round"
             filter={`url(#blur-orange-${uniqueId})`}
             opacity="0.8"
@@ -151,9 +151,9 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
 
         {/* Light flares - Left blue */}
         <circle
-          cx={center - 58}
+          cx={center - 22}
           cy={center}
-          r="4"
+          r="2"
           fill="#38bdf8"
           filter={`url(#blur-blue-${uniqueId})`}
           style={{ animation: 'pulse-glow 2s ease-in-out infinite' }}
@@ -161,18 +161,18 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
         
         {/* Light flares - Right orange */}
         <circle
-          cx={center + 58}
+          cx={center + 22}
           cy={center}
-          r="4"
+          r="2"
           fill="#fb923c"
           filter={`url(#blur-orange-${uniqueId})`}
           style={{ animation: 'pulse-glow 2s ease-in-out infinite', animationDelay: '1s' }}
         />
 
         {/* Particle effects */}
-        {[...Array(8)].map((_, i) => {
-          const angle = (i * 45) * (Math.PI / 180);
-          const radius = center - 8;
+        {[...Array(6)].map((_, i) => {
+          const angle = (i * 60) * (Math.PI / 180);
+          const radius = center - 4;
           const x = center + Math.cos(angle) * radius;
           const y = center + Math.sin(angle) * radius;
           return (
@@ -180,7 +180,7 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
               key={i}
               cx={x}
               cy={y}
-              r="1.5"
+              r="1"
               fill={i % 2 === 0 ? '#38bdf8' : '#fb923c'}
               opacity="0.6"
               style={{ 
@@ -203,16 +203,16 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
           className="font-bold text-white tabular-nums"
           style={{ 
             fontFamily: "'Orbitron', 'SF Pro Display', sans-serif",
-            fontSize: '0.95rem',
-            letterSpacing: '0.05em',
-            textShadow: '0 0 15px rgba(56, 189, 248, 0.9), 0 0 30px rgba(56, 189, 248, 0.5), 0 0 45px rgba(56, 189, 248, 0.3)',
+            fontSize: '0.6rem',
+            letterSpacing: '0.03em',
+            textShadow: '0 0 8px rgba(56, 189, 248, 0.9), 0 0 16px rgba(56, 189, 248, 0.5)',
           }}
         >
           {hours}:{minutes}
           <span 
             className="text-amber-400"
             style={{
-              textShadow: '0 0 15px rgba(251, 146, 60, 0.9), 0 0 30px rgba(251, 146, 60, 0.5)',
+              textShadow: '0 0 8px rgba(251, 146, 60, 0.9), 0 0 16px rgba(251, 146, 60, 0.5)',
             }}
           >
             :{seconds}
@@ -222,10 +222,10 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
 
       {/* Bottom reflection */}
       <div 
-        className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-24 h-4 rounded-full opacity-40"
+        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-10 h-2 rounded-full opacity-40"
         style={{
           background: 'radial-gradient(ellipse at center, rgba(56, 189, 248, 0.5) 0%, rgba(251, 146, 60, 0.3) 50%, transparent 80%)',
-          filter: 'blur(4px)',
+          filter: 'blur(2px)',
         }}
       />
 
