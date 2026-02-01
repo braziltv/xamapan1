@@ -39,7 +39,6 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
   'Barbacena': { lat: -21.23, lon: -43.77 },
   'Sabará': { lat: -19.88, lon: -43.81 },
   'Varginha': { lat: -21.55, lon: -45.43 },
-  'Conselheiro Lafaiete': { lat: -20.66, lon: -43.79 },
   'Araguari': { lat: -18.65, lon: -48.19 },
   'Itabira': { lat: -19.62, lon: -43.23 },
   'Passos': { lat: -20.72, lon: -46.61 },
