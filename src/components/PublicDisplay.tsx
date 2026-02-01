@@ -12,6 +12,7 @@ import { useInactivePatientCleanup } from '@/hooks/useInactivePatientCleanup';
 import { AnalogClock } from './AnalogClock';
 import { SpotlightOverlay } from './SpotlightOverlay';
 import { ParticleBackground } from './ParticleBackground';
+import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
@@ -2804,6 +2805,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       data-resolution-tier={tvResolution.tier}
       data-landscape={tvResolution.isLandscape}
     >
+      {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
+      <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
+
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
