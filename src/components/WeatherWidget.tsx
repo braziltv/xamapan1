@@ -547,7 +547,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const minTemp = todayForecast?.minTemp ?? weather.current.temperature - 5;
 
   return (
-    <div className="w-full flex items-center gap-2 sm:gap-3 lg:gap-3.5 xl:gap-5 justify-end flex-nowrap overflow-visible">
+    <div className="w-full flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 xl:gap-4 justify-end flex-nowrap overflow-visible">
       {/* City Card - Adaptive width with visible overflow */}
       <div 
         className="shrink-0 flex flex-col items-center justify-center rounded-lg lg:rounded-xl border border-indigo-500/50 relative"
