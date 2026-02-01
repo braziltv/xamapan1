@@ -28,7 +28,6 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
   'Montes Claros': { lat: -16.73, lon: -43.86 },
   'Ribeirão das Neves': { lat: -19.77, lon: -44.08 },
   'Uberaba': { lat: -19.75, lon: -47.93 },
-  'Governador Valadares': { lat: -18.85, lon: -41.95 },
   'Ipatinga': { lat: -19.47, lon: -42.54 },
   'Divinópolis': { lat: -20.14, lon: -44.88 },
   'Santa Luzia': { lat: -19.77, lon: -43.85 },
