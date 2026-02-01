@@ -3,10 +3,9 @@ import { useId } from 'react';
 interface FuturisticClockProps {
   time: Date | null;
   className?: string;
-  showSeconds?: boolean;
 }
 
-export function FuturisticClock({ time, className = '', showSeconds = false }: FuturisticClockProps) {
+export function FuturisticClock({ time, className = '' }: FuturisticClockProps) {
   const uniqueId = useId().replace(/:/g, '');
   
   if (!time) return null;
@@ -15,7 +14,7 @@ export function FuturisticClock({ time, className = '', showSeconds = false }: F
   const minutes = time.getMinutes().toString().padStart(2, '0');
   const seconds = time.getSeconds().toString().padStart(2, '0');
 
-  const size = 140;
+  const size = 100;
   const center = size / 2;
 
   return (
@@ -204,22 +203,20 @@ export function FuturisticClock({ time, className = '', showSeconds = false }: F
           className="font-bold text-white tabular-nums"
           style={{ 
             fontFamily: "'Orbitron', 'SF Pro Display', sans-serif",
-            fontSize: showSeconds ? '1.1rem' : '1.4rem',
+            fontSize: '0.95rem',
             letterSpacing: '0.05em',
             textShadow: '0 0 15px rgba(56, 189, 248, 0.9), 0 0 30px rgba(56, 189, 248, 0.5), 0 0 45px rgba(56, 189, 248, 0.3)',
           }}
         >
           {hours}:{minutes}
-          {showSeconds && (
-            <span 
-              className="text-amber-400"
-              style={{
-                textShadow: '0 0 15px rgba(251, 146, 60, 0.9), 0 0 30px rgba(251, 146, 60, 0.5)',
-              }}
-            >
-              :{seconds}
-            </span>
-          )}
+          <span 
+            className="text-amber-400"
+            style={{
+              textShadow: '0 0 15px rgba(251, 146, 60, 0.9), 0 0 30px rgba(251, 146, 60, 0.5)',
+            }}
+          >
+            :{seconds}
+          </span>
         </span>
       </div>
 
