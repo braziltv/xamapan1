@@ -3119,7 +3119,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           height: '100%',
         }}
       >
-        {/* ===== TRIAGE CARD - Premium Design ===== */}
+        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
@@ -3129,11 +3129,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(20,30,55,0.97) 0%, rgba(30,41,70,0.95) 50%, rgba(20,30,55,0.97) 100%)',
-            border: announcingType === 'triage' ? 'none' : '1px solid rgba(99,102,241,0.2)',
+            background: 'linear-gradient(160deg, rgba(30,27,75,0.97) 0%, rgba(49,46,129,0.93) 50%, rgba(30,27,75,0.97) 100%)',
+            border: announcingType === 'triage' ? 'none' : '1px solid rgba(129,140,248,0.35)',
             boxShadow: announcingType === 'triage' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3144,7 +3144,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 1.5vw, 1.5rem)',
               background: announcingType === 'triage'
                 ? 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f59e0b 100%)'
-                : 'linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #4f46e5 100%)',
+                : 'linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #818cf8 100%)',
             }}
           >
             {/* Shimmer effect */}
@@ -3185,13 +3185,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           {/* Content area */}
           <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
-            {/* Subtle radial glow */}
+            {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
               style={{
                 background: announcingType === 'triage'
-                  ? 'radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)'
-                  : 'radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 70%)',
+                  ? 'radial-gradient(ellipse 100% 70% at center, rgba(251,191,36,0.15) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse 100% 70% at center, rgba(99,102,241,0.12) 0%, transparent 70%)',
               }}
             />
             
@@ -3226,22 +3226,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </p>
               </div>
             ) : (
-              <div className="text-center px-4 max-w-[95%]">
+              <div className="text-center px-4 max-w-[95%] flex flex-col items-center justify-center">
+                {/* Large Waiting icon - centered */}
                 <div 
-                  className="mx-auto rounded-full flex items-center justify-center animate-pulse mb-3"
+                  className="rounded-full flex items-center justify-center animate-pulse mb-4"
                   style={{ 
-                    width: 'clamp(3rem, 5vw, 4.5rem)', 
-                    height: 'clamp(3rem, 5vw, 4.5rem)',
-                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(79,70,229,0.1) 100%)',
-                    boxShadow: '0 4px 16px rgba(99,102,241,0.2)',
+                    width: 'clamp(4.5rem, 8vw, 7rem)', 
+                    height: 'clamp(4.5rem, 8vw, 7rem)',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(79,70,229,0.15) 100%)',
+                    boxShadow: '0 8px 24px rgba(99,102,241,0.25)',
                   }}
                 >
-                  <Activity className="text-indigo-400/70" style={{ width: 'clamp(1.5rem, 2.5vw, 2.25rem)', height: 'clamp(1.5rem, 2.5vw, 2.25rem)' }} />
+                  <Activity className="text-indigo-400/80" style={{ width: 'clamp(2.25rem, 4vw, 3.5rem)', height: 'clamp(2.25rem, 4vw, 3.5rem)' }} />
                 </div>
                 <p 
-                  className={`text-slate-300 text-center font-semibold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
+                    fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)',
                     lineHeight: '1.5',
                     textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                   }}
@@ -3253,7 +3254,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== DOCTOR CARD - Premium Design ===== */}
+        {/* ===== DOCTOR CARD - Premium Green/Teal Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
@@ -3263,11 +3264,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(20,35,45,0.97) 0%, rgba(25,50,55,0.95) 50%, rgba(20,35,45,0.97) 100%)',
-            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(16,185,129,0.2)',
+            background: 'linear-gradient(160deg, rgba(6,78,59,0.97) 0%, rgba(4,120,87,0.93) 50%, rgba(6,78,59,0.97) 100%)',
+            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(52,211,153,0.35)',
             boxShadow: announcingType === 'doctor' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3278,7 +3279,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               padding: 'clamp(0.5rem, 1vh, 0.875rem) clamp(1rem, 1.5vw, 1.5rem)',
               background: announcingType === 'doctor'
                 ? 'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f59e0b 100%)'
-                : 'linear-gradient(135deg, #059669 0%, #10b981 50%, #059669 100%)',
+                : 'linear-gradient(135deg, #047857 0%, #10b981 50%, #34d399 100%)',
             }}
           >
             {/* Shimmer effect */}
@@ -3319,13 +3320,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           
           {/* Content area */}
           <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
-            {/* Subtle radial glow */}
+            {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
               style={{
                 background: announcingType === 'doctor'
-                  ? 'radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)'
-                  : 'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 70%)',
+                  ? 'radial-gradient(ellipse 100% 70% at center, rgba(251,191,36,0.15) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse 100% 70% at center, rgba(16,185,129,0.12) 0%, transparent 70%)',
               }}
             />
             
@@ -3360,22 +3361,23 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 </p>
               </div>
             ) : (
-              <div className="text-center px-4 max-w-[95%]">
+              <div className="text-center px-4 max-w-[95%] flex flex-col items-center justify-center">
+                {/* Large Waiting icon - centered */}
                 <div 
-                  className="mx-auto rounded-full flex items-center justify-center animate-pulse mb-3"
+                  className="rounded-full flex items-center justify-center animate-pulse mb-4"
                   style={{ 
-                    width: 'clamp(3rem, 5vw, 4.5rem)', 
-                    height: 'clamp(3rem, 5vw, 4.5rem)',
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(5,150,105,0.1) 100%)',
-                    boxShadow: '0 4px 16px rgba(16,185,129,0.2)',
+                    width: 'clamp(4.5rem, 8vw, 7rem)', 
+                    height: 'clamp(4.5rem, 8vw, 7rem)',
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.15) 100%)',
+                    boxShadow: '0 8px 24px rgba(16,185,129,0.25)',
                   }}
                 >
-                  <Stethoscope className="text-emerald-400/70" style={{ width: 'clamp(1.5rem, 2.5vw, 2.25rem)', height: 'clamp(1.5rem, 2.5vw, 2.25rem)' }} />
+                  <Stethoscope className="text-emerald-400/80" style={{ width: 'clamp(2.25rem, 4vw, 3.5rem)', height: 'clamp(2.25rem, 4vw, 3.5rem)' }} />
                 </div>
                 <p 
-                  className={`text-slate-300 text-center font-semibold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
-                    fontSize: 'clamp(0.8rem, 1.4vw, 1.15rem)',
+                    fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)',
                     lineHeight: '1.5',
                     textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                   }}
@@ -3389,21 +3391,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* ===== RECENT CALLS SIDEBAR ===== */}
         <div 
-          className={`flex flex-col rounded-2xl border border-purple-500/30 transition-opacity duration-300 h-full ${
+          className={`flex flex-col rounded-2xl border border-indigo-500/40 transition-opacity duration-300 h-full ${
             announcingType ? 'opacity-30' : 'opacity-100'
           }`}
           style={{
-            background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%)',
-            padding: 'clamp(0.4rem, 0.8vw, 0.75rem)',
+            background: 'linear-gradient(180deg, rgba(15,23,42,0.97) 0%, rgba(30,41,59,0.95) 100%)',
+            padding: 'clamp(0.5rem, 1vw, 0.875rem)',
             minHeight: 'clamp(150px, 25vh, 300px)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-2 shrink-0">
-            <Clock className="text-cyan-400 shrink-0 animate-pulse" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
-            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.25rem)' }}>
+          <div className="flex items-center gap-2 mb-1.5 shrink-0">
+            <Clock className="text-cyan-400 shrink-0" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
+            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
               Últimas Chamadas
             </h3>
+          </div>
+          
+          {/* Subheader */}
+          <div className="flex items-center gap-1.5 mb-2 shrink-0 px-1">
+            <span className="text-cyan-500" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)' }}>◆</span>
+            <span 
+              className="text-slate-400 font-semibold uppercase tracking-wider"
+              style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.65rem)' }}
+            >
+              ÚLTIMAS CHAMADAS
+            </span>
           </div>
 
           {/* List with Carousel - 7 items per page */}
