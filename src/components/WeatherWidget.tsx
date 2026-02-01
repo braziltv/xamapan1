@@ -438,23 +438,22 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
   const uniqueClockId = useId().replace(/:/g, '');
 
-  // Modern LED 7-segment display clock
+  // Modern LED 7-segment display clock with seconds
   const renderDateTimeCompact = () => {
     const hours = safeFormatTime(currentTime, 'HH');
     const minutes = safeFormatTime(currentTime, 'mm');
+    const seconds = safeFormatTime(currentTime, 'ss');
     
-    const digitSize = 50; // Size for each digit
-    const w = digitSize * 0.6;
-    const h = digitSize;
-    const segmentWidth = digitSize * 0.12;
-    const gap = digitSize * 0.02;
-    const glowColor = 'rgba(255, 255, 255, 0.95)';
+    const digitSize = 44; // Size for main digits (HH:MM)
+    const secondsDigitSize = 32; // Smaller size for seconds
+    const glowColor = 'rgba(6, 182, 212, 0.95)'; // Cyan glow for main digits
+    const secondsGlowColor = 'rgba(251, 191, 36, 0.95)'; // Amber glow for seconds
     
     // Segment paths for 7-segment display
     const getSegmentPaths = (size: number) => {
       const w = size * 0.6;
       const h = size;
-      const segW = size * 0.12;
+      const segW = size * 0.13;
       const g = size * 0.02;
       return [
         // a - top horizontal
@@ -474,62 +473,93 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       ];
     };
 
-    const renderDigit = (digit: string, id: string) => {
+    const renderDigit = (digit: string, id: string, size: number, color: string) => {
       const segments = digitSegments[digit] || digitSegments['0'];
-      const paths = getSegmentPaths(digitSize);
+      const paths = getSegmentPaths(size);
+      const w = size * 0.6;
+      const h = size;
       
       return (
-        <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+        <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="drop-shadow-lg">
           <defs>
-            <filter id={`glow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
+            <filter id={`glow-${id}`} x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="2.5" result="blur1" />
+              <feGaussianBlur stdDeviation="1" result="blur2" />
               <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
+                <feMergeNode in="blur1" />
+                <feMergeNode in="blur2" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <linearGradient id={`grad-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
+              <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0.2)" />
+            </linearGradient>
           </defs>
+          {/* Background segments (off state) */}
+          {paths.map((path, index) => (
+            <path
+              key={`bg-${index}`}
+              d={path}
+              fill="rgba(30, 41, 59, 0.4)"
+              opacity="0.5"
+            />
+          ))}
+          {/* Active segments with glow */}
           {paths.map((path, index) => (
             <path
               key={index}
               d={path}
-              fill={segments[index] ? glowColor : 'rgba(30, 41, 59, 0.3)'}
+              fill={segments[index] ? color : 'transparent'}
               filter={segments[index] ? `url(#glow-${id})` : undefined}
-              style={{ transition: 'fill 0.15s ease-out' }}
+              style={{ 
+                transition: 'fill 0.1s ease-out',
+                opacity: segments[index] ? 1 : 0,
+              }}
             />
+          ))}
+          {/* Highlight overlay for active segments */}
+          {paths.map((path, index) => (
+            segments[index] && (
+              <path
+                key={`hl-${index}`}
+                d={path}
+                fill={`url(#grad-${id})`}
+                opacity="0.4"
+              />
+            )
           ))}
         </svg>
       );
     };
 
-    const renderColon = () => {
-      const colonW = digitSize * 0.25;
-      const dotSize = digitSize * 0.1;
+    const renderColon = (color: string, size: number) => {
+      const colonW = size * 0.2;
+      const dotSize = size * 0.12;
       
       return (
         <div 
-          className="flex flex-col justify-center items-center gap-2"
-          style={{ width: colonW, height: h }}
+          className="flex flex-col justify-center items-center gap-2 mx-0.5"
+          style={{ width: colonW, height: size }}
         >
           <div 
-            className="animate-pulse"
+            className="animate-pulse rounded-sm"
             style={{
               width: dotSize,
               height: dotSize,
-              backgroundColor: glowColor,
-              borderRadius: '20%',
-              boxShadow: `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+              backgroundColor: color,
+              boxShadow: `0 0 6px ${color}, 0 0 12px ${color}, 0 0 18px ${color}`,
             }}
           />
           <div 
-            className="animate-pulse"
+            className="animate-pulse rounded-sm"
             style={{
               width: dotSize,
               height: dotSize,
-              backgroundColor: glowColor,
-              borderRadius: '20%',
-              boxShadow: `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+              backgroundColor: color,
+              boxShadow: `0 0 6px ${color}, 0 0 12px ${color}, 0 0 18px ${color}`,
+              animationDelay: '0.5s',
             }}
           />
         </div>
@@ -537,63 +567,123 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     };
     
     return (
-      <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0">
+      <div className="flex flex-col items-center gap-1.5 shrink-0">
         {/* Date pills with animated icons */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500/25 to-amber-600/15 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 border border-amber-400/50 shadow-lg"
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500/25 to-amber-600/15 rounded-full px-2 lg:px-2.5 py-0.5 sm:py-1 border border-amber-400/50 shadow-lg"
                style={{ boxShadow: '0 0 12px rgba(245,158,11,0.25)' }}>
-            <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-amber-400 animate-pulse" strokeWidth={2} />
-            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[0.5rem] sm:text-[0.55rem] lg:text-xs"
+            <Calendar className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-amber-400 animate-pulse" strokeWidth={2} />
+            <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[0.55rem] lg:text-xs"
                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
               {safeFormatTime(currentTime, 'EEEE')}
             </p>
           </div>
-          <div className="flex items-center gap-1 bg-gradient-to-r from-slate-700/60 to-slate-800/50 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 border border-slate-500/50 shadow-lg">
-            <p className="font-semibold text-white leading-tight whitespace-nowrap text-[0.5rem] sm:text-[0.55rem] lg:text-xs"
+          <div className="flex items-center gap-1 bg-gradient-to-r from-slate-700/60 to-slate-800/50 rounded-full px-2 lg:px-2.5 py-0.5 sm:py-1 border border-slate-500/50 shadow-lg">
+            <p className="font-semibold text-white leading-tight whitespace-nowrap text-[0.55rem] lg:text-xs"
                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
               {safeFormatTime(currentTime, 'dd/MM/yyyy')}
             </p>
           </div>
         </div>
         
-        {/* Modern LED Digital Clock */}
+        {/* Modern LED Digital Clock with seconds */}
         <div 
-          className="relative flex items-center justify-center"
+          className="relative flex items-center justify-center overflow-hidden"
           style={{
-            background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95))',
-            borderRadius: '12px',
-            padding: '10px 16px',
+            background: 'linear-gradient(160deg, rgba(10, 15, 30, 0.98) 0%, rgba(20, 30, 50, 0.95) 50%, rgba(15, 25, 45, 0.98) 100%)',
+            borderRadius: '14px',
+            padding: '12px 18px',
             boxShadow: `
-              0 0 0 1px rgba(255, 255, 255, 0.15),
-              0 8px 32px rgba(0, 0, 0, 0.5),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+              0 0 0 1px rgba(6, 182, 212, 0.3),
+              0 0 0 3px rgba(10, 15, 30, 0.8),
+              0 0 30px rgba(6, 182, 212, 0.15),
+              0 10px 40px rgba(0, 0, 0, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.3)
             `,
+            border: '1px solid rgba(6, 182, 212, 0.2)',
           }}
         >
+          {/* Animated scan line effect */}
+          <div 
+            className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
+            style={{
+              background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px)',
+            }}
+          />
+          
+          {/* Top highlight reflection */}
+          <div 
+            className="absolute top-0 left-4 right-4 h-px pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), transparent)',
+            }}
+          />
+          
           {/* Subtle inner glow */}
           <div 
             className="absolute inset-0 rounded-xl pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 60%)',
+              background: 'radial-gradient(ellipse at 50% -20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%)',
             }}
           />
           
-          {/* LED Display */}
-          <div className="flex items-center gap-0.5 relative z-10">
-            {renderDigit(hours[0] || '0', `${uniqueClockId}-h1`)}
-            {renderDigit(hours[1] || '0', `${uniqueClockId}-h2`)}
-            {renderColon()}
-            {renderDigit(minutes[0] || '0', `${uniqueClockId}-m1`)}
-            {renderDigit(minutes[1] || '0', `${uniqueClockId}-m2`)}
+          {/* LED Display container */}
+          <div className="flex items-center relative z-10">
+            {/* Hours */}
+            <div className="flex items-center">
+              {renderDigit(hours[0] || '0', `${uniqueClockId}-h1`, digitSize, glowColor)}
+              {renderDigit(hours[1] || '0', `${uniqueClockId}-h2`, digitSize, glowColor)}
+            </div>
+            
+            {renderColon(glowColor, digitSize)}
+            
+            {/* Minutes */}
+            <div className="flex items-center">
+              {renderDigit(minutes[0] || '0', `${uniqueClockId}-m1`, digitSize, glowColor)}
+              {renderDigit(minutes[1] || '0', `${uniqueClockId}-m2`, digitSize, glowColor)}
+            </div>
+            
+            {/* Seconds separator - smaller colon */}
+            <div className="flex flex-col justify-center items-center mx-1" style={{ height: digitSize }}>
+              <div 
+                className="w-1 h-1 rounded-full animate-pulse"
+                style={{
+                  backgroundColor: secondsGlowColor,
+                  boxShadow: `0 0 4px ${secondsGlowColor}, 0 0 8px ${secondsGlowColor}`,
+                }}
+              />
+              <div className="h-2" />
+              <div 
+                className="w-1 h-1 rounded-full animate-pulse"
+                style={{
+                  backgroundColor: secondsGlowColor,
+                  boxShadow: `0 0 4px ${secondsGlowColor}, 0 0 8px ${secondsGlowColor}`,
+                  animationDelay: '0.5s',
+                }}
+              />
+            </div>
+            
+            {/* Seconds - smaller amber digits */}
+            <div className="flex items-end pb-0.5">
+              {renderDigit(seconds[0] || '0', `${uniqueClockId}-s1`, secondsDigitSize, secondsGlowColor)}
+              {renderDigit(seconds[1] || '0', `${uniqueClockId}-s2`, secondsDigitSize, secondsGlowColor)}
+            </div>
           </div>
           
-          {/* Reflection effect */}
+          {/* Bottom reflection effect */}
           <div 
-            className="absolute bottom-0 left-0 right-0 h-1/3 rounded-b-xl pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 h-1/4 rounded-b-xl pointer-events-none"
             style={{
-              background: 'linear-gradient(to top, rgba(255, 255, 255, 0.03), transparent)',
+              background: 'linear-gradient(to top, rgba(6, 182, 212, 0.05), transparent)',
             }}
           />
+          
+          {/* Corner accents */}
+          <div className="absolute top-1 left-1 w-2 h-2 border-t border-l border-cyan-500/30 rounded-tl" />
+          <div className="absolute top-1 right-1 w-2 h-2 border-t border-r border-cyan-500/30 rounded-tr" />
+          <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l border-cyan-500/30 rounded-bl" />
+          <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-cyan-500/30 rounded-br" />
         </div>
       </div>
     );
