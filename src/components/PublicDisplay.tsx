@@ -3402,22 +3402,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-1.5 shrink-0">
+          <div className="flex items-center gap-2 mb-2 shrink-0">
             <Clock className="text-cyan-400 shrink-0" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
             <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
               Últimas Chamadas
             </h3>
-          </div>
-          
-          {/* Subheader */}
-          <div className="flex items-center gap-1.5 mb-2 shrink-0 px-1">
-            <span className="text-cyan-500" style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)' }}>◆</span>
-            <span 
-              className="text-slate-400 font-semibold uppercase tracking-wider"
-              style={{ fontSize: 'clamp(0.5rem, 0.75vw, 0.65rem)' }}
-            >
-              ÚLTIMAS CHAMADAS
-            </span>
           </div>
 
           {/* List with Carousel - 7 items per page */}
