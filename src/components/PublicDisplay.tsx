@@ -3119,7 +3119,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           height: '100%',
         }}
       >
-        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design ===== */}
+        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design with Cyan Glow ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
@@ -3130,10 +3130,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
             background: 'linear-gradient(160deg, rgba(30,27,75,0.97) 0%, rgba(49,46,129,0.93) 50%, rgba(30,27,75,0.97) 100%)',
-            border: announcingType === 'triage' ? 'none' : '1px solid rgba(129,140,248,0.35)',
+            border: announcingType === 'triage' ? 'none' : '2px solid rgba(56,189,248,0.5)',
             boxShadow: announcingType === 'triage' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 0 30px rgba(56,189,248,0.25), 0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3254,7 +3254,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== DOCTOR CARD - Premium Green/Teal Design ===== */}
+        {/* ===== DOCTOR CARD - Premium Green/Teal Design with Cyan Glow ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
@@ -3265,10 +3265,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
             background: 'linear-gradient(160deg, rgba(6,78,59,0.97) 0%, rgba(4,120,87,0.93) 50%, rgba(6,78,59,0.97) 100%)',
-            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(52,211,153,0.35)',
+            border: announcingType === 'doctor' ? 'none' : '2px solid rgba(52,211,153,0.5)',
             boxShadow: announcingType === 'doctor' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 0 30px rgba(52,211,153,0.25), 0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3389,20 +3389,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== RECENT CALLS SIDEBAR ===== */}
+        {/* ===== RECENT CALLS SIDEBAR with Cyan Glow ===== */}
         <div 
-          className={`flex flex-col rounded-2xl border border-indigo-500/40 transition-opacity duration-300 h-full ${
+          className={`flex flex-col rounded-2xl transition-opacity duration-300 h-full ${
             announcingType ? 'opacity-30' : 'opacity-100'
           }`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.97) 0%, rgba(30,41,59,0.95) 100%)',
             padding: 'clamp(0.5rem, 1vw, 0.875rem)',
             minHeight: 'clamp(150px, 25vh, 300px)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+            border: '2px solid rgba(56,189,248,0.4)',
+            boxShadow: '0 0 25px rgba(56,189,248,0.2), 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-2 shrink-0">
+          <div className="flex items-center gap-2 mb-1 shrink-0">
             <Clock className="text-cyan-400 shrink-0" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
             <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
               Últimas Chamadas
