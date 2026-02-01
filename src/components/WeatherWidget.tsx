@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin, Thermometer, ThermometerSun, ThermometerSnowflake, Calendar, Clock } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback, useId } from 'react';
+import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin, Thermometer, ThermometerSun, ThermometerSnowflake, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
 
@@ -422,11 +422,119 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
   };
 
-  // Modern animated clock widget
+  // Segmentos para cada dígito (a-g) no formato de 7 segmentos
+  const digitSegments: { [key: string]: boolean[] } = {
+    '0': [true, true, true, true, true, true, false],
+    '1': [false, true, true, false, false, false, false],
+    '2': [true, true, false, true, true, false, true],
+    '3': [true, true, true, true, false, false, true],
+    '4': [false, true, true, false, false, true, true],
+    '5': [true, false, true, true, false, true, true],
+    '6': [true, false, true, true, true, true, true],
+    '7': [true, true, true, false, false, false, false],
+    '8': [true, true, true, true, true, true, true],
+    '9': [true, true, true, true, false, true, true],
+  };
+
+  const uniqueClockId = useId().replace(/:/g, '');
+
+  // Modern LED 7-segment display clock
   const renderDateTimeCompact = () => {
     const hours = safeFormatTime(currentTime, 'HH');
     const minutes = safeFormatTime(currentTime, 'mm');
-    const seconds = safeFormatTime(currentTime, 'ss');
+    
+    const digitSize = 50; // Size for each digit
+    const w = digitSize * 0.6;
+    const h = digitSize;
+    const segmentWidth = digitSize * 0.12;
+    const gap = digitSize * 0.02;
+    const glowColor = 'rgba(255, 255, 255, 0.95)';
+    
+    // Segment paths for 7-segment display
+    const getSegmentPaths = (size: number) => {
+      const w = size * 0.6;
+      const h = size;
+      const segW = size * 0.12;
+      const g = size * 0.02;
+      return [
+        // a - top horizontal
+        `M ${g + segW * 0.5} ${g} L ${w - g - segW * 0.5} ${g} L ${w - g - segW} ${segW * 0.7} L ${g + segW} ${segW * 0.7} Z`,
+        // b - top right vertical
+        `M ${w - g} ${g + segW * 0.5} L ${w - g} ${h * 0.5 - g * 0.5} L ${w - segW * 0.7 - g} ${h * 0.5 - segW * 0.3} L ${w - segW * 0.7 - g} ${g + segW} Z`,
+        // c - bottom right vertical
+        `M ${w - g} ${h * 0.5 + g * 0.5} L ${w - g} ${h - g - segW * 0.5} L ${w - segW * 0.7 - g} ${h - g - segW} L ${w - segW * 0.7 - g} ${h * 0.5 + segW * 0.3} Z`,
+        // d - bottom horizontal
+        `M ${g + segW * 0.5} ${h - g} L ${w - g - segW * 0.5} ${h - g} L ${w - g - segW} ${h - segW * 0.7} L ${g + segW} ${h - segW * 0.7} Z`,
+        // e - bottom left vertical
+        `M ${g} ${h * 0.5 + g * 0.5} L ${g} ${h - g - segW * 0.5} L ${g + segW * 0.7} ${h - g - segW} L ${g + segW * 0.7} ${h * 0.5 + segW * 0.3} Z`,
+        // f - top left vertical
+        `M ${g} ${g + segW * 0.5} L ${g} ${h * 0.5 - g * 0.5} L ${g + segW * 0.7} ${h * 0.5 - segW * 0.3} L ${g + segW * 0.7} ${g + segW} Z`,
+        // g - middle horizontal
+        `M ${g + segW * 0.5} ${h * 0.5 - segW * 0.35} L ${w - g - segW * 0.5} ${h * 0.5 - segW * 0.35} L ${w - g - segW * 0.3} ${h * 0.5} L ${w - g - segW * 0.5} ${h * 0.5 + segW * 0.35} L ${g + segW * 0.5} ${h * 0.5 + segW * 0.35} L ${g + segW * 0.3} ${h * 0.5} Z`,
+      ];
+    };
+
+    const renderDigit = (digit: string, id: string) => {
+      const segments = digitSegments[digit] || digitSegments['0'];
+      const paths = getSegmentPaths(digitSize);
+      
+      return (
+        <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+          <defs>
+            <filter id={`glow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {paths.map((path, index) => (
+            <path
+              key={index}
+              d={path}
+              fill={segments[index] ? glowColor : 'rgba(30, 41, 59, 0.3)'}
+              filter={segments[index] ? `url(#glow-${id})` : undefined}
+              style={{ transition: 'fill 0.15s ease-out' }}
+            />
+          ))}
+        </svg>
+      );
+    };
+
+    const renderColon = () => {
+      const colonW = digitSize * 0.25;
+      const dotSize = digitSize * 0.1;
+      
+      return (
+        <div 
+          className="flex flex-col justify-center items-center gap-2"
+          style={{ width: colonW, height: h }}
+        >
+          <div 
+            className="animate-pulse"
+            style={{
+              width: dotSize,
+              height: dotSize,
+              backgroundColor: glowColor,
+              borderRadius: '20%',
+              boxShadow: `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+            }}
+          />
+          <div 
+            className="animate-pulse"
+            style={{
+              width: dotSize,
+              height: dotSize,
+              backgroundColor: glowColor,
+              borderRadius: '20%',
+              boxShadow: `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+            }}
+          />
+        </div>
+      );
+    };
     
     return (
       <div className="flex flex-col items-center gap-1 sm:gap-1.5 shrink-0">
@@ -448,68 +556,44 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           </div>
         </div>
         
-        {/* Modern Digital Clock */}
+        {/* Modern LED Digital Clock */}
         <div 
-          className="relative flex items-center bg-gradient-to-br from-slate-900/98 to-slate-800/95 rounded-xl lg:rounded-2xl px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 overflow-hidden"
+          className="relative flex items-center justify-center"
           style={{
-            border: '2px solid rgba(6,182,212,0.5)',
-            boxShadow: '0 0 25px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+            background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95))',
+            borderRadius: '12px',
+            padding: '10px 16px',
+            boxShadow: `
+              0 0 0 1px rgba(255, 255, 255, 0.15),
+              0 8px 32px rgba(0, 0, 0, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+            `,
           }}
         >
-          {/* Animated background pulse */}
+          {/* Subtle inner glow */}
           <div 
-            className="absolute inset-0 opacity-20 animate-pulse"
+            className="absolute inset-0 rounded-xl pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 60%)',
             }}
           />
           
-          {/* Clock icon */}
-          <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-cyan-400 mr-1 sm:mr-1.5 animate-spin-slow shrink-0" style={{ animationDuration: '10s' }} />
-          
-          {/* Hours */}
-          <span 
-            className="font-mono font-black text-cyan-300 tracking-tight relative z-10" 
-            style={{ 
-              fontFamily: "'Orbitron', 'SF Mono', monospace",
-              fontSize: 'clamp(1.1rem, 2.2vw, 2rem)',
-              textShadow: '0 0 15px rgba(6,182,212,0.7)',
-            }}
-          >
-            {hours}
-          </span>
-          
-          {/* Animated colon separator */}
-          <div className="flex flex-col items-center justify-center gap-0.5 sm:gap-1 mx-0.5 sm:mx-1 lg:mx-1.5 relative z-10">
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-cyan-400 animate-pulse" style={{ boxShadow: '0 0 6px rgba(6,182,212,0.8)' }} />
-            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-cyan-400 animate-pulse" style={{ boxShadow: '0 0 6px rgba(6,182,212,0.8)', animationDelay: '0.5s' }} />
+          {/* LED Display */}
+          <div className="flex items-center gap-0.5 relative z-10">
+            {renderDigit(hours[0] || '0', `${uniqueClockId}-h1`)}
+            {renderDigit(hours[1] || '0', `${uniqueClockId}-h2`)}
+            {renderColon()}
+            {renderDigit(minutes[0] || '0', `${uniqueClockId}-m1`)}
+            {renderDigit(minutes[1] || '0', `${uniqueClockId}-m2`)}
           </div>
           
-          {/* Minutes */}
-          <span 
-            className="font-mono font-black text-cyan-300 tracking-tight relative z-10" 
-            style={{ 
-              fontFamily: "'Orbitron', 'SF Mono', monospace",
-              fontSize: 'clamp(1.1rem, 2.2vw, 2rem)',
-              textShadow: '0 0 15px rgba(6,182,212,0.7)',
+          {/* Reflection effect */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-1/3 rounded-b-xl pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, rgba(255, 255, 255, 0.03), transparent)',
             }}
-          >
-            {minutes}
-          </span>
-          
-          {/* Seconds with highlight */}
-          <div className="ml-1 sm:ml-1.5 lg:ml-2 px-1 sm:px-1.5 py-0.5 bg-amber-500/20 rounded-md border border-amber-400/40 relative z-10">
-            <span 
-              className="font-mono font-bold text-amber-400" 
-              style={{ 
-                fontFamily: "'Orbitron', 'SF Mono', monospace",
-                fontSize: 'clamp(0.6rem, 1vw, 0.9rem)',
-                textShadow: '0 0 8px rgba(251,191,36,0.6)',
-              }}
-            >
-              {seconds}
-            </span>
-          </div>
+          />
         </div>
       </div>
     );
