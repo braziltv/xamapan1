@@ -12,7 +12,6 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
   'Belo Horizonte': { lat: -19.92, lon: -43.94 },
   'Sete Lagoas': { lat: -19.46, lon: -44.25 },
   'Biquinhas': { lat: -18.79, lon: -45.50 },
-  'Morada Nova de Minas': { lat: -18.60, lon: -45.36 },
   'Cedro do Abaeté': { lat: -19.15, lon: -45.71 },
   'Bom Despacho': { lat: -19.74, lon: -45.25 },
   'Três Marias': { lat: -18.20, lon: -45.24 },
@@ -44,7 +43,6 @@ const cityCoordinates: { [city: string]: { lat: number; lon: number } } = {
   'Araguari': { lat: -18.65, lon: -48.19 },
   'Itabira': { lat: -19.62, lon: -43.23 },
   'Passos': { lat: -20.72, lon: -46.61 },
-  'Coronel Fabriciano': { lat: -19.52, lon: -42.63 },
   'Muriaé': { lat: -21.13, lon: -42.37 },
   'Ituiutaba': { lat: -18.97, lon: -49.46 },
   'Araxá': { lat: -19.59, lon: -46.94 },
@@ -297,30 +295,51 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     console.log('Starting cache update...');
+    console.log(`Total cities to process: ${cities.length}`);
     
-    // Atualizar previsão do tempo para todas as cidades
-    console.log('Fetching weather for all cities...');
-    const weatherPromises = cities.map(async (city) => {
-      const weatherData = await fetchWeatherForCity(city);
-      if (weatherData) {
-        return { city_name: city, weather_data: weatherData };
-      }
-      return null;
-    });
+    // Processar cidades em lotes menores para evitar timeout e rate limiting
+    const BATCH_SIZE = 5;
+    const DELAY_BETWEEN_BATCHES = 500; // 500ms entre lotes
+    const allWeatherResults: Array<{ city_name: string; weather_data: any }> = [];
     
-    const weatherResults = (await Promise.all(weatherPromises)).filter(Boolean);
-    
-    if (weatherResults.length > 0) {
-      // Limpar cache antigo de clima
-      await supabase.from('weather_cache').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    for (let i = 0; i < cities.length; i += BATCH_SIZE) {
+      const batch = cities.slice(i, i + BATCH_SIZE);
+      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(cities.length / BATCH_SIZE)}: ${batch.join(', ')}`);
       
-      // Inserir novos dados
+      const batchPromises = batch.map(async (city) => {
+        try {
+          const weatherData = await fetchWeatherForCity(city);
+          if (weatherData) {
+            return { city_name: city, weather_data: weatherData };
+          }
+          console.warn(`No weather data for ${city}`);
+          return null;
+        } catch (err) {
+          console.error(`Error fetching weather for ${city}:`, err);
+          return null;
+        }
+      });
+      
+      const batchResults = (await Promise.all(batchPromises)).filter(Boolean) as Array<{ city_name: string; weather_data: any }>;
+      allWeatherResults.push(...batchResults);
+      
+      // Delay entre lotes para evitar rate limiting
+      if (i + BATCH_SIZE < cities.length) {
+        await new Promise(r => setTimeout(r, DELAY_BETWEEN_BATCHES));
+      }
+    }
+    
+    console.log(`Successfully fetched weather for ${allWeatherResults.length}/${cities.length} cities`);
+    
+    if (allWeatherResults.length > 0) {
+      // Usar upsert para atualizar dados existentes e inserir novos
+      // NÃO deletar dados antigos para evitar perda de dados em caso de falha parcial
       const { error: weatherError } = await supabase
         .from('weather_cache')
         .upsert(
-          weatherResults.map(w => ({
-            city_name: w!.city_name,
-            weather_data: w!.weather_data,
+          allWeatherResults.map(w => ({
+            city_name: w.city_name,
+            weather_data: w.weather_data,
             updated_at: new Date().toISOString(),
           })),
           { onConflict: 'city_name' }
@@ -329,7 +348,18 @@ serve(async (req) => {
       if (weatherError) {
         console.error('Error saving weather cache:', weatherError);
       } else {
-        console.log(`Weather cache updated for ${weatherResults.length} cities`);
+        console.log(`Weather cache updated for ${allWeatherResults.length} cities`);
+      }
+      
+      // Limpar cidades que não existem mais na lista (foram removidas)
+      const validCityNames = cities;
+      const { error: cleanupError } = await supabase
+        .from('weather_cache')
+        .delete()
+        .not('city_name', 'in', `(${validCityNames.map(c => `"${c}"`).join(',')})`);
+      
+      if (cleanupError) {
+        console.error('Error cleaning up old cities:', cleanupError);
       }
     }
     
@@ -389,7 +419,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        weather_count: weatherResults.length,
+        weather_count: allWeatherResults.length,
+        weather_total_cities: cities.length,
         news_total_fetched: allNews.length,
         news_unique_saved: shuffledNews.length,
         feeds_processed: feeds.length,
