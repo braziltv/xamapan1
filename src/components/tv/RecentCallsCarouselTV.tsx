@@ -62,17 +62,25 @@ export function RecentCallsCarouselTV({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Page indicator (only shown when multiple pages) */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-end mb-2 shrink-0 px-1">
-          <div className="flex items-center gap-1">
+      {/* Subheader - matching reference design */}
+      <div className="flex items-center gap-1.5 mb-2 shrink-0 px-1">
+        <span className="text-cyan-500" style={{ fontSize: 'clamp(0.45rem, 0.7vw, 0.6rem)' }}>◆</span>
+        <span 
+          className="text-slate-400 font-semibold uppercase tracking-wider"
+          style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.6rem)' }}
+        >
+          ÚLTIMAS CHAMADAS
+        </span>
+        {/* Page indicator - moved to right side */}
+        {totalPages > 1 && (
+          <div className="ml-auto flex items-center gap-1">
             {Array.from({ length: totalPages }).map((_, idx) => (
               <div
                 key={idx}
                 className="rounded-full transition-all duration-300"
                 style={{
-                  width: idx === currentPage ? '12px' : '5px',
-                  height: '5px',
+                  width: idx === currentPage ? '10px' : '4px',
+                  height: '4px',
                   background: idx === currentPage 
                     ? 'linear-gradient(90deg, #06b6d4, #6366f1)' 
                     : 'rgba(100,116,139,0.5)',
@@ -80,12 +88,12 @@ export function RecentCallsCarouselTV({
               />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Items list */}
       <div 
-        className={`flex-1 space-y-1.5 transition-all duration-300 ease-out ${
+        className={`flex-1 space-y-1 transition-all duration-300 ease-out ${
           isTransitioning ? 'opacity-0 translate-x-3' : 'opacity-100 translate-x-0'
         }`}
       >
@@ -93,90 +101,80 @@ export function RecentCallsCarouselTV({
           const globalIndex = startIndex + localIndex;
           const isTriage = item.type === 'triage';
           const opacity = getItemOpacity(localIndex);
-          const isFirst = globalIndex === 0;
           
           return (
             <div
               key={item.id}
-              className="rounded-xl transition-all duration-200 hover:scale-[1.02]"
+              className="rounded-xl transition-all duration-200"
               style={{ 
                 opacity,
-                padding: 'clamp(0.3rem, 0.6vh, 0.5rem) clamp(0.5rem, 0.7vw, 0.75rem)',
-                background: isFirst 
-                  ? 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(79,70,229,0.15) 100%)'
-                  : 'linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(51,65,85,0.6) 100%)',
-                border: isFirst 
-                  ? '1px solid rgba(99,102,241,0.4)' 
-                  : '1px solid rgba(71,85,105,0.3)',
-                boxShadow: isFirst 
-                  ? '0 4px 16px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)' 
-                  : '0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)',
+                padding: 'clamp(0.35rem, 0.6vh, 0.5rem) clamp(0.5rem, 0.8vw, 0.75rem)',
+                background: 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(51,65,85,0.7) 100%)',
+                border: '1px solid rgba(71,85,105,0.4)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
               <div className="flex items-center gap-2">
-                {/* Icon with gradient */}
+                {/* Icon badge - circular with colored background */}
                 <div 
-                  className="rounded-lg flex items-center justify-center shrink-0"
+                  className="rounded-full flex items-center justify-center shrink-0"
                   style={{ 
-                    width: 'clamp(1.25rem, 1.4vw, 1.5rem)', 
-                    height: 'clamp(1.25rem, 1.4vw, 1.5rem)',
+                    width: 'clamp(1.5rem, 1.8vw, 2rem)', 
+                    height: 'clamp(1.5rem, 1.8vw, 2rem)',
                     background: isTriage 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' 
+                      ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' 
                       : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                     boxShadow: isTriage 
-                      ? '0 2px 8px rgba(59,130,246,0.4)' 
-                      : '0 2px 8px rgba(16,185,129,0.4)',
+                      ? '0 2px 10px rgba(99,102,241,0.5)' 
+                      : '0 2px 10px rgba(16,185,129,0.5)',
                   }}
                 >
                   {isTriage 
                     ? <Activity 
-                        style={{ width: 'clamp(0.55rem, 0.65vw, 0.7rem)', height: 'clamp(0.55rem, 0.65vw, 0.7rem)' }} 
+                        style={{ width: 'clamp(0.7rem, 0.9vw, 1rem)', height: 'clamp(0.7rem, 0.9vw, 1rem)' }} 
                         className="text-white" 
                       /> 
                     : <Stethoscope 
-                        style={{ width: 'clamp(0.55rem, 0.65vw, 0.7rem)', height: 'clamp(0.55rem, 0.65vw, 0.7rem)' }} 
+                        style={{ width: 'clamp(0.7rem, 0.9vw, 1rem)', height: 'clamp(0.7rem, 0.9vw, 1rem)' }} 
                         className="text-white" 
                       />
                   }
                 </div>
 
-                {/* Name + Badge */}
-                <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                {/* Name + Type badge - stacked */}
+                <div className="flex-1 min-w-0 flex flex-col gap-0">
                   <p 
-                    className="tv-font-body font-bold text-white truncate" 
+                    className="tv-font-body font-bold text-white truncate leading-tight" 
                     style={{ 
-                      fontSize: 'clamp(0.6rem, 0.85vw, 0.8rem)',
+                      fontSize: 'clamp(0.65rem, 0.95vw, 0.9rem)',
                       textShadow: '0 1px 2px rgba(0,0,0,0.3)',
                     }}
                   >
                     {currentTime ? maskNameAfterOneMinute(item.name, item.time, currentTime) : item.name}
                   </p>
                   <span 
-                    className="shrink-0 px-1.5 py-0.5 rounded-md font-bold uppercase relative overflow-hidden"
+                    className="font-bold uppercase tracking-wide"
                     style={{ 
-                      fontSize: 'clamp(0.35rem, 0.45vw, 0.45rem)',
-                      background: isTriage 
-                        ? 'rgba(6,182,212,0.15)' 
-                        : 'rgba(16,185,129,0.15)',
-                      color: isTriage ? '#22d3ee' : '#34d399',
-                      border: `1px solid ${isTriage ? 'rgba(6,182,212,0.3)' : 'rgba(16,185,129,0.3)'}`,
+                      fontSize: 'clamp(0.4rem, 0.55vw, 0.5rem)',
+                      color: isTriage ? '#a5b4fc' : '#6ee7b7',
                     }}
                   >
-                    <span className="relative z-10">{isTriage ? 'Tri' : 'Méd'}</span>
+                    {isTriage ? 'TRIAGEM' : 'MÉDICO'}
                   </span>
                 </div>
 
-                {/* Time badge */}
+                {/* Time badge - styled pill */}
                 <div 
-                  className="shrink-0 rounded-md px-1.5 py-0.5"
+                  className="shrink-0 rounded-lg px-2 py-1"
                   style={{
-                    background: 'rgba(15,23,42,0.6)',
-                    border: '1px solid rgba(71,85,105,0.3)',
+                    background: 'rgba(15,23,42,0.8)',
+                    border: '1px solid rgba(71,85,105,0.4)',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
                   }}
                 >
                   <span 
-                    className="text-slate-300 font-mono font-semibold" 
-                    style={{ fontSize: 'clamp(0.5rem, 0.65vw, 0.65rem)' }}
+                    className="text-slate-200 font-mono font-bold" 
+                    style={{ fontSize: 'clamp(0.55rem, 0.75vw, 0.7rem)' }}
                   >
                     {formatBrazilTime(item.time, 'HH:mm')}
                   </span>
