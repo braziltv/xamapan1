@@ -14,29 +14,30 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
     <div 
       className={`relative flex items-center justify-center ${className}`}
     >
-      {/* Time Display with gentle pulse animation */}
+      {/* Time Display with gentle fade animation */}
       <div 
         className="flex items-center justify-center"
         style={{
-          textShadow: '0 0 20px rgba(56, 189, 248, 0.8), 0 0 40px rgba(56, 189, 248, 0.4)',
-          animation: 'clock-breathe 3s ease-in-out infinite',
+          animation: 'clock-fade 4s ease-in-out infinite',
         }}
       >
         <span 
-          className="font-bold text-white tabular-nums"
+          className="text-white tabular-nums"
           style={{ 
             fontFamily: "'Orbitron', 'SF Pro Display', sans-serif",
-            fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)',
-            letterSpacing: '0.05em',
-            textShadow: '0 0 15px rgba(56, 189, 248, 0.9), 0 0 30px rgba(56, 189, 248, 0.5), 0 0 45px rgba(56, 189, 248, 0.3)',
+            fontSize: 'clamp(1.75rem, 3vw, 2.75rem)',
+            fontWeight: 900,
+            letterSpacing: '0.08em',
+            textShadow: '0 0 20px rgba(56, 189, 248, 1), 0 0 40px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4)',
+            WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.3)',
           }}
         >
           {hours}:{minutes}
           <span 
             className="text-amber-400"
             style={{
-              textShadow: '0 0 15px rgba(251, 146, 60, 0.9), 0 0 30px rgba(251, 146, 60, 0.5)',
-              animation: 'seconds-pulse 1s ease-in-out infinite',
+              fontWeight: 900,
+              textShadow: '0 0 20px rgba(251, 146, 60, 1), 0 0 40px rgba(251, 146, 60, 0.7)',
             }}
           >
             :{seconds}
@@ -44,26 +45,14 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
         </span>
       </div>
 
-      {/* CSS Animations */}
+      {/* CSS Animations - Slow and subtle fade only */}
       <style>{`
-        @keyframes clock-breathe {
-          0%, 100% { 
-            opacity: 1; 
-            transform: scale(1);
-            filter: brightness(1);
-          }
-          50% { 
-            opacity: 0.7; 
-            transform: scale(0.98);
-            filter: brightness(0.85);
-          }
-        }
-        @keyframes seconds-pulse {
+        @keyframes clock-fade {
           0%, 100% { 
             opacity: 1; 
           }
           50% { 
-            opacity: 0.5; 
+            opacity: 0.85; 
           }
         }
       `}</style>
