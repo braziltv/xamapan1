@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, Stethoscope, Clock } from 'lucide-react';
+import { Activity, Stethoscope } from 'lucide-react';
 import { formatBrazilTime } from '@/hooks/useBrazilTime';
 
 interface HistoryItem {
@@ -62,22 +62,9 @@ export function RecentCallsCarouselTV({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header with page indicator */}
-      <div className="flex items-center justify-between mb-2 shrink-0 px-1">
-        <div className="flex items-center gap-1.5">
-          <Clock 
-            className="text-slate-400" 
-            style={{ width: 'clamp(0.7rem, 0.9vw, 0.9rem)', height: 'clamp(0.7rem, 0.9vw, 0.9rem)' }} 
-          />
-          <span 
-            className="text-slate-400 font-semibold uppercase tracking-wider"
-            style={{ fontSize: 'clamp(0.5rem, 0.7vw, 0.7rem)' }}
-          >
-            Últimas Chamadas
-          </span>
-        </div>
-        
-        {totalPages > 1 && (
+      {/* Page indicator (only shown when multiple pages) */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-end mb-2 shrink-0 px-1">
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }).map((_, idx) => (
               <div
@@ -93,8 +80,8 @@ export function RecentCallsCarouselTV({
               />
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Items list */}
       <div 
