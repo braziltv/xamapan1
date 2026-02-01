@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Cloud, Droplets, Sun, CloudRain, CloudSnow, CloudLightning, Wind, CloudSun, MapPin, Thermometer, ThermometerSun, ThermometerSnowflake, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useBrazilTime, formatBrazilTime } from '@/hooks/useBrazilTime';
-import { Modern3DClock } from './Modern3DClock';
+import { FuturisticClock } from './FuturisticClock';
 
 interface WeatherData {
   current: {
@@ -445,8 +445,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           </div>
         </div>
         
-        {/* Modern 3D Digital Clock */}
-        <Modern3DClock time={currentTime} />
+        {/* Futuristic Clock with rotating rings */}
+        <FuturisticClock time={currentTime} />
       </div>
     );
   };
