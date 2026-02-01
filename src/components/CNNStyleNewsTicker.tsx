@@ -118,7 +118,7 @@ export function CNNStyleNewsTicker({
                     ) : item.source}
                   </span>
                   <span className={`${
-                    item.source === '📢 Informativo' ? 'text-yellow-400 font-bold' : 
+                    item.source === '📢 Informativo' ? 'text-lime-400 font-bold' : 
                     item.source === 'Créditos' ? 'text-white font-bold animate-pulse' : 
                     'text-white'
                   }`}>
