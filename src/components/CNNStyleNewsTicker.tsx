@@ -198,8 +198,18 @@ export function CNNStyleNewsTicker({
                     <span className={`transition-colors duration-300 ${style.text}`}>
                       {item.title}
                     </span>
-                    {/* Separator arrow */}
-                    <span className="text-red-500 mx-2 sm:mx-3 text-sm sm:text-base lg:text-lg xl:text-xl shrink-0 animate-pulse">▸</span>
+                    {/* Separator arrow - Large and animated */}
+                    <span 
+                      className="mx-3 sm:mx-4 lg:mx-6 shrink-0 text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold"
+                      style={{
+                        color: '#ef4444',
+                        textShadow: '0 0 10px rgba(239,68,68,0.8), 0 0 20px rgba(239,68,68,0.5), 0 0 30px rgba(239,68,68,0.3)',
+                        animation: 'pulse 1s ease-in-out infinite',
+                        filter: 'drop-shadow(0 0 4px rgba(239,68,68,0.6))',
+                      }}
+                    >
+                      ▶
+                    </span>
                   </span>
                 );
               })}
