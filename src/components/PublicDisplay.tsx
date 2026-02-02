@@ -3115,7 +3115,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
-          paddingBottom: 'clamp(4.5rem, 8vh, 6.5rem)',
+          paddingBottom: 'clamp(3rem, 5vh, 4rem)',
           height: '100%',
         }}
       >
@@ -3229,17 +3229,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="text-center px-4 max-w-[95%] flex flex-col items-center justify-center">
                 {/* Large Waiting icon - centered */}
                 <div 
-                  className="rounded-full flex items-center justify-center animate-pulse mb-4"
+                  className="rounded-full flex items-center justify-center animate-pulse mb-2"
                   style={{ 
-                    width: 'clamp(4.5rem, 8vw, 7rem)', 
-                    height: 'clamp(4.5rem, 8vw, 7rem)',
+                    width: 'clamp(3.5rem, 6vw, 5.5rem)', 
+                    height: 'clamp(3.5rem, 6vw, 5.5rem)',
                     background: 'linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(79,70,229,0.15) 100%)',
                     boxShadow: '0 8px 24px rgba(99,102,241,0.25)',
                   }}
                 >
-                  <Activity className="text-indigo-400/80" style={{ width: 'clamp(2.25rem, 4vw, 3.5rem)', height: 'clamp(2.25rem, 4vw, 3.5rem)' }} />
+                  <Activity className="text-indigo-400/80" style={{ width: 'clamp(1.75rem, 3vw, 2.75rem)', height: 'clamp(1.75rem, 3vw, 2.75rem)' }} />
                 </div>
-                <p 
+                <p
                   className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
                     fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)',
@@ -3364,17 +3364,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               <div className="text-center px-4 max-w-[95%] flex flex-col items-center justify-center">
                 {/* Large Waiting icon - centered */}
                 <div 
-                  className="rounded-full flex items-center justify-center animate-pulse mb-4"
+                  className="rounded-full flex items-center justify-center animate-pulse mb-2"
                   style={{ 
-                    width: 'clamp(4.5rem, 8vw, 7rem)', 
-                    height: 'clamp(4.5rem, 8vw, 7rem)',
+                    width: 'clamp(3.5rem, 6vw, 5.5rem)', 
+                    height: 'clamp(3.5rem, 6vw, 5.5rem)',
                     background: 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.15) 100%)',
                     boxShadow: '0 8px 24px rgba(16,185,129,0.25)',
                   }}
                 >
-                  <Stethoscope className="text-emerald-400/80" style={{ width: 'clamp(2.25rem, 4vw, 3.5rem)', height: 'clamp(2.25rem, 4vw, 3.5rem)' }} />
+                  <Stethoscope className="text-emerald-400/80" style={{ width: 'clamp(1.75rem, 3vw, 2.75rem)', height: 'clamp(1.75rem, 3vw, 2.75rem)' }} />
                 </div>
-                <p 
+                <p
                   className={`text-white text-center font-bold transition-opacity duration-500 ${waitingPhraseVisible ? 'opacity-100' : 'opacity-0'}`}
                   style={{ 
                     fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)',
