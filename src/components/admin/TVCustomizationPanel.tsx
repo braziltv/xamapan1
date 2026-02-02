@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -10,11 +10,11 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { 
-  Tv, Palette, Layout, Type, Clock, Sidebar, Newspaper, 
-  Save, RotateCcw, Sparkles, ExternalLink, Loader2, Wand2
+  Tv, Palette, Layout, Clock, Sidebar, Newspaper, 
+  Save, RotateCcw, ExternalLink, Loader2, Wand2
 } from 'lucide-react';
 import { useTVCustomization, presets, TVCustomization } from '@/hooks/useTVCustomization';
-import { TVPreview } from './TVPreview';
+import { TVPreviewInteractive } from './TVPreviewInteractive';
 import { toast } from 'sonner';
 
 interface TVCustomizationPanelProps {
@@ -62,6 +62,21 @@ export function TVCustomizationPanel({ unitId, unitName }: TVCustomizationPanelP
     setLocalChanges({});
   };
 
+  const handlePreviewClick = (area: string) => {
+    // Map preview areas to tab names
+    const areaToTab: Record<string, string> = {
+      'background': 'background',
+      'header': 'header',
+      'cards': 'cards',
+      'sidebar': 'sidebar',
+      'ticker': 'ticker',
+    };
+    const tab = areaToTab[area];
+    if (tab) {
+      setActiveTab(tab);
+    }
+  };
+
   const hasChanges = Object.keys(localChanges).length > 0;
 
   if (loading) {
@@ -107,26 +122,20 @@ export function TVCustomizationPanel({ unitId, unitName }: TVCustomizationPanelP
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Preview */}
-        <Card className="xl:col-span-1 order-1 xl:order-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Preview ao Vivo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TVPreview customization={currentConfig} className="w-full" />
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Prévia em miniatura do painel da TV
-            </p>
-          </CardContent>
-        </Card>
+      {/* Large Interactive Preview - Full Width */}
+      <Card>
+        <CardContent className="pt-6">
+          <TVPreviewInteractive 
+            customization={currentConfig} 
+            onElementClick={handlePreviewClick}
+            className="max-w-4xl mx-auto"
+          />
+        </CardContent>
+      </Card>
 
-        {/* Settings */}
-        <Card className="xl:col-span-2 order-2 xl:order-1">
-          <CardContent className="pt-6">
+      {/* Settings Panel */}
+      <Card>
+        <CardContent className="pt-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-6 mb-6">
                 <TabsTrigger value="presets" className="text-xs">
@@ -710,6 +719,5 @@ export function TVCustomizationPanel({ unitId, unitName }: TVCustomizationPanelP
           </CardContent>
         </Card>
       </div>
-    </div>
   );
 }
