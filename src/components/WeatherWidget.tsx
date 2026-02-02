@@ -319,7 +319,11 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [rotationCount, setRotationCount] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [progress, setProgress] = useState(0);
   const fetchingRef = useRef(false);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const ROTATION_DURATION = 6000; // 6 seconds per city
+  const PROGRESS_UPDATE_INTERVAL = 50; // Update progress every 50ms for smooth animation
 
   const availableCities = Object.keys(weatherCache);
   const currentWeather = weatherCache[displayCity];
@@ -376,6 +380,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }, 300);
   }, []);
 
+  // City rotation with progress bar
   useEffect(() => {
     if (availableCities.length === 0) return;
     
@@ -391,13 +396,34 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       setDisplayCity(sortedCities[0]);
     }
     
-    const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % sortedCities.length;
-      changeCityWithTransition(sortedCities[currentIndex]);
-      setRotationCount(prev => prev + 1);
-    }, 5000);
+    // Reset progress
+    setProgress(0);
     
-    return () => clearInterval(interval);
+    // Progress increment
+    const progressStep = 100 / (ROTATION_DURATION / PROGRESS_UPDATE_INTERVAL);
+    
+    // Start progress animation
+    progressIntervalRef.current = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + progressStep;
+        
+        if (newProgress >= 100) {
+          // Time to switch city
+          currentIndex = (currentIndex + 1) % sortedCities.length;
+          changeCityWithTransition(sortedCities[currentIndex]);
+          setRotationCount(p => p + 1);
+          return 0; // Reset progress
+        }
+        
+        return newProgress;
+      });
+    }, PROGRESS_UPDATE_INTERVAL);
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
   }, [availableCities.length, weatherCache, changeCityWithTransition]);
 
   useEffect(() => {
@@ -486,16 +512,26 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     <div className="w-full flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 xl:gap-4 justify-end flex-nowrap overflow-visible">
       {/* City Card - Adaptive width with visible overflow */}
       <div 
-        className="shrink-0 flex flex-col items-center justify-center rounded-lg lg:rounded-xl border border-indigo-500/50 relative"
+        className="shrink-0 flex flex-col items-center justify-center rounded-lg lg:rounded-xl border border-indigo-500/50 relative overflow-hidden"
         style={{
           background: 'linear-gradient(145deg, rgba(30,41,70,0.98) 0%, rgba(49,46,129,0.6) 100%)',
           boxShadow: '0 0 25px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
           padding: 'clamp(0.35rem, 0.8vw, 0.6rem) clamp(0.5rem, 1vw, 0.85rem)',
+          paddingTop: 'clamp(0.5rem, 1vw, 0.75rem)',
           minWidth: 'fit-content',
         }}
       >
-        {/* Animated top accent */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-500 rounded-t-lg animate-shimmer-slide" style={{ backgroundSize: '200% 100%' }} />
+        {/* Progress bar at the top */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] sm:h-1 bg-slate-700/60 overflow-hidden rounded-t-lg">
+          <div 
+            className="h-full transition-all duration-75 ease-linear"
+            style={{ 
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg, #06b6d4, #8b5cf6, #f59e0b)',
+              boxShadow: '0 0 8px rgba(139,92,246,0.6), 0 0 12px rgba(6,182,212,0.4)',
+            }}
+          />
+        </div>
         
         {/* Title: Previsão do Tempo */}
         <div className="flex items-center justify-center gap-1 mb-0.5">
