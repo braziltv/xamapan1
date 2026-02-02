@@ -1,4 +1,4 @@
-import { Megaphone } from 'lucide-react';
+import { NewsSourceIcon3D } from './NewsSourceIcon3D';
 
 interface NewsItem {
   title: string;
@@ -182,23 +182,16 @@ export function CNNStyleNewsTicker({
                 const style = getSourceStyle(item.source);
                 return (
                   <span key={index} className="mx-3 sm:mx-4 lg:mx-6 xl:mx-8 inline-flex items-center gap-1.5 sm:gap-2 lg:gap-3 font-semibold tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl group" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                    {/* 3D Icon */}
+                    <NewsSourceIcon3D source={item.source} />
                     {/* Source Badge with unique styling */}
                     <span className={`px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-bold inline-flex items-center gap-1.5 shrink-0 transition-transform duration-300 hover:scale-105 ${style.badge}`}>
                       {item.source === 'Créditos' ? (
-                        <>
-                          <span className="animate-spin-slow">⭐</span>
-                          <span className="hidden sm:inline">CRÉDITOS</span>
-                        </>
+                        <span className="hidden sm:inline">CRÉDITOS</span>
                       ) : item.source === '📢 Informativo' ? (
-                        <>
-                          <Megaphone className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 inline animate-bounce" />
-                          <span className="hidden sm:inline">INFORMATIVO</span>
-                        </>
+                        <span className="hidden sm:inline">INFORMATIVO</span>
                       ) : (
-                        <>
-                          {style.icon && <span className="text-[10px] sm:text-xs lg:text-sm">{style.icon}</span>}
-                          <span>{item.source}</span>
-                        </>
+                        <span>{item.source}</span>
                       )}
                     </span>
                     {/* News title with source-specific color */}
