@@ -16,7 +16,6 @@ import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
-import { useTVSettings, getSidebarWidth, getTickerDuration } from '@/hooks/useTVSettings';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -99,11 +98,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Real-time resolution detection for responsive TV display
   const tvResolution = useTVResolution();
   
-  // Get unit ID for TV settings
-  const storedUnitId = localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || '';
-  
-  // Load TV customization settings
-  const { settings: tvSettings } = useTVSettings(storedUnitId || undefined);
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
@@ -194,25 +188,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
   
-  // Waiting phrases rotation - use custom or defaults
-  const WAITING_PHRASES = useMemo(() => {
-    if (tvSettings.waiting_messages && tvSettings.waiting_messages.length > 0) {
-      return tvSettings.waiting_messages;
-    }
-    return [
-      "⏳ Aguarde um momento, já chamaremos você. Obrigado pela paciência! 🙏",
-      "📋 Estamos organizando o atendimento. Em instantes, você será chamado. ✨",
-      "🔔 Aguarde um momento, já chamaremos você. 😊",
-      "👥 Você está na fila de atendimento. Obrigado pela paciência! 💙",
-      "👀 Fique atento(a), sua chamada será exibida em instantes. 📺",
-      "⏰ Seu atendimento está quase começando. 🌟",
-      "📝 Siga sempre as orientações da equipe de saúde. 👨‍⚕️",
-      "🚨 O atendimento prioriza os casos mais urgentes. 🏥",
-      "❤️ Estamos aqui para cuidar de você. 🏥🧑‍⚕️",
-      "🤝 Trabalhamos para oferecer um atendimento seguro e humanizado. 💚",
-      "⚕️ O atendimento segue critérios de urgência e risco. 🩺"
-    ];
-  }, [tvSettings.waiting_messages]);
+  // Waiting phrases rotation
+  const WAITING_PHRASES = [
+    "⏳ Aguarde um momento, já chamaremos você. Obrigado pela paciência! 🙏",
+    "📋 Estamos organizando o atendimento. Em instantes, você será chamado. ✨",
+    "🔔 Aguarde um momento, já chamaremos você. 😊",
+    "👥 Você está na fila de atendimento. Obrigado pela paciência! 💙",
+    "👀 Fique atento(a), sua chamada será exibida em instantes. 📺",
+    "⏰ Seu atendimento está quase começando. 🌟",
+    "📝 Siga sempre as orientações da equipe de saúde. 👨‍⚕️",
+    "🚨 O atendimento prioriza os casos mais urgentes. 🏥",
+    "❤️ Estamos aqui para cuidar de você. 🏥🧑‍⚕️",
+    "🤝 Trabalhamos para oferecer um atendimento seguro e humanizado. 💚",
+    "⚕️ O atendimento segue critérios de urgência e risco. 🩺"
+  ];
   const [currentWaitingPhraseIndex, setCurrentWaitingPhraseIndex] = useState(0);
   const [waitingPhraseVisible, setWaitingPhraseVisible] = useState(true);
   
@@ -2817,9 +2806,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       data-landscape={tvResolution.isLandscape}
     >
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
-      {tvSettings.background_animation && (
-        <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
-      )}
+      <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
@@ -3124,9 +3111,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       <div 
         className="relative z-10 flex-1 grid overflow-hidden"
         style={{
-          gridTemplateColumns: tvSettings.sidebar_visible 
-            ? `minmax(0, 1fr) minmax(0, 1fr) ${getSidebarWidth(tvSettings)}`
-            : 'minmax(0, 1fr) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 240px)',
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
@@ -3134,7 +3119,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           height: '100%',
         }}
       >
-        {/* ===== TRIAGE CARD - Customizable Design ===== */}
+        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
@@ -3144,19 +3129,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: tvSettings.card_triage_bg,
-            border: announcingType === 'triage' 
-              ? 'none' 
-              : tvSettings.card_border_style === 'neon' 
-                ? `2px solid ${tvSettings.card_border_color}`
-                : tvSettings.card_border_style === 'minimal'
-                  ? `1px solid ${tvSettings.card_border_color}40`
-                  : 'none',
+            background: 'linear-gradient(160deg, rgba(30,27,75,0.97) 0%, rgba(49,46,129,0.93) 50%, rgba(30,27,75,0.97) 100%)',
+            border: announcingType === 'triage' ? 'none' : '1px solid rgba(129,140,248,0.35)',
             boxShadow: announcingType === 'triage' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : tvSettings.card_border_style === 'neon'
-                ? `0 8px 32px ${tvSettings.card_border_color}30, inset 0 1px 0 rgba(255,255,255,0.05)`
-                : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3221,9 +3198,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             {currentTriageCall ? (
               <div className={`text-center w-full relative z-10 ${announcingType === 'triage' ? 'scale-105' : ''}`}>
                 <h2 
-                  className="tv-font-display break-words font-extrabold leading-tight"
+                  className="tv-font-display break-words text-white font-extrabold leading-tight"
                   style={{ 
-                    color: tvSettings.card_triage_text,
                     fontSize: currentTriageCall.name.length <= 15 
                       ? 'clamp(2.5rem, 6vw, 5rem)' 
                       : currentTriageCall.name.length <= 25 
@@ -3231,8 +3207,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         : currentTriageCall.name.length <= 35 
                           ? 'clamp(1.75rem, 4vw, 3.5rem)' 
                           : 'clamp(1.5rem, 3vw, 3rem)',
-                    fontWeight: tvSettings.patient_font_weight,
-                    textTransform: tvSettings.patient_text_transform as 'uppercase' | 'lowercase' | 'capitalize' | 'none',
                     wordBreak: 'break-word', 
                     letterSpacing: '0.02em',
                     textShadow: '0 4px 12px rgba(0,0,0,0.5)',
@@ -3280,7 +3254,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== DOCTOR CARD - Customizable Design ===== */}
+        {/* ===== DOCTOR CARD - Premium Green/Teal Design ===== */}
         <div 
           className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
@@ -3290,19 +3264,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: tvSettings.card_doctor_bg,
-            border: announcingType === 'doctor' 
-              ? 'none' 
-              : tvSettings.card_border_style === 'neon' 
-                ? `2px solid ${tvSettings.card_border_color}`
-                : tvSettings.card_border_style === 'minimal'
-                  ? `1px solid ${tvSettings.card_border_color}40`
-                  : 'none',
+            background: 'linear-gradient(160deg, rgba(6,78,59,0.97) 0%, rgba(4,120,87,0.93) 50%, rgba(6,78,59,0.97) 100%)',
+            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(52,211,153,0.35)',
             boxShadow: announcingType === 'doctor' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : tvSettings.card_border_style === 'neon'
-                ? `0 8px 32px ${tvSettings.card_border_color}30, inset 0 1px 0 rgba(255,255,255,0.05)`
-                : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              : '0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
             minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
@@ -3367,9 +3333,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             {currentDoctorCall ? (
               <div className={`text-center w-full relative z-10 ${announcingType === 'doctor' ? 'scale-105' : ''}`}>
                 <h2 
-                  className="tv-font-display break-words font-extrabold leading-tight"
+                  className="tv-font-display break-words text-white font-extrabold leading-tight"
                   style={{ 
-                    color: tvSettings.card_doctor_text,
                     fontSize: currentDoctorCall.name.length <= 15 
                       ? 'clamp(2.5rem, 6vw, 5rem)' 
                       : currentDoctorCall.name.length <= 25 
@@ -3377,8 +3342,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                         : currentDoctorCall.name.length <= 35 
                           ? 'clamp(1.75rem, 4vw, 3.5rem)' 
                           : 'clamp(1.5rem, 3vw, 3rem)',
-                    fontWeight: tvSettings.patient_font_weight,
-                    textTransform: tvSettings.patient_text_transform as 'uppercase' | 'lowercase' | 'capitalize' | 'none',
                     wordBreak: 'break-word', 
                     letterSpacing: '0.02em',
                     textShadow: '0 4px 12px rgba(0,0,0,0.5)',
@@ -3427,63 +3390,49 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         </div>
 
         {/* ===== RECENT CALLS SIDEBAR ===== */}
-        {tvSettings.sidebar_visible && (
-          <div 
-            className={`flex flex-col rounded-2xl transition-opacity duration-300 h-full ${
-              announcingType ? 'opacity-30' : 'opacity-100'
-            }`}
-            style={{
-              background: tvSettings.sidebar_bg_color,
-              border: `1px solid ${tvSettings.sidebar_border_color}`,
-              padding: 'clamp(0.5rem, 1vw, 0.875rem)',
-              minHeight: 'clamp(150px, 25vh, 300px)',
-              boxShadow: tvSettings.card_border_style === 'neon' 
-                ? `0 4px 24px ${tvSettings.sidebar_border_color}20, inset 0 1px 0 rgba(255,255,255,0.05)`
-                : '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
-            }}
-          >
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-2 shrink-0">
-              <Clock 
-                className="shrink-0" 
-                style={{ 
-                  color: tvSettings.sidebar_border_color,
-                  width: 'clamp(1rem, 1.5vw, 1.25rem)', 
-                  height: 'clamp(1rem, 1.5vw, 1.25rem)' 
-                }} 
-              />
-              <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
-                Últimas Chamadas
-              </h3>
-            </div>
-
-            {/* List with Carousel */}
-            <div className="flex-1 overflow-hidden">
-              {historyItems.length === 0 ? (
-                <p className="text-slate-500 text-center py-8" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}>
-                  Nenhuma chamada ainda
-                </p>
-              ) : (
-                <RecentCallsCarouselTV 
-                  historyItems={historyItems.slice(0, tvSettings.sidebar_items_count)}
-                  currentTime={currentTime}
-                  maskNameAfterOneMinute={maskNameAfterOneMinute}
-                />
-              )}
-            </div>
+        <div 
+          className={`flex flex-col rounded-2xl border border-indigo-500/40 transition-opacity duration-300 h-full ${
+            announcingType ? 'opacity-30' : 'opacity-100'
+          }`}
+          style={{
+            background: 'linear-gradient(180deg, rgba(15,23,42,0.97) 0%, rgba(30,41,59,0.95) 100%)',
+            padding: 'clamp(0.5rem, 1vw, 0.875rem)',
+            minHeight: 'clamp(150px, 25vh, 300px)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-2 shrink-0">
+            <Clock className="text-cyan-400 shrink-0" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
+            <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
+              Últimas Chamadas
+            </h3>
           </div>
-        )}
+
+          {/* List with Carousel - 7 items per page */}
+          <div className="flex-1 overflow-hidden">
+            {historyItems.length === 0 ? (
+              <p className="text-slate-500 text-center py-8" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}>
+                Nenhuma chamada ainda
+              </p>
+            ) : (
+              <RecentCallsCarouselTV 
+                historyItems={historyItems}
+                currentTime={currentTime}
+                maskNameAfterOneMinute={maskNameAfterOneMinute}
+              />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ========== NEWS TICKER ========== */}
-      {tvSettings.ticker_visible && (
-        <CNNStyleNewsTicker
-          newsItems={newsItems}
-          commercialPhrases={commercialPhrases}
-          currentTime={currentTime}
-          isAnnouncing={!!announcingType}
-        />
-      )}
+      <CNNStyleNewsTicker
+        newsItems={newsItems}
+        commercialPhrases={commercialPhrases}
+        currentTime={currentTime}
+        isAnnouncing={!!announcingType}
+      />
 
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (

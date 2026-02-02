@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone, Palette } from 'lucide-react';
+import { Building2, Layers, MapPin, Users, Volume2, Settings2, BarChart3, FlaskConical, Tv, Send, HardDrive, Megaphone } from 'lucide-react';
 import { UnitsManager } from './UnitsManager';
 import { ModulesManager } from './ModulesManager';
 import { DestinationsManager } from './DestinationsManager';
@@ -16,7 +16,6 @@ import { TelegramManager } from './TelegramManager';
 import { DataStoragePanel } from './DataStoragePanel';
 import { MarketingPanel } from './MarketingPanel';
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
-import { TVCustomizationPanel } from './TVCustomizationPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,7 +55,7 @@ export function SystemConfigPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-12 mb-6">
+        <TabsList className="grid w-full grid-cols-11 mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -89,10 +88,6 @@ export function SystemConfigPanel() {
             <Volume2 className="w-4 h-4" />
             <span className="hidden sm:inline">TTS</span>
           </TabsTrigger>
-          <TabsTrigger value="tv-custom" className="flex items-center gap-2">
-            <Palette className="w-4 h-4" />
-            <span className="hidden sm:inline">TV Visual</span>
-          </TabsTrigger>
           <TabsTrigger value="marketing" className="flex items-center gap-2">
             <Megaphone className="w-4 h-4" />
             <span className="hidden sm:inline">Marketing</span>
@@ -108,7 +103,7 @@ export function SystemConfigPanel() {
         </TabsList>
 
         {/* Seletor de unidade (para abas que precisam) */}
-        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && activeTab !== 'sessions' && activeTab !== 'storage' && activeTab !== 'tv-custom' && (
+        {activeTab !== 'units' && activeTab !== 'dashboard' && activeTab !== 'tests' && activeTab !== 'sessions' && activeTab !== 'storage' && (
           <Card className="mb-4">
             <CardContent className="py-4">
               <div className="flex items-center gap-4">
@@ -135,32 +130,6 @@ export function SystemConfigPanel() {
                   Nenhuma unidade cadastrada. Vá para a aba "Unidades" para criar uma.
                 </p>
               )}
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'tv-custom' && (
-          <Card className="mb-4">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-4">
-                <Label className="whitespace-nowrap">Unidade:</Label>
-                <Select 
-                  value={selectedUnitId} 
-                  onValueChange={setSelectedUnitId}
-                  disabled={loading || units.length === 0}
-                >
-                  <SelectTrigger className="w-full max-w-md">
-                    <SelectValue placeholder="Selecione uma unidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {units.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id}>
-                        {unit.display_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </CardContent>
           </Card>
         )}
@@ -224,21 +193,6 @@ export function SystemConfigPanel() {
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 Selecione uma unidade para gerenciar as frases TTS.
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="tv-custom">
-          {selectedUnitId ? (
-            <TVCustomizationPanel 
-              unitId={selectedUnitId} 
-              unitName={units.find(u => u.id === selectedUnitId)?.display_name || ''} 
-            />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Selecione uma unidade para personalizar a TV.
               </CardContent>
             </Card>
           )}
