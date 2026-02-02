@@ -3129,11 +3129,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(30,27,75,0.97) 0%, rgba(49,46,129,0.93) 50%, rgba(30,27,75,0.97) 100%)',
-            border: announcingType === 'triage' ? 'none' : '2px solid rgba(56,189,248,0.5)',
+            background: 'linear-gradient(160deg, rgba(30,27,75,0.98) 0%, rgba(49,46,129,0.95) 50%, rgba(30,27,75,0.98) 100%)',
+            border: announcingType === 'triage' ? 'none' : '2px solid rgba(99,102,241,0.6)',
             boxShadow: announcingType === 'triage' 
-              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 0 30px rgba(56,189,248,0.25), 0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              ? '0 8px 24px rgba(234,179,8,0.25)' 
+              : '0 4px 16px rgba(0,0,0,0.3)',
+            isolation: 'isolate',
           }}
         >
           {/* Header with refined gradient */}
@@ -3263,11 +3264,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(6,78,59,0.97) 0%, rgba(4,120,87,0.93) 50%, rgba(6,78,59,0.97) 100%)',
-            border: announcingType === 'doctor' ? 'none' : '2px solid rgba(52,211,153,0.5)',
+            background: 'linear-gradient(160deg, rgba(6,78,59,0.98) 0%, rgba(4,120,87,0.95) 50%, rgba(6,78,59,0.98) 100%)',
+            border: announcingType === 'doctor' ? 'none' : '2px solid rgba(16,185,129,0.6)',
             boxShadow: announcingType === 'doctor' 
-              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-              : '0 0 30px rgba(52,211,153,0.25), 0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+              ? '0 8px 24px rgba(234,179,8,0.25)' 
+              : '0 4px 16px rgba(0,0,0,0.3)',
+            isolation: 'isolate',
           }}
         >
           {/* Header with refined gradient */}
