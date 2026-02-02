@@ -3109,19 +3109,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* ========== MAIN CONTENT - Responsive Grid ========== */}
       <div 
-        className="relative z-10 flex-1 grid overflow-hidden"
+        className="relative z-10 flex-1 grid"
         style={{
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 240px)',
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
-          paddingBottom: 'clamp(4.5rem, 8vh, 6.5rem)',
-          height: '100%',
+          paddingBottom: 'clamp(3.5rem, 6vh, 5rem)',
+          minHeight: 0,
         }}
       >
         {/* ===== TRIAGE CARD - Premium Blue/Indigo Design with Cyan Glow ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 h-full min-h-0 ${
             announcingType === 'triage' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'doctor'
@@ -3134,7 +3134,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             boxShadow: announcingType === 'triage' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
               : '0 0 30px rgba(56,189,248,0.25), 0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
-            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header with refined gradient */}
@@ -3184,7 +3183,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
           
           {/* Content area */}
-          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
+          <div className="flex-1 flex items-center justify-center relative min-h-0 overflow-hidden" style={{ padding: 'clamp(0.75rem, 1.5vh, 1.25rem)' }}>
             {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
@@ -3256,7 +3255,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         {/* ===== DOCTOR CARD - Premium Green/Teal Design with Cyan Glow ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 h-full min-h-0 ${
             announcingType === 'doctor' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'triage'
@@ -3269,7 +3268,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             boxShadow: announcingType === 'doctor' 
               ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
               : '0 0 30px rgba(52,211,153,0.25), 0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
-            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header with refined gradient */}
@@ -3319,7 +3317,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
           
           {/* Content area */}
-          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
+          <div className="flex-1 flex items-center justify-center relative min-h-0 overflow-hidden" style={{ padding: 'clamp(0.75rem, 1.5vh, 1.25rem)' }}>
             {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
