@@ -3115,7 +3115,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
-          paddingBottom: 'clamp(3rem, 5vh, 4rem)',
+          paddingBottom: 'clamp(3.5rem, 6vh, 5rem)',
           height: '100%',
         }}
       >
