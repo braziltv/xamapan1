@@ -3109,19 +3109,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* ========== MAIN CONTENT - Responsive Grid ========== */}
       <div 
-        className="relative z-10 flex-1 grid"
+        className="relative z-10 flex-1 grid overflow-hidden"
         style={{
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 240px)',
           gridTemplateRows: '1fr',
           gap: 'clamp(0.5rem, 1vw, 1rem)',
           padding: 'clamp(0.5rem, 1vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem)',
-          paddingBottom: 'clamp(3.5rem, 6vh, 5rem)',
-          minHeight: 0,
+          paddingBottom: 'clamp(4.5rem, 8vh, 6.5rem)',
+          height: '100%',
         }}
       >
-        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design with Cyan Glow ===== */}
+        {/* ===== TRIAGE CARD - Premium Blue/Indigo Design ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 h-full min-h-0 ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'triage' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'doctor'
@@ -3129,12 +3129,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentTriageCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(30,27,75,0.98) 0%, rgba(49,46,129,0.95) 50%, rgba(30,27,75,0.98) 100%)',
-            border: announcingType === 'triage' ? 'none' : '2px solid rgba(99,102,241,0.6)',
+            background: 'linear-gradient(160deg, rgba(30,27,75,0.97) 0%, rgba(49,46,129,0.93) 50%, rgba(30,27,75,0.97) 100%)',
+            border: announcingType === 'triage' ? 'none' : '1px solid rgba(129,140,248,0.35)',
             boxShadow: announcingType === 'triage' 
-              ? '0 8px 24px rgba(234,179,8,0.25)' 
-              : '0 4px 16px rgba(0,0,0,0.3)',
-            isolation: 'isolate',
+              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
+              : '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header with refined gradient */}
@@ -3184,7 +3184,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
           
           {/* Content area */}
-          <div className="flex-1 flex items-center justify-center relative min-h-0 overflow-hidden" style={{ padding: 'clamp(0.75rem, 1.5vh, 1.25rem)' }}>
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
             {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
@@ -3254,9 +3254,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== DOCTOR CARD - Premium Green/Teal Design with Cyan Glow ===== */}
+        {/* ===== DOCTOR CARD - Premium Green/Teal Design ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-all duration-500 h-full min-h-0 ${
+          className={`flex flex-col rounded-2xl transition-all duration-500 overflow-hidden h-full ${
             announcingType === 'doctor' 
               ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-500/40 scale-[1.02] z-20' 
               : announcingType === 'triage'
@@ -3264,12 +3264,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 : ''
           } ${currentDoctorCall ? 'animate-card-pop' : ''}`}
           style={{
-            background: 'linear-gradient(160deg, rgba(6,78,59,0.98) 0%, rgba(4,120,87,0.95) 50%, rgba(6,78,59,0.98) 100%)',
-            border: announcingType === 'doctor' ? 'none' : '2px solid rgba(16,185,129,0.6)',
+            background: 'linear-gradient(160deg, rgba(6,78,59,0.97) 0%, rgba(4,120,87,0.93) 50%, rgba(6,78,59,0.97) 100%)',
+            border: announcingType === 'doctor' ? 'none' : '1px solid rgba(52,211,153,0.35)',
             boxShadow: announcingType === 'doctor' 
-              ? '0 8px 24px rgba(234,179,8,0.25)' 
-              : '0 4px 16px rgba(0,0,0,0.3)',
-            isolation: 'isolate',
+              ? '0 20px 60px rgba(234,179,8,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
+              : '0 8px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+            minHeight: 'clamp(200px, 35vh, 400px)',
           }}
         >
           {/* Header with refined gradient */}
@@ -3319,7 +3319,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
           
           {/* Content area */}
-          <div className="flex-1 flex items-center justify-center relative min-h-0 overflow-hidden" style={{ padding: 'clamp(0.75rem, 1.5vh, 1.25rem)' }}>
+          <div className="flex-1 flex items-center justify-center relative" style={{ padding: 'clamp(1rem, 2vh, 1.5rem)' }}>
             {/* Enhanced radial glow */}
             <div 
               className="absolute inset-0 pointer-events-none" 
@@ -3389,21 +3389,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           </div>
         </div>
 
-        {/* ===== RECENT CALLS SIDEBAR with Cyan Glow ===== */}
+        {/* ===== RECENT CALLS SIDEBAR ===== */}
         <div 
-          className={`flex flex-col rounded-2xl transition-opacity duration-300 h-full ${
+          className={`flex flex-col rounded-2xl border border-indigo-500/40 transition-opacity duration-300 h-full ${
             announcingType ? 'opacity-30' : 'opacity-100'
           }`}
           style={{
             background: 'linear-gradient(180deg, rgba(15,23,42,0.97) 0%, rgba(30,41,59,0.95) 100%)',
             padding: 'clamp(0.5rem, 1vw, 0.875rem)',
             minHeight: 'clamp(150px, 25vh, 300px)',
-            border: '2px solid rgba(56,189,248,0.4)',
-            boxShadow: '0 0 25px rgba(56,189,248,0.2), 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-1 shrink-0">
+          <div className="flex items-center gap-2 mb-2 shrink-0">
             <Clock className="text-cyan-400 shrink-0" style={{ width: 'clamp(1rem, 1.5vw, 1.25rem)', height: 'clamp(1rem, 1.5vw, 1.25rem)' }} />
             <h3 className="tv-font-heading font-bold text-white drop-shadow-md" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1.25rem)' }}>
               Últimas Chamadas

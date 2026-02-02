@@ -1,2 +1,3 @@
 export { TVHeader } from './TVHeader';
-export { RecentCallsCarouselTV } from './RecentCallsCarouselTV';
+export { TVCallCard } from './TVCallCard';
+export { TVRecentCalls } from './TVRecentCalls';
