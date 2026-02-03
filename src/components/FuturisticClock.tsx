@@ -1,9 +1,12 @@
+import { memo } from 'react';
+
 interface FuturisticClockProps {
   time: Date | null;
   className?: string;
 }
 
-export function FuturisticClock({ time, className = '' }: FuturisticClockProps) {
+// Memoized clock component - only re-renders when time changes
+export const FuturisticClock = memo(function FuturisticClock({ time, className = '' }: FuturisticClockProps) {
   if (!time) return null;
 
   const hours = time.getHours().toString().padStart(2, '0');
@@ -11,16 +14,9 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
   const seconds = time.getSeconds().toString().padStart(2, '0');
 
   return (
-    <div 
-      className={`relative flex items-center justify-center ${className}`}
-    >
-      {/* Time Display with gentle fade animation */}
-      <div 
-        className="flex items-center justify-center"
-        style={{
-          animation: 'clock-fade 4s ease-in-out infinite',
-        }}
-      >
+    <div className={`relative flex items-center justify-center ${className}`}>
+      {/* Time Display - simplified, no animation for better performance */}
+      <div className="flex items-center justify-center">
         <span 
           className="text-white tabular-nums"
           style={{ 
@@ -28,8 +24,7 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
             fontSize: 'clamp(1.75rem, 3vw, 2.75rem)',
             fontWeight: 900,
             letterSpacing: '0.08em',
-            textShadow: '0 0 20px rgba(56, 189, 248, 1), 0 0 40px rgba(56, 189, 248, 0.7), 0 0 60px rgba(56, 189, 248, 0.4)',
-            WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.3)',
+            textShadow: '0 0 15px rgba(56, 189, 248, 0.8), 0 0 30px rgba(56, 189, 248, 0.5)',
           }}
         >
           {hours}:{minutes}
@@ -37,25 +32,13 @@ export function FuturisticClock({ time, className = '' }: FuturisticClockProps) 
             className="text-amber-400"
             style={{
               fontWeight: 900,
-              textShadow: '0 0 20px rgba(251, 146, 60, 1), 0 0 40px rgba(251, 146, 60, 0.7)',
+              textShadow: '0 0 15px rgba(251, 146, 60, 0.8), 0 0 30px rgba(251, 146, 60, 0.5)',
             }}
           >
             :{seconds}
           </span>
         </span>
       </div>
-
-      {/* CSS Animations - Slow and subtle fade only */}
-      <style>{`
-        @keyframes clock-fade {
-          0%, 100% { 
-            opacity: 1; 
-          }
-          50% { 
-            opacity: 0.85; 
-          }
-        }
-      `}</style>
     </div>
   );
-}
+});

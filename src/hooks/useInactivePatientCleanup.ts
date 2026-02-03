@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getBrazilTime } from './useBrazilTime';
 
 const INACTIVE_THRESHOLD_MINUTES = 10;
-const CLEANUP_INTERVAL_MS = 60000; // Check every minute
+const CLEANUP_INTERVAL_MS = 120000; // Check every 2 minutes (reduced from 1 minute)
 
 /**
  * Hook to automatically remove patients from queues after 10 minutes of inactivity
