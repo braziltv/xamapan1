@@ -663,37 +663,39 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [marketingUnitName, loadScheduledAnnouncements]);
 
-  // Countdown timer for next news update
+  // Consolidated interval: countdown, clock toggle, and localStorage check
   useEffect(() => {
-    const countdownInterval = setInterval(() => {
-      setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
+    let countdownTick = 0;
+    let clockTick = 0;
+    let localStorageTick = 0;
+    
+    const consolidatedInterval = setInterval(() => {
+      // Countdown for news - every second
+      countdownTick++;
+      if (countdownTick >= 1) {
+        setNewsCountdown(prev => (prev > 0 ? prev - 1 : 5 * 60));
+        countdownTick = 0;
+      }
+      
+      // Clock toggle - every 45 seconds (increased from 30s)
+      clockTick++;
+      if (clockTick >= 45) {
+        setShowAnalogClock(prev => !prev);
+        clockTick = 0;
+      }
+      
+      // LocalStorage check - every 10 seconds (increased from 5s)
+      localStorageTick++;
+      if (localStorageTick >= 10) {
+        const name = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
+        const id = localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || '';
+        if (name !== unitName) setUnitName(name);
+        if (id !== unitId) setUnitId(id);
+        localStorageTick = 0;
+      }
     }, 1000);
-    return () => clearInterval(countdownInterval);
-  }, []);
-
-  // Alternate between analog and digital clock every 30 seconds
-  useEffect(() => {
-    const clockInterval = setInterval(() => {
-      setShowAnalogClock(prev => !prev);
-    }, 30000);
-    return () => clearInterval(clockInterval);
-  }, []);
-
-  // Re-check localStorage periodically for unit name/id (reduced frequency)
-  useEffect(() => {
-    const checkUnit = () => {
-      const name =
-        localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
-      const id =
-        localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || '';
-
-      if (name !== unitName) setUnitName(name);
-      if (id !== unitId) setUnitId(id);
-    };
-
-    // Check every 5 seconds instead of 1 second to reduce CPU load
-    const interval = setInterval(checkUnit, 5000);
-    return () => clearInterval(interval);
+    
+    return () => clearInterval(consolidatedInterval);
   }, [unitName, unitId]);
 
   // Auto fullscreen on mount
@@ -954,10 +956,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     let activityInterval: ReturnType<typeof setInterval> | null = null;
     let reloadCheckInterval: ReturnType<typeof setInterval> | null = null;
     let memoryCleanupInterval: ReturnType<typeof setInterval> | null = null;
-    const AUTO_RELOAD_INTERVAL = 30 * 60 * 1000; // 30 minutes auto reload
-    const ACTIVITY_INTERVAL = 30 * 1000; // Simulate activity every 30 seconds (reduced from 15s)
-    const RELOAD_CHECK_INTERVAL = 30 * 1000; // Check every 30 seconds if we should reload (reduced from 10s)
-    const MEMORY_CLEANUP_INTERVAL = 5 * 60 * 1000; // Memory cleanup every 5 minutes
+    const AUTO_RELOAD_INTERVAL = 45 * 60 * 1000; // 45 minutes auto reload (increased from 30 min)
+    const ACTIVITY_INTERVAL = 60 * 1000; // Simulate activity every 60 seconds (increased from 30s)
+    const RELOAD_CHECK_INTERVAL = 60 * 1000; // Check every 60 seconds (increased from 30s)
+    const MEMORY_CLEANUP_INTERVAL = 10 * 60 * 1000; // Memory cleanup every 10 minutes (increased from 5 min)
     let pendingReload = false;
     let reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
 
@@ -1139,16 +1141,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // ignore
       }
 
-      try {
-        (window as any).responsiveVoice?.resume?.();
-      } catch {
-        // ignore
-      }
-
       if (audioContextRef.current?.state === 'suspended') {
         void audioContextRef.current.resume();
       }
-    }, 120000); // every 2 minutes
+    }, 180000); // every 3 minutes (increased from 2 min)
 
     return () => window.clearInterval(interval);
   }, [audioUnlocked]);

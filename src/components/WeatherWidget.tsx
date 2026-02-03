@@ -322,8 +322,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [progress, setProgress] = useState(0);
   const fetchingRef = useRef(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const ROTATION_DURATION = 6000; // 6 seconds per city
-  const PROGRESS_UPDATE_INTERVAL = 50; // Update progress every 50ms for smooth animation
+  const ROTATION_DURATION = 10000; // 10 seconds per city (increased from 6s)
+  const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms (reduced from 50ms)
 
   const availableCities = Object.keys(weatherCache);
   const currentWeather = weatherCache[displayCity];
@@ -429,7 +429,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   useEffect(() => {
     const interval = setInterval(() => {
       setShowMaxTemp(prev => !prev);
-    }, 3000);
+    }, 5000); // Increased from 3s to 5s
     return () => clearInterval(interval);
   }, []);
 
@@ -457,7 +457,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         <div className="flex items-center gap-1 sm:gap-1.5">
           <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500/25 to-amber-600/15 rounded-full px-1.5 sm:px-2 lg:px-2.5 py-0.5 sm:py-1 border border-amber-400/50 shadow-lg"
                style={{ boxShadow: '0 0 12px rgba(245,158,11,0.25)' }}>
-            <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-amber-400 animate-pulse" strokeWidth={2} />
+            <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 text-amber-400" strokeWidth={2} />
             <p className="font-bold text-amber-300 leading-tight whitespace-nowrap uppercase tracking-wide text-[0.5rem] sm:text-[0.55rem] lg:text-xs"
                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
               {safeFormatTime(currentTime, 'EEEE')}
