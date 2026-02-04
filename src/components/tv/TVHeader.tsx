@@ -49,7 +49,7 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
               <HealthCrossIcon size={Math.round(logoSize * 0.7)} className="w-5 h-5 lg:w-6 lg:h-6" />
             </div>
             
-            {/* Title + Credits stacked */}
+            {/* Title only */}
             <div className="flex flex-col justify-center">
               <h1 
                 className="tv-font-heading font-black text-white leading-none whitespace-nowrap tracking-tight"
@@ -60,16 +60,6 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
               >
                 Painel de Chamadas
               </h1>
-              <p 
-                className="tv-font-body leading-tight font-bold whitespace-nowrap text-yellow-300"
-                style={{ 
-                  fontSize: creditSize,
-                  marginTop: '0.1rem',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
-                }}
-              >
-                ✨ Solução criada por Kalebe Gomes
-              </p>
             </div>
           </div>
           
@@ -79,10 +69,10 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
             style={{ height: `${2.5 * scale}rem` }} 
           />
           
-          {/* Center: Unit Name - takes available space */}
-          <div className="flex-1 flex items-center justify-center min-w-0 px-2">
+          {/* Center: Unit Name + Credits - takes available space */}
+          <div className="flex-1 flex flex-col justify-center min-w-0 px-2">
             <p 
-              className="tv-font-body text-amber-400 font-black text-center leading-tight"
+              className="tv-font-body text-amber-400 font-black text-left leading-tight"
               style={{ 
                 fontSize: unitNameSize,
                 textShadow: '0 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(251,191,36,0.3)',
@@ -92,6 +82,16 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
               }}
             >
               {processedUnitName}
+            </p>
+            <p 
+              className="tv-font-body leading-tight font-bold text-left text-yellow-300"
+              style={{ 
+                fontSize: creditSize,
+                marginTop: '0.15rem',
+                textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
+              }}
+            >
+              ✨ Solução criada por Kalebe Gomes
             </p>
           </div>
           
