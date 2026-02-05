@@ -1291,6 +1291,37 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     });
   }, []);
 
+  // Play marketing notification sound (different from patient call notification)
+  const playMarketingNotificationSound = useCallback(() => {
+    console.log('playMarketingNotificationSound called');
+
+    return new Promise<void>((resolve, reject) => {
+      try {
+        // Get volume from localStorage (safe)
+        const notificationVolume = readVolume('volume-notification', 1);
+        
+        const audio = new Audio('/sounds/marketing-notification.mp3');
+        audio.volume = Math.min(1.0, notificationVolume);
+        
+        audio.onended = () => {
+          console.log('✅ Marketing notification sound finished');
+          resolve();
+        };
+        audio.onerror = (err) => {
+          console.error('❌ Marketing notification sound error:', err);
+          reject(new Error('Marketing notification sound failed'));
+        };
+        audio.play().catch((err) => {
+          console.error('❌ Marketing notification sound play() failed:', err);
+          reject(err);
+        });
+      } catch (err) {
+        console.error('❌ Failed to create marketing notification sound:', err);
+        reject(err);
+      }
+    });
+  }, []);
+
 
   const speakWithWebSpeech = useCallback(
     (text: string, opts?: { rate?: number; pitch?: number; volume?: number }) => {
@@ -1750,8 +1781,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       setTimeout(() => setShowFlash(false), 800);
       
       try {
-        // Play notification sound first
-        await playNotificationSound();
+        // Play marketing notification sound first
+        await playMarketingNotificationSound();
         
         // Use cached audio if available, otherwise generate via TTS
         if (announcement.audio_cache_url) {
@@ -1932,8 +1963,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               await new Promise(resolve => setTimeout(resolve, 800));
             }
             
-            // Play notification sound
-            await playNotificationSound();
+            // Play marketing notification sound
+            await playMarketingNotificationSound();
             
             // Use cached audio if available, otherwise generate via TTS
             if (announcement.audio_cache_url) {
@@ -1999,7 +2030,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
             await new Promise(resolve => setTimeout(resolve, 800));
           }
           
-          await playNotificationSound();
+          await playMarketingNotificationSound();
           
           if (announcement.audio_cache_url) {
             console.log(`📢 Playing cached audio for "${announcement.title}"`);
