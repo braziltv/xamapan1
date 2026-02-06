@@ -130,15 +130,15 @@ export const useHourAudio = () => {
   };
 
   /**
-   * Reproduzir som de notificação
+   * Reproduzir som de notificação de hora (dedicado, diferente do som de paciente e marketing)
    */
-  const playNotificationSound = (volume: number): Promise<void> => {
+  const playHourNotificationSound = (volume: number): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const audio = new Audio('/sounds/notification.mp3');
+      const audio = new Audio('/sounds/hour-notification.mp3');
       audio.volume = volume;
       
       audio.onended = () => resolve();
-      audio.onerror = () => reject(new Error('Notification sound failed'));
+      audio.onerror = () => reject(new Error('Hour notification sound failed'));
       audio.play().catch(reject);
     });
   };
@@ -179,7 +179,7 @@ export const useHourAudio = () => {
 
       // 1. Som de notificação
       console.log('[useHourAudio] Passo 1: Som de notificação');
-      await playNotificationSound(timeAnnouncementVolume);
+      await playHourNotificationSound(timeAnnouncementVolume);
       
       // Pequena pausa após notificação
       await wait(300);
