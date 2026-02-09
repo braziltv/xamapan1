@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseAutoLogoutOptions {
   isTvMode: boolean;
@@ -8,12 +9,14 @@ interface UseAutoLogoutOptions {
 
 /**
  * Auto-logout hook that triggers logout at 07:04 and 19:04
+ * AND checks for force-logout from the database (force_logout_at in unit_settings).
  * IMPORTANT: TV mode is ALWAYS exempted from auto-logout to ensure
  * continuous display operation without interruption.
  */
 export function useAutoLogout({ isTvMode, onLogout }: UseAutoLogoutOptions) {
   const lastCheckRef = useRef<string>('');
   const warningShownRef = useRef<string>('');
+  const forceLogoutExecutedRef = useRef<string>('');
 
   const checkAutoLogout = useCallback(() => {
     // CRITICAL: NEVER auto-logout TV mode - must stay active 24/7
@@ -47,20 +50,61 @@ export function useAutoLogout({ isTvMode, onLogout }: UseAutoLogoutOptions) {
         duration: 10000,
       });
       
-      // Small delay to show toast before logout
       setTimeout(() => {
         onLogout();
       }, 1500);
     }
   }, [isTvMode, onLogout]);
 
+  // Check for force-logout from database
+  const checkForceLogout = useCallback(async () => {
+    if (isTvMode) return;
+
+    const unitName = localStorage.getItem('selectedUnitName');
+    if (!unitName) return;
+
+    try {
+      const { data } = await supabase
+        .from('unit_settings')
+        .select('force_logout_at')
+        .eq('unit_name', unitName)
+        .maybeSingle();
+
+      if (!data?.force_logout_at) return;
+
+      const forceLogoutAt = data.force_logout_at as string;
+      
+      // Already executed this force logout
+      if (forceLogoutExecutedRef.current === forceLogoutAt) return;
+
+      // Check if force_logout_at is after the user's login time
+      const loginTime = localStorage.getItem('loginTimestamp');
+      if (loginTime && new Date(forceLogoutAt) > new Date(loginTime)) {
+        forceLogoutExecutedRef.current = forceLogoutAt;
+        
+        toast.info('🔐 Logout Forçado pelo Administrador', {
+          description: 'O administrador solicitou que todos os usuários façam login novamente.',
+          duration: 8000,
+        });
+
+        setTimeout(() => {
+          onLogout();
+        }, 2000);
+      }
+    } catch (err) {
+      // Silently ignore errors
+    }
+  }, [isTvMode, onLogout]);
+
   useEffect(() => {
-    // Check immediately on mount
     checkAutoLogout();
+    checkForceLogout();
     
-    // Check every 30 seconds (more efficient than every second)
-    const interval = setInterval(checkAutoLogout, 30000);
+    const interval = setInterval(() => {
+      checkAutoLogout();
+      checkForceLogout();
+    }, 30000);
     
     return () => clearInterval(interval);
-  }, [checkAutoLogout]);
+  }, [checkAutoLogout, checkForceLogout]);
 }
