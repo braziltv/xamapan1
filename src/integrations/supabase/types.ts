@@ -964,6 +964,7 @@ export type Database = {
           commercial_phrase_2: string | null
           commercial_phrase_3: string | null
           created_at: string
+          force_logout_at: string | null
           patient_call_voice: string | null
           unit_name: string
           updated_at: string
@@ -973,6 +974,7 @@ export type Database = {
           commercial_phrase_2?: string | null
           commercial_phrase_3?: string | null
           created_at?: string
+          force_logout_at?: string | null
           patient_call_voice?: string | null
           unit_name: string
           updated_at?: string
@@ -982,6 +984,7 @@ export type Database = {
           commercial_phrase_2?: string | null
           commercial_phrase_3?: string | null
           created_at?: string
+          force_logout_at?: string | null
           patient_call_voice?: string | null
           unit_name?: string
           updated_at?: string

@@ -247,6 +247,9 @@ const Index = () => {
     setUnitName(unitNameParam);
     setIsTvMode(tvMode || false);
     
+    // Save login timestamp for force-logout checks
+    localStorage.setItem('loginTimestamp', new Date().toISOString());
+    
     // Create user session
     await createSession(unitNameParam, tvMode ? 'display' : 'cadastro', tvMode || false);
     
