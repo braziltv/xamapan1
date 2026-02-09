@@ -33,9 +33,18 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
 
     try {
       const unitName = localStorage.getItem('selectedUnitName') || '';
+      const senderStation = localStorage.getItem('selectedModule') || localStorage.getItem('stationName') || 'unknown';
+      const senderName = localStorage.getItem('operatorName') || null;
+
+      // Log the custom announcement for audit trail
+      await supabase.from('custom_announcement_logs' as any).insert({
+        unit_name: unitName,
+        sender_station: senderStation,
+        sender_name: senderName,
+        message_text: text.trim(),
+      });
 
       // Insert a custom announcement into patient_calls
-      // This will trigger the TV display but won't appear in patient queues (filtered by call_type='custom')
       const { data, error } = await supabase.from('patient_calls').insert({
         patient_name: text.trim(),
         call_type: 'custom',
@@ -56,7 +65,6 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
       setOpen(false);
       
       // Auto-delete the custom announcement after 30 seconds
-      // This prevents database clutter while ensuring TV has time to process
       if (data?.id) {
         setTimeout(async () => {
           await supabase.from('patient_calls').delete().eq('id', data.id);
