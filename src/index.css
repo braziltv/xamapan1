@@ -513,7 +513,7 @@
 
 .animate-marquee {
   display: inline-flex;
-  animation: marquee 180s linear infinite;
+  animation: marquee 120s linear infinite;
   will-change: transform;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
