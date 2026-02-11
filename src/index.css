@@ -507,18 +507,21 @@
 }
 
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 .animate-marquee {
   display: inline-flex;
   animation: marquee 120s linear infinite;
   will-change: transform;
-  -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  pointer-events: none;
+  contain: strict;
 }
 
 @keyframes flash {
