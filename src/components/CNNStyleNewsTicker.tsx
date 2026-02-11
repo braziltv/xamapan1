@@ -97,18 +97,19 @@ export function CNNStyleNewsTicker({
     return { badge: 'bg-gray-700 text-white', text: 'text-gray-100' };
   };
 
-  // Limit DOM nodes for TV performance
-  const limitedItems = items.slice(0, 30);
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40" style={{ opacity: isAnnouncing ? 0.3 : 1, contain: 'layout size style' }}>
-      <div className="bg-gray-900 overflow-hidden h-10 sm:h-12 lg:h-16 xl:h-20 2xl:h-24 flex items-center">
+    <div className={`fixed bottom-0 left-0 right-0 z-40 shrink-0 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
+      <div className="bg-gray-900 overflow-hidden h-10 sm:h-12 lg:h-16 xl:h-20 2xl:h-24 flex items-center relative">
+        {/* Top red line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-red-600" />
+
+        {/* Scrolling content */}
         <div className="animate-marquee whitespace-nowrap inline-flex">
-          {[...limitedItems, ...limitedItems].map((item, index) => {
+          {[...items, ...items].map((item, index) => {
             const style = getSourceStyle(item.source);
             return (
-              <span key={index} className="mx-4 lg:mx-6 inline-flex items-center gap-2 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: 'system-ui, sans-serif' }}>
-                <span className={`px-2 lg:px-3 py-0.5 rounded text-[9px] lg:text-xs xl:text-sm font-bold shrink-0 ${style.badge}`}>
+              <span key={index} className="mx-4 lg:mx-6 inline-flex items-center gap-2 lg:gap-3 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                <span className={`px-2 lg:px-3 py-0.5 lg:py-1 rounded text-[9px] lg:text-xs xl:text-sm font-bold shrink-0 ${style.badge}`}>
                   {item.source === 'Créditos' ? 'CRÉDITOS' : item.source === '📢 Informativo' ? 'INFORMATIVO' : item.source}
                 </span>
                 <span className={style.text}>{item.title}</span>
