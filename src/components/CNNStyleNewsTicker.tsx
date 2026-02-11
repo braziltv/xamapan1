@@ -1,4 +1,4 @@
-// Lightweight CNN-style news ticker optimized for TV hardware
+import { NewsSourceIcon3D } from './NewsSourceIcon3D';
 
 interface NewsItem {
   title: string;
@@ -99,24 +99,41 @@ export function CNNStyleNewsTicker({
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-40 shrink-0 transition-opacity duration-300 ${isAnnouncing ? 'opacity-30' : 'opacity-100'}`}>
-      <div className="bg-gray-900 overflow-hidden h-10 sm:h-12 lg:h-16 xl:h-20 2xl:h-24 flex items-center relative">
-        {/* Top red line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-red-600" />
+      {/* CNN-style two-row footer */}
+      <div className="flex flex-col">
+        {/* Bottom ticker row - scrolling news */}
+        <div className="flex items-stretch h-8 xs:h-10 sm:h-12 md:h-14 lg:h-16 xl:h-[4.5rem] 2xl:h-20 3xl:h-24">
+          {/* Scrolling News Section - Dark background like CNN */}
+          <div className="flex-1 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 overflow-hidden flex items-center relative">
+            {/* Top red accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[3px] lg:h-1 bg-gradient-to-r from-red-600 via-red-500 to-red-600" />
+            
+            {/* Gradient fade edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-r from-gray-900 to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-4 xs:w-6 sm:w-8 md:w-12 lg:w-16 xl:w-20 bg-gradient-to-l from-gray-900 to-transparent z-10" />
+            
+            {/* Scrolling content - GPU accelerated, no repaints */}
+            <div className="animate-marquee whitespace-nowrap inline-flex py-1">
+              {[...items, ...items].map((item, index) => {
+                const style = getSourceStyle(item.source);
+                return (
+                  <span key={index} className="mx-3 sm:mx-4 lg:mx-6 xl:mx-8 inline-flex items-center gap-1.5 sm:gap-2 lg:gap-3 font-semibold tracking-wide text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl 3xl:text-2xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
+                    <NewsSourceIcon3D source={item.source} />
+                    <span className={`px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-bold shrink-0 ${style.badge}`}>
+                      {item.source === 'Créditos' ? 'CRÉDITOS' : item.source === '📢 Informativo' ? 'INFORMATIVO' : item.source}
+                    </span>
+                    <span className={style.text}>
+                      {item.title}
+                    </span>
+                    <span className="mx-3 sm:mx-4 lg:mx-6 shrink-0 text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-red-600">
+                      ▶
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
 
-        {/* Scrolling content */}
-        <div className="animate-marquee whitespace-nowrap inline-flex">
-          {[...items, ...items].map((item, index) => {
-            const style = getSourceStyle(item.source);
-            return (
-              <span key={index} className="mx-4 lg:mx-6 inline-flex items-center gap-2 lg:gap-3 font-semibold text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: 'Poppins, system-ui, sans-serif' }}>
-                <span className={`px-2 lg:px-3 py-0.5 lg:py-1 rounded text-[9px] lg:text-xs xl:text-sm font-bold shrink-0 ${style.badge}`}>
-                  {item.source === 'Créditos' ? 'CRÉDITOS' : item.source === '📢 Informativo' ? 'INFORMATIVO' : item.source}
-                </span>
-                <span className={style.text}>{item.title}</span>
-                <span className="mx-2 lg:mx-4 shrink-0 text-red-600 font-bold">▶</span>
-              </span>
-            );
-          })}
         </div>
       </div>
     </div>
