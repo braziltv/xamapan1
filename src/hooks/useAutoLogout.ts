@@ -20,7 +20,7 @@ export function useAutoLogout({ isTvMode, onLogout }: UseAutoLogoutOptions) {
 
   const checkAutoLogout = useCallback(() => {
     // CRITICAL: NEVER auto-logout TV mode - must stay active 24/7
-    if (isTvMode) return;
+    if (isTvMode || localStorage.getItem('isTvMode') === 'true') return;
 
     const now = new Date();
     const hours = now.getHours();
@@ -58,7 +58,7 @@ export function useAutoLogout({ isTvMode, onLogout }: UseAutoLogoutOptions) {
 
   // Check for force-logout from database
   const checkForceLogout = useCallback(async () => {
-    if (isTvMode) return;
+    if (isTvMode || localStorage.getItem('isTvMode') === 'true') return;
 
     const unitName = localStorage.getItem('selectedUnitName');
     if (!unitName) return;
