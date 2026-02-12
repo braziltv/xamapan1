@@ -474,14 +474,16 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         {/* Futuristic Clock with rotating rings */}
         <FuturisticClock time={currentTime} />
         
+        {/* Spacing line */}
+        <div style={{ height: 'clamp(0.5rem, 1.5vh, 1rem)' }} />
+        
         {/* Credits below clock */}
         <p 
-          className="text-amber-300/80 font-semibold whitespace-nowrap text-center"
+          className="text-amber-300 font-bold whitespace-nowrap text-center"
           style={{ 
-            fontSize: 'clamp(0.45rem, 0.7vw, 0.65rem)',
-            letterSpacing: '0.04em',
-            marginTop: 'clamp(0.5rem, 1vh, 0.75rem)',
-            textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+            fontSize: 'clamp(0.5rem, 0.8vw, 0.75rem)',
+            letterSpacing: '0.03em',
+            textShadow: '0 2px 4px rgba(0,0,0,0.6)',
           }}
         >
           ✨ Solução criada por Kalebe Gomes
