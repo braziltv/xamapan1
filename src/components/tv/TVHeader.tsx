@@ -83,6 +83,16 @@ export function TVHeader({ unitName, currentTime, formatTime, isAnnouncing }: TV
             >
               {processedUnitName}
             </p>
+            <p 
+              className="tv-font-body leading-tight font-bold text-left text-yellow-300"
+              style={{ 
+                fontSize: creditSize,
+                marginTop: '0.15rem',
+                textShadow: '0 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(253,224,71,0.3)',
+              }}
+            >
+              ✨ Solução criada por Kalebe Gomes
+            </p>
           </div>
           
           {/* Separator */}

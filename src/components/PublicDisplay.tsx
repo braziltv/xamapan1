@@ -3102,6 +3102,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 >
                   📍 {(unitName || 'Unidade de Saúde').replace(/Pronto Atendimento/gi, 'P.A')}
                 </p>
+                <p 
+                  className="leading-tight font-semibold whitespace-nowrap text-amber-300 mt-1.5"
+                  style={{ 
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 'clamp(0.55rem, 0.85vw, 0.75rem)',
+                    letterSpacing: '0.03em',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  ✨ Solução criada por Kalebe Gomes
+                </p>
               </div>
             </div>
             

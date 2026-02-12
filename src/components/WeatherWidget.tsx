@@ -473,18 +473,6 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         
         {/* Futuristic Clock with rotating rings */}
         <FuturisticClock time={currentTime} />
-        
-        {/* Credits below clock with small gap */}
-        <p 
-          className="text-amber-300 font-bold whitespace-nowrap text-center mt-0.5"
-          style={{ 
-            fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)',
-            letterSpacing: '0.03em',
-            textShadow: '0 2px 4px rgba(0,0,0,0.6)',
-          }}
-        >
-          ✨ Solução criada por Kalebe Gomes
-        </p>
       </div>
     );
   };
