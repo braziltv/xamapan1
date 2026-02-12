@@ -476,7 +476,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
         
         {/* Credits below clock with small gap */}
         <p 
-          className="text-amber-300 font-bold whitespace-nowrap text-center mt-1.5"
+          className="text-amber-300 font-bold whitespace-nowrap text-center mt-0.5"
           style={{ 
             fontSize: 'clamp(0.5rem, 0.8vw, 0.7rem)',
             letterSpacing: '0.03em',
