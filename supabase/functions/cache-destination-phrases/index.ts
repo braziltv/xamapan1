@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Fixed voice for patient calls (Chirp3-HD = voz mais natural e humana)
 const FIXED_VOICE_ID = 'pt-BR-Chirp3-HD-Aoede';
-const FIXED_SPEAKING_RATE = 1.0;
+const FIXED_SPEAKING_RATE = 0.92; // Mais lento e natural
 
 // Generate destination phrase with correct article (ao/à)
 function generateDestinationPhrase(destinationName: string): string {
@@ -86,8 +86,19 @@ async function getAccessToken(credentials: any): Promise<string> {
   return data.access_token;
 }
 
-// Generate TTS audio using Google Cloud
+// Converter texto para SSML com pausas naturais
+function convertToNaturalSSML(text: string): string {
+  let ssml = text;
+  ssml = ssml.replace(/,\s*/g, ',<break time="350ms"/> ');
+  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="200ms"/>');
+  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="500ms"/> $1');
+  return `<speak>${ssml}</speak>`;
+}
+
+// Generate TTS audio using Google Cloud with SSML
 async function generateTTSAudio(text: string, accessToken: string): Promise<Uint8Array> {
+  const ssmlText = convertToNaturalSSML(text);
+  
   const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
     method: 'POST',
     headers: {
@@ -95,7 +106,7 @@ async function generateTTSAudio(text: string, accessToken: string): Promise<Uint
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      input: { text },
+      input: { ssml: ssmlText },
       voice: {
         languageCode: 'pt-BR',
         name: FIXED_VOICE_ID,
@@ -104,8 +115,7 @@ async function generateTTSAudio(text: string, accessToken: string): Promise<Uint
       audioConfig: {
         audioEncoding: 'MP3',
         speakingRate: FIXED_SPEAKING_RATE,
-        // Chirp3-HD não suporta pitch
-        volumeGainDb: 1.5,
+        volumeGainDb: 1.0,
         effectsProfileId: ['large-home-entertainment-class-device']
       }
     })
