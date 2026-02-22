@@ -2119,18 +2119,41 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
     
     // Retorna frase mapeada ou gera uma frase genérica
+    let phrase: string;
     if (destinationPhrases[destination]) {
-      return destinationPhrases[destination];
+      phrase = destinationPhrases[destination];
+    } else {
+      // Lógica genérica para destinos não mapeados
+      const useFeminineArticle = 
+        destination.toLowerCase().startsWith('sala') ||
+        destination.toLowerCase().startsWith('triagem') ||
+        destination.toLowerCase().startsWith('enfermaria');
+      phrase = `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
     }
-    
-    // Lógica genérica para destinos não mapeados
-    const useFeminineArticle = 
-      destination.toLowerCase().startsWith('sala') ||
-      destination.toLowerCase().startsWith('triagem') ||
-      destination.toLowerCase().startsWith('enfermaria');
-    
-    return `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
-  }, []);
+
+    // Orientações de faixas coloridas exclusivas para PA Pedro José de Menezes
+    const isPedroJose = marketingUnitName === 'pa_pedro_jose';
+    if (isPedroJose) {
+      const faixaMap: Record<string, string> = {
+        'Triagem': 'em caso de dúvidas siga a faixa branca',
+        'Sala de Triagem': 'em caso de dúvidas siga a faixa branca',
+        'Sala de Eletrocardiograma': 'em caso de dúvidas siga a faixa vermelha',
+        'Sala de ECG': 'em caso de dúvidas siga a faixa vermelha',
+        'Sala de Curativos': 'em caso de dúvidas siga a faixa amarela',
+        'Consultório 1': 'em caso de dúvidas siga a faixa verde',
+        'Consultório 2': 'em caso de dúvidas siga a faixa azul',
+        'Enfermaria': 'em caso de dúvidas siga a faixa rosa',
+        'Sala do Raio X': 'em caso de dúvidas siga a faixa preta',
+        'Raio X': 'em caso de dúvidas siga a faixa preta',
+      };
+      const faixa = faixaMap[destination];
+      if (faixa) {
+        phrase += `, ${faixa}`;
+      }
+    }
+
+    return phrase;
+  }, [marketingUnitName]);
 
   // Gerar TTS para frase de destino via Google Cloud TTS
   // Uses fixed voice: pt-BR-Neural2-C (Female Premium)
