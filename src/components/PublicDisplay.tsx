@@ -378,8 +378,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
           destinationPhraseCacheRef.current.set(phrase, cacheUrl);
           // Store guidance mapping for use in getDestinationPhrase
+          // Map by display_name AND also by common variations (e.g. "Sala de Raio X" for "Raio X")
           if (dest.guidance_phrase) {
             destinationGuidanceRef.current.set(destName, dest.guidance_phrase);
+            // Also map with "Sala de " prefix if not already present
+            if (!lowerName.startsWith('sala')) {
+              destinationGuidanceRef.current.set(`Sala de ${destName}`, dest.guidance_phrase);
+            }
           }
         }
 
