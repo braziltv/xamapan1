@@ -89,9 +89,9 @@ async function getAccessToken(credentials: any): Promise<string> {
 // Converter texto para SSML com pausas naturais
 function convertToNaturalSSML(text: string): string {
   let ssml = text;
-  ssml = ssml.replace(/,\s*/g, ',<break time="175ms"/> ');
-  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="100ms"/>');
-  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="250ms"/> $1');
+  ssml = ssml.replace(/,\s*/g, ',<break time="90ms"/> ');
+  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="50ms"/>');
+  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="125ms"/> $1');
   return `<speak>${ssml}</speak>`;
 }
 
