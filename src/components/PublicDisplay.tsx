@@ -207,6 +207,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   
   // Cache de frases de destino pré-geradas (hash -> URL pública)
   const destinationPhraseCacheRef = useRef<Map<string, string>>(new Map());
+  // Mapa de destino → guidance_phrase do banco de dados
+  const destinationGuidanceRef = useRef<Map<string, string>>(new Map());
   const destinationCacheLoadedRef = useRef(false);
 
   const readVolume = (key: string, fallback = 1) => {
@@ -343,7 +345,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Buscar destinos da unidade
         const { data: destinations, error } = await supabase
           .from('destinations')
-          .select('name, display_name')
+          .select('name, display_name, guidance_phrase')
           .eq('unit_id', unitId)
           .eq('is_active', true);
 
@@ -365,12 +367,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           const lowerName = destName.toLowerCase();
           const feminineKeywords = ['sala', 'triagem', 'enfermaria', 'recepção', 'farmácia', 'emergência'];
           const useFeminine = feminineKeywords.some(kw => lowerName.startsWith(kw));
-          const phrase = `Por favor, dirija-se ${useFeminine ? 'à' : 'ao'} ${destName}`;
+          const basePhrase = `Por favor, dirija-se ${useFeminine ? 'à' : 'ao'} ${destName}`;
+          // Include guidance_phrase to match the cached audio
+          const phrase = dest.guidance_phrase 
+            ? `${basePhrase}, ${dest.guidance_phrase}` 
+            : basePhrase;
 
           const hash = await hashDestinationPhrase(phrase);
           const cacheUrl = `${STORAGE_BASE_URL}/${hash}.mp3`;
 
           destinationPhraseCacheRef.current.set(phrase, cacheUrl);
+          // Store guidance mapping for use in getDestinationPhrase
+          if (dest.guidance_phrase) {
+            destinationGuidanceRef.current.set(destName, dest.guidance_phrase);
+          }
         }
 
         destinationCacheLoadedRef.current = true;
@@ -2104,55 +2114,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS]);
 
   const getDestinationPhrase = useCallback((destination: string): string => {
-    // Mapeamento de destinos para frases corretas
-    const destinationPhrases: Record<string, string> = {
-      'Triagem': 'Por favor, dirija-se à Triagem',
-      'Sala de Eletrocardiograma': 'Por favor, dirija-se à Sala de Eletrocardiograma',
-      'Sala de Curativos': 'Por favor, dirija-se à Sala de Curativos',
-      'Raio X': 'Por favor, dirija-se ao Raio X',
-      'Enfermaria': 'Por favor, dirija-se à Enfermaria',
-      'Consultório 1': 'Por favor, dirija-se ao Consultório 1',
-      'Consultório 2': 'Por favor, dirija-se ao Consultório 2',
-      'Consultório Médico': 'Por favor, dirija-se ao Consultório Médico',
-      'Consultório Médico 1': 'Por favor, dirija-se ao Consultório Médico 1',
-      'Consultório Médico 2': 'Por favor, dirija-se ao Consultório Médico 2',
-    };
-    
-    // Retorna frase mapeada ou gera uma frase genérica
-    let phrase: string;
-    if (destinationPhrases[destination]) {
-      phrase = destinationPhrases[destination];
-    } else {
-      // Lógica genérica para destinos não mapeados
-      const useFeminineArticle = 
-        destination.toLowerCase().startsWith('sala') ||
-        destination.toLowerCase().startsWith('triagem') ||
-        destination.toLowerCase().startsWith('enfermaria');
-      phrase = `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
-    }
+    // Gerar frase base com artigo correto (ao/à)
+    const lowerDest = destination.toLowerCase();
+    const feminineKeywords = ['sala', 'triagem', 'enfermaria', 'recepção', 'farmácia', 'emergência'];
+    const useFeminine = feminineKeywords.some(kw => lowerDest.startsWith(kw));
+    const phrase = `Por favor, dirija-se ${useFeminine ? 'à' : 'ao'} ${destination}`;
 
-    // Orientações de faixas coloridas exclusivas para PA Pedro José de Menezes
-    const isPedroJose = marketingUnitName === 'pa_pedro_jose';
-    if (isPedroJose) {
-      const faixaMap: Record<string, string> = {
-        'Triagem': 'em caso de dúvidas siga a faixa branca',
-        'Sala de Triagem': 'em caso de dúvidas siga a faixa branca',
-        'Sala de Eletrocardiograma': 'em caso de dúvidas siga a faixa vermelha',
-        'Sala de ECG': 'em caso de dúvidas siga a faixa vermelha',
-        'Sala de Curativos': 'em caso de dúvidas siga a faixa amarela',
-        'Consultório 1': 'em caso de dúvidas siga a faixa verde',
-        'Consultório 2': 'em caso de dúvidas siga a faixa azul',
-        'Enfermaria': 'em caso de dúvidas siga a faixa rosa',
-        'Raio X': 'em caso de dúvidas siga a faixa de cor prata',
-      };
-      const faixa = faixaMap[destination];
-      if (faixa) {
-        phrase += `, ${faixa}`;
-      }
+    // Buscar guidance_phrase do banco de dados (carregado no destinationGuidanceRef)
+    const guidance = destinationGuidanceRef.current.get(destination);
+    if (guidance) {
+      return `${phrase}, ${guidance}`;
     }
 
     return phrase;
-  }, [marketingUnitName]);
+  }, []);
 
   // Gerar TTS para frase de destino via Google Cloud TTS
   // Uses fixed voice: pt-BR-Neural2-C (Female Premium)
