@@ -177,7 +177,7 @@ serve(async (req) => {
     // Fetch destinations for the unit
     const { data: destinations, error: destError } = await supabase
       .from('destinations')
-      .select('name, display_name')
+      .select('name, display_name, guidance_phrase')
       .eq('unit_id', unitId)
       .eq('is_active', true);
 
@@ -208,7 +208,11 @@ serve(async (req) => {
 
     for (const dest of destinations) {
       const destinationName = dest.display_name || dest.name;
-      const phrase = generateDestinationPhrase(destinationName);
+      const basePhrase = generateDestinationPhrase(destinationName);
+      // Include guidance_phrase in the cached audio
+      const phrase = dest.guidance_phrase 
+        ? `${basePhrase}, ${dest.guidance_phrase}` 
+        : basePhrase;
       const hash = await hashPhrase(phrase);
       const fileName = `destinations/${hash}.mp3`;
 
