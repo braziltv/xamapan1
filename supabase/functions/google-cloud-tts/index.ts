@@ -103,23 +103,39 @@ async function getAccessToken(credentials: any): Promise<string> {
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
-  // Vozes Femininas
+  // Vozes Chirp3-HD (mais naturais e humanas - última geração)
+  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Aoede', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Leda', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Zephyr', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
+  // Vozes Neural2 (legado)
   'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
   'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
-  // Vozes Masculinas
   'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
+  // Vozes Wavenet (legado)
+  'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
   'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
+  'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
+  // Vozes Standard (legado)
+  'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
   'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
+  'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
 };
 
-// Vozes padrão por gênero
+// Verificar se a voz é Chirp3-HD (não suporta pitch)
+function isChirp3HD(voiceName: string): boolean {
+  return voiceName.includes('Chirp3-HD');
+}
+
+// Vozes padrão por gênero (Chirp3-HD para máxima naturalidade)
 const DEFAULT_VOICES = {
-  female: 'pt-BR-Neural2-A',
-  male: 'pt-BR-Neural2-B'
+  female: 'pt-BR-Chirp3-HD-Aoede',
+  male: 'pt-BR-Chirp3-HD-Charon'
 };
 
 serve(async (req) => {
@@ -211,10 +227,10 @@ serve(async (req) => {
           voice: selectedVoice,
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: speakingRate * 0.95, // Slightly slower for natural pacing
-            pitch: -0.8, // Lower pitch for warmer, more natural tone
-            volumeGainDb: 1.5, // Slightly louder for clarity
-            effectsProfileId: ['large-home-entertainment-class-device'] // Optimized for speakers
+            speakingRate: isChirp3HD(selectedVoiceName) ? speakingRate : speakingRate * 0.95,
+            ...(isChirp3HD(selectedVoiceName) ? {} : { pitch: -0.8 }), // Chirp3-HD não suporta pitch
+            volumeGainDb: 1.5,
+            effectsProfileId: ['large-home-entertainment-class-device']
           }
         })
       }
