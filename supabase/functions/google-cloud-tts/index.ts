@@ -138,6 +138,25 @@ const DEFAULT_VOICES = {
   male: 'pt-BR-Chirp3-HD-Charon'
 };
 
+// Converter texto para SSML com pausas e entonação naturais
+function convertToNaturalSSML(text: string): string {
+  let ssml = text;
+
+  // Pausa mais longa após o nome do paciente (antes de "por favor" ou "Por favor")
+  ssml = ssml.replace(/\.\s*(por favor|Por favor)/g, '.<break time="600ms"/> $1');
+  
+  // Pausa natural após vírgulas
+  ssml = ssml.replace(/,\s*/g, ',<break time="350ms"/> ');
+
+  // Pausa antes de "em caso de dúvidas"
+  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="500ms"/> $1');
+
+  // Pausa sutil após "dirija-se" para dar ênfase ao destino
+  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="200ms"/>');
+
+  return `<speak>${ssml}</speak>`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -166,7 +185,6 @@ serve(async (req) => {
     let finalText = text;
     if (concatenate) {
       const { name, prefix, destination } = concatenate;
-      // Construir frase: "Nome. Por favor, dirija-se ao/à Destino."
       const cleanName = name?.trim() || '';
       const cleanPrefix = prefix?.trim() || '';
       const cleanDestination = destination?.trim() || '';
@@ -190,7 +208,6 @@ serve(async (req) => {
     let selectedVoiceName: string;
     
     if (voiceName && VOICES[voiceName]) {
-      // Usar voz específica se fornecida
       selectedVoiceName = voiceName;
     } else if (voice === 'male') {
       selectedVoiceName = DEFAULT_VOICES.male;
@@ -199,8 +216,12 @@ serve(async (req) => {
     }
     
     const selectedVoice = VOICES[selectedVoiceName];
+    const useChirp3 = isChirp3HD(selectedVoiceName);
 
-    console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName}`);
+    // Converter texto para SSML com pausas naturais para soar mais humano
+    const ssmlText = convertToNaturalSSML(finalText);
+
+    console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName} (SSML)`);
 
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
@@ -209,11 +230,12 @@ serve(async (req) => {
     }
 
     const credentials = JSON.parse(credentialsJson);
-    
-    // Obter access token
     const accessToken = await getAccessToken(credentials);
 
-    // Chamar Google Cloud TTS API
+    // Taxa de fala: Chirp3-HD já é natural, desacelerar levemente
+    const finalRate = useChirp3 ? Math.min(speakingRate, 0.92) : speakingRate * 0.90;
+
+    // Chamar Google Cloud TTS API com SSML
     const ttsResponse = await fetch(
       'https://texttospeech.googleapis.com/v1/text:synthesize',
       {
@@ -223,13 +245,13 @@ serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          input: { text: finalText },
+          input: { ssml: ssmlText },
           voice: selectedVoice,
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: isChirp3HD(selectedVoiceName) ? speakingRate : speakingRate * 0.95,
-            ...(isChirp3HD(selectedVoiceName) ? {} : { pitch: -0.8 }), // Chirp3-HD não suporta pitch
-            volumeGainDb: 1.5,
+            speakingRate: finalRate,
+            ...(useChirp3 ? {} : { pitch: -1.2 }), // Tom mais grave e acolhedor para Neural2
+            volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
           }
         })
