@@ -8,7 +8,7 @@ const corsHeaders = {
 
 // Fixed voice for patient calls (Chirp3-HD = voz mais natural e humana)
 const FIXED_VOICE_ID = 'pt-BR-Chirp3-HD-Aoede';
-const FIXED_SPEAKING_RATE = 0.92; // Mais lento e natural
+const FIXED_SPEAKING_RATE = 0.95;
 
 // Generate destination phrase with correct article (ao/à)
 function generateDestinationPhrase(destinationName: string): string {
@@ -89,9 +89,9 @@ async function getAccessToken(credentials: any): Promise<string> {
 // Converter texto para SSML com pausas naturais
 function convertToNaturalSSML(text: string): string {
   let ssml = text;
-  ssml = ssml.replace(/,\s*/g, ',<break time="350ms"/> ');
-  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="200ms"/>');
-  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="500ms"/> $1');
+  ssml = ssml.replace(/,\s*/g, ',<break time="175ms"/> ');
+  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="100ms"/>');
+  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="250ms"/> $1');
   return `<speak>${ssml}</speak>`;
 }
 

@@ -141,19 +141,10 @@ const DEFAULT_VOICES = {
 // Converter texto para SSML com pausas e entonação naturais
 function convertToNaturalSSML(text: string): string {
   let ssml = text;
-
-  // Pausa mais longa após o nome do paciente (antes de "por favor" ou "Por favor")
-  ssml = ssml.replace(/\.\s*(por favor|Por favor)/g, '.<break time="600ms"/> $1');
-  
-  // Pausa natural após vírgulas
-  ssml = ssml.replace(/,\s*/g, ',<break time="350ms"/> ');
-
-  // Pausa antes de "em caso de dúvidas"
-  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="500ms"/> $1');
-
-  // Pausa sutil após "dirija-se" para dar ênfase ao destino
-  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="200ms"/>');
-
+  ssml = ssml.replace(/\.\s*(por favor|Por favor)/g, '.<break time="300ms"/> $1');
+  ssml = ssml.replace(/,\s*/g, ',<break time="175ms"/> ');
+  ssml = ssml.replace(/,?\s*(em caso de dúvidas)/gi, '.<break time="250ms"/> $1');
+  ssml = ssml.replace(/(dirija-se\s+(?:ao|à))\s+/g, '$1 <break time="100ms"/>');
   return `<speak>${ssml}</speak>`;
 }
 
@@ -232,8 +223,8 @@ serve(async (req) => {
     const credentials = JSON.parse(credentialsJson);
     const accessToken = await getAccessToken(credentials);
 
-    // Taxa de fala: Chirp3-HD já é natural, desacelerar levemente
-    const finalRate = useChirp3 ? Math.min(speakingRate, 0.92) : speakingRate * 0.90;
+    // Taxa de fala: 0.95 para ritmo natural
+    const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
 
     // Chamar Google Cloud TTS API com SSML
     const ttsResponse = await fetch(
