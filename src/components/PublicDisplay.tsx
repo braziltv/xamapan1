@@ -361,6 +361,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
         const STORAGE_BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/tts-cache/destinations`;
 
+        // Helper: gerar todas as variantes de nome para um destino
+        const getNameVariants = (displayName: string): string[] => {
+          const variants = [displayName];
+          const lower = displayName.toLowerCase();
+          const salaPrefix = 'Sala de ';
+          
+          if (lower.startsWith('sala de ')) {
+            // "Sala de Triagem" → also "Triagem"
+            const shortName = displayName.substring(salaPrefix.length);
+            variants.push(shortName);
+          } else {
+            // "Raio X" → also "Sala de Raio X"
+            variants.push(`${salaPrefix}${displayName}`);
+          }
+          
+          // Mapeamento manual para nomes que diferem significativamente
+          if (lower.includes('ecg')) {
+            variants.push('Sala de Eletrocardiograma', 'Eletrocardiograma');
+          }
+          if (lower.includes('eletrocardiograma')) {
+            variants.push('Sala de ECG', 'ECG');
+          }
+          
+          return variants;
+        };
+
         // Gerar hash para cada frase e montar map de cache
         for (const dest of destinations) {
           const destName = dest.display_name || dest.name;
@@ -376,14 +402,22 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           const hash = await hashDestinationPhrase(phrase);
           const cacheUrl = `${STORAGE_BASE_URL}/${hash}.mp3`;
 
+          // Armazenar cache de áudio para a frase principal
           destinationPhraseCacheRef.current.set(phrase, cacheUrl);
-          // Store guidance mapping for use in getDestinationPhrase
-          // Map by display_name AND also by common variations (e.g. "Sala de Raio X" for "Raio X")
-          if (dest.guidance_phrase) {
-            destinationGuidanceRef.current.set(destName, dest.guidance_phrase);
-            // Also map with "Sala de " prefix if not already present
-            if (!lowerName.startsWith('sala')) {
-              destinationGuidanceRef.current.set(`Sala de ${destName}`, dest.guidance_phrase);
+          
+          // Para cada variante do nome, armazenar guidance E cache de áudio alternativo
+          const variants = getNameVariants(destName);
+          for (const variant of variants) {
+            if (dest.guidance_phrase) {
+              destinationGuidanceRef.current.set(variant, dest.guidance_phrase);
+            }
+            // Gerar a frase alternativa e apontar para o mesmo áudio cacheado
+            const varLower = variant.toLowerCase();
+            const varFeminine = feminineKeywords.some(kw => varLower.startsWith(kw));
+            const varBase = `Por favor, dirija-se ${varFeminine ? 'à' : 'ao'} ${variant}`;
+            const varPhrase = dest.guidance_phrase ? `${varBase}, ${dest.guidance_phrase}` : varBase;
+            if (varPhrase !== phrase) {
+              destinationPhraseCacheRef.current.set(varPhrase, cacheUrl);
             }
           }
         }
