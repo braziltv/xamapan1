@@ -207,7 +207,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   
   // Cache de frases de destino pré-geradas (hash -> URL pública)
   const destinationPhraseCacheRef = useRef<Map<string, string>>(new Map());
-  const destinationGuidanceRef = useRef<Map<string, string>>(new Map());
   const destinationCacheLoadedRef = useRef(false);
 
   const readVolume = (key: string, fallback = 1) => {
@@ -344,7 +343,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         // Buscar destinos da unidade
         const { data: destinations, error } = await supabase
           .from('destinations')
-          .select('name, display_name, guidance_phrase')
+          .select('name, display_name')
           .eq('unit_id', unitId)
           .eq('is_active', true);
 
@@ -367,11 +366,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           const feminineKeywords = ['sala', 'triagem', 'enfermaria', 'recepção', 'farmácia', 'emergência'];
           const useFeminine = feminineKeywords.some(kw => lowerName.startsWith(kw));
           const phrase = `Por favor, dirija-se ${useFeminine ? 'à' : 'ao'} ${destName}`;
-
-          // Armazenar orientação de destino se configurada
-          if (dest.guidance_phrase) {
-            destinationGuidanceRef.current.set(destName, dest.guidance_phrase);
-          }
 
           const hash = await hashDestinationPhrase(phrase);
           const cacheUrl = `${STORAGE_BASE_URL}/${hash}.mp3`;
@@ -2137,14 +2131,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       phrase = `Por favor, dirija-se ${useFeminineArticle ? 'à' : 'ao'} ${destination}`;
     }
 
-    // Orientações de destino configuradas no painel administrativo
-    const guidance = destinationGuidanceRef.current.get(destination);
-    if (guidance) {
-      phrase += `, ${guidance}`;
+    // Orientações de faixas coloridas exclusivas para PA Pedro José de Menezes
+    const isPedroJose = marketingUnitName === 'pa_pedro_jose';
+    if (isPedroJose) {
+      const faixaMap: Record<string, string> = {
+        'Triagem': 'em caso de dúvidas siga a faixa branca',
+        'Sala de Triagem': 'em caso de dúvidas siga a faixa branca',
+        'Sala de Eletrocardiograma': 'em caso de dúvidas siga a faixa vermelha',
+        'Sala de ECG': 'em caso de dúvidas siga a faixa vermelha',
+        'Sala de Curativos': 'em caso de dúvidas siga a faixa amarela',
+        'Consultório 1': 'em caso de dúvidas siga a faixa verde',
+        'Consultório 2': 'em caso de dúvidas siga a faixa azul',
+        'Enfermaria': 'em caso de dúvidas siga a faixa rosa',
+        'Sala do Raio X': 'em caso de dúvidas siga a faixa preta',
+        'Raio X': 'em caso de dúvidas siga a faixa preta',
+      };
+      const faixa = faixaMap[destination];
+      if (faixa) {
+        phrase += `, ${faixa}`;
+      }
     }
 
     return phrase;
-  }, []);
+  }, [marketingUnitName]);
 
   // Gerar TTS para frase de destino via Google Cloud TTS
   // Uses fixed voice: pt-BR-Neural2-C (Female Premium)

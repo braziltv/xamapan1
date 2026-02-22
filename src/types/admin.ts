@@ -33,7 +33,6 @@ export interface Destination {
   display_name: string;
   is_active: boolean;
   display_order: number;
-  guidance_phrase: string | null;
   created_at: string;
 }
 

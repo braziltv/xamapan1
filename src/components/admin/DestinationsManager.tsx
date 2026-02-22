@@ -25,8 +25,7 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
     display_name: '',
     module_id: '' as string | null,
     is_active: true,
-    display_order: 0,
-    guidance_phrase: ''
+    display_order: 0
   });
 
   const handleOpenCreate = () => {
@@ -36,8 +35,7 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
       display_name: '',
       module_id: null,
       is_active: true,
-      display_order: destinations.length,
-      guidance_phrase: ''
+      display_order: destinations.length
     });
     setDialogOpen(true);
   };
@@ -49,8 +47,7 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
       display_name: dest.display_name,
       module_id: dest.module_id,
       is_active: dest.is_active,
-      display_order: dest.display_order,
-      guidance_phrase: dest.guidance_phrase || ''
+      display_order: dest.display_order
     });
     setDialogOpen(true);
   };
@@ -59,8 +56,7 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
     const payload = {
       ...formData,
       unit_id: unitId,
-      module_id: formData.module_id || null,
-      guidance_phrase: formData.guidance_phrase?.trim() || null
+      module_id: formData.module_id || null
     };
     
     if (editingDestination) {
@@ -117,7 +113,6 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
                 <TableHead>Nome</TableHead>
                 <TableHead>Código</TableHead>
                 <TableHead>Módulo</TableHead>
-                <TableHead>Orientação</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -128,9 +123,6 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
                   <TableCell className="font-medium">{dest.display_name}</TableCell>
                   <TableCell className="text-muted-foreground">{dest.name}</TableCell>
                   <TableCell>{getModuleName(dest.module_id)}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">
-                    {dest.guidance_phrase || '—'}
-                  </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${dest.is_active ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                       {dest.is_active ? 'Ativo' : 'Inativo'}
@@ -194,18 +186,6 @@ export function DestinationsManager({ unitId }: DestinationsManagerProps) {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="guidance_phrase">Orientação de Destino (opcional)</Label>
-                <Input
-                  id="guidance_phrase"
-                  value={formData.guidance_phrase}
-                  onChange={(e) => setFormData({ ...formData, guidance_phrase: e.target.value })}
-                  placeholder="Ex: em caso de dúvidas siga a faixa branca"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Frase falada após o destino na chamada de voz. Ex: "em caso de dúvidas siga a faixa branca"
-                </p>
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="is_active">Destino Ativo</Label>

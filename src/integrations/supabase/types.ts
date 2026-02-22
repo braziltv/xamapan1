@@ -214,7 +214,6 @@ export type Database = {
           created_at: string
           display_name: string
           display_order: number
-          guidance_phrase: string | null
           id: string
           is_active: boolean
           module_id: string | null
@@ -225,7 +224,6 @@ export type Database = {
           created_at?: string
           display_name: string
           display_order?: number
-          guidance_phrase?: string | null
           id?: string
           is_active?: boolean
           module_id?: string | null
@@ -236,7 +234,6 @@ export type Database = {
           created_at?: string
           display_name?: string
           display_order?: number
-          guidance_phrase?: string | null
           id?: string
           is_active?: boolean
           module_id?: string | null
