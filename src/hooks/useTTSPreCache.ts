@@ -5,7 +5,7 @@ const DESTINATION_PHRASES = [
   'Por favor, dirija-se à Triagem',
   'Por favor, dirija-se à Sala de Eletrocardiograma',
   'Por favor, dirija-se à Sala de Curativos',
-  'Por favor, dirija-se à Sala do Raio X',
+  'Por favor, dirija-se ao Raio X',
   'Por favor, dirija-se à Enfermaria',
   'Por favor, dirija-se ao Consultório 1',
   'Por favor, dirija-se ao Consultório 2',

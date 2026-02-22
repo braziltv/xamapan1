@@ -2109,7 +2109,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       'Triagem': 'Por favor, dirija-se à Triagem',
       'Sala de Eletrocardiograma': 'Por favor, dirija-se à Sala de Eletrocardiograma',
       'Sala de Curativos': 'Por favor, dirija-se à Sala de Curativos',
-      'Sala do Raio X': 'Por favor, dirija-se à Sala do Raio X',
+      'Raio X': 'Por favor, dirija-se ao Raio X',
       'Enfermaria': 'Por favor, dirija-se à Enfermaria',
       'Consultório 1': 'Por favor, dirija-se ao Consultório 1',
       'Consultório 2': 'Por favor, dirija-se ao Consultório 2',
@@ -2143,8 +2143,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         'Consultório 1': 'em caso de dúvidas siga a faixa verde',
         'Consultório 2': 'em caso de dúvidas siga a faixa azul',
         'Enfermaria': 'em caso de dúvidas siga a faixa rosa',
-        'Sala do Raio X': 'em caso de dúvidas siga a faixa preta',
-        'Raio X': 'em caso de dúvidas siga a faixa preta',
+        'Raio X': 'em caso de dúvidas siga a faixa de cor prata',
       };
       const faixa = faixaMap[destination];
       if (faixa) {
@@ -2309,7 +2308,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         doctor: 'Consultório Médico',
         ecg: 'Sala de Eletrocardiograma',
         curativos: 'Sala de Curativos',
-        raiox: 'Sala do Raio X',
+        raiox: 'Raio X',
         enfermaria: 'Enfermaria',
       };
 
