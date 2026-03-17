@@ -176,7 +176,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const [cursorVisible, setCursorVisible] = useState(false);
-  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cursorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const lastTimeAnnouncementRef = useRef<number>(0);
