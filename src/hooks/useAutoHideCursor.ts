@@ -22,7 +22,7 @@ export function useAutoHideCursor({ timeout = 3000, enabled = true }: UseAutoHid
       return;
     }
 
-    let hideTimeout: NodeJS.Timeout;
+    let hideTimeout: ReturnType<typeof setTimeout>;
 
     const resetTimer = () => {
       showCursor();

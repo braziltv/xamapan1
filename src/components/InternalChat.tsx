@@ -74,7 +74,7 @@ export function InternalChat({ station }: InternalChatProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [notification, setNotification] = useState<{ sender: string; message: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const presenceChannelRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';

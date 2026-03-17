@@ -19,7 +19,7 @@ export const SimpleCaptcha = forwardRef<HTMLDivElement, SimpleCaptchaProps>(
     const [isValid, setIsValid] = useState(false);
     const [timeLeft, setTimeLeft] = useState(CAPTCHA_TIMEOUT_SECONDS);
     const [animationState, setAnimationState] = useState<'idle' | 'correct' | 'incorrect'>('idle');
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const generateCaptcha = useCallback(() => {
       const n1 = Math.floor(Math.random() * 10) + 1;

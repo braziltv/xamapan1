@@ -321,7 +321,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
   const fetchingRef = useRef(false);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const ROTATION_DURATION = 10000; // 10 seconds per city (increased from 6s)
   const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms (reduced from 50ms)
 
