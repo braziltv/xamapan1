@@ -83,7 +83,7 @@ export function useTVResolution(): TVResolution {
     updateResolution();
     
     // Listen to resize events with debounce
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     const handleResize = () => {
       clearTimeout(timeoutId);

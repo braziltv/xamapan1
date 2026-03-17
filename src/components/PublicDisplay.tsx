@@ -924,7 +924,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       });
 
     // Debounced reload to avoid multiple rapid reloads
-    let reloadTimeout: NodeJS.Timeout | null = null;
+    let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
     
     const triggerAutoReload = (reason: string) => {
       if (reloadTimeout) {

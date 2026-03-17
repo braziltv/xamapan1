@@ -7,7 +7,7 @@ const AUTO_RELOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
  * Só recarrega se não houver chamadas durante esse período
  */
 export function useTVAutoReload(enabled: boolean = true) {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastCallTimeRef = useRef<Date>(new Date());
 
   // Reset timer when a call happens

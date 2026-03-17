@@ -10,7 +10,7 @@ import { useEffect, useRef, useCallback } from 'react';
 export const usePreventSleep = (enabled: boolean = true) => {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Tenta adquirir Wake Lock API
   const requestWakeLock = useCallback(async () => {
