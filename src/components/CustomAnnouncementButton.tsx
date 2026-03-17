@@ -107,16 +107,11 @@ export function CustomAnnouncementButton({ className }: CustomAnnouncementButton
           <Textarea
             placeholder="Ex: Atenção! Atendimento encerra às 18h."
             value={text}
-            onChange={(e) => {
-              if (e.target.value.length <= 64) {
-                setText(e.target.value);
-              }
-            }}
+            onChange={(e) => setText(e.target.value)}
             className="min-h-[80px] resize-none"
-            maxLength={64}
           />
-          <p className={`text-xs text-right ${text.length >= 60 ? 'text-amber-600 font-medium' : 'text-muted-foreground'}`}>
-            {text.length}/64 caracteres
+          <p className="text-xs text-right text-muted-foreground">
+            {text.length} caracteres
           </p>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
