@@ -469,10 +469,42 @@ export function useCallPanel() {
     localStorage.setItem(STORAGE_KEYS.LAST_CALL_TIMESTAMP, JSON.stringify(callEvent));
   }, []);
 
-  const directPatient = useCallback((patientName: string, destination: string) => {
-    createCall(patientName, 'triage', destination);
-    triggerCallEvent({ name: patientName }, 'triage', destination);
-  }, [createCall, triggerCallEvent]);
+  const directPatient = useCallback(async (patientName: string, destination: string) => {
+    // Determine if destination is a Consultório (doctor)
+    const isConsultorio = destination.toLowerCase().includes('consultório');
+    
+    if (isConsultorio && unitName) {
+      // For Consultório destinations: complete existing records, then create doctor call
+      await supabase
+        .from('patient_calls')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('patient_name', patientName)
+        .eq('unit_name', unitName)
+        .in('status', ['waiting', 'active']);
+      
+      // Create the doctor call (active for TV announcement + queue)
+      createCall(patientName, 'doctor', destination);
+      triggerCallEvent({ name: patientName }, 'doctor', destination);
+      
+      // Update local patient state to waiting-doctor
+      setPatients(prev => prev.map(p => 
+        normalizePatientName(p.name) === normalizePatientName(patientName) && p.status !== 'attended'
+          ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' as const, calledAt: new Date() }
+          : p
+      ));
+      
+      // Clear from current call states
+      const patientId = patientsRef.current.find(p => normalizePatientName(p.name) === normalizePatientName(patientName) && p.status !== 'attended')?.id || '';
+      if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
+      
+      // Immediate refresh for real-time sync
+      refreshPatientsFromDB();
+    } else {
+      // For non-Consultório destinations, keep original behavior
+      createCall(patientName, 'triage', destination);
+      triggerCallEvent({ name: patientName }, 'triage', destination);
+    }
+  }, [createCall, triggerCallEvent, unitName, currentTriageCall, refreshPatientsFromDB]);
 
   const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal'): Promise<{ patient: Patient; isDuplicate: boolean }> => {
     const trimmedName = name.trim().replace(/\s+/g, ' ');
