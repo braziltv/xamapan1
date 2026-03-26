@@ -470,17 +470,11 @@ export function useCallPanel() {
   }, []);
 
   const directPatient = useCallback(async (patientName: string, destination: string) => {
-    // Determine the correct call_type based on destination
+    // Determine if destination is a Consultório (doctor)
     const isConsultorio = destination.toLowerCase().includes('consultório');
-    const callType = isConsultorio ? 'doctor' : 'triage';
     
     if (isConsultorio && unitName) {
-      // For Consultório destinations: complete existing records, then create doctor queue record
-      const patient = patientsRef.current.find(p => 
-        normalizePatientName(p.name) === normalizePatientName(patientName) && p.status !== 'attended'
-      );
-      
-      // Complete ALL existing records for this patient first
+      // For Consultório destinations: complete existing records, then create doctor call
       await supabase
         .from('patient_calls')
         .update({ status: 'completed', completed_at: new Date().toISOString() })
@@ -488,7 +482,7 @@ export function useCallPanel() {
         .eq('unit_name', unitName)
         .in('status', ['waiting', 'active']);
       
-      // Create the doctor call (active for TV announcement)
+      // Create the doctor call (active for TV announcement + queue)
       createCall(patientName, 'doctor', destination);
       triggerCallEvent({ name: patientName }, 'doctor', destination);
       
@@ -498,18 +492,19 @@ export function useCallPanel() {
           ? { ...p, status: 'waiting-doctor' as const, destination, calledBy: 'triage' as const, calledAt: new Date() }
           : p
       ));
-      clearPatientFromAllCurrentCalls(
-        patientsRef.current.find(p => normalizePatientName(p.name) === normalizePatientName(patientName) && p.status !== 'attended')?.id || ''
-      );
+      
+      // Clear from current call states
+      const patientId = patientsRef.current.find(p => normalizePatientName(p.name) === normalizePatientName(patientName) && p.status !== 'attended')?.id || '';
+      if (currentTriageCall?.id === patientId) setCurrentTriageCall(null);
       
       // Immediate refresh for real-time sync
       refreshPatientsFromDB();
     } else {
-      // For non-Consultório destinations (ECG, Curativos, etc.), keep original behavior
+      // For non-Consultório destinations, keep original behavior
       createCall(patientName, 'triage', destination);
       triggerCallEvent({ name: patientName }, 'triage', destination);
     }
-  }, [createCall, triggerCallEvent, unitName, clearPatientFromAllCurrentCalls, refreshPatientsFromDB]);
+  }, [createCall, triggerCallEvent, unitName, currentTriageCall, refreshPatientsFromDB]);
 
   const addPatient = useCallback(async (name: string, priority: 'normal' | 'priority' | 'emergency' = 'normal'): Promise<{ patient: Patient; isDuplicate: boolean }> => {
     const trimmedName = name.trim().replace(/\s+/g, ' ');
