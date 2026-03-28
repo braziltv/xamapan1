@@ -101,41 +101,38 @@ async function getAccessToken(credentials: any): Promise<string> {
   return data.access_token;
 }
 
-// Vozes disponíveis no Google Cloud TTS para pt-BR
+// Vozes disponíveis no Gemini 2.5 Flash TTS para pt-BR
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
-  // Vozes Chirp3-HD (mais naturais e humanas - última geração)
-  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Aoede', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Leda', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Zephyr', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
-  // Vozes Neural2 (legado)
-  'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
-  // Vozes Wavenet (legado)
-  'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
-  'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  // Vozes Standard (legado)
-  'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
-  'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
+  // Vozes Gemini 2.5 Flash TTS (mais baratas e naturais)
+  'Aoede': { languageCode: 'pt-BR', name: 'Aoede', ssmlGender: 'FEMALE' },
+  'Kore': { languageCode: 'pt-BR', name: 'Kore', ssmlGender: 'FEMALE' },
+  'Leda': { languageCode: 'pt-BR', name: 'Leda', ssmlGender: 'FEMALE' },
+  'Zephyr': { languageCode: 'pt-BR', name: 'Zephyr', ssmlGender: 'FEMALE' },
+  'Charon': { languageCode: 'pt-BR', name: 'Charon', ssmlGender: 'MALE' },
+  'Orus': { languageCode: 'pt-BR', name: 'Orus', ssmlGender: 'MALE' },
+  'Puck': { languageCode: 'pt-BR', name: 'Puck', ssmlGender: 'MALE' },
+  'Fenrir': { languageCode: 'pt-BR', name: 'Fenrir', ssmlGender: 'MALE' },
+  'Erinome': { languageCode: 'pt-BR', name: 'Erinome', ssmlGender: 'FEMALE' },
+  'Achernar': { languageCode: 'pt-BR', name: 'Achernar', ssmlGender: 'FEMALE' },
+  // Manter compatibilidade com nomes antigos (mapeiam para Gemini TTS)
+  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'Aoede', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'Kore', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'Leda', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'Zephyr', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'Charon', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'Orus', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'Puck', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'Fenrir', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'Erinome', ssmlGender: 'FEMALE' },
 };
 
-// Verificar se a voz é Chirp3-HD (não suporta pitch)
-function isChirp3HD(voiceName: string): boolean {
-  return voiceName.includes('Chirp3-HD');
-}
+// Gemini 2.5 Flash TTS endpoint (location-specific)
+const TTS_ENDPOINT = 'https://us-central1-texttospeech.googleapis.com/v1beta1/text:synthesize';
 
-// Vozes padrão por gênero (Chirp3-HD para máxima naturalidade)
+// Vozes padrão por gênero (Gemini 2.5 Flash TTS)
 const DEFAULT_VOICES = {
-  female: 'pt-BR-Chirp3-HD-Aoede',
-  male: 'pt-BR-Chirp3-HD-Charon'
+  female: 'Aoede',
+  male: 'Charon'
 };
 
 // Converter texto para SSML com pausas e entonação naturais
