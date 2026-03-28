@@ -126,7 +126,7 @@ async function getAccessToken(credentials: any): Promise<string> {
   return tokenData.access_token;
 }
 
-// Gera áudio usando Gemini 2.5 Flash TTS (Erinome - Female)
+// Gera áudio usando Google Cloud TTS - Chirp 3: HD (Erinome - Female)
 async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
   const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
   if (!credentialsJson) {
@@ -136,9 +136,9 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
   const credentials = JSON.parse(credentialsJson);
   const accessToken = await getAccessToken(credentials);
 
-  console.log(`[Gemini Flash TTS Erinome] Generating audio for: "${text}"`);
+  console.log(`[Chirp3-HD Erinome] Generating audio for: "${text}"`);
 
-  const response = await fetch('https://us-central1-texttospeech.googleapis.com/v1beta1/text:synthesize', {
+  const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -148,7 +148,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       input: { text },
       voice: {
         languageCode: 'pt-BR',
-        name: 'Erinome',
+        name: 'pt-BR-Chirp3-HD-Erinome',
       },
       audioConfig: {
         audioEncoding: 'MP3',
@@ -156,7 +156,6 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
         volumeGainDb: 2.0,
         effectsProfileId: ['large-home-entertainment-class-device'],
       },
-      model: 'gemini-2.5-flash-tts'
     }),
   });
 
