@@ -219,11 +219,11 @@ serve(async (req) => {
     const accessToken = await getAccessToken(credentials);
 
     // Taxa de fala: 0.95 para ritmo natural
-    const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
+    const finalRate = Math.min(speakingRate, 0.95);
 
-    // Chamar Google Cloud TTS API com SSML
+    // Chamar Gemini 2.5 Flash TTS API com SSML
     const ttsResponse = await fetch(
-      'https://texttospeech.googleapis.com/v1/text:synthesize',
+      TTS_ENDPOINT,
       {
         method: 'POST',
         headers: {
