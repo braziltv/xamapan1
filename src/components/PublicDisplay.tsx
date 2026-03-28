@@ -1313,29 +1313,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       try {
         // Get volume from localStorage (safe)
         const notificationVolume = readVolume('volume-notification', 1);
         
         const audio = new Audio('/sounds/notification.mp3');
         audio.volume = Math.min(1.0, notificationVolume);
+        let settled = false;
+        
+        // Safety timeout: 5 seconds max for notification sound
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.warn('⚠️ Notification sound timeout (5s) - continuing');
+            resolve();
+          }
+        }, 5000);
         
         audio.onended = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
           console.log('✅ Notification sound finished');
           resolve();
         };
-        audio.onerror = (err) => {
-          console.error('❌ Notification sound error:', err);
-          reject(new Error('Notification sound failed'));
+        audio.onerror = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          console.error('❌ Notification sound error - continuing');
+          resolve();
         };
         audio.play().catch((err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
           console.error('❌ Notification sound play() failed:', err);
-          reject(err);
+          resolve();
         });
       } catch (err) {
         console.error('❌ Failed to create notification sound:', err);
-        reject(err);
+        resolve();
       }
     });
   }, []);
@@ -1436,25 +1455,61 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         audio.volume = Math.min(1.0, volume);
+        let settled = false;
+        
+        // Safety timeout: if audio doesn't finish in 20 seconds, resolve anyway
+        const safetyTimer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.warn('⚠️ playSimpleAudio safety timeout (20s) - resolving anyway');
+            try { audio.pause(); } catch {}
+            URL.revokeObjectURL(url);
+            resolve();
+          }
+        }, 20000);
         
         audio.oncanplaythrough = () => {
           console.log('✅ Audio can play through, duration:', audio.duration);
+          // If we know the duration, set a tighter timeout
+          if (audio.duration && audio.duration > 0 && audio.duration < 20) {
+            clearTimeout(safetyTimer);
+            setTimeout(() => {
+              if (!settled) {
+                settled = true;
+                console.warn('⚠️ playSimpleAudio duration timeout - resolving');
+                try { audio.pause(); } catch {}
+                URL.revokeObjectURL(url);
+                resolve();
+              }
+            }, (audio.duration + 2) * 1000); // duration + 2s buffer
+          }
         };
         
         audio.onended = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.log('✅ Simple audio playback finished');
           resolve();
         };
         audio.onerror = (err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.error('❌ Simple audio playback error:', err, audio.error);
-          reject(new Error(`Audio playback failed: ${audio.error?.message || 'unknown error'}`));
+          // Resolve instead of reject to avoid blocking the queue
+          resolve();
         };
         audio.play().catch((err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.error('❌ Simple audio play() failed:', err);
-          reject(err);
+          // Resolve instead of reject to avoid blocking the queue
+          resolve();
         });
       });
     },
@@ -2304,10 +2359,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         return;
       }
       
-      // Check if isSpeakingRef is stuck (more than 45 seconds since last call)
+      // Check if isSpeakingRef is stuck (more than 20 seconds since last call)
       const lastSpeakTime = lastSpeakCallRef.current;
-      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 45000) {
-        console.warn('⚠️ isSpeakingRef was stuck for over 45s, forcing reset');
+      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 20000) {
+        console.warn('⚠️ isSpeakingRef was stuck for over 20s, forcing reset');
         isSpeakingRef.current = false;
       }
       
@@ -2347,13 +2402,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       isSpeakingRef.current = true;
       console.log('🎤 isSpeakingRef set to TRUE');
 
-      // Safety timeout: reset isSpeakingRef after 30 seconds max (in case of errors)
+      // Safety timeout: reset isSpeakingRef after 25 seconds max (in case of errors)
       const safetyTimeout = setTimeout(() => {
         if (isSpeakingRef.current) {
-          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
+          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 25s');
           isSpeakingRef.current = false;
         }
-      }, 30000);
+      }, 25000);
 
       // Atualiza a tela somente agora (áudio já está pronto)
       if (caller === 'triage') {
