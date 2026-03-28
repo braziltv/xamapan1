@@ -175,7 +175,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
     bytes[i] = binaryString.charCodeAt(i);
   }
   
-  console.log(`[Chirp3-HD Erinome] Generated ${bytes.length} bytes for: "${text}"`);
+  console.log(`[Gemini Flash TTS Erinome] Generated ${bytes.length} bytes for: "${text}"`);
   return bytes.buffer;
 }
 

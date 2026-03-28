@@ -89,13 +89,13 @@ async function getAccessToken(credentials: any): Promise<string> {
   return data.access_token;
 }
 
-async function generateAudioWithChirp3Kore(text: string, credentials: any): Promise<ArrayBuffer> {
+async function generateAudioWithGeminiTTS(text: string, credentials: any): Promise<ArrayBuffer> {
   const accessToken = await getAccessToken(credentials);
 
-  console.log(`[generate-marketing-audio] Gerando áudio com voz ${MARKETING_VOICE}: "${text.substring(0, 50)}..."`);
+  console.log(`[generate-marketing-audio] Gerando áudio com Gemini Flash TTS ${MARKETING_VOICE}: "${text.substring(0, 50)}..."`);
 
   const response = await fetch(
-    'https://texttospeech.googleapis.com/v1/text:synthesize',
+    TTS_ENDPOINT,
     {
       method: 'POST',
       headers: {
@@ -111,10 +111,9 @@ async function generateAudioWithChirp3Kore(text: string, credentials: any): Prom
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.96, // Natural conversational pacing
-          // Note: Chirp3-HD voices don't support pitch parameter
-          volumeGainDb: 2.5, // Enhanced volume for clarity in public spaces
-          effectsProfileId: ['large-home-entertainment-class-device'] // Optimized audio profile
+          speakingRate: 0.96,
+          volumeGainDb: 2.5,
+          effectsProfileId: ['large-home-entertainment-class-device']
         }
       })
     }
