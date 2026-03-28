@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Voice for marketing: Chirp 3 HD Kore (pt-BR)
-const MARKETING_VOICE = 'pt-BR-Chirp3-HD-Kore';
+// Voice for marketing: Neural2-C (pt-BR, Female - 10x mais barato)
+const MARKETING_VOICE = 'pt-BR-Neural2-C';
 
 // Helper functions for JWT creation
 function base64UrlEncode(data: string | Uint8Array): string {
