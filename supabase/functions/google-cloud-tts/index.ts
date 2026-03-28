@@ -215,9 +215,8 @@ serve(async (req) => {
     const credentials = JSON.parse(credentialsJson);
     const accessToken = await getAccessToken(credentials);
 
-    // Taxa de fala: 0.95 para ritmo natural
-    const useChirp3 = isChirp3HD(selectedVoiceName);
-    const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
+    // Taxa de fala ajustada para anúncio
+    const finalRate = speakingRate * 0.95;
 
     // Chamar Google Cloud TTS API com SSML
     const ttsResponse = await fetch(
