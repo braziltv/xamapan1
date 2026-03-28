@@ -2383,13 +2383,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       isSpeakingRef.current = true;
       console.log('🎤 isSpeakingRef set to TRUE');
 
-      // Safety timeout: reset isSpeakingRef after 30 seconds max (in case of errors)
+      // Safety timeout: reset isSpeakingRef after 25 seconds max (in case of errors)
       const safetyTimeout = setTimeout(() => {
         if (isSpeakingRef.current) {
-          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
+          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 25s');
           isSpeakingRef.current = false;
         }
-      }, 30000);
+      }, 25000);
 
       // Atualiza a tela somente agora (áudio já está pronto)
       if (caller === 'triage') {
