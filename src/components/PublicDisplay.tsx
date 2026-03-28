@@ -1436,25 +1436,61 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         audio.volume = Math.min(1.0, volume);
+        let settled = false;
+        
+        // Safety timeout: if audio doesn't finish in 20 seconds, resolve anyway
+        const safetyTimer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.warn('⚠️ playSimpleAudio safety timeout (20s) - resolving anyway');
+            try { audio.pause(); } catch {}
+            URL.revokeObjectURL(url);
+            resolve();
+          }
+        }, 20000);
         
         audio.oncanplaythrough = () => {
           console.log('✅ Audio can play through, duration:', audio.duration);
+          // If we know the duration, set a tighter timeout
+          if (audio.duration && audio.duration > 0 && audio.duration < 20) {
+            clearTimeout(safetyTimer);
+            setTimeout(() => {
+              if (!settled) {
+                settled = true;
+                console.warn('⚠️ playSimpleAudio duration timeout - resolving');
+                try { audio.pause(); } catch {}
+                URL.revokeObjectURL(url);
+                resolve();
+              }
+            }, (audio.duration + 2) * 1000); // duration + 2s buffer
+          }
         };
         
         audio.onended = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.log('✅ Simple audio playback finished');
           resolve();
         };
         audio.onerror = (err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.error('❌ Simple audio playback error:', err, audio.error);
-          reject(new Error(`Audio playback failed: ${audio.error?.message || 'unknown error'}`));
+          // Resolve instead of reject to avoid blocking the queue
+          resolve();
         };
         audio.play().catch((err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(safetyTimer);
           URL.revokeObjectURL(url);
           console.error('❌ Simple audio play() failed:', err);
-          reject(err);
+          // Resolve instead of reject to avoid blocking the queue
+          resolve();
         });
       });
     },
