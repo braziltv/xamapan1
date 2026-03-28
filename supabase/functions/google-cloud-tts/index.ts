@@ -236,7 +236,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
-            ...(useChirp3 ? {} : { pitch: -1.2 }), // Tom mais grave e acolhedor para Neural2
+            // Gemini 2.5 Flash TTS não suporta pitch
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
           }
