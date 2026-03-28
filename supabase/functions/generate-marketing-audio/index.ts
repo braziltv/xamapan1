@@ -7,9 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Voice for marketing: Gemini 2.5 Flash TTS Kore (pt-BR)
-const MARKETING_VOICE = 'Kore';
-const TTS_ENDPOINT = 'https://us-central1-texttospeech.googleapis.com/v1beta1/text:synthesize';
+// Voice for marketing: Chirp 3 HD Kore (pt-BR)
+const MARKETING_VOICE = 'pt-BR-Chirp3-HD-Kore';
 
 // Helper functions for JWT creation
 function base64UrlEncode(data: string | Uint8Array): string {
