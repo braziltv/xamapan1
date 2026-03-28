@@ -148,7 +148,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       input: { text },
       voice: {
         languageCode: 'pt-BR',
-        name: 'Erinome', // Gemini 2.5 Flash TTS - Erinome (Female)
+        name: 'Erinome',
       },
       audioConfig: {
         audioEncoding: 'MP3',
@@ -156,6 +156,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
         volumeGainDb: 2.0,
         effectsProfileId: ['large-home-entertainment-class-device'],
       },
+      model: 'gemini-2.5-flash-tts'
     }),
   });
 

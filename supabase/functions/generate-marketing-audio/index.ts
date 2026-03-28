@@ -114,7 +114,8 @@ async function generateAudioWithGeminiTTS(text: string, credentials: any): Promi
           speakingRate: 0.96,
           volumeGainDb: 2.5,
           effectsProfileId: ['large-home-entertainment-class-device']
-        }
+        },
+        model: 'gemini-2.5-flash-tts'
       })
     }
   );

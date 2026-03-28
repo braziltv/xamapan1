@@ -118,7 +118,8 @@ async function generateTTSAudio(text: string, accessToken: string): Promise<Uint
         speakingRate: FIXED_SPEAKING_RATE,
         volumeGainDb: 1.0,
         effectsProfileId: ['large-home-entertainment-class-device']
-      }
+      },
+      model: 'gemini-2.5-flash-tts'
     })
   });
 
