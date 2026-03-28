@@ -14,7 +14,7 @@ const DESTINATION_PHRASES = [
   'Por favor, dirija-se ao Consultório Médico 2',
 ];
 
-const PRECACHE_KEY = 'tts_phrases_precached_google';
+const PRECACHE_KEY = 'tts_phrases_precached_neural2';
 
 export function useTTSPreCache() {
   const isPreCachingRef = useRef(false);
