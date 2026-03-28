@@ -236,10 +236,10 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
-            // Gemini 2.5 Flash TTS não suporta pitch
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
-          }
+          },
+          model: 'gemini-2.5-flash-tts'
         })
       }
     );
