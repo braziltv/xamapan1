@@ -126,7 +126,7 @@ async function getAccessToken(credentials: any): Promise<string> {
   return tokenData.access_token;
 }
 
-// Gera áudio usando Google Cloud TTS - Chirp 3: HD (Erinome - Female)
+// Gera áudio usando Google Cloud TTS - Neural2 (Female, mais barato)
 async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
   const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
   if (!credentialsJson) {
@@ -136,7 +136,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
   const credentials = JSON.parse(credentialsJson);
   const accessToken = await getAccessToken(credentials);
 
-  console.log(`[Chirp3-HD Erinome] Generating audio for: "${text}"`);
+  console.log(`[Neural2-A] Generating audio for: "${text}"`);
 
   const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
     method: 'POST',
@@ -148,11 +148,12 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       input: { text },
       voice: {
         languageCode: 'pt-BR',
-        name: 'pt-BR-Chirp3-HD-Erinome',
+        name: 'pt-BR-Neural2-A',
       },
       audioConfig: {
         audioEncoding: 'MP3',
         speakingRate: 0.90,
+        pitch: -1.0,
         volumeGainDb: 2.0,
         effectsProfileId: ['large-home-entertainment-class-device'],
       },
@@ -175,7 +176,7 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
     bytes[i] = binaryString.charCodeAt(i);
   }
   
-  console.log(`[Chirp3-HD Erinome] Generated ${bytes.length} bytes for: "${text}"`);
+  console.log(`[Neural2-A] Generated ${bytes.length} bytes for: "${text}"`);
   return bytes.buffer;
 }
 

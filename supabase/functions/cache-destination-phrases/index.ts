@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Fixed voice for patient calls (Chirp3-HD = voz mais natural e humana)
-const FIXED_VOICE_ID = 'pt-BR-Chirp3-HD-Aoede';
+// Neural2 voice for patient calls (10x mais barato que Chirp3-HD)
+const FIXED_VOICE_ID = 'pt-BR-Neural2-A';
 const FIXED_SPEAKING_RATE = 0.95;
 
 // Generate destination phrase with correct article (ao/à)
@@ -115,6 +115,7 @@ async function generateTTSAudio(text: string, accessToken: string): Promise<Uint
       audioConfig: {
         audioEncoding: 'MP3',
         speakingRate: FIXED_SPEAKING_RATE,
+        pitch: -1.2,
         volumeGainDb: 1.0,
         effectsProfileId: ['large-home-entertainment-class-device']
       }

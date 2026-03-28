@@ -14,7 +14,7 @@ const DESTINATION_PHRASES = [
   'Por favor, dirija-se ao Consultório Médico 2',
 ];
 
-const PRECACHE_KEY = 'tts_phrases_precached_google';
+const PRECACHE_KEY = 'tts_phrases_precached_neural2';
 
 export function useTTSPreCache() {
   const isPreCachingRef = useRef(false);
@@ -22,7 +22,7 @@ export function useTTSPreCache() {
   // Pré-cachear uma frase de destino via Google Cloud TTS
   const preCacheDestinationPhrase = useCallback(async (phrase: string): Promise<boolean> => {
     try {
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Chirp3-HD-Aoede';
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
@@ -56,7 +56,7 @@ export function useTTSPreCache() {
   // Pré-cachear o nome de um paciente via Google Cloud TTS
   const preCachePatientName = useCallback(async (name: string): Promise<boolean> => {
     try {
-      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Chirp3-HD-Aoede';
+      const configuredVoice = localStorage.getItem('googleVoiceFemale') || 'pt-BR-Neural2-A';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-cloud-tts`,
