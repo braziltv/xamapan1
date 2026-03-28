@@ -481,7 +481,7 @@ serve(async (req) => {
 
     // Default: just generate audio and return it
     if (text) {
-      const audioBuffer = await generateAudioWithChirp3Kore(text, credentials);
+      const audioBuffer = await generateAudioWithGeminiTTS(text, credentials);
       
       return new Response(audioBuffer, {
         headers: {
