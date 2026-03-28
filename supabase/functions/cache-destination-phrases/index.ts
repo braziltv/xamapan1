@@ -6,10 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Gemini 2.5 Flash TTS voice (mais barata e natural)
-const FIXED_VOICE_ID = 'Aoede';
+// Fixed voice for patient calls (Chirp3-HD = voz mais natural e humana)
+const FIXED_VOICE_ID = 'pt-BR-Chirp3-HD-Aoede';
 const FIXED_SPEAKING_RATE = 0.95;
-const TTS_ENDPOINT = 'https://us-central1-texttospeech.googleapis.com/v1beta1/text:synthesize';
 
 // Generate destination phrase with correct article (ao/à)
 function generateDestinationPhrase(destinationName: string): string {
