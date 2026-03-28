@@ -341,7 +341,7 @@ serve(async (req) => {
         throw new Error('announcementId and text are required');
       }
 
-      const audioBuffer = await generateAudioWithChirp3Kore(text, credentials);
+      const audioBuffer = await generateAudioWithGeminiTTS(text, credentials);
       const cacheFileName = `announcements/announcement_${announcementId}.mp3`;
 
       // Upload to storage
