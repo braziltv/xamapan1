@@ -115,6 +115,7 @@ async function generateTTSAudio(text: string, accessToken: string): Promise<Uint
       audioConfig: {
         audioEncoding: 'MP3',
         speakingRate: FIXED_SPEAKING_RATE,
+        pitch: -1.2,
         volumeGainDb: 1.0,
         effectsProfileId: ['large-home-entertainment-class-device']
       }

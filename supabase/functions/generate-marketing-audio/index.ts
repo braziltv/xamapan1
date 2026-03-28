@@ -111,6 +111,7 @@ async function generateAudioWithChirp3Kore(text: string, credentials: any): Prom
         audioConfig: {
           audioEncoding: 'MP3',
           speakingRate: 0.96,
+          pitch: -1.0,
           volumeGainDb: 2.5,
           effectsProfileId: ['large-home-entertainment-class-device']
         }

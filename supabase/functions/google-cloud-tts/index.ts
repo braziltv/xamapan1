@@ -233,7 +233,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
-            ...(useChirp3 ? {} : { pitch: -1.2 }),
+            pitch: -1.2, // Tom mais grave e acolhedor
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
           }
