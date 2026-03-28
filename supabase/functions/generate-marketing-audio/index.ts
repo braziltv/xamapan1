@@ -426,7 +426,7 @@ serve(async (req) => {
         }
 
         try {
-          const audioBuffer = await generateAudioWithChirp3Kore(announcement.text_content, credentials);
+          const audioBuffer = await generateAudioWithGeminiTTS(announcement.text_content, credentials);
           const cacheFileName = `announcements/announcement_${announcement.id}.mp3`;
 
           const { error: uploadError } = await supabase.storage
