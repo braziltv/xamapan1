@@ -215,11 +215,12 @@ serve(async (req) => {
     const accessToken = await getAccessToken(credentials);
 
     // Taxa de fala: 0.95 para ritmo natural
-    const finalRate = Math.min(speakingRate, 0.95);
+    const useChirp3 = isChirp3HD(selectedVoiceName);
+    const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
 
-    // Chamar Gemini 2.5 Flash TTS API com SSML
+    // Chamar Google Cloud TTS API com SSML
     const ttsResponse = await fetch(
-      TTS_ENDPOINT,
+      'https://texttospeech.googleapis.com/v1/text:synthesize',
       {
         method: 'POST',
         headers: {
@@ -232,10 +233,10 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
+            ...(useChirp3 ? {} : { pitch: -1.2 }),
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
-          },
-          model: 'gemini-2.5-flash-tts'
+          }
         })
       }
     );

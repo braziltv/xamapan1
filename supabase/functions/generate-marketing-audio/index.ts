@@ -88,13 +88,13 @@ async function getAccessToken(credentials: any): Promise<string> {
   return data.access_token;
 }
 
-async function generateAudioWithGeminiTTS(text: string, credentials: any): Promise<ArrayBuffer> {
+async function generateAudioWithChirp3Kore(text: string, credentials: any): Promise<ArrayBuffer> {
   const accessToken = await getAccessToken(credentials);
 
-  console.log(`[generate-marketing-audio] Gerando áudio com Gemini Flash TTS ${MARKETING_VOICE}: "${text.substring(0, 50)}..."`);
+  console.log(`[generate-marketing-audio] Gerando áudio com voz ${MARKETING_VOICE}: "${text.substring(0, 50)}..."`);
 
   const response = await fetch(
-    TTS_ENDPOINT,
+    'https://texttospeech.googleapis.com/v1/text:synthesize',
     {
       method: 'POST',
       headers: {
@@ -113,8 +113,7 @@ async function generateAudioWithGeminiTTS(text: string, credentials: any): Promi
           speakingRate: 0.96,
           volumeGainDb: 2.5,
           effectsProfileId: ['large-home-entertainment-class-device']
-        },
-        model: 'gemini-2.5-flash-tts'
+        }
       })
     }
   );
