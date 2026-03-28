@@ -14,7 +14,7 @@ const DESTINATION_PHRASES = [
   'Por favor, dirija-se ao Consultório Médico 2',
 ];
 
-const PRECACHE_KEY = 'tts_phrases_precached_gemini_flash';
+const PRECACHE_KEY = 'tts_phrases_precached_google';
 
 export function useTTSPreCache() {
   const isPreCachingRef = useRef(false);
