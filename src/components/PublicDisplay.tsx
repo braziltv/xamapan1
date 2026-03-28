@@ -1313,29 +1313,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const playNotificationSound = useCallback(() => {
     console.log('playNotificationSound called');
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       try {
         // Get volume from localStorage (safe)
         const notificationVolume = readVolume('volume-notification', 1);
         
         const audio = new Audio('/sounds/notification.mp3');
         audio.volume = Math.min(1.0, notificationVolume);
+        let settled = false;
+        
+        // Safety timeout: 5 seconds max for notification sound
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.warn('⚠️ Notification sound timeout (5s) - continuing');
+            resolve();
+          }
+        }, 5000);
         
         audio.onended = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
           console.log('✅ Notification sound finished');
           resolve();
         };
-        audio.onerror = (err) => {
-          console.error('❌ Notification sound error:', err);
-          reject(new Error('Notification sound failed'));
+        audio.onerror = () => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          console.error('❌ Notification sound error - continuing');
+          resolve();
         };
         audio.play().catch((err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
           console.error('❌ Notification sound play() failed:', err);
-          reject(err);
+          resolve();
         });
       } catch (err) {
         console.error('❌ Failed to create notification sound:', err);
-        reject(err);
+        resolve();
       }
     });
   }, []);
