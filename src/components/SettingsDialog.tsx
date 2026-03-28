@@ -56,29 +56,6 @@ const AUTO_NIGHT_KEY = 'autoNightModeEnabled';
 const GOOGLE_VOICE_FEMALE_KEY = 'googleVoiceFemale';
 const GOOGLE_VOICE_MALE_KEY = 'googleVoiceMale';
 
-// Migração automática: Chirp3-HD → Neural2
-const VOICE_MIGRATION: Record<string, string> = {
-  'pt-BR-Chirp3-HD-Aoede': 'pt-BR-Neural2-A',
-  'pt-BR-Chirp3-HD-Erinome': 'pt-BR-Neural2-A',
-  'pt-BR-Chirp3-HD-Kore': 'pt-BR-Neural2-C',
-  'pt-BR-Chirp3-HD-Charon': 'pt-BR-Neural2-B',
-  'Aoede': 'pt-BR-Neural2-A',
-  'Kore': 'pt-BR-Neural2-C',
-  'Charon': 'pt-BR-Neural2-B',
-};
-
-function migrateVoice(key: string, fallback: string): string {
-  const current = localStorage.getItem(key);
-  if (!current) return fallback;
-  const migrated = VOICE_MIGRATION[current];
-  if (migrated) {
-    localStorage.setItem(key, migrated);
-    console.log(`[Voice Migration] ${key}: ${current} → ${migrated}`);
-    return migrated;
-  }
-  return current;
-}
-
 export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogProps) {
   const [testName, setTestName] = useState('Maria da Silva');
   const [testDestination, setTestDestination] = useState('Triagem');
@@ -91,12 +68,12 @@ export function SettingsDialog({ trigger, open, onOpenChange }: SettingsDialogPr
   const [volumes, setVolumes] = useState<VolumeSettings>(DEFAULT_VOLUMES);
   const [autoNightMode, setAutoNightMode] = useState(() => localStorage.getItem(AUTO_NIGHT_KEY) !== 'false');
   
-  // Google Cloud TTS voice settings (with auto-migration from Chirp3-HD)
+  // Google Cloud TTS voice settings (for hour announcements)
   const [googleVoiceFemale, setGoogleVoiceFemale] = useState(() => 
-    migrateVoice(GOOGLE_VOICE_FEMALE_KEY, 'pt-BR-Neural2-A')
+    localStorage.getItem(GOOGLE_VOICE_FEMALE_KEY) || 'pt-BR-Neural2-A'
   );
   const [googleVoiceMale, setGoogleVoiceMale] = useState(() => 
-    migrateVoice(GOOGLE_VOICE_MALE_KEY, 'pt-BR-Neural2-B')
+    localStorage.getItem(GOOGLE_VOICE_MALE_KEY) || 'pt-BR-Neural2-B'
   );
 
   // Load volumes from localStorage on mount

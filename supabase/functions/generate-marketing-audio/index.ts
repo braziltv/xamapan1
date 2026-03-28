@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Voice for marketing: Neural2-C (pt-BR, Female - 10x mais barato)
-const MARKETING_VOICE = 'pt-BR-Neural2-C';
+// Voice for marketing: Chirp 3 HD Kore (pt-BR)
+const MARKETING_VOICE = 'pt-BR-Chirp3-HD-Kore';
 
 // Helper functions for JWT creation
 function base64UrlEncode(data: string | Uint8Array): string {
@@ -110,10 +110,10 @@ async function generateAudioWithChirp3Kore(text: string, credentials: any): Prom
         },
         audioConfig: {
           audioEncoding: 'MP3',
-          speakingRate: 0.96,
-          pitch: -1.0,
-          volumeGainDb: 2.5,
-          effectsProfileId: ['large-home-entertainment-class-device']
+          speakingRate: 0.96, // Natural conversational pacing
+          // Note: Chirp3-HD voices don't support pitch parameter
+          volumeGainDb: 2.5, // Enhanced volume for clarity in public spaces
+          effectsProfileId: ['large-home-entertainment-class-device'] // Optimized audio profile
         }
       })
     }

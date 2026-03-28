@@ -103,33 +103,39 @@ async function getAccessToken(credentials: any): Promise<string> {
 
 // Vozes disponíveis no Google Cloud TTS para pt-BR
 const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: string }> = {
-  // Vozes Neural2 (custo-benefício - $16/1M chars vs $160 do Chirp3-HD)
+  // Vozes Chirp3-HD (mais naturais e humanas - última geração)
+  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Aoede', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Leda': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Leda', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Zephyr': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Zephyr', ssmlGender: 'FEMALE' },
+  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Orus': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Orus', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
+  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
+  // Vozes Neural2 (legado)
   'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
   'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  // Vozes WaveNet (mesmo preço do Neural2)
+  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
+  // Vozes Wavenet (legado)
   'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
   'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
   'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  // Vozes Standard (mais baratas - $4/1M chars)
+  // Vozes Standard (legado)
   'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
   'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
   'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
-  // Compatibilidade com nomes antigos (mapeiam para Neural2)
-  'pt-BR-Chirp3-HD-Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Kore': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  'pt-BR-Chirp3-HD-Charon': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
-  'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'Kore': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  'Charon': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
-  'Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
 };
 
-// Vozes padrão por gênero (Neural2 - melhor custo-benefício)
+// Verificar se a voz é Chirp3-HD (não suporta pitch)
+function isChirp3HD(voiceName: string): boolean {
+  return voiceName.includes('Chirp3-HD');
+}
+
+// Vozes padrão por gênero (Chirp3-HD para máxima naturalidade)
 const DEFAULT_VOICES = {
-  female: 'pt-BR-Neural2-A',
-  male: 'pt-BR-Neural2-B'
+  female: 'pt-BR-Chirp3-HD-Aoede',
+  male: 'pt-BR-Chirp3-HD-Charon'
 };
 
 // Converter texto para SSML com pausas e entonação naturais
@@ -201,11 +207,13 @@ serve(async (req) => {
     }
     
     const selectedVoice = VOICES[selectedVoiceName];
+    const useChirp3 = isChirp3HD(selectedVoiceName);
 
     // Converter texto para SSML com pausas naturais para soar mais humano
     const ssmlText = convertToNaturalSSML(finalText);
 
     console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName} (SSML)`);
+
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
     if (!credentialsJson) {
@@ -215,8 +223,8 @@ serve(async (req) => {
     const credentials = JSON.parse(credentialsJson);
     const accessToken = await getAccessToken(credentials);
 
-    // Taxa de fala ajustada para anúncio
-    const finalRate = speakingRate * 0.95;
+    // Taxa de fala: 0.95 para ritmo natural
+    const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
 
     // Chamar Google Cloud TTS API com SSML
     const ttsResponse = await fetch(
@@ -233,7 +241,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
-            pitch: -1.2, // Tom mais grave e acolhedor
+            ...(useChirp3 ? {} : { pitch: -1.2 }), // Tom mais grave e acolhedor para Neural2
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
           }
