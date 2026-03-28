@@ -204,13 +204,11 @@ serve(async (req) => {
     }
     
     const selectedVoice = VOICES[selectedVoiceName];
-    const useChirp3 = isChirp3HD(selectedVoiceName);
 
     // Converter texto para SSML com pausas naturais para soar mais humano
     const ssmlText = convertToNaturalSSML(finalText);
 
-    console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName} (SSML)`);
-
+    console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoice.name} (Gemini 2.5 Flash TTS)`);
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
     if (!credentialsJson) {
