@@ -148,14 +148,13 @@ async function generateAudioWithGoogle(text: string): Promise<ArrayBuffer> {
       input: { text },
       voice: {
         languageCode: 'pt-BR',
-        name: 'pt-BR-Chirp3-HD-Erinome', // Chirp 3: HD - Erinome (Female)
+        name: 'pt-BR-Chirp3-HD-Erinome',
       },
       audioConfig: {
         audioEncoding: 'MP3',
-        speakingRate: 0.90, // Slower for clear, natural time announcements
-        // Note: Chirp3-HD voices don't support pitch parameter
-        volumeGainDb: 2.0, // Enhanced clarity for TV speakers
-        effectsProfileId: ['large-home-entertainment-class-device'], // Optimized for TV/speakers
+        speakingRate: 0.90,
+        volumeGainDb: 2.0,
+        effectsProfileId: ['large-home-entertainment-class-device'],
       },
     }),
   });

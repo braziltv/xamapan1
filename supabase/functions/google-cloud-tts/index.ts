@@ -113,18 +113,11 @@ const VOICES: Record<string, { languageCode: string; name: string; ssmlGender: s
   'pt-BR-Chirp3-HD-Puck': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Puck', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Fenrir': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Fenrir', ssmlGender: 'MALE' },
   'pt-BR-Chirp3-HD-Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
-  // Vozes Neural2 (legado)
-  'pt-BR-Neural2-A': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-C': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-C', ssmlGender: 'FEMALE' },
-  'pt-BR-Neural2-B': { languageCode: 'pt-BR', name: 'pt-BR-Neural2-B', ssmlGender: 'MALE' },
-  // Vozes Wavenet (legado)
-  'pt-BR-Wavenet-A': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Wavenet-B': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-B', ssmlGender: 'MALE' },
-  'pt-BR-Wavenet-C': { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-C', ssmlGender: 'FEMALE' },
-  // Vozes Standard (legado)
-  'pt-BR-Standard-A': { languageCode: 'pt-BR', name: 'pt-BR-Standard-A', ssmlGender: 'FEMALE' },
-  'pt-BR-Standard-B': { languageCode: 'pt-BR', name: 'pt-BR-Standard-B', ssmlGender: 'MALE' },
-  'pt-BR-Standard-C': { languageCode: 'pt-BR', name: 'pt-BR-Standard-C', ssmlGender: 'FEMALE' },
+  // Vozes Gemini TTS (mapeiam para Chirp3-HD via REST API)
+  'Aoede': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Aoede', ssmlGender: 'FEMALE' },
+  'Kore': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Kore', ssmlGender: 'FEMALE' },
+  'Charon': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Charon', ssmlGender: 'MALE' },
+  'Erinome': { languageCode: 'pt-BR', name: 'pt-BR-Chirp3-HD-Erinome', ssmlGender: 'FEMALE' },
 };
 
 // Verificar se a voz é Chirp3-HD (não suporta pitch)
@@ -207,13 +200,11 @@ serve(async (req) => {
     }
     
     const selectedVoice = VOICES[selectedVoiceName];
-    const useChirp3 = isChirp3HD(selectedVoiceName);
 
     // Converter texto para SSML com pausas naturais para soar mais humano
     const ssmlText = convertToNaturalSSML(finalText);
 
     console.log(`[google-cloud-tts] Gerando áudio para: "${finalText}" com voz ${selectedVoiceName} (SSML)`);
-
     // Carregar credenciais
     const credentialsJson = Deno.env.get('GOOGLE_CLOUD_CREDENTIALS');
     if (!credentialsJson) {
@@ -224,6 +215,7 @@ serve(async (req) => {
     const accessToken = await getAccessToken(credentials);
 
     // Taxa de fala: 0.95 para ritmo natural
+    const useChirp3 = isChirp3HD(selectedVoiceName);
     const finalRate = useChirp3 ? Math.min(speakingRate, 0.95) : speakingRate * 0.95;
 
     // Chamar Google Cloud TTS API com SSML
@@ -241,7 +233,7 @@ serve(async (req) => {
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: finalRate,
-            ...(useChirp3 ? {} : { pitch: -1.2 }), // Tom mais grave e acolhedor para Neural2
+            ...(useChirp3 ? {} : { pitch: -1.2 }),
             volumeGainDb: 1.0,
             effectsProfileId: ['large-home-entertainment-class-device']
           }
