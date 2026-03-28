@@ -2340,10 +2340,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         return;
       }
       
-      // Check if isSpeakingRef is stuck (more than 45 seconds since last call)
+      // Check if isSpeakingRef is stuck (more than 20 seconds since last call)
       const lastSpeakTime = lastSpeakCallRef.current;
-      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 45000) {
-        console.warn('⚠️ isSpeakingRef was stuck for over 45s, forcing reset');
+      if (isSpeakingRef.current && lastSpeakTime > 0 && now - lastSpeakTime > 20000) {
+        console.warn('⚠️ isSpeakingRef was stuck for over 20s, forcing reset');
         isSpeakingRef.current = false;
       }
       
