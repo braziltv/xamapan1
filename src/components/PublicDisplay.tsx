@@ -1492,6 +1492,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 text: cleanName,
                 voiceName: FIXED_VOICE_ID,
                 speakingRate: FIXED_SPEAKING_RATE,
+                cacheType: 'name',
               }),
             }),
             fetch(cachedDestinationUrl)
