@@ -282,7 +282,7 @@ serve(async (req) => {
     // cacheType can be: 'name' (60min), 'announcement' (24h=1440min), 'none' (skip cache)
     if (cacheType === 'name') {
       cacheFolder = 'names';
-      cacheTTLMinutes = 60;
+      cacheTTLMinutes = 10080; // 7 days
     } else if (cacheType === 'announcement') {
       cacheFolder = 'announcements';
       cacheTTLMinutes = 1440; // 24 hours
