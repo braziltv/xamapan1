@@ -291,7 +291,7 @@ serve(async (req) => {
       // If text is longer, cache as announcement
       if (finalText.length <= 60) {
         cacheFolder = 'names';
-        cacheTTLMinutes = 60;
+        cacheTTLMinutes = 10080; // 7 days
       } else {
         cacheFolder = 'announcements';
         cacheTTLMinutes = 1440;
