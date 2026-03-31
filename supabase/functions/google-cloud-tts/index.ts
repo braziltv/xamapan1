@@ -140,7 +140,7 @@ function convertToNaturalSSML(text: string): string {
 
 // ==================== CACHE LOGIC ====================
 // Cache types: 
-//   names/{hash}.mp3 → patient names, TTL 60 min (checked by created_at)
+//   names/{hash}.mp3 → patient names, TTL 7 days (checked by created_at)
 //   announcements/{hash}.mp3 → custom announcements, TTL 24h
 //   destinations/{hash}.mp3 → destination phrases, permanent (managed by cache-destination-phrases)
 //   time/ → hour/minute audio, permanent
