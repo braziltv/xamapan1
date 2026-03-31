@@ -1492,6 +1492,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
                 text: cleanName,
                 voiceName: FIXED_VOICE_ID,
                 speakingRate: FIXED_SPEAKING_RATE,
+                cacheType: 'name',
               }),
             }),
             fetch(cachedDestinationUrl)
@@ -1595,7 +1596,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
-            body: JSON.stringify({ text, voiceName: FIXED_VOICE_ID, speakingRate: FIXED_SPEAKING_RATE }),
+            body: JSON.stringify({ text, voiceName: FIXED_VOICE_ID, speakingRate: FIXED_SPEAKING_RATE, cacheType: 'announcement' }),
           }
         );
 
