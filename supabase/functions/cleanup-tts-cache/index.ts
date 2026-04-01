@@ -93,154 +93,127 @@ Deno.serve(async (req) => {
       )
     }
 
-    const maxAgeDays = 7 // 7 dias para cache temporário
-    const cutoffTime = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000)
+    const NAME_MAX_AGE_DAYS = 7
+    const ANNOUNCEMENT_MAX_AGE_DAYS = 30
 
     console.log(`Starting TTS cache cleanup...`)
-    console.log(`Temporary cache: removing files older than ${maxAgeDays} days (before ${cutoffTime.toISOString()})`)
+    console.log(`Names: removing unused files older than ${NAME_MAX_AGE_DAYS} days`)
+    console.log(`Announcements: removing unused files older than ${ANNOUNCEMENT_MAX_AGE_DAYS} days`)
 
-    // List all files in the tts-cache bucket
-    const { data: files, error: listError } = await supabase.storage
+    const supabase_client = supabase
+    let totalDeleted = 0
+
+    // ==================== CLEAN NAMES (7 days unused) ====================
+    const nameCutoff = new Date(Date.now() - NAME_MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
+    
+    const { data: nameFiles } = await supabase_client.storage
+      .from('tts-cache')
+      .list('names', { limit: 1000 })
+
+    let namesDeleted = 0
+    if (nameFiles && nameFiles.length > 0) {
+      // Get recent usage from tts_name_usage
+      const { data: recentUsage } = await supabase_client
+        .from('tts_name_usage')
+        .select('name_hash')
+        .gte('used_at', nameCutoff.toISOString())
+
+      const recentHashes = new Set((recentUsage || []).map(u => u.name_hash))
+
+      const namesToDelete = nameFiles
+        .filter(f => {
+          if (!f.name.endsWith('.mp3')) return false
+          const hash = f.name.replace('.mp3', '')
+          // Delete if NOT used recently AND file is old
+          if (recentHashes.has(hash)) return false
+          if (!f.created_at) return false
+          return new Date(f.created_at) < nameCutoff
+        })
+        .map(f => `names/${f.name}`)
+
+      if (namesToDelete.length > 0) {
+        const { error } = await supabase_client.storage.from('tts-cache').remove(namesToDelete)
+        if (!error) {
+          namesDeleted = namesToDelete.length
+          totalDeleted += namesDeleted
+          console.log(`Deleted ${namesDeleted} expired name cache files`)
+        }
+      }
+    }
+
+    // ==================== CLEAN ANNOUNCEMENTS (30 days unused) ====================
+    const annCutoff = new Date(Date.now() - ANNOUNCEMENT_MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
+    
+    const { data: annFiles } = await supabase_client.storage
+      .from('tts-cache')
+      .list('announcements', { limit: 1000 })
+
+    let announcementsDeleted = 0
+    if (annFiles && annFiles.length > 0) {
+      const annsToDelete = annFiles
+        .filter(f => {
+          if (!f.name.endsWith('.mp3')) return false
+          if (!f.created_at) return false
+          return new Date(f.created_at) < annCutoff
+        })
+        .map(f => `announcements/${f.name}`)
+
+      if (annsToDelete.length > 0) {
+        const { error } = await supabase_client.storage.from('tts-cache').remove(annsToDelete)
+        if (!error) {
+          announcementsDeleted = annsToDelete.length
+          totalDeleted += announcementsDeleted
+          console.log(`Deleted ${announcementsDeleted} expired announcement cache files`)
+        }
+      }
+    }
+
+    // ==================== CLEAN OLD ROOT FILES (legacy) ====================
+    const { data: rootFiles } = await supabase_client.storage
       .from('tts-cache')
       .list('', { limit: 1000 })
 
-    if (listError) {
-      console.error('Error listing files:', listError)
-      throw listError
-    }
+    let legacyDeleted = 0
+    if (rootFiles && rootFiles.length > 0) {
+      const legacyToDelete = rootFiles
+        .filter(f => {
+          if (!f.name.endsWith('.mp3')) return false
+          if (f.name.startsWith('.')) return false
+          // Only delete legacy files (part_, tts_, phrase_) older than 7 days
+          if (!f.created_at) return false
+          return new Date(f.created_at) < nameCutoff && 
+            (f.name.startsWith('part_') || f.name.startsWith('tts_') || f.name.startsWith('phrase_'))
+        })
+        .map(f => f.name)
 
-    if (!files || files.length === 0) {
-      console.log('No files in TTS cache')
-      return new Response(
-        JSON.stringify({ success: true, deleted: 0, permanentDeleted: 0, message: 'Nenhum arquivo no cache' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Separate permanent and temporary files
-    const permanentFiles = files.filter(f => f.name.startsWith('phrase_'))
-    const temporaryFiles = files.filter(f => f.name.startsWith('part_') || f.name.startsWith('tts_'))
-
-    console.log(`Found ${permanentFiles.length} permanent files and ${temporaryFiles.length} temporary files`)
-
-    // Calculate permanent cache size
-    let permanentCacheSize = 0
-    for (const file of permanentFiles) {
-      permanentCacheSize += file.metadata?.size || 0
-    }
-    console.log(`Permanent cache size: ${(permanentCacheSize / 1024 / 1024).toFixed(2)}MB / ${MAX_PERMANENT_CACHE_SIZE / 1024 / 1024}MB limit`)
-
-    let permanentDeleted = 0
-
-    // Check if permanent cache exceeds limit
-    if (permanentCacheSize > MAX_PERMANENT_CACHE_SIZE) {
-      console.log(`Permanent cache exceeds limit, cleaning up least used entries...`)
-
-      // Get usage counts for all parts from last 20 days
-      const twentyDaysAgo = new Date()
-      twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20)
-
-      const { data: usageData, error: usageError } = await supabase
-        .from('tts_name_usage')
-        .select('name_hash, name_text')
-        .gte('used_at', twentyDaysAgo.toISOString())
-
-      if (usageError) {
-        console.error('Error fetching usage data:', usageError)
-      } else {
-        // Count usage per hash
-        const usageCounts: Record<string, number> = {}
-        for (const entry of usageData || []) {
-          usageCounts[entry.name_hash] = (usageCounts[entry.name_hash] || 0) + 1
-        }
-
-        // Sort permanent files by usage (least used first)
-        const sortedPermanentFiles = permanentFiles
-          .map(f => {
-            const hash = f.name.replace('phrase_', '').replace('.mp3', '')
-            return {
-              name: f.name,
-              hash,
-              usageCount: usageCounts[hash] || 0,
-              size: f.metadata?.size || 0
-            }
-          })
-          .sort((a, b) => a.usageCount - b.usageCount)
-
-        // Delete 50% least used files
-        const filesToDelete = sortedPermanentFiles.slice(0, Math.ceil(sortedPermanentFiles.length / 2))
-
-        if (filesToDelete.length > 0) {
-          const filePaths = filesToDelete.map(f => f.name)
-          console.log(`Deleting ${filePaths.length} least used permanent cache files:`)
-          filesToDelete.forEach(f => console.log(`  - ${f.name} (usage: ${f.usageCount})`))
-
-          const { error: deleteError } = await supabase.storage
-            .from('tts-cache')
-            .remove(filePaths)
-
-          if (deleteError) {
-            console.error('Error deleting permanent files:', deleteError)
-          } else {
-            permanentDeleted = filePaths.length
-            console.log(`Successfully deleted ${permanentDeleted} permanent cache files`)
-          }
+      if (legacyToDelete.length > 0) {
+        const { error } = await supabase_client.storage.from('tts-cache').remove(legacyToDelete)
+        if (!error) {
+          legacyDeleted = legacyToDelete.length
+          totalDeleted += legacyDeleted
         }
       }
-    }
-
-    // Delete old temporary files (older than 30 days)
-    const tempFilesToDelete = temporaryFiles.filter(file => {
-      if (!file.created_at) return false
-      const fileCreatedAt = new Date(file.created_at)
-      return fileCreatedAt < cutoffTime
-    })
-
-    let tempDeleted = 0
-
-    if (tempFilesToDelete.length > 0) {
-      const filePaths = tempFilesToDelete.map(f => f.name)
-      console.log(`Deleting ${filePaths.length} old temporary TTS cache files`)
-
-      const { error: deleteError } = await supabase.storage
-        .from('tts-cache')
-        .remove(filePaths)
-
-      if (deleteError) {
-        console.error('Error deleting temporary files:', deleteError)
-      } else {
-        tempDeleted = filePaths.length
-        console.log(`Successfully deleted ${tempDeleted} temporary cache files`)
-      }
-    } else {
-      console.log('No old temporary files to delete')
     }
 
     // Clean up old usage tracking entries (older than 30 days)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    const { error: cleanupError, count: usageDeleted } = await supabase
+    await supabase_client
       .from('tts_name_usage')
       .delete()
       .lt('used_at', thirtyDaysAgo.toISOString())
 
-    if (cleanupError) {
-      console.error('Error cleaning up old usage tracking:', cleanupError)
-    } else {
-      console.log(`Cleaned up ${usageDeleted || 0} old usage tracking entries`)
-    }
-
-    const totalDeleted = tempDeleted + permanentDeleted
+    console.log(`✅ Cleanup complete: ${totalDeleted} files removed (names: ${namesDeleted}, announcements: ${announcementsDeleted}, legacy: ${legacyDeleted})`)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         deleted: totalDeleted,
-        tempDeleted,
-        permanentDeleted,
-        permanentCacheSize: `${(permanentCacheSize / 1024 / 1024).toFixed(2)}MB`,
-        message: `${totalDeleted} arquivos removidos (${tempDeleted} temporários, ${permanentDeleted} permanentes)`
+        namesDeleted,
+        announcementsDeleted,
+        legacyDeleted,
+        message: `${totalDeleted} arquivos removidos (nomes: ${namesDeleted}, anúncios: ${announcementsDeleted}, legado: ${legacyDeleted})`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

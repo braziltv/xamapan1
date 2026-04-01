@@ -141,7 +141,7 @@ function convertToNaturalSSML(text: string): string {
 // ==================== CACHE LOGIC ====================
 // Cache types: 
 //   names/{hash}.mp3 → patient names, TTL 7 days (checked by created_at)
-//   announcements/{hash}.mp3 → custom announcements, TTL 24h
+//   announcements/{hash}.mp3 → custom announcements, TTL 30 days
 //   destinations/{hash}.mp3 → destination phrases, permanent (managed by cache-destination-phrases)
 //   time/ → hour/minute audio, permanent
 
@@ -285,7 +285,7 @@ serve(async (req) => {
       cacheTTLMinutes = 10080; // 7 days
     } else if (cacheType === 'announcement') {
       cacheFolder = 'announcements';
-      cacheTTLMinutes = 1440; // 24 hours
+      cacheTTLMinutes = 43200; // 30 days
     } else if (cacheType !== 'none' && !concatenate) {
       // Auto-detect: if text is short (likely a name), cache as name
       // If text is longer, cache as announcement
@@ -294,7 +294,7 @@ serve(async (req) => {
         cacheTTLMinutes = 10080; // 7 days
       } else {
         cacheFolder = 'announcements';
-        cacheTTLMinutes = 1440;
+        cacheTTLMinutes = 43200; // 30 days
       }
     } else if (cacheType !== 'none' && concatenate) {
       // For concatenated calls, don't cache the full thing (name+dest)
