@@ -285,7 +285,7 @@ serve(async (req) => {
       cacheTTLMinutes = 10080; // 7 days
     } else if (cacheType === 'announcement') {
       cacheFolder = 'announcements';
-      cacheTTLMinutes = 1440; // 24 hours
+      cacheTTLMinutes = 43200; // 30 days
     } else if (cacheType !== 'none' && !concatenate) {
       // Auto-detect: if text is short (likely a name), cache as name
       // If text is longer, cache as announcement
@@ -294,7 +294,7 @@ serve(async (req) => {
         cacheTTLMinutes = 10080; // 7 days
       } else {
         cacheFolder = 'announcements';
-        cacheTTLMinutes = 1440;
+        cacheTTLMinutes = 43200; // 30 days
       }
     } else if (cacheType !== 'none' && concatenate) {
       // For concatenated calls, don't cache the full thing (name+dest)
