@@ -282,16 +282,14 @@ serve(async (req) => {
     // cacheType can be: 'name' (60min), 'announcement' (24h=1440min), 'none' (skip cache)
     if (cacheType === 'name') {
       cacheFolder = 'names';
-      cacheTTLMinutes = 10080; // 7 days
+      cacheTTLMinutes = 43200; // 30 days
     } else if (cacheType === 'announcement') {
       cacheFolder = 'announcements';
       cacheTTLMinutes = 43200; // 30 days
     } else if (cacheType !== 'none' && !concatenate) {
-      // Auto-detect: if text is short (likely a name), cache as name
-      // If text is longer, cache as announcement
       if (finalText.length <= 60) {
         cacheFolder = 'names';
-        cacheTTLMinutes = 10080; // 7 days
+        cacheTTLMinutes = 43200; // 30 days
       } else {
         cacheFolder = 'announcements';
         cacheTTLMinutes = 43200; // 30 days
