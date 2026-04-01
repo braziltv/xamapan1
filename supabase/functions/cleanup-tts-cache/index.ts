@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const NAME_MAX_AGE_DAYS = 7
+    const NAME_MAX_AGE_DAYS = 30
     const ANNOUNCEMENT_MAX_AGE_DAYS = 30
 
     console.log(`Starting TTS cache cleanup...`)
