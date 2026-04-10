@@ -319,9 +319,11 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const [rotationCount, setRotationCount] = useState(0);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [progress, setProgress] = useState(0);
   const fetchingRef = useRef(false);
-  const rotationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const ROTATION_DURATION = 10000; // 10 seconds per city
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ROTATION_DURATION = 10000; // 10 seconds per city (increased from 6s)
+  const PROGRESS_UPDATE_INTERVAL = 100; // Update progress every 100ms (reduced from 50ms)
 
   const availableCities = Object.keys(weatherCache);
   const currentWeather = weatherCache[displayCity];
@@ -378,7 +380,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }, 300);
   }, []);
 
-  // City rotation
+  // City rotation with progress bar
   useEffect(() => {
     if (availableCities.length === 0) return;
     
@@ -394,15 +396,32 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
       setDisplayCity(sortedCities[0]);
     }
     
-    rotationIntervalRef.current = setInterval(() => {
-      currentIndex = (currentIndex + 1) % sortedCities.length;
-      changeCityWithTransition(sortedCities[currentIndex]);
-      setRotationCount(p => p + 1);
-    }, ROTATION_DURATION);
+    // Reset progress
+    setProgress(0);
+    
+    // Progress increment
+    const progressStep = 100 / (ROTATION_DURATION / PROGRESS_UPDATE_INTERVAL);
+    
+    // Start progress animation
+    progressIntervalRef.current = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + progressStep;
+        
+        if (newProgress >= 100) {
+          // Time to switch city
+          currentIndex = (currentIndex + 1) % sortedCities.length;
+          changeCityWithTransition(sortedCities[currentIndex]);
+          setRotationCount(p => p + 1);
+          return 0; // Reset progress
+        }
+        
+        return newProgress;
+      });
+    }, PROGRESS_UPDATE_INTERVAL);
     
     return () => {
-      if (rotationIntervalRef.current) {
-        clearInterval(rotationIntervalRef.current);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
       }
     };
   }, [availableCities.length, weatherCache, changeCityWithTransition]);
@@ -502,6 +521,17 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
           minWidth: 'fit-content',
         }}
       >
+        {/* Progress bar at the top */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] sm:h-1 bg-slate-700/60 overflow-hidden rounded-t-lg">
+          <div 
+            className="h-full transition-all duration-75 ease-linear"
+            style={{ 
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg, #06b6d4, #8b5cf6, #f59e0b)',
+              boxShadow: '0 0 8px rgba(139,92,246,0.6), 0 0 12px rgba(6,182,212,0.4)',
+            }}
+          />
+        </div>
         
         {/* Title: Previsão do Tempo */}
         <div className="flex items-center justify-center gap-1 mb-0.5">
