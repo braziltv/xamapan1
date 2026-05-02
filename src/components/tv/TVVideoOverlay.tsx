@@ -207,7 +207,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       } catch { /* noop */ }
     };
 
-    if (paused) {
+    if (paused || silenceHour) {
       send('pauseVideo');
       send('mute');
       return;
