@@ -847,20 +847,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   // Load TV video settings from unit_settings (and refresh on realtime change)
   useEffect(() => {
-    if (!unitName) return;
+    if (!marketingUnitName) return;
     let cancelled = false;
 
     const loadVideoSettings = async () => {
       const { data, error } = await supabase
         .from('unit_settings')
         .select('tv_video_url, tv_video_enabled, tv_video_volume')
-        .eq('unit_name', unitName)
+        .eq('unit_name', marketingUnitName)
         .maybeSingle();
       if (cancelled) return;
       if (error) {
         console.warn('Failed to load TV video settings:', error.message);
         return;
       }
+      console.log('🎬 Loaded TV video settings for', marketingUnitName, data);
       if (data) {
         setTvVideo({
           url: (data.tv_video_url as string | null) || '',
@@ -873,10 +874,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     loadVideoSettings();
 
     const ch = supabase
-      .channel(`tv-video-settings-${unitName}`)
+      .channel(`tv-video-settings-${marketingUnitName}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'unit_settings', filter: `unit_name=eq.${unitName}` },
+        { event: '*', schema: 'public', table: 'unit_settings', filter: `unit_name=eq.${marketingUnitName}` },
         () => loadVideoSettings()
       )
       .subscribe();
@@ -885,7 +886,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       cancelled = true;
       supabase.removeChannel(ch);
     };
-  }, [unitName]);
+  }, [marketingUnitName]);
 
   // Listen for configuration changes and auto-reload
   useEffect(() => {
