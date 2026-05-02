@@ -901,6 +901,30 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [marketingUnitName]);
 
+  // Cooldown after a call ends: keep video paused for resumeDelaySec seconds
+  useEffect(() => {
+    if (announcingType) {
+      setVideoCooldownActive(true);
+      return;
+    }
+    if (!tvVideo.enabled || tvVideo.urls.length === 0) {
+      setVideoCooldownActive(false);
+      return;
+    }
+    const delayMs = Math.max(0, (tvVideo.resumeDelaySec ?? 20) * 1000);
+    if (delayMs === 0) {
+      setVideoCooldownActive(false);
+      return;
+    }
+    setVideoCooldownActive(true);
+    console.log(`🎬 Video cooldown ${delayMs}ms before resume`);
+    const t = setTimeout(() => {
+      setVideoCooldownActive(false);
+      console.log('🎬 Video cooldown ended — resuming playback');
+    }, delayMs);
+    return () => clearTimeout(t);
+  }, [announcingType, tvVideo.enabled, tvVideo.urls.length, tvVideo.resumeDelaySec]);
+
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
