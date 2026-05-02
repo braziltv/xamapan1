@@ -183,7 +183,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
     v.volume = audioUnlocked ? Math.max(0, Math.min(1, volume / 100)) : 0;
     v.muted = !audioUnlocked;
 
-    if (paused) {
+    if (paused || silenceHour) {
       try { v.pause(); } catch { /* noop */ }
     } else if (enabled) {
       v.play().catch(() => {
@@ -191,7 +191,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
         v.play().catch(() => { /* ignore */ });
       });
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, silenceHour]);
 
   // YouTube iframe API control via postMessage + fallback advance timer
   useEffect(() => {
