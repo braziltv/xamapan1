@@ -677,6 +677,10 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="video" className="mt-4">
+          <TVVideoSettings unitName={unitName} />
+        </TabsContent>
       </Tabs>
 
       {/* Dialog para Anúncios de Voz */}
