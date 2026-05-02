@@ -163,7 +163,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
     setCurrentIndex((i) => (i + 1) % validUrls.length);
   };
 
-  const shouldShow = enabled && validUrls.length > 0 && !paused && !loadError;
+  const shouldShow = enabled && validUrls.length > 0 && !paused && !loadError && !silenceHour;
 
   // Smooth fade in/out
   useEffect(() => {
