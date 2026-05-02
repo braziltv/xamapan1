@@ -270,7 +270,18 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
           loop={validUrls.length === 1}
           playsInline
           muted={!audioUnlocked}
+          preload={quality === 'small' || quality === 'medium' ? 'metadata' : 'auto'}
+          onWaiting={() => {
+            stallCountRef.current += 1;
+            console.warn(`🎬⏳ Vídeo travou (stall #${stallCountRef.current}) — qualidade atual ${QUALITY_LABEL[quality]}`);
+            // After 2 stalls in same session, downgrade
+            if (stallCountRef.current >= 2) {
+              downgradeQuality('stall MP4');
+              stallCountRef.current = 0;
+            }
+          }}
           onEnded={() => {
+            stallCountRef.current = 0;
             if (validUrls.length > 1) advance();
           }}
           onError={(e) => {
@@ -291,15 +302,21 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       {kind === 'youtube' && ytId && (
         <iframe
           ref={iframeRef}
-          key={url}
+          key={`${url}-${quality}`}
           title="TV Video"
           className="w-full h-full"
-          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=${validUrls.length === 1 ? 1 : 0}&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}&vq=hd720&hd=0`}
+          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=${validUrls.length === 1 ? 1 : 0}&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}&vq=${quality}&hd=0`}
           frameBorder={0}
           allow="autoplay; encrypted-media; picture-in-picture"
           allowFullScreen
         />
       )}
-    </div>
+
+      {/* Subtle quality indicator — only visible briefly when downgrading */}
+      {quality !== 'hd720' && (
+        <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-black/60 text-white/80 text-xs font-mono pointer-events-none">
+          {QUALITY_LABEL[quality]} • conexão lenta
+        </div>
+      )}
   );
 }
