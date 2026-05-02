@@ -41,11 +41,18 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [visible, setVisible] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const kind = useMemo(() => detectKind(url), [url]);
   const ytId = useMemo(() => (kind === 'youtube' ? extractYouTubeId(url) : null), [kind, url]);
 
-  const shouldShow = enabled && !!url && !paused;
+  // Reset error state when url changes
+  useEffect(() => {
+    setLoadError(null);
+    console.log('🎬 TVVideoOverlay config:', { url, enabled, kind, ytId });
+  }, [url, enabled, kind, ytId]);
+
+  const shouldShow = enabled && !!url && !paused && !loadError;
 
   // Smooth fade in/out
   useEffect(() => {
@@ -126,6 +133,14 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
           loop
           playsInline
           muted={!audioUnlocked}
+          onError={(e) => {
+            const v = e.currentTarget;
+            const code = v.error?.code;
+            const msg = `Falha ao carregar vídeo (código ${code}). Verifique se a URL aponta para um arquivo .mp4 público com CORS liberado.`;
+            console.error('🎬❌ Video error:', { code, message: v.error?.message, url });
+            setLoadError(msg);
+          }}
+          onLoadedData={() => console.log('🎬✅ Video carregado:', url)}
         />
       )}
 
