@@ -855,7 +855,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const loadVideoSettings = async () => {
       const { data, error } = await supabase
         .from('unit_settings')
-        .select('tv_video_url, tv_video_enabled, tv_video_volume')
+        .select('tv_video_url, tv_video_urls, tv_video_enabled, tv_video_volume, tv_video_resume_delay_seconds')
         .eq('unit_name', marketingUnitName)
         .maybeSingle();
       if (cancelled) return;
@@ -865,10 +865,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
       console.log('🎬 Loaded TV video settings for', marketingUnitName, data);
       if (data) {
+        const raw = (data as any).tv_video_urls;
+        let urls: string[] = [];
+        if (Array.isArray(raw)) {
+          urls = raw.filter((u: any) => typeof u === 'string' && u.trim().length > 0);
+        }
+        if (urls.length === 0 && (data as any).tv_video_url) {
+          urls = [String((data as any).tv_video_url)];
+        }
         setTvVideo({
-          url: (data.tv_video_url as string | null) || '',
+          urls,
           enabled: !!data.tv_video_enabled,
           volume: typeof data.tv_video_volume === 'number' ? data.tv_video_volume : 50,
+          resumeDelaySec: typeof (data as any).tv_video_resume_delay_seconds === 'number'
+            ? (data as any).tv_video_resume_delay_seconds
+            : 20,
         });
       }
     };
