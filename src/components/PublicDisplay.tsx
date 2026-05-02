@@ -903,6 +903,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           filter: `unit_name=eq.${unitName}`
         },
         (payload) => {
+          // Skip auto-reload when only TV video settings changed (handled live)
+          const newRow = (payload as any).new || {};
+          const oldRow = (payload as any).old || {};
+          const videoFields = ['tv_video_url', 'tv_video_enabled', 'tv_video_volume'];
+          const allKeys = new Set([...Object.keys(newRow), ...Object.keys(oldRow)]);
+          const changedKeys = [...allKeys].filter((k) => newRow[k] !== oldRow[k]);
+          const onlyVideoChanged = changedKeys.length > 0 && changedKeys.every((k) => videoFields.includes(k));
+          if (onlyVideoChanged) {
+            console.log('🎬 Only TV video settings changed — applying live, skipping reload');
+            return;
+          }
           console.log('⚙️ Unit settings changed, reloading TV...', payload);
           triggerAutoReload('Configurações atualizadas');
         }
