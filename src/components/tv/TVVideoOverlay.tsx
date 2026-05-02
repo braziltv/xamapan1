@@ -135,7 +135,12 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       } else {
         send('mute');
       }
+      // Cap quality to 720p to save bandwidth on low-quality internet connections
+      send('setPlaybackQuality', ['hd720']);
       send('playVideo');
+      // Re-apply quality cap after play (YouTube may auto-bump quality)
+      setTimeout(() => send('setPlaybackQuality', ['hd720']), 1500);
+      setTimeout(() => send('setPlaybackQuality', ['hd720']), 5000);
     }
 
     // Fallback timer to rotate playlist when more than one URL
