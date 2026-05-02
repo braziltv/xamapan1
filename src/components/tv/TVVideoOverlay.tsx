@@ -232,7 +232,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       const t = setTimeout(() => advance(), YT_FALLBACK_ADVANCE_MS);
       return () => clearTimeout(t);
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality, silenceHour]);
 
   // Listen to YouTube infoDelivery messages to detect buffering and downgrade
   useEffect(() => {
