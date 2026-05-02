@@ -1,4 +1,4 @@
-import { useEffect, useState, useId } from 'react';
+import { useEffect, useState, useId, useMemo, memo } from 'react';
 import { ParticleBackground } from './ParticleBackground';
 
 interface SpotlightOverlayProps {
@@ -7,23 +7,49 @@ interface SpotlightOverlayProps {
   className?: string;
 }
 
-export function SpotlightOverlay({ active, color = 'blue', className = '' }: SpotlightOverlayProps) {
+// Detect reduced motion preference once
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
+export const SpotlightOverlay = memo(function SpotlightOverlay({ active, color = 'blue', className = '' }: SpotlightOverlayProps) {
   const uniqueId = useId().replace(/:/g, '');
   const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
+  const reduced = useMemo(() => prefersReducedMotion(), []);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || reduced) return;
 
-    // Animate spotlight position subtly
+    // Throttled subtle motion: 4Hz (250ms) is enough — was 20Hz (50ms) which caused
+    // 20 React re-renders per second with full SVG repaint. Huge CPU/GPU savings.
     const interval = setInterval(() => {
+      const t = Date.now();
       setSpotlightPos({
-        x: 50 + Math.sin(Date.now() / 1000) * 5,
-        y: 50 + Math.cos(Date.now() / 800) * 3,
+        x: 50 + Math.sin(t / 1000) * 5,
+        y: 50 + Math.cos(t / 800) * 3,
       });
-    }, 50);
+    }, 250);
 
     return () => clearInterval(interval);
-  }, [active]);
+  }, [active, reduced]);
+
+  // Memoize beam polygons — they don't need to follow the spotlight; they animate via CSS.
+  const beams = useMemo(
+    () =>
+      [...Array(5)].map((_, i) => {
+        const baseX = 20 + i * 15;
+        return {
+          key: i,
+          points: `${baseX},0 ${baseX + 10},0 ${baseX + 25},100% ${baseX - 15},100%`,
+        };
+      }),
+    []
+  );
 
   if (!active) return null;
 
@@ -54,10 +80,12 @@ export function SpotlightOverlay({ active, color = 'blue', className = '' }: Spo
         className="absolute inset-0 animate-spotlight-pulse"
         style={{
           background: `radial-gradient(ellipse 80% 60% at ${spotlightPos.x}% ${spotlightPos.y}%, ${colors.primary} 0%, ${colors.secondary} 40%, transparent 70%)`,
+          transition: 'background 250ms linear',
+          transform: 'translateZ(0)',
         }}
       />
 
-      {/* Volumetric light beams */}
+      {/* Volumetric light beams - static positions, CSS sway only */}
       <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id={`beam-${uniqueId}`} x1="50%" y1="0%" x2="50%" y2="100%">
@@ -66,24 +94,19 @@ export function SpotlightOverlay({ active, color = 'blue', className = '' }: Spo
           </linearGradient>
         </defs>
         
-        {/* Light beams from top */}
-        {[...Array(5)].map((_, i) => {
-          const baseX = 20 + i * 15;
-          const offset = Math.sin(Date.now() / 1000 + i) * 2;
-          return (
-            <polygon
-              key={i}
-              points={`${baseX + offset},0 ${baseX + 10 + offset},0 ${baseX + 25 + offset},100% ${baseX - 15 + offset},100%`}
-              fill={`url(#beam-${uniqueId})`}
-              className="animate-beam-sway"
-              style={{ animationDelay: `${i * 0.2}s` }}
-            />
-          );
-        })}
+        {beams.map((b, i) => (
+          <polygon
+            key={b.key}
+            points={b.points}
+            fill={`url(#beam-${uniqueId})`}
+            className="animate-beam-sway"
+            style={{ animationDelay: `${i * 0.2}s` }}
+          />
+        ))}
       </svg>
 
-      {/* Particles */}
-      <ParticleBackground count={50} color={colors.particle} active={active} />
+      {/* Particles - reduced from 50 to 18 for performance; visual still rich */}
+      <ParticleBackground count={reduced ? 0 : 18} color={colors.particle} active={active} />
 
       {/* Lens flare effect */}
       <div 
@@ -91,10 +114,11 @@ export function SpotlightOverlay({ active, color = 'blue', className = '' }: Spo
         style={{
           left: `${spotlightPos.x}%`,
           top: `${spotlightPos.y - 20}%`,
-          transform: 'translate(-50%, -50%)',
+          transform: 'translate(-50%, -50%) translateZ(0)',
           background: `radial-gradient(circle, ${colors.primary} 0%, transparent 70%)`,
+          transition: 'left 250ms linear, top 250ms linear',
         }}
       />
     </div>
   );
-}
+});

@@ -26,11 +26,20 @@ export const ParticleBackground = memo(function ParticleBackground({
   active = true 
 }: ParticleBackgroundProps) {
   const uniqueId = useId().replace(/:/g, '');
-  
+
+  // Respect reduced motion preference: disable particles entirely on low-end / accessibility setups
+  const reducedMotion = useMemo(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; }
+  }, []);
+
+  // Hard cap to protect older TVs even if a caller passes a high number
+  const effectiveCount = reducedMotion ? 0 : Math.min(count, 24);
+
   // Generate particles only once using useMemo (no state = no re-renders)
   const particles = useMemo<Particle[]>(() => {
     const newParticles: Particle[] = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < effectiveCount; i++) {
       newParticles.push({
         id: i,
         x: Math.random() * 100,
@@ -42,7 +51,7 @@ export const ParticleBackground = memo(function ParticleBackground({
       });
     }
     return newParticles;
-  }, [count]);
+  }, [effectiveCount]);
 
   if (!active) return null;
 
