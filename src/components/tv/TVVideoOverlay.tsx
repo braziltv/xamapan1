@@ -133,6 +133,14 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
           loop
           playsInline
           muted={!audioUnlocked}
+          onError={(e) => {
+            const v = e.currentTarget;
+            const code = v.error?.code;
+            const msg = `Falha ao carregar vídeo (código ${code}). Verifique se a URL aponta para um arquivo .mp4 público com CORS liberado.`;
+            console.error('🎬❌ Video error:', { code, message: v.error?.message, url });
+            setLoadError(msg);
+          }}
+          onLoadedData={() => console.log('🎬✅ Video carregado:', url)}
         />
       )}
 
