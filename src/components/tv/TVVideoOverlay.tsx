@@ -1,4 +1,17 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { toZonedTime } from 'date-fns-tz';
+
+// Silence window: 22:00 → 06:00 (America/Sao_Paulo). Same range used by hourly audio.
+function isSilenceHourBR(): boolean {
+  try {
+    const nowBR = toZonedTime(new Date(), 'America/Sao_Paulo');
+    const h = nowBR.getHours();
+    return h >= 22 || h < 6;
+  } catch {
+    const h = new Date().getHours();
+    return h >= 22 || h < 6;
+  }
+}
 
 interface TVVideoOverlayProps {
   urls: string[];
@@ -75,6 +88,15 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
   const [quality, setQuality] = useState<QualityTier>(() => detectInitialQuality());
   const stallCountRef = useRef(0);
   const lastDowngradeAtRef = useRef(0);
+  const [silenceHour, setSilenceHour] = useState<boolean>(() => isSilenceHourBR());
+
+  // Re-check silence window every 30s
+  useEffect(() => {
+    const check = () => setSilenceHour(isSilenceHourBR());
+    check();
+    const t = setInterval(check, 30000);
+    return () => clearInterval(t);
+  }, []);
 
   const downgradeQuality = (reason: string) => {
     const now = Date.now();
@@ -141,7 +163,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
     setCurrentIndex((i) => (i + 1) % validUrls.length);
   };
 
-  const shouldShow = enabled && validUrls.length > 0 && !paused && !loadError;
+  const shouldShow = enabled && validUrls.length > 0 && !paused && !loadError && !silenceHour;
 
   // Smooth fade in/out
   useEffect(() => {
@@ -161,7 +183,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
     v.volume = audioUnlocked ? Math.max(0, Math.min(1, volume / 100)) : 0;
     v.muted = !audioUnlocked;
 
-    if (paused) {
+    if (paused || silenceHour) {
       try { v.pause(); } catch { /* noop */ }
     } else if (enabled) {
       v.play().catch(() => {
@@ -169,7 +191,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
         v.play().catch(() => { /* ignore */ });
       });
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, silenceHour]);
 
   // YouTube iframe API control via postMessage + fallback advance timer
   useEffect(() => {
@@ -185,7 +207,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       } catch { /* noop */ }
     };
 
-    if (paused) {
+    if (paused || silenceHour) {
       send('pauseVideo');
       send('mute');
       return;
@@ -210,7 +232,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       const t = setTimeout(() => advance(), YT_FALLBACK_ADVANCE_MS);
       return () => clearTimeout(t);
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality, silenceHour]);
 
   // Listen to YouTube infoDelivery messages to detect buffering and downgrade
   useEffect(() => {
