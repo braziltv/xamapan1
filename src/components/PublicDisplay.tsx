@@ -2931,6 +2931,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
+      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls) ========== */}
+      <TVVideoOverlay
+        url={tvVideo.url}
+        enabled={tvVideo.enabled}
+        volume={tvVideo.volume}
+        paused={!!announcingType}
+        audioUnlocked={audioUnlocked}
+      />
+
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
