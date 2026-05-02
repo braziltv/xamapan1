@@ -1,4 +1,17 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { toZonedTime } from 'date-fns-tz';
+
+// Silence window: 22:00 → 06:00 (America/Sao_Paulo). Same range used by hourly audio.
+function isSilenceHourBR(): boolean {
+  try {
+    const nowBR = toZonedTime(new Date(), 'America/Sao_Paulo');
+    const h = nowBR.getHours();
+    return h >= 22 || h < 6;
+  } catch {
+    const h = new Date().getHours();
+    return h >= 22 || h < 6;
+  }
+}
 
 interface TVVideoOverlayProps {
   urls: string[];
