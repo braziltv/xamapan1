@@ -845,6 +845,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, marketingUnitName]);
 
+  // Load TV video settings from unit_settings (and refresh on realtime change)
+  useEffect(() => {
+    if (!unitName) return;
+    let cancelled = false;
+
+    const loadVideoSettings = async () => {
+      const { data, error } = await supabase
+        .from('unit_settings')
+        .select('tv_video_url, tv_video_enabled, tv_video_volume')
+        .eq('unit_name', unitName)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.warn('Failed to load TV video settings:', error.message);
+        return;
+      }
+      if (data) {
+        setTvVideo({
+          url: (data.tv_video_url as string | null) || '',
+          enabled: !!data.tv_video_enabled,
+          volume: typeof data.tv_video_volume === 'number' ? data.tv_video_volume : 50,
+        });
+      }
+    };
+
+    loadVideoSettings();
+
+    const ch = supabase
+      .channel(`tv-video-settings-${unitName}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'unit_settings', filter: `unit_name=eq.${unitName}` },
+        () => loadVideoSettings()
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(ch);
+    };
+  }, [unitName]);
+
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
