@@ -15,6 +15,7 @@ import { ParticleBackground } from './ParticleBackground';
 import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
+import { TVVideoOverlay } from './tv/TVVideoOverlay';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
 
 interface PublicDisplayProps {
