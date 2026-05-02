@@ -15,6 +15,7 @@ import { ParticleBackground } from './ParticleBackground';
 import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
+import { TVVideoOverlay } from './tv/TVVideoOverlay';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
 
 interface PublicDisplayProps {
@@ -170,6 +171,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
   const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
+  const [tvVideo, setTvVideo] = useState<{ url: string; enabled: boolean; volume: number }>({
+    url: '',
+    enabled: false,
+    volume: 50,
+  });
   const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
@@ -839,6 +845,48 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, marketingUnitName]);
 
+  // Load TV video settings from unit_settings (and refresh on realtime change)
+  useEffect(() => {
+    if (!unitName) return;
+    let cancelled = false;
+
+    const loadVideoSettings = async () => {
+      const { data, error } = await supabase
+        .from('unit_settings')
+        .select('tv_video_url, tv_video_enabled, tv_video_volume')
+        .eq('unit_name', unitName)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.warn('Failed to load TV video settings:', error.message);
+        return;
+      }
+      if (data) {
+        setTvVideo({
+          url: (data.tv_video_url as string | null) || '',
+          enabled: !!data.tv_video_enabled,
+          volume: typeof data.tv_video_volume === 'number' ? data.tv_video_volume : 50,
+        });
+      }
+    };
+
+    loadVideoSettings();
+
+    const ch = supabase
+      .channel(`tv-video-settings-${unitName}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'unit_settings', filter: `unit_name=eq.${unitName}` },
+        () => loadVideoSettings()
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(ch);
+    };
+  }, [unitName]);
+
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
@@ -855,6 +903,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           filter: `unit_name=eq.${unitName}`
         },
         (payload) => {
+          // Skip auto-reload when only TV video settings changed (handled live)
+          const newRow = (payload as any).new || {};
+          const oldRow = (payload as any).old || {};
+          const videoFields = ['tv_video_url', 'tv_video_enabled', 'tv_video_volume'];
+          const allKeys = new Set([...Object.keys(newRow), ...Object.keys(oldRow)]);
+          const changedKeys = [...allKeys].filter((k) => newRow[k] !== oldRow[k]);
+          const onlyVideoChanged = changedKeys.length > 0 && changedKeys.every((k) => videoFields.includes(k));
+          if (onlyVideoChanged) {
+            console.log('🎬 Only TV video settings changed — applying live, skipping reload');
+            return;
+          }
           console.log('⚙️ Unit settings changed, reloading TV...', payload);
           triggerAutoReload('Configurações atualizadas');
         }
@@ -2871,6 +2930,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     >
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
+
+      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls) ========== */}
+      <TVVideoOverlay
+        url={tvVideo.url}
+        enabled={tvVideo.enabled}
+        volume={tvVideo.volume}
+        paused={!!announcingType}
+        audioUnlocked={audioUnlocked}
+      />
 
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
