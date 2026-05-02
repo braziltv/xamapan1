@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 
 interface TVVideoOverlayProps {
-  url: string;
+  urls: string[];
   enabled: boolean;
   volume: number; // 0-100
-  paused: boolean; // true when a call is announcing
+  paused: boolean; // true when a call is announcing OR during post-call cooldown
   audioUnlocked: boolean;
 }
 
@@ -15,7 +15,6 @@ function detectKind(url: string): VideoKind {
   const u = url.trim().toLowerCase();
   if (u.includes('youtube.com/') || u.includes('youtu.be/')) return 'youtube';
   if (u.match(/\.(mp4|webm|ogv|mov|m4v)(\?|$)/)) return 'mp4';
-  // assume mp4 if direct link
   if (u.startsWith('http')) return 'mp4';
   return 'unknown';
 }
@@ -27,7 +26,6 @@ function extractYouTubeId(url: string): string | null {
       return u.pathname.replace('/', '').split('/')[0] || null;
     }
     if (u.searchParams.get('v')) return u.searchParams.get('v');
-    // /embed/ID
     const parts = u.pathname.split('/');
     const idx = parts.indexOf('embed');
     if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
@@ -37,22 +35,51 @@ function extractYouTubeId(url: string): string | null {
   }
 }
 
-export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: TVVideoOverlayProps) {
+// Average duration to advance YouTube playlist when ended event isn't reliable
+const YT_FALLBACK_ADVANCE_MS = 5 * 60 * 1000;
+
+export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }: TVVideoOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [visible, setVisible] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
+  const validUrls = useMemo(
+    () => (Array.isArray(urls) ? urls : []).map((u) => (u || '').trim()).filter(Boolean),
+    [urls]
+  );
+
+  const safeIndex = validUrls.length ? currentIndex % validUrls.length : 0;
+  const url = validUrls[safeIndex] || '';
   const kind = useMemo(() => detectKind(url), [url]);
   const ytId = useMemo(() => (kind === 'youtube' ? extractYouTubeId(url) : null), [kind, url]);
 
-  // Reset error state when url changes
+  // Reset error when current url changes
   useEffect(() => {
     setLoadError(null);
-    console.log('🎬 TVVideoOverlay config:', { url, enabled, kind, ytId });
-  }, [url, enabled, kind, ytId]);
+    console.log('🎬 TVVideoOverlay current:', { index: safeIndex, total: validUrls.length, url, kind });
+  }, [url, kind, safeIndex, validUrls.length]);
 
-  const shouldShow = enabled && !!url && !paused && !loadError;
+  // If url count shrinks, clamp index
+  useEffect(() => {
+    if (validUrls.length === 0) return;
+    if (currentIndex >= validUrls.length) setCurrentIndex(0);
+  }, [validUrls.length, currentIndex]);
+
+  const advance = () => {
+    if (validUrls.length <= 1) {
+      // restart same video
+      const v = videoRef.current;
+      if (v) {
+        try { v.currentTime = 0; v.play().catch(() => {}); } catch { /* noop */ }
+      }
+      return;
+    }
+    setCurrentIndex((i) => (i + 1) % validUrls.length);
+  };
+
+  const shouldShow = enabled && validUrls.length > 0 && !paused && !loadError;
 
   // Smooth fade in/out
   useEffect(() => {
@@ -76,22 +103,20 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
       try { v.pause(); } catch { /* noop */ }
     } else if (enabled) {
       v.play().catch(() => {
-        // Autoplay blocked — try muted
         v.muted = true;
         v.play().catch(() => { /* ignore */ });
       });
     }
-  }, [paused, enabled, volume, audioUnlocked, kind]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url]);
 
-  // YouTube iframe API control via postMessage
+  // YouTube iframe API control via postMessage + fallback advance timer
   useEffect(() => {
     if (kind !== 'youtube') return;
     const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow) return;
 
     const send = (func: string, args: unknown[] = []) => {
       try {
-        iframe.contentWindow!.postMessage(
+        iframe?.contentWindow?.postMessage(
           JSON.stringify({ event: 'command', func, args }),
           '*'
         );
@@ -101,7 +126,9 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
     if (paused) {
       send('pauseVideo');
       send('mute');
-    } else if (enabled) {
+      return;
+    }
+    if (enabled) {
       if (audioUnlocked) {
         send('unMute');
         send('setVolume', [Math.max(0, Math.min(100, volume))]);
@@ -110,9 +137,15 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
       }
       send('playVideo');
     }
-  }, [paused, enabled, volume, audioUnlocked, kind]);
 
-  if (!enabled || !url || kind === 'unknown') return null;
+    // Fallback timer to rotate playlist when more than one URL
+    if (validUrls.length > 1 && !paused) {
+      const t = setTimeout(() => advance(), YT_FALLBACK_ADVANCE_MS);
+      return () => clearTimeout(t);
+    }
+  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length]);
+
+  if (!enabled || validUrls.length === 0 || kind === 'unknown') return null;
   if (!visible && !shouldShow) return null;
 
   return (
@@ -128,17 +161,25 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
         <video
           ref={videoRef}
           src={url}
+          key={url}
           className="w-full h-full object-cover"
           autoPlay
-          loop
+          loop={validUrls.length === 1}
           playsInline
           muted={!audioUnlocked}
+          onEnded={() => {
+            if (validUrls.length > 1) advance();
+          }}
           onError={(e) => {
             const v = e.currentTarget;
             const code = v.error?.code;
-            const msg = `Falha ao carregar vídeo (código ${code}). Verifique se a URL aponta para um arquivo .mp4 público com CORS liberado.`;
             console.error('🎬❌ Video error:', { code, message: v.error?.message, url });
-            setLoadError(msg);
+            // If playlist has more, skip to next instead of erroring out
+            if (validUrls.length > 1) {
+              advance();
+            } else {
+              setLoadError(`Falha ao carregar vídeo (código ${code}).`);
+            }
           }}
           onLoadedData={() => console.log('🎬✅ Video carregado:', url)}
         />
@@ -147,9 +188,10 @@ export function TVVideoOverlay({ url, enabled, volume, paused, audioUnlocked }: 
       {kind === 'youtube' && ytId && (
         <iframe
           ref={iframeRef}
+          key={url}
           title="TV Video"
           className="w-full h-full"
-          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}`}
+          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=${validUrls.length === 1 ? 1 : 0}&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}`}
           frameBorder={0}
           allow="autoplay; encrypted-media; picture-in-picture"
           allowFullScreen
