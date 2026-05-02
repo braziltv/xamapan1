@@ -38,12 +38,74 @@ function extractYouTubeId(url: string): string | null {
 // Average duration to advance YouTube playlist when ended event isn't reliable
 const YT_FALLBACK_ADVANCE_MS = 5 * 60 * 1000;
 
+// Quality tiers (YouTube playback quality strings)
+type QualityTier = 'hd720' | 'large' | 'medium' | 'small';
+const QUALITY_LABEL: Record<QualityTier, string> = {
+  hd720: '720p',
+  large: '480p',
+  medium: '360p',
+  small: '240p',
+};
+const QUALITY_ORDER: QualityTier[] = ['hd720', 'large', 'medium', 'small'];
+
+// Detect initial quality from Network Information API
+function detectInitialQuality(): QualityTier {
+  try {
+    const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (!conn) return 'hd720';
+    const effectiveType: string = conn.effectiveType || '';
+    const downlink: number = conn.downlink || 0; // Mbps
+    const saveData: boolean = !!conn.saveData;
+    if (saveData) return 'medium';
+    if (effectiveType === 'slow-2g' || effectiveType === '2g') return 'small';
+    if (effectiveType === '3g' || (downlink > 0 && downlink < 1.5)) return 'medium';
+    if (downlink > 0 && downlink < 4) return 'large';
+    return 'hd720';
+  } catch {
+    return 'hd720';
+  }
+}
+
 export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }: TVVideoOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [visible, setVisible] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [quality, setQuality] = useState<QualityTier>(() => detectInitialQuality());
+  const stallCountRef = useRef(0);
+  const lastDowngradeAtRef = useRef(0);
+
+  const downgradeQuality = (reason: string) => {
+    const now = Date.now();
+    // Cooldown: don't downgrade more than once per 15s
+    if (now - lastDowngradeAtRef.current < 15000) return;
+    setQuality((curr) => {
+      const idx = QUALITY_ORDER.indexOf(curr);
+      if (idx >= QUALITY_ORDER.length - 1) return curr; // already lowest
+      const next = QUALITY_ORDER[idx + 1];
+      lastDowngradeAtRef.current = now;
+      console.log(`🎬⬇️ Conexão lenta (${reason}) — reduzindo qualidade ${QUALITY_LABEL[curr]} → ${QUALITY_LABEL[next]}`);
+      return next;
+    });
+  };
+
+  // React to live network changes
+  useEffect(() => {
+    const conn = (navigator as any).connection;
+    if (!conn || typeof conn.addEventListener !== 'function') return;
+    const onChange = () => {
+      const target = detectInitialQuality();
+      const targetIdx = QUALITY_ORDER.indexOf(target);
+      setQuality((curr) => {
+        const currIdx = QUALITY_ORDER.indexOf(curr);
+        // Only downgrade automatically; don't upgrade silently mid-playback
+        return targetIdx > currIdx ? target : curr;
+      });
+    };
+    conn.addEventListener('change', onChange);
+    return () => conn.removeEventListener('change', onChange);
+  }, []);
 
   const validUrls = useMemo(
     () => (Array.isArray(urls) ? urls : []).map((u) => (u || '').trim()).filter(Boolean),
