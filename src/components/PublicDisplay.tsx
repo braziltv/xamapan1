@@ -2945,12 +2945,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
-      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls) ========== */}
+      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls + cooldown) ========== */}
       <TVVideoOverlay
-        url={tvVideo.url}
+        urls={tvVideo.urls}
         enabled={tvVideo.enabled}
         volume={tvVideo.volume}
-        paused={!!announcingType}
+        paused={!!announcingType || videoCooldownActive}
         audioUnlocked={audioUnlocked}
       />
 
