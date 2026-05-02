@@ -38,12 +38,74 @@ function extractYouTubeId(url: string): string | null {
 // Average duration to advance YouTube playlist when ended event isn't reliable
 const YT_FALLBACK_ADVANCE_MS = 5 * 60 * 1000;
 
+// Quality tiers (YouTube playback quality strings)
+type QualityTier = 'hd720' | 'large' | 'medium' | 'small';
+const QUALITY_LABEL: Record<QualityTier, string> = {
+  hd720: '720p',
+  large: '480p',
+  medium: '360p',
+  small: '240p',
+};
+const QUALITY_ORDER: QualityTier[] = ['hd720', 'large', 'medium', 'small'];
+
+// Detect initial quality from Network Information API
+function detectInitialQuality(): QualityTier {
+  try {
+    const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (!conn) return 'hd720';
+    const effectiveType: string = conn.effectiveType || '';
+    const downlink: number = conn.downlink || 0; // Mbps
+    const saveData: boolean = !!conn.saveData;
+    if (saveData) return 'medium';
+    if (effectiveType === 'slow-2g' || effectiveType === '2g') return 'small';
+    if (effectiveType === '3g' || (downlink > 0 && downlink < 1.5)) return 'medium';
+    if (downlink > 0 && downlink < 4) return 'large';
+    return 'hd720';
+  } catch {
+    return 'hd720';
+  }
+}
+
 export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }: TVVideoOverlayProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [visible, setVisible] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [quality, setQuality] = useState<QualityTier>(() => detectInitialQuality());
+  const stallCountRef = useRef(0);
+  const lastDowngradeAtRef = useRef(0);
+
+  const downgradeQuality = (reason: string) => {
+    const now = Date.now();
+    // Cooldown: don't downgrade more than once per 15s
+    if (now - lastDowngradeAtRef.current < 15000) return;
+    setQuality((curr) => {
+      const idx = QUALITY_ORDER.indexOf(curr);
+      if (idx >= QUALITY_ORDER.length - 1) return curr; // already lowest
+      const next = QUALITY_ORDER[idx + 1];
+      lastDowngradeAtRef.current = now;
+      console.log(`🎬⬇️ Conexão lenta (${reason}) — reduzindo qualidade ${QUALITY_LABEL[curr]} → ${QUALITY_LABEL[next]}`);
+      return next;
+    });
+  };
+
+  // React to live network changes
+  useEffect(() => {
+    const conn = (navigator as any).connection;
+    if (!conn || typeof conn.addEventListener !== 'function') return;
+    const onChange = () => {
+      const target = detectInitialQuality();
+      const targetIdx = QUALITY_ORDER.indexOf(target);
+      setQuality((curr) => {
+        const currIdx = QUALITY_ORDER.indexOf(curr);
+        // Only downgrade automatically; don't upgrade silently mid-playback
+        return targetIdx > currIdx ? target : curr;
+      });
+    };
+    conn.addEventListener('change', onChange);
+    return () => conn.removeEventListener('change', onChange);
+  }, []);
 
   const validUrls = useMemo(
     () => (Array.isArray(urls) ? urls : []).map((u) => (u || '').trim()).filter(Boolean),
@@ -135,12 +197,12 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       } else {
         send('mute');
       }
-      // Cap quality to 720p to save bandwidth on low-quality internet connections
-      send('setPlaybackQuality', ['hd720']);
+      // Apply current dynamic quality (auto-downgrades on slow connections)
+      send('setPlaybackQuality', [quality]);
       send('playVideo');
       // Re-apply quality cap after play (YouTube may auto-bump quality)
-      setTimeout(() => send('setPlaybackQuality', ['hd720']), 1500);
-      setTimeout(() => send('setPlaybackQuality', ['hd720']), 5000);
+      setTimeout(() => send('setPlaybackQuality', [quality]), 1500);
+      setTimeout(() => send('setPlaybackQuality', [quality]), 5000);
     }
 
     // Fallback timer to rotate playlist when more than one URL
@@ -148,7 +210,43 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       const t = setTimeout(() => advance(), YT_FALLBACK_ADVANCE_MS);
       return () => clearTimeout(t);
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality]);
+
+  // Listen to YouTube infoDelivery messages to detect buffering and downgrade
+  useEffect(() => {
+    if (kind !== 'youtube') return;
+    let bufferingSince = 0;
+    const onMessage = (ev: MessageEvent) => {
+      if (typeof ev.data !== 'string') return;
+      if (!ev.data.includes('youtube')) return;
+      try {
+        const data = JSON.parse(ev.data);
+        const info = data?.info;
+        if (!info) return;
+        // playerState: 3 = buffering, 1 = playing
+        if (info.playerState === 3) {
+          if (!bufferingSince) bufferingSince = Date.now();
+          // If buffering for > 4s, downgrade
+          else if (Date.now() - bufferingSince > 4000) {
+            downgradeQuality('buffering YouTube');
+            bufferingSince = 0;
+          }
+        } else if (info.playerState === 1) {
+          bufferingSince = 0;
+        }
+      } catch { /* noop */ }
+    };
+    window.addEventListener('message', onMessage);
+    // Ask YouTube to start sending state updates
+    const iframe = iframeRef.current;
+    try {
+      iframe?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }),
+        '*'
+      );
+    } catch { /* noop */ }
+    return () => window.removeEventListener('message', onMessage);
+  }, [kind, url]);
 
   if (!enabled || validUrls.length === 0 || kind === 'unknown') return null;
   if (!visible && !shouldShow) return null;
@@ -172,7 +270,18 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
           loop={validUrls.length === 1}
           playsInline
           muted={!audioUnlocked}
+          preload={quality === 'small' || quality === 'medium' ? 'metadata' : 'auto'}
+          onWaiting={() => {
+            stallCountRef.current += 1;
+            console.warn(`🎬⏳ Vídeo travou (stall #${stallCountRef.current}) — qualidade atual ${QUALITY_LABEL[quality]}`);
+            // After 2 stalls in same session, downgrade
+            if (stallCountRef.current >= 2) {
+              downgradeQuality('stall MP4');
+              stallCountRef.current = 0;
+            }
+          }}
           onEnded={() => {
+            stallCountRef.current = 0;
             if (validUrls.length > 1) advance();
           }}
           onError={(e) => {
@@ -193,14 +302,21 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       {kind === 'youtube' && ytId && (
         <iframe
           ref={iframeRef}
-          key={url}
+          key={`${url}-${quality}`}
           title="TV Video"
           className="w-full h-full"
-          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=${validUrls.length === 1 ? 1 : 0}&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}&vq=hd720&hd=0`}
+          src={`https://www.youtube.com/embed/${ytId}?autoplay=1&loop=${validUrls.length === 1 ? 1 : 0}&playlist=${ytId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&enablejsapi=1&mute=${audioUnlocked ? 0 : 1}&vq=${quality}&hd=0`}
           frameBorder={0}
           allow="autoplay; encrypted-media; picture-in-picture"
           allowFullScreen
         />
+      )}
+
+      {/* Subtle quality indicator — only visible briefly when downgrading */}
+      {quality !== 'hd720' && (
+        <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-black/60 text-white/80 text-xs font-mono pointer-events-none">
+          {QUALITY_LABEL[quality]} • conexão lenta
+        </div>
       )}
     </div>
   );
