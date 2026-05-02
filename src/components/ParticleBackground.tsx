@@ -51,7 +51,7 @@ export const ParticleBackground = memo(function ParticleBackground({
       });
     }
     return newParticles;
-  }, [count]);
+  }, [effectiveCount]);
 
   if (!active) return null;
 
