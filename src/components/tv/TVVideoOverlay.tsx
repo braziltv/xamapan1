@@ -88,6 +88,15 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
   const [quality, setQuality] = useState<QualityTier>(() => detectInitialQuality());
   const stallCountRef = useRef(0);
   const lastDowngradeAtRef = useRef(0);
+  const [silenceHour, setSilenceHour] = useState<boolean>(() => isSilenceHourBR());
+
+  // Re-check silence window every 30s
+  useEffect(() => {
+    const check = () => setSilenceHour(isSilenceHourBR());
+    check();
+    const t = setInterval(check, 30000);
+    return () => clearInterval(t);
+  }, []);
 
   const downgradeQuality = (reason: string) => {
     const now = Date.now();
