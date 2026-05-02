@@ -970,7 +970,9 @@ export type Database = {
           force_logout_at: string | null
           patient_call_voice: string | null
           tv_video_enabled: boolean
+          tv_video_resume_delay_seconds: number
           tv_video_url: string | null
+          tv_video_urls: Json
           tv_video_volume: number
           unit_name: string
           updated_at: string
@@ -983,7 +985,9 @@ export type Database = {
           force_logout_at?: string | null
           patient_call_voice?: string | null
           tv_video_enabled?: boolean
+          tv_video_resume_delay_seconds?: number
           tv_video_url?: string | null
+          tv_video_urls?: Json
           tv_video_volume?: number
           unit_name: string
           updated_at?: string
@@ -996,7 +1000,9 @@ export type Database = {
           force_logout_at?: string | null
           patient_call_voice?: string | null
           tv_video_enabled?: boolean
+          tv_video_resume_delay_seconds?: number
           tv_video_url?: string | null
+          tv_video_urls?: Json
           tv_video_volume?: number
           unit_name?: string
           updated_at?: string

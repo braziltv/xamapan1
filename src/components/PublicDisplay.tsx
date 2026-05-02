@@ -171,11 +171,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
   const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
-  const [tvVideo, setTvVideo] = useState<{ url: string; enabled: boolean; volume: number }>({
-    url: '',
+  const [tvVideo, setTvVideo] = useState<{ urls: string[]; enabled: boolean; volume: number; resumeDelaySec: number }>({
+    urls: [],
     enabled: false,
     volume: 50,
+    resumeDelaySec: 20,
   });
+  const [videoCooldownActive, setVideoCooldownActive] = useState(false);
   const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
@@ -853,7 +855,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     const loadVideoSettings = async () => {
       const { data, error } = await supabase
         .from('unit_settings')
-        .select('tv_video_url, tv_video_enabled, tv_video_volume')
+        .select('tv_video_url, tv_video_urls, tv_video_enabled, tv_video_volume, tv_video_resume_delay_seconds')
         .eq('unit_name', marketingUnitName)
         .maybeSingle();
       if (cancelled) return;
@@ -863,10 +865,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
       console.log('🎬 Loaded TV video settings for', marketingUnitName, data);
       if (data) {
+        const raw = (data as any).tv_video_urls;
+        let urls: string[] = [];
+        if (Array.isArray(raw)) {
+          urls = raw.filter((u: any) => typeof u === 'string' && u.trim().length > 0);
+        }
+        if (urls.length === 0 && (data as any).tv_video_url) {
+          urls = [String((data as any).tv_video_url)];
+        }
         setTvVideo({
-          url: (data.tv_video_url as string | null) || '',
+          urls,
           enabled: !!data.tv_video_enabled,
           volume: typeof data.tv_video_volume === 'number' ? data.tv_video_volume : 50,
+          resumeDelaySec: typeof (data as any).tv_video_resume_delay_seconds === 'number'
+            ? (data as any).tv_video_resume_delay_seconds
+            : 20,
         });
       }
     };
@@ -888,6 +901,30 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [marketingUnitName]);
 
+  // Cooldown after a call ends: keep video paused for resumeDelaySec seconds
+  useEffect(() => {
+    if (announcingType) {
+      setVideoCooldownActive(true);
+      return;
+    }
+    if (!tvVideo.enabled || tvVideo.urls.length === 0) {
+      setVideoCooldownActive(false);
+      return;
+    }
+    const delayMs = Math.max(0, (tvVideo.resumeDelaySec ?? 20) * 1000);
+    if (delayMs === 0) {
+      setVideoCooldownActive(false);
+      return;
+    }
+    setVideoCooldownActive(true);
+    console.log(`🎬 Video cooldown ${delayMs}ms before resume`);
+    const t = setTimeout(() => {
+      setVideoCooldownActive(false);
+      console.log('🎬 Video cooldown ended — resuming playback');
+    }, delayMs);
+    return () => clearTimeout(t);
+  }, [announcingType, tvVideo.enabled, tvVideo.urls.length, tvVideo.resumeDelaySec]);
+
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
@@ -907,7 +944,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Skip auto-reload when only TV video settings changed (handled live)
           const newRow = (payload as any).new || {};
           const oldRow = (payload as any).old || {};
-          const videoFields = ['tv_video_url', 'tv_video_enabled', 'tv_video_volume'];
+          const videoFields = ['tv_video_url', 'tv_video_urls', 'tv_video_enabled', 'tv_video_volume', 'tv_video_resume_delay_seconds'];
           const allKeys = new Set([...Object.keys(newRow), ...Object.keys(oldRow)]);
           const changedKeys = [...allKeys].filter((k) => newRow[k] !== oldRow[k]);
           const onlyVideoChanged = changedKeys.length > 0 && changedKeys.every((k) => videoFields.includes(k));
@@ -2932,12 +2969,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
-      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls) ========== */}
+      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls + cooldown) ========== */}
       <TVVideoOverlay
-        url={tvVideo.url}
+        urls={tvVideo.urls}
         enabled={tvVideo.enabled}
         volume={tvVideo.volume}
-        paused={!!announcingType}
+        paused={!!announcingType || videoCooldownActive}
         audioUnlocked={audioUnlocked}
       />
 
