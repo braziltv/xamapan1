@@ -318,5 +318,6 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
           {QUALITY_LABEL[quality]} • conexão lenta
         </div>
       )}
+    </div>
   );
 }
