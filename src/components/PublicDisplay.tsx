@@ -171,11 +171,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
   const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
-  const [tvVideo, setTvVideo] = useState<{ url: string; enabled: boolean; volume: number }>({
-    url: '',
+  const [tvVideo, setTvVideo] = useState<{ urls: string[]; enabled: boolean; volume: number; resumeDelaySec: number }>({
+    urls: [],
     enabled: false,
     volume: 50,
+    resumeDelaySec: 20,
   });
+  const [videoCooldownActive, setVideoCooldownActive] = useState(false);
   const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
