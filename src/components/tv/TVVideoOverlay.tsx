@@ -210,7 +210,43 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
       const t = setTimeout(() => advance(), YT_FALLBACK_ADVANCE_MS);
       return () => clearTimeout(t);
     }
-  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length]);
+  }, [paused, enabled, volume, audioUnlocked, kind, url, validUrls.length, quality]);
+
+  // Listen to YouTube infoDelivery messages to detect buffering and downgrade
+  useEffect(() => {
+    if (kind !== 'youtube') return;
+    let bufferingSince = 0;
+    const onMessage = (ev: MessageEvent) => {
+      if (typeof ev.data !== 'string') return;
+      if (!ev.data.includes('youtube')) return;
+      try {
+        const data = JSON.parse(ev.data);
+        const info = data?.info;
+        if (!info) return;
+        // playerState: 3 = buffering, 1 = playing
+        if (info.playerState === 3) {
+          if (!bufferingSince) bufferingSince = Date.now();
+          // If buffering for > 4s, downgrade
+          else if (Date.now() - bufferingSince > 4000) {
+            downgradeQuality('buffering YouTube');
+            bufferingSince = 0;
+          }
+        } else if (info.playerState === 1) {
+          bufferingSince = 0;
+        }
+      } catch { /* noop */ }
+    };
+    window.addEventListener('message', onMessage);
+    // Ask YouTube to start sending state updates
+    const iframe = iframeRef.current;
+    try {
+      iframe?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }),
+        '*'
+      );
+    } catch { /* noop */ }
+    return () => window.removeEventListener('message', onMessage);
+  }, [kind, url]);
 
   if (!enabled || validUrls.length === 0 || kind === 'unknown') return null;
   if (!visible && !shouldShow) return null;
