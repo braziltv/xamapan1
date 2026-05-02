@@ -300,6 +300,8 @@ export function TVVideoSettings({ unitName }: TVVideoSettingsProps) {
                 <li>Os vídeos tocam em loop e em sequência (um após o outro).</li>
                 <li>Ao chamar um paciente, o vídeo é pausado e o painel padrão reaparece.</li>
                 <li>Após a chamada terminar, o vídeo aguarda <strong>{settings.resumeDelaySec} segundos</strong> antes de voltar a tocar — tempo suficiente para a chamada ser repetida sem ser interrompida pelo vídeo.</li>
+                <li><strong>Qualidade limitada a 720p</strong> automaticamente para vídeos do YouTube, economizando banda em internet lenta.</li>
+                <li>Para vídeos MP4 diretos, hospede arquivos em <strong>até 720p (1280×720)</strong> para evitar travamentos.</li>
                 <li>Para áudio funcionar, a TV precisa ter o som desbloqueado.</li>
               </ul>
             </div>
