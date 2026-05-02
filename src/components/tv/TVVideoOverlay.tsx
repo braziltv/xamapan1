@@ -334,12 +334,7 @@ export function TVVideoOverlay({ urls, enabled, volume, paused, audioUnlocked }:
         />
       )}
 
-      {/* Subtle quality indicator — only visible briefly when downgrading */}
-      {quality !== 'hd720' && (
-        <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-black/60 text-white/80 text-xs font-mono pointer-events-none">
-          {QUALITY_LABEL[quality]} • conexão lenta
-        </div>
-      )}
+      {/* Quality indicator hidden by user request */}
     </div>
   );
 }
