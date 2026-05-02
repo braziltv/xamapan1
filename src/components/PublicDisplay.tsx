@@ -920,7 +920,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           // Skip auto-reload when only TV video settings changed (handled live)
           const newRow = (payload as any).new || {};
           const oldRow = (payload as any).old || {};
-          const videoFields = ['tv_video_url', 'tv_video_enabled', 'tv_video_volume'];
+          const videoFields = ['tv_video_url', 'tv_video_urls', 'tv_video_enabled', 'tv_video_volume', 'tv_video_resume_delay_seconds'];
           const allKeys = new Set([...Object.keys(newRow), ...Object.keys(oldRow)]);
           const changedKeys = [...allKeys].filter((k) => newRow[k] !== oldRow[k]);
           const onlyVideoChanged = changedKeys.length > 0 && changedKeys.every((k) => videoFields.includes(k));
