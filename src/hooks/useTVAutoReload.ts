@@ -1,10 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const AUTO_RELOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
+const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 /**
- * Hook para recarregar a TV automaticamente a cada 10 minutos de ociosidade
- * Só recarrega se não houver chamadas durante esse período
+ * Hook para recarregar a TV automaticamente após 15 minutos de ociosidade.
+ * Só recarrega se não houver chamadas durante esse período.
+ * Use `onCallMade()` para resetar o timer sempre que uma chamada acontecer.
  */
 export function useTVAutoReload(enabled: boolean = true) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
