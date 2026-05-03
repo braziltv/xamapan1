@@ -1097,41 +1097,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   // Anti-standby: Prevent TV from entering standby mode when idle
+  // NOTE: Auto-reload por tempo foi REMOVIDO (memória: Auto-reload Disabled).
+  // Recarregar sozinho fechava o módulo TV inesperadamente. Mantemos apenas
+  // wake-lock, simulação de atividade e limpeza de memória.
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
     let activityInterval: ReturnType<typeof setInterval> | null = null;
-    let reloadCheckInterval: ReturnType<typeof setInterval> | null = null;
     let memoryCleanupInterval: ReturnType<typeof setInterval> | null = null;
-    const AUTO_RELOAD_INTERVAL = 45 * 60 * 1000; // 45 minutes auto reload (increased from 30 min)
-    const ACTIVITY_INTERVAL = 60 * 1000; // Simulate activity every 60 seconds (increased from 30s)
-    const RELOAD_CHECK_INTERVAL = 60 * 1000; // Check every 60 seconds (increased from 30s)
-    const MEMORY_CLEANUP_INTERVAL = 10 * 60 * 1000; // Memory cleanup every 10 minutes (increased from 5 min)
-    let pendingReload = false;
-    let reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
+    const ACTIVITY_INTERVAL = 60 * 1000;
+    const MEMORY_CLEANUP_INTERVAL = 10 * 60 * 1000;
 
-    // Request Wake Lock to prevent screen from sleeping
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await (navigator as any).wakeLock.request('screen');
           console.log('🔒 Wake Lock ativado - TV não entrará em standby');
-          
           wakeLock.addEventListener('release', () => {
             console.log('🔓 Wake Lock liberado - tentando reativar...');
-            // Try to re-acquire wake lock after a delay (avoid tight loop)
             setTimeout(requestWakeLock, 3000);
           });
         }
       } catch (err) {
         console.log('Wake Lock não disponível:', err);
-        // Retry after 10 seconds (increased from 5s)
         setTimeout(requestWakeLock, 10000);
       }
     };
 
-    // Simulate user activity to prevent standby on older TVs - simplified
     const simulateActivity = () => {
-      // 1. Dispatch synthetic mouse move event
       const event = new MouseEvent('mousemove', {
         bubbles: false,
         cancelable: true,
@@ -1140,58 +1132,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       });
       document.body.dispatchEvent(event);
 
-      // 2. Force a tiny DOM change (forces browser to stay active)
       const antiStandbyEl = document.getElementById('anti-standby-pixel');
       if (antiStandbyEl) {
         antiStandbyEl.style.opacity = antiStandbyEl.style.opacity === '0.01' ? '0.02' : '0.01';
       }
 
-      // 3. Resume audio context if suspended
       if (audioContextRef.current?.state === 'suspended') {
         audioContextRef.current.resume().catch(() => {});
       }
     };
 
-    // Memory cleanup - clear old processed calls
     const cleanupMemory = () => {
       const maxProcessedCalls = 100;
       if (processedCallsRef.current.size > maxProcessedCalls) {
         const arr = Array.from(processedCallsRef.current);
-        processedCallsRef.current = new Set(arr.slice(-50)); // Keep only last 50
+        processedCallsRef.current = new Set(arr.slice(-50));
         console.log('🧹 Memory cleanup: cleared old processed calls');
       }
     };
 
-    // Check if we should reload now
-    const checkReload = () => {
-      const now = Date.now();
-      
-      // If we passed the scheduled reload time
-      if (now >= reloadScheduledAt) {
-        if (!isSpeakingRef.current && !pendingReload) {
-          console.log('⏰ Recarregando página automaticamente (30 minutos)...');
-          window.location.reload();
-        } else if (!pendingReload) {
-          pendingReload = true;
-          console.log('⏸️ Reload adiado - reproduzindo anúncio. Aguardando término...');
-        }
-      }
-      
-      // If pending reload and not speaking anymore
-      if (pendingReload && !isSpeakingRef.current) {
-        console.log('▶️ Anúncio terminou - executando reload pendente...');
-        window.location.reload();
-      }
-    };
-
-    // Schedule next reload
-    const scheduleNextReload = () => {
-      reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
-      pendingReload = false;
-      console.log(`📅 Próximo reload agendado para ${new Date(reloadScheduledAt).toLocaleTimeString('pt-BR')}`);
-    };
-
-    // Re-acquire wake lock when page becomes visible again
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('👁️ Página visível novamente - reativando proteções');
@@ -1200,29 +1159,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Handle page focus
     const handleFocus = () => {
       console.log('🎯 Página recebeu foco - reativando proteções');
       requestWakeLock();
     };
     window.addEventListener('focus', handleFocus);
 
-    // Start wake lock
     requestWakeLock();
-
-    // Start activity simulation interval (every 30 seconds - reduced frequency)
     activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
-
-    // Start reload check interval (every 30 seconds - reduced frequency)
-    reloadCheckInterval = setInterval(checkReload, RELOAD_CHECK_INTERVAL);
-
-    // Start memory cleanup interval
     memoryCleanupInterval = setInterval(cleanupMemory, MEMORY_CLEANUP_INTERVAL);
 
-    // Schedule first reload
-    scheduleNextReload();
-
-    // Create anti-standby pixel element
     if (!document.getElementById('anti-standby-pixel')) {
       const pixel = document.createElement('div');
       pixel.id = 'anti-standby-pixel';
@@ -1236,9 +1182,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
       if (activityInterval) {
         clearInterval(activityInterval);
-      }
-      if (reloadCheckInterval) {
-        clearInterval(reloadCheckInterval);
       }
       if (memoryCleanupInterval) {
         clearInterval(memoryCleanupInterval);
