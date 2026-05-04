@@ -13,7 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { TVVideoSettings } from './TVVideoSettings';
 
 interface MarketingPanelProps {
   unitName: string;
@@ -463,7 +462,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="voice" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="voice" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             Anúncios de Voz
@@ -471,10 +470,6 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
           <TabsTrigger value="text" className="flex items-center gap-2">
             <Type className="w-4 h-4" />
             Frases no Rodapé
-          </TabsTrigger>
-          <TabsTrigger value="video" className="flex items-center gap-2">
-            <Tv className="w-4 h-4" />
-            Vídeo na TV
           </TabsTrigger>
         </TabsList>
 
@@ -676,10 +671,6 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="video" className="mt-4">
-          <TVVideoSettings unitName={unitName} />
         </TabsContent>
       </Tabs>
 

@@ -15,7 +15,6 @@ import { ParticleBackground } from './ParticleBackground';
 import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
-import { TVVideoOverlay } from './tv/TVVideoOverlay';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
 
 interface PublicDisplayProps {
@@ -102,8 +101,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
-  // Auto-reload da TV após 15 min sem chamadas (reseta a cada chamada anunciada)
-  const { onCallMade } = useTVAutoReload(true);
+  // Auto-reload desabilitado
+  // const { onCallMade } = useTVAutoReload(true);
   
   // Get unit name for cleanup
   const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
@@ -171,13 +170,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [newsCountdown, setNewsCountdown] = useState(5 * 60); // 5 minutes in seconds
   const [commercialPhrases, setCommercialPhrases] = useState<CommercialPhrase[]>([]);
   const [scheduledAnnouncements, setScheduledAnnouncements] = useState<ScheduledAnnouncement[]>([]);
-  const [tvVideo, setTvVideo] = useState<{ urls: string[]; enabled: boolean; volume: number; resumeDelaySec: number }>({
-    urls: [],
-    enabled: false,
-    volume: 50,
-    resumeDelaySec: 20,
-  });
-  const [videoCooldownActive, setVideoCooldownActive] = useState(false);
   const lastAnnouncementPlayedRef = useRef<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => localStorage.getItem('audioUnlocked') === 'true');
@@ -847,84 +839,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [unitName, marketingUnitName]);
 
-  // Load TV video settings from unit_settings (and refresh on realtime change)
-  useEffect(() => {
-    if (!marketingUnitName) return;
-    let cancelled = false;
-
-    const loadVideoSettings = async () => {
-      const { data, error } = await supabase
-        .from('unit_settings')
-        .select('tv_video_url, tv_video_urls, tv_video_enabled, tv_video_volume, tv_video_resume_delay_seconds')
-        .eq('unit_name', marketingUnitName)
-        .maybeSingle();
-      if (cancelled) return;
-      if (error) {
-        console.warn('Failed to load TV video settings:', error.message);
-        return;
-      }
-      console.log('🎬 Loaded TV video settings for', marketingUnitName, data);
-      if (data) {
-        const raw = (data as any).tv_video_urls;
-        let urls: string[] = [];
-        if (Array.isArray(raw)) {
-          urls = raw.filter((u: any) => typeof u === 'string' && u.trim().length > 0);
-        }
-        if (urls.length === 0 && (data as any).tv_video_url) {
-          urls = [String((data as any).tv_video_url)];
-        }
-        setTvVideo({
-          urls,
-          enabled: !!data.tv_video_enabled,
-          volume: typeof data.tv_video_volume === 'number' ? data.tv_video_volume : 50,
-          resumeDelaySec: typeof (data as any).tv_video_resume_delay_seconds === 'number'
-            ? (data as any).tv_video_resume_delay_seconds
-            : 20,
-        });
-      }
-    };
-
-    loadVideoSettings();
-
-    const ch = supabase
-      .channel(`tv-video-settings-${marketingUnitName}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'unit_settings', filter: `unit_name=eq.${marketingUnitName}` },
-        () => loadVideoSettings()
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(ch);
-    };
-  }, [marketingUnitName]);
-
-  // Cooldown after a call ends: keep video paused for resumeDelaySec seconds
-  useEffect(() => {
-    if (announcingType) {
-      setVideoCooldownActive(true);
-      return;
-    }
-    if (!tvVideo.enabled || tvVideo.urls.length === 0) {
-      setVideoCooldownActive(false);
-      return;
-    }
-    const delayMs = Math.max(0, (tvVideo.resumeDelaySec ?? 20) * 1000);
-    if (delayMs === 0) {
-      setVideoCooldownActive(false);
-      return;
-    }
-    setVideoCooldownActive(true);
-    console.log(`🎬 Video cooldown ${delayMs}ms before resume`);
-    const t = setTimeout(() => {
-      setVideoCooldownActive(false);
-      console.log('🎬 Video cooldown ended — resuming playback');
-    }, delayMs);
-    return () => clearTimeout(t);
-  }, [announcingType, tvVideo.enabled, tvVideo.urls.length, tvVideo.resumeDelaySec]);
-
   // Listen for configuration changes and auto-reload
   useEffect(() => {
     console.log('📡 Setting up auto-reload on config changes for TV');
@@ -941,17 +855,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           filter: `unit_name=eq.${unitName}`
         },
         (payload) => {
-          // Skip auto-reload when only TV video settings changed (handled live)
-          const newRow = (payload as any).new || {};
-          const oldRow = (payload as any).old || {};
-          const videoFields = ['tv_video_url', 'tv_video_urls', 'tv_video_enabled', 'tv_video_volume', 'tv_video_resume_delay_seconds'];
-          const allKeys = new Set([...Object.keys(newRow), ...Object.keys(oldRow)]);
-          const changedKeys = [...allKeys].filter((k) => newRow[k] !== oldRow[k]);
-          const onlyVideoChanged = changedKeys.length > 0 && changedKeys.every((k) => videoFields.includes(k));
-          if (onlyVideoChanged) {
-            console.log('🎬 Only TV video settings changed — applying live, skipping reload');
-            return;
-          }
           console.log('⚙️ Unit settings changed, reloading TV...', payload);
           triggerAutoReload('Configurações atualizadas');
         }
@@ -1097,33 +1000,41 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, []);
 
   // Anti-standby: Prevent TV from entering standby mode when idle
-  // NOTE: Auto-reload por tempo foi REMOVIDO (memória: Auto-reload Disabled).
-  // Recarregar sozinho fechava o módulo TV inesperadamente. Mantemos apenas
-  // wake-lock, simulação de atividade e limpeza de memória.
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
     let activityInterval: ReturnType<typeof setInterval> | null = null;
+    let reloadCheckInterval: ReturnType<typeof setInterval> | null = null;
     let memoryCleanupInterval: ReturnType<typeof setInterval> | null = null;
-    const ACTIVITY_INTERVAL = 60 * 1000;
-    const MEMORY_CLEANUP_INTERVAL = 10 * 60 * 1000;
+    const AUTO_RELOAD_INTERVAL = 45 * 60 * 1000; // 45 minutes auto reload (increased from 30 min)
+    const ACTIVITY_INTERVAL = 60 * 1000; // Simulate activity every 60 seconds (increased from 30s)
+    const RELOAD_CHECK_INTERVAL = 60 * 1000; // Check every 60 seconds (increased from 30s)
+    const MEMORY_CLEANUP_INTERVAL = 10 * 60 * 1000; // Memory cleanup every 10 minutes (increased from 5 min)
+    let pendingReload = false;
+    let reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
 
+    // Request Wake Lock to prevent screen from sleeping
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await (navigator as any).wakeLock.request('screen');
           console.log('🔒 Wake Lock ativado - TV não entrará em standby');
+          
           wakeLock.addEventListener('release', () => {
             console.log('🔓 Wake Lock liberado - tentando reativar...');
+            // Try to re-acquire wake lock after a delay (avoid tight loop)
             setTimeout(requestWakeLock, 3000);
           });
         }
       } catch (err) {
         console.log('Wake Lock não disponível:', err);
+        // Retry after 10 seconds (increased from 5s)
         setTimeout(requestWakeLock, 10000);
       }
     };
 
+    // Simulate user activity to prevent standby on older TVs - simplified
     const simulateActivity = () => {
+      // 1. Dispatch synthetic mouse move event
       const event = new MouseEvent('mousemove', {
         bubbles: false,
         cancelable: true,
@@ -1132,25 +1043,58 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       });
       document.body.dispatchEvent(event);
 
+      // 2. Force a tiny DOM change (forces browser to stay active)
       const antiStandbyEl = document.getElementById('anti-standby-pixel');
       if (antiStandbyEl) {
         antiStandbyEl.style.opacity = antiStandbyEl.style.opacity === '0.01' ? '0.02' : '0.01';
       }
 
+      // 3. Resume audio context if suspended
       if (audioContextRef.current?.state === 'suspended') {
         audioContextRef.current.resume().catch(() => {});
       }
     };
 
+    // Memory cleanup - clear old processed calls
     const cleanupMemory = () => {
       const maxProcessedCalls = 100;
       if (processedCallsRef.current.size > maxProcessedCalls) {
         const arr = Array.from(processedCallsRef.current);
-        processedCallsRef.current = new Set(arr.slice(-50));
+        processedCallsRef.current = new Set(arr.slice(-50)); // Keep only last 50
         console.log('🧹 Memory cleanup: cleared old processed calls');
       }
     };
 
+    // Check if we should reload now
+    const checkReload = () => {
+      const now = Date.now();
+      
+      // If we passed the scheduled reload time
+      if (now >= reloadScheduledAt) {
+        if (!isSpeakingRef.current && !pendingReload) {
+          console.log('⏰ Recarregando página automaticamente (30 minutos)...');
+          window.location.reload();
+        } else if (!pendingReload) {
+          pendingReload = true;
+          console.log('⏸️ Reload adiado - reproduzindo anúncio. Aguardando término...');
+        }
+      }
+      
+      // If pending reload and not speaking anymore
+      if (pendingReload && !isSpeakingRef.current) {
+        console.log('▶️ Anúncio terminou - executando reload pendente...');
+        window.location.reload();
+      }
+    };
+
+    // Schedule next reload
+    const scheduleNextReload = () => {
+      reloadScheduledAt = Date.now() + AUTO_RELOAD_INTERVAL;
+      pendingReload = false;
+      console.log(`📅 Próximo reload agendado para ${new Date(reloadScheduledAt).toLocaleTimeString('pt-BR')}`);
+    };
+
+    // Re-acquire wake lock when page becomes visible again
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('👁️ Página visível novamente - reativando proteções');
@@ -1159,16 +1103,29 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Handle page focus
     const handleFocus = () => {
       console.log('🎯 Página recebeu foco - reativando proteções');
       requestWakeLock();
     };
     window.addEventListener('focus', handleFocus);
 
+    // Start wake lock
     requestWakeLock();
+
+    // Start activity simulation interval (every 30 seconds - reduced frequency)
     activityInterval = setInterval(simulateActivity, ACTIVITY_INTERVAL);
+
+    // Start reload check interval (every 30 seconds - reduced frequency)
+    reloadCheckInterval = setInterval(checkReload, RELOAD_CHECK_INTERVAL);
+
+    // Start memory cleanup interval
     memoryCleanupInterval = setInterval(cleanupMemory, MEMORY_CLEANUP_INTERVAL);
 
+    // Schedule first reload
+    scheduleNextReload();
+
+    // Create anti-standby pixel element
     if (!document.getElementById('anti-standby-pixel')) {
       const pixel = document.createElement('div');
       pixel.id = 'anti-standby-pixel';
@@ -1182,6 +1139,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
       if (activityInterval) {
         clearInterval(activityInterval);
+      }
+      if (reloadCheckInterval) {
+        clearInterval(reloadCheckInterval);
       }
       if (memoryCleanupInterval) {
         clearInterval(memoryCleanupInterval);
@@ -2490,13 +2450,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (processedCallsRef.current.has(item.id)) return;
       processedCallsRef.current.add(item.id);
 
-      // Reset do timer de auto-reload (15 min sem chamadas)
-      onCallMade();
-
       announcementQueueRef.current.push(item);
       processAnnouncementQueue();
     },
-    [processAnnouncementQueue, onCallMade]
+    [processAnnouncementQueue]
   );
 
   // Stop the flashing alert after exactly 10 seconds
@@ -2914,15 +2871,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     >
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
-
-      {/* ========== FULLSCREEN VIDEO OVERLAY (hides during calls + cooldown) ========== */}
-      <TVVideoOverlay
-        urls={tvVideo.urls}
-        enabled={tvVideo.enabled}
-        volume={tvVideo.volume}
-        paused={!!announcingType || videoCooldownActive}
-        audioUnlocked={audioUnlocked}
-      />
 
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
