@@ -44,8 +44,7 @@ export function MarketingImageSlideshow({
         .select('id, image_url, display_order')
         .eq('unit_name', uName)
         .eq('month', month)
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
+        .eq('is_active', true);
 
       if (error) {
         console.error('[MarketingImageSlideshow] load error:', error);
@@ -55,7 +54,9 @@ export function MarketingImageSlideshow({
         unitName: uName, month, count: data?.length || 0,
       });
       if (cancelled) return;
-      setImages(data || []);
+      // Embaralha ordem aleatória a cada carregamento
+      const shuffled = (data || []).sort(() => Math.random() - 0.5);
+      setImages(shuffled);
       setCurrentIndex(0);
     };
 
