@@ -149,6 +149,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
+      marketingIdleTimerRef.current = null;
     }, 50000);
   }, []);
 
