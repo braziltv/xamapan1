@@ -30,9 +30,6 @@ export function MarketingImageSlideshow({
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [fadeProgress, setFadeProgress] = useState(1); // 0 = recém-trocado, 1 = totalmente exibido
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Guarda a ordem embaralhada fixa durante a sessão
-  const sessionOrderRef = useRef<string[]>([]);
-  const sessionMonthRef = useRef<number>(0);
 
   // Carrega as imagens do mês atual da unidade
   useEffect(() => {
@@ -105,8 +102,6 @@ export function MarketingImageSlideshow({
     return () => {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
-      sessionOrderRef.current = [];
-      sessionMonthRef.current = 0;
     };
   }, [unitName]);
 
