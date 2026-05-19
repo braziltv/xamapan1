@@ -2985,8 +2985,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
       {/* ========== MARKETING IMAGE SLIDESHOW (idle 50s) ========== */}
       <MarketingImageSlideshow
-        unitName={unitName}
-        isIdle={isMarketingIdle && !announcingType}
+        unitName={marketingUnitName || unitName}
+        isIdle={isMarketingIdle && !announcingType && !isVoiceSpeaking}
       />
 
 
