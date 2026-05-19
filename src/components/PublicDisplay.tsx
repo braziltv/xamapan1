@@ -16,6 +16,7 @@ import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
+import { MarketingImageSlideshow } from './MarketingImageSlideshow';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
