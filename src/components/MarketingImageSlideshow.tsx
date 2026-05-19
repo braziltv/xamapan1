@@ -128,29 +128,35 @@ export function MarketingImageSlideshow({
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
 
+  // Alterna efeito Ken Burns para cada imagem
+  const kbClass = `slideshow-kb-${(currentIndex % 4) + 1}`;
+  const prevKbClass = previousIndex !== null ? `slideshow-kb-${(previousIndex % 4) + 1}` : '';
+
   return (
-    <div className="fixed inset-0 z-[80] bg-black animate-fade-in">
+    <div className="fixed inset-0 z-[80] bg-black animate-fade-in overflow-hidden">
       {prevImg && (
         <img
-          key={`prev-${prevImg.id}`}
+          key={`prev-${prevImg.id}-${currentIndex}`}
           src={prevImg.image_url}
           alt=""
-          className="absolute inset-0 w-full h-full object-contain"
+          className={`absolute inset-0 w-full h-full object-contain slideshow-previous ${prevKbClass}`}
         />
       )}
       <img
-        key={`cur-${currentImg.id}`}
+        key={`cur-${currentImg.id}-${currentIndex}`}
         src={currentImg.image_url}
         alt=""
-        className="absolute inset-0 w-full h-full object-contain animate-fade-in"
+        className={`absolute inset-0 w-full h-full object-contain ${kbClass}`}
       />
+      {/* Vinheta sutil para um toque mais profissional */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_55%,_rgba(0,0,0,0.45)_100%)] z-[5]" />
       {/* Indicador discreto de progresso */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
         {images.map((_, i) => (
           <div
             key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/40'
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              i === currentIndex ? 'w-10 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]' : 'w-1.5 bg-white/30'
             }`}
           />
         ))}
