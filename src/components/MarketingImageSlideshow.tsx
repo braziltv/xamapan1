@@ -28,6 +28,7 @@ export function MarketingImageSlideshow({
   const [images, setImages] = useState<MarketingImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
+  const [fadeProgress, setFadeProgress] = useState(1); // 0 = recém-trocado, 1 = totalmente exibido
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Guarda a ordem embaralhada fixa durante a sessão
   const sessionOrderRef = useRef<string[]>([]);
@@ -146,6 +147,17 @@ export function MarketingImageSlideshow({
     };
   }, [isIdle, images.length, imageDurationMs]);
 
+  // Dispara o crossfade apenas quando o índice realmente muda.
+  // Resize/re-render não reinicia a animação (transition baseada em estado).
+  useEffect(() => {
+    if (previousIndex === null) return;
+    setFadeProgress(0);
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setFadeProgress(1));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [currentIndex, previousIndex]);
+
   if (!isIdle || images.length === 0) {
     if (import.meta.env.DEV) {
       console.log('[MarketingImageSlideshow] hidden', { isIdle, count: images.length, unitName });
@@ -155,24 +167,29 @@ export function MarketingImageSlideshow({
 
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
+  const FADE_MS = 1200;
+  const transitionStyle = {
+    transition: `opacity ${FADE_MS}ms ease-in-out`,
+    willChange: 'opacity' as const,
+  };
 
   return (
     <div className="fixed inset-0 z-[80] bg-black">
       {prevImg && (
         <img
-          key={`prev-${prevImg.id}-${previousIndex}`}
+          key={`prev-${previousIndex}`}
           src={prevImg.image_url}
           alt=""
-          className="absolute inset-0 w-full h-full object-contain opacity-100 animate-slideshow-fade-out"
-          style={{ willChange: 'opacity' }}
+          className="absolute inset-0 w-full h-full object-contain"
+          style={{ ...transitionStyle, opacity: 1 - fadeProgress }}
         />
       )}
       <img
-        key={`cur-${currentImg.id}-${currentIndex}`}
+        key={`cur-${currentIndex}`}
         src={currentImg.image_url}
         alt=""
-        className="absolute inset-0 w-full h-full object-contain animate-slideshow-fade-in"
-        style={{ willChange: 'opacity' }}
+        className="absolute inset-0 w-full h-full object-contain"
+        style={{ ...transitionStyle, opacity: fadeProgress }}
       />
     </div>
   );
