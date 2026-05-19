@@ -1951,8 +1951,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (error) {
         console.error('❌ Erro ao reproduzir anúncio:', error);
       } finally {
-        isSpeakingRef.current = false;
-        setAnnouncingType(null);
+        releaseVoiceAnnouncementState('teste manual');
       }
     };
     
@@ -1963,7 +1962,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       delete (window as any).testarHora;
       delete (window as any).testarAnuncioVoz;
     };
-  }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
+  }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   // Announce time once per hour at minute 0 (quiet hours: 22h-06h)
   useEffect(() => {
@@ -2134,15 +2133,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         } catch (error) {
           console.error('Error playing scheduled announcement:', error);
         } finally {
-          isSpeakingRef.current = false;
-          setAnnouncingType(null);
+          releaseVoiceAnnouncementState(`anúncio programado ${announcement.title}`);
         }
       }, 1500);
 
       // Only play one announcement at a time
       break;
     }
-  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio]);
+  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio, releaseVoiceAnnouncementState]);
 
   // Process immediate announcement triggered via realtime
   useEffect(() => {
@@ -2199,13 +2197,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (error) {
         console.error('Error playing immediate announcement:', error);
       } finally {
-        isSpeakingRef.current = false;
-        setAnnouncingType(null);
+        releaseVoiceAnnouncementState(`anúncio imediato ${announcement.title}`);
       }
     };
 
     playImmediateAnnouncement();
-  }, [pendingImmediateAnnouncement, audioUnlocked, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
+  }, [pendingImmediateAnnouncement, audioUnlocked, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   const playCommercialPhraseNow = useCallback(async () => {
     try {
@@ -2252,10 +2249,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         timestamp: new Date(),
       });
     } finally {
-      isSpeakingRef.current = false;
-      setAnnouncingType(null);
+      releaseVoiceAnnouncementState('frase comercial manual');
     }
-  }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS]);
+  }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
