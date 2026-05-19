@@ -143,23 +143,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Idle state para slideshow de marketing (50s sem chamadas/anúncios)
   const [isMarketingIdle, setIsMarketingIdle] = useState(false);
   const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSpeakingRef = useRef<boolean>(false);
+  const lastSpeakCallRef = useRef<number>(0);
+
+  const clearMarketingIdleTimer = useCallback(() => {
+    if (marketingIdleTimerRef.current) {
+      clearTimeout(marketingIdleTimerRef.current);
+      marketingIdleTimerRef.current = null;
+    }
+  }, []);
 
   const resetMarketingIdle = useCallback(() => {
     setIsMarketingIdle(false);
-    if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    clearMarketingIdleTimer();
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
       marketingIdleTimerRef.current = null;
     }, 50000);
-  }, []);
+  }, [clearMarketingIdleTimer]);
 
   // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
   useEffect(() => {
     resetMarketingIdle();
     return () => {
-      if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+      clearMarketingIdleTimer();
     };
-  }, [resetMarketingIdle]);
+  }, [resetMarketingIdle, clearMarketingIdleTimer]);
 
   // Espelha isSpeakingRef (anúncios de voz de marketing/hora) em state,
   // para que o slideshow também esconda durante esses anúncios e reapareça depois.
@@ -176,9 +185,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   useEffect(() => {
     if (announcingType || currentTriageCall || currentDoctorCall || isVoiceSpeaking) {
       setIsMarketingIdle(false);
-      if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+      clearMarketingIdleTimer();
     }
-  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination, isVoiceSpeaking]);
+  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination, isVoiceSpeaking, clearMarketingIdleTimer]);
 
   // Detecta FIM de qualquer chamada (triagem, médico, anúncio ou voz marketing):
   // quando passa de ativo -> inativo, re-arma timer de 50s.
@@ -251,8 +260,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const lastTimeAnnouncementRef = useRef<number>(0);
   const scheduledAnnouncementsRef = useRef<number[]>([]);
   const currentScheduleHourRef = useRef<number>(-1);
-  const isSpeakingRef = useRef<boolean>(false);
-  const lastSpeakCallRef = useRef<number>(0);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
