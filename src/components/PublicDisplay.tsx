@@ -214,6 +214,24 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     return () => clearInterval(interval);
   }, [announcingType, currentTriageCall, currentDoctorCall, isMarketingIdle, resetMarketingIdle]);
 
+  // Visibilitychange: navegadores throttlam setTimeout em abas escondidas.
+  // Quando a aba volta a ficar visível, se nada está ativo, ativa idle imediatamente.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall || isSpeakingRef.current);
+      if (!isActive) {
+        console.log('👁️ Tab voltou visível e ocioso: ativando slideshow imediatamente.');
+        clearMarketingIdleTimer();
+        setIsMarketingIdle(true);
+      } else {
+        resetMarketingIdle();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [announcingType, currentTriageCall, currentDoctorCall, resetMarketingIdle, clearMarketingIdleTimer]);
+
 
 
 
