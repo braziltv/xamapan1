@@ -16,6 +16,7 @@ import { ColorCycleOverlay } from './ColorCycleOverlay';
 import { RecentCallsCarousel } from './RecentCallsCarousel';
 import { RecentCallsCarouselTV } from './tv/RecentCallsCarouselTV';
 import { useTVResolution, type TVResolutionTier } from '@/hooks/useTVResolution';
+import { MarketingImageSlideshow } from './MarketingImageSlideshow';
 
 interface PublicDisplayProps {
   currentTriageCall?: any;
@@ -138,6 +139,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [unitId, setUnitId] = useState(() =>
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
+
+  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
+  const [isMarketingIdle, setIsMarketingIdle] = useState(false);
+  const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetMarketingIdle = useCallback(() => {
+    setIsMarketingIdle(false);
+    if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    marketingIdleTimerRef.current = setTimeout(() => {
+      setIsMarketingIdle(true);
+    }, 30000);
+  }, []);
+
+  // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
+  useEffect(() => {
+    resetMarketingIdle();
+    return () => {
+      if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    };
+  }, [resetMarketingIdle]);
+
+  useEffect(() => {
+    if (currentTriageCall || currentDoctorCall || announcingType) {
+      resetMarketingIdle();
+    }
+  }, [currentTriageCall, currentDoctorCall, announcingType, resetMarketingIdle]);
 
   // Reset de estado quando a unidade muda (evita replays e loops)
   useEffect(() => {
@@ -2871,6 +2898,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     >
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
+
+      {/* ========== MARKETING IMAGE SLIDESHOW (idle 30s) ========== */}
+      <MarketingImageSlideshow
+        unitName={unitName}
+        isIdle={isMarketingIdle && !announcingType && !currentTriageCall && !currentDoctorCall}
+      />
+
 
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
