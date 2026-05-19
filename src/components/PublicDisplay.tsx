@@ -161,9 +161,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, [resetMarketingIdle]);
 
   useEffect(() => {
-    if (currentTriageCall || currentDoctorCall || announcingType) {
-      resetMarketingIdle();
-    }
+    // Sempre que o estado de chamada/anúncio muda (entra OU sai),
+    // re-arma o cronômetro de 30s. Assim, ao terminar uma chamada,
+    // o slideshow volta a aparecer 30s depois.
+    resetMarketingIdle();
   }, [currentTriageCall, currentDoctorCall, announcingType, resetMarketingIdle]);
 
   // Reset de estado quando a unidade muda (evita replays e loops)
