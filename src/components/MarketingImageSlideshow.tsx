@@ -122,6 +122,8 @@ export function MarketingImageSlideshow({
     return () => {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
+      sessionOrderRef.current = [];
+      sessionMonthRef.current = 0;
     };
   }, [unitName]);
 
