@@ -285,6 +285,14 @@ export default {
           "0%, 90%, 100%": { opacity: "0" },
           "92%, 94%": { opacity: "0.8" },
         },
+        "slideshow-fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "slideshow-fade-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -313,6 +321,9 @@ export default {
         "raindrop-fall": "raindrop-fall 1s ease-in infinite",
         "snowflake-fall": "snowflake-fall 2s ease-in-out infinite",
         "lightning-flash": "lightning-flash 3s ease-in-out infinite",
+        // Slideshow crossfade
+        "slideshow-fade-in": "slideshow-fade-in 1.2s ease-in-out forwards",
+        "slideshow-fade-out": "slideshow-fade-out 1.2s ease-in-out forwards",
       },
     },
   },

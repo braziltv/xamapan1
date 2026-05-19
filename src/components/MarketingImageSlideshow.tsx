@@ -157,20 +157,22 @@ export function MarketingImageSlideshow({
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black animate-fade-in">
+    <div className="fixed inset-0 z-[80] bg-black">
       {prevImg && (
         <img
-          key={`prev-${prevImg.id}`}
+          key={`prev-${prevImg.id}-${previousIndex}`}
           src={prevImg.image_url}
           alt=""
-          className="absolute inset-0 w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-contain opacity-100 animate-slideshow-fade-out"
+          style={{ willChange: 'opacity' }}
         />
       )}
       <img
-        key={`cur-${currentImg.id}`}
+        key={`cur-${currentImg.id}-${currentIndex}`}
         src={currentImg.image_url}
         alt=""
-        className="absolute inset-0 w-full h-full object-contain animate-fade-in"
+        className="absolute inset-0 w-full h-full object-contain animate-slideshow-fade-in"
+        style={{ willChange: 'opacity' }}
       />
     </div>
   );
