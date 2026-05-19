@@ -41,27 +41,9 @@ export function MarketingImageSlideshow({
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
 
-    const applySessionOrder = (data: MarketingImage[]) => {
-      const currentMonth = new Date().getMonth() + 1;
-      // Se mudou de mês ou primeira carga, embaralha e fixa a ordem
-      if (sessionMonthRef.current !== currentMonth || sessionOrderRef.current.length === 0) {
-        sessionMonthRef.current = currentMonth;
-        const shuffled = [...data].sort(() => Math.random() - 0.5);
-        sessionOrderRef.current = shuffled.map((img) => img.id);
-        return shuffled;
-      }
-      // Mantém ordem da sessão: imagens conhecidas na ordem fixa, novas no final
-      const orderMap = new Map(sessionOrderRef.current.map((id, idx) => [id, idx]));
-      const known: MarketingImage[] = [];
-      const novel: MarketingImage[] = [];
-      data.forEach((img) => {
-        if (orderMap.has(img.id)) known.push(img);
-        else novel.push(img);
-      });
-      known.sort((a, b) => (orderMap.get(a.id)! - orderMap.get(b.id)!));
-      // Adiciona novas imagens ao final do array de ordem
-      novel.forEach((img) => sessionOrderRef.current.push(img.id));
-      return [...known, ...novel];
+    const applyShuffle = (data: MarketingImage[]) => {
+      // Sempre embaralha aleatoriamente a cada carregamento
+      return [...data].sort(() => Math.random() - 0.5);
     };
 
     const loadImages = async (uName: string) => {
