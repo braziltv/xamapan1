@@ -2899,6 +2899,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
+      {/* ========== MARKETING IMAGE SLIDESHOW (idle 30s) ========== */}
+      <MarketingImageSlideshow
+        unitName={unitName}
+        isIdle={isMarketingIdle && !announcingType && !currentTriageCall && !currentDoctorCall}
+      />
+
+
       {/* ========== FLASH EFFECT ON CALL START ========== */}
       {ENABLE_CALL_OVERLAYS && showFlash && (
         <div className="fixed inset-0 z-[200] pointer-events-none">
