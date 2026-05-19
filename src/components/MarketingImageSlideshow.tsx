@@ -63,7 +63,7 @@ export function MarketingImageSlideshow({
         unitName: uName, month, count: data?.length || 0,
       });
       if (cancelled) return;
-      const ordered = applySessionOrder(data || []);
+      const ordered = applyShuffle(data || []);
       setImages(ordered);
       setCurrentIndex(0);
     };
