@@ -140,6 +140,32 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
 
+  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
+  const [isMarketingIdle, setIsMarketingIdle] = useState(false);
+  const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetMarketingIdle = useCallback(() => {
+    setIsMarketingIdle(false);
+    if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    marketingIdleTimerRef.current = setTimeout(() => {
+      setIsMarketingIdle(true);
+    }, 30000);
+  }, []);
+
+  // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
+  useEffect(() => {
+    resetMarketingIdle();
+    return () => {
+      if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    };
+  }, [resetMarketingIdle]);
+
+  useEffect(() => {
+    if (currentTriageCall || currentDoctorCall || announcingType) {
+      resetMarketingIdle();
+    }
+  }, [currentTriageCall, currentDoctorCall, announcingType, resetMarketingIdle]);
+
   // Reset de estado quando a unidade muda (evita replays e loops)
   useEffect(() => {
     processedCallsRef.current.clear();
