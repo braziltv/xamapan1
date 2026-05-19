@@ -96,7 +96,12 @@ export function MarketingImageSlideshow({
     };
   }, [isIdle, images.length, imageDurationMs]);
 
-  if (!isIdle || images.length === 0) return null;
+  if (!isIdle || images.length === 0) {
+    if (import.meta.env.DEV) {
+      console.log('[MarketingImageSlideshow] hidden', { isIdle, count: images.length, unitName });
+    }
+    return null;
+  }
 
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
