@@ -144,17 +144,6 @@ export function MarketingImageSlideshow({
         alt=""
         className="absolute inset-0 w-full h-full object-contain animate-fade-in"
       />
-      {/* Indicador discreto de progresso */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-        {images.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/40'
-            }`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
