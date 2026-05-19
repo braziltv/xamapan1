@@ -187,7 +187,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       setIsMarketingIdle(false);
       clearMarketingIdleTimer();
     }
-  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination, isVoiceSpeaking, clearMarketingIdleTimer]);
+  }, [announcingType, currentTriageCall, currentDoctorCall, isVoiceSpeaking, clearMarketingIdleTimer]);
 
   // Detecta FIM de qualquer chamada (triagem, médico, anúncio ou voz marketing):
   // quando passa de ativo -> inativo, re-arma timer de 50s.
