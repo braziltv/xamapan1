@@ -48,6 +48,9 @@ export function MarketingImageSlideshow({
         console.error('[MarketingImageSlideshow] load error:', error);
         return;
       }
+      console.log('[MarketingImageSlideshow] loaded', {
+        unitName, month, count: data?.length || 0,
+      });
       setImages(data || []);
       setCurrentIndex(0);
     };
@@ -93,13 +96,18 @@ export function MarketingImageSlideshow({
     };
   }, [isIdle, images.length, imageDurationMs]);
 
-  if (!isIdle || images.length === 0) return null;
+  if (!isIdle || images.length === 0) {
+    if (import.meta.env.DEV) {
+      console.log('[MarketingImageSlideshow] hidden', { isIdle, count: images.length, unitName });
+    }
+    return null;
+  }
 
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black animate-fade-in">
+    <div className="fixed inset-0 z-[80] bg-black animate-fade-in">
       {prevImg && (
         <img
           key={`prev-${prevImg.id}`}
