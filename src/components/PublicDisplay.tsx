@@ -149,6 +149,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
+      marketingIdleTimerRef.current = null;
     }, 50000);
   }, []);
 
@@ -168,17 +169,33 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination]);
 
-  // Detecta FIM do anúncio (announcingType -> null): re-arma timer de 50s
-  const prevAnnouncingRef = useRef<typeof announcingType>(null);
+  // Detecta FIM de qualquer chamada (triagem, médico ou anúncio):
+  // quando passa de ativo -> inativo, re-arma timer de 50s.
+  // Watchdog adicional: se nenhum estado ativo persistir, garante o re-arme.
+  const prevActiveRef = useRef<boolean>(false);
   useEffect(() => {
-    const wasAnnouncing = prevAnnouncingRef.current !== null;
-    const nowIdle = announcingType === null;
-    if (wasAnnouncing && nowIdle) {
-      console.log('🎬 Chamada encerrada. Slideshow voltará em 50s.');
+    const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall);
+    const wasActive = prevActiveRef.current;
+    if (wasActive && !isActive) {
+      console.log('🎬 Chamada/anúncio encerrados. Slideshow voltará em 50s.');
       resetMarketingIdle();
     }
-    prevAnnouncingRef.current = announcingType;
-  }, [announcingType, resetMarketingIdle]);
+    prevActiveRef.current = isActive;
+  }, [announcingType, currentTriageCall, currentDoctorCall, resetMarketingIdle]);
+
+  // Watchdog: a cada 5s verifica se está tudo ocioso e o timer não está armado.
+  // Evita ficar preso em isMarketingIdle=false caso algum reset tenha sido perdido.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall);
+      if (!isActive && !isMarketingIdle && !marketingIdleTimerRef.current) {
+        console.log('🛡️ Watchdog: re-armando timer do slideshow.');
+        resetMarketingIdle();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [announcingType, currentTriageCall, currentDoctorCall, isMarketingIdle, resetMarketingIdle]);
+
 
 
   // Reset de estado quando a unidade muda (evita replays e loops)
