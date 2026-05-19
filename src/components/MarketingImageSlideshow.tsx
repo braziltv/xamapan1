@@ -102,7 +102,7 @@ export function MarketingImageSlideshow({
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black animate-fade-in">
+    <div className="fixed inset-0 z-[80] bg-black animate-fade-in">
       {prevImg && (
         <img
           key={`prev-${prevImg.id}`}
