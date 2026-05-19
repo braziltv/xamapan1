@@ -140,7 +140,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
 
-  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
+  // Idle state para slideshow de marketing (50s sem chamadas/anúncios)
   const [isMarketingIdle, setIsMarketingIdle] = useState(false);
   const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -149,7 +149,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
-    }, 30000);
+    }, 50000);
   }, []);
 
   // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
