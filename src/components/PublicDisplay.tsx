@@ -160,12 +160,26 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [resetMarketingIdle]);
 
+  // Detecta INÍCIO de chamada/anúncio: esconde slideshow imediatamente
   useEffect(() => {
-    // Sempre que o estado de chamada/anúncio muda (entra OU sai),
-    // re-arma o cronômetro de 50s. Assim, ao terminar uma chamada,
-    // o slideshow volta a aparecer 50s depois.
-    resetMarketingIdle();
-  }, [currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination, announcingType, resetMarketingIdle]);
+    if (announcingType || currentTriageCall || currentDoctorCall) {
+      setIsMarketingIdle(false);
+      if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
+    }
+  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination]);
+
+  // Detecta FIM do anúncio (announcingType -> null): re-arma timer de 50s
+  const prevAnnouncingRef = useRef<typeof announcingType>(null);
+  useEffect(() => {
+    const wasAnnouncing = prevAnnouncingRef.current !== null;
+    const nowIdle = announcingType === null;
+    if (wasAnnouncing && nowIdle) {
+      console.log('🎬 Chamada encerrada. Slideshow voltará em 50s.');
+      resetMarketingIdle();
+    }
+    prevAnnouncingRef.current = announcingType;
+  }, [announcingType, resetMarketingIdle]);
+
 
   // Reset de estado quando a unidade muda (evita replays e loops)
   useEffect(() => {
