@@ -2229,6 +2229,30 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const staleTriage = currentTriageCall && announcingType !== 'triage' && !isSpeakingRef.current;
+      const staleDoctor = currentDoctorCall && announcingType !== 'doctor' && !isSpeakingRef.current;
+
+      if (staleTriage) {
+        console.warn('🧹 Limpando triagem presa na TV para liberar slideshow.');
+        setCurrentTriageCall(null);
+      }
+
+      if (staleDoctor) {
+        console.warn('🧹 Limpando chamada médica presa na TV para liberar slideshow.');
+        setCurrentDoctorCall(null);
+      }
+
+      const isIdleNow = !announcingType && !currentTriageCall && !currentDoctorCall && !isSpeakingRef.current;
+      if (isIdleNow && !isMarketingIdle && !marketingIdleTimerRef.current) {
+        resetMarketingIdle();
+      }
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [announcingType, currentTriageCall, currentDoctorCall, isMarketingIdle, resetMarketingIdle]);
+
   const getDestinationPhrase = useCallback((destination: string): string => {
     // Gerar frase base com artigo correto (ao/à)
     const lowerDest = destination.toLowerCase();
