@@ -144,7 +144,7 @@ export function MarketingImageSlideshow({
 
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
-  const FADE_MS = 1200;
+  const FADE_MS = 2000;
   const transitionStyle = {
     transition: `opacity ${FADE_MS}ms ease-in-out`,
     willChange: 'opacity' as const,
