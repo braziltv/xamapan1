@@ -140,7 +140,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
 
-  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
+  // Idle state para slideshow de marketing (50s sem chamadas/anúncios)
   const [isMarketingIdle, setIsMarketingIdle] = useState(false);
   const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -149,7 +149,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
-    }, 30000);
+    }, 50000);
   }, []);
 
   // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
@@ -162,8 +162,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
   useEffect(() => {
     // Sempre que o estado de chamada/anúncio muda (entra OU sai),
-    // re-arma o cronômetro de 30s. Assim, ao terminar uma chamada,
-    // o slideshow volta a aparecer 30s depois.
+    // re-arma o cronômetro de 50s. Assim, ao terminar uma chamada,
+    // o slideshow volta a aparecer 50s depois.
     resetMarketingIdle();
   }, [currentTriageCall, currentDoctorCall, announcingType, resetMarketingIdle]);
 
@@ -2900,7 +2900,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
-      {/* ========== MARKETING IMAGE SLIDESHOW (idle 30s) ========== */}
+      {/* ========== MARKETING IMAGE SLIDESHOW (idle 50s) ========== */}
       <MarketingImageSlideshow
         unitName={unitName}
         isIdle={isMarketingIdle && !announcingType && !currentTriageCall && !currentDoctorCall}
