@@ -140,11 +140,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
 
-  // Idle state para slideshow de marketing (50s sem chamadas/anúncios)
+  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
   const [isMarketingIdle, setIsMarketingIdle] = useState(false);
   const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSpeakingRef = useRef<boolean>(false);
   const lastSpeakCallRef = useRef<number>(0);
+  const MARKETING_IDLE_DELAY_MS = 30000;
 
   const clearMarketingIdleTimer = useCallback(() => {
     if (marketingIdleTimerRef.current) {
@@ -159,8 +160,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
       marketingIdleTimerRef.current = null;
-    }, 50000);
+    }, MARKETING_IDLE_DELAY_MS);
   }, [clearMarketingIdleTimer]);
+
+  const releaseVoiceAnnouncementState = useCallback((reason: string) => {
+    console.log(`🎬 Liberando slideshow após anúncio de voz: ${reason}`);
+    isSpeakingRef.current = false;
+    setAnnouncingType(null);
+    setCurrentTriageCall(null);
+    setCurrentDoctorCall(null);
+    resetMarketingIdle();
+  }, [resetMarketingIdle]);
 
   // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
   useEffect(() => {
