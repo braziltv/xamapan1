@@ -463,7 +463,7 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="voice" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="voice" className="flex items-center gap-2">
             <Volume2 className="w-4 h-4" />
             Anúncios de Voz
@@ -472,7 +472,16 @@ export function MarketingPanel({ unitName }: MarketingPanelProps) {
             <Type className="w-4 h-4" />
             Frases no Rodapé
           </TabsTrigger>
+          <TabsTrigger value="images" className="flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" />
+            Imagens (Slideshow)
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="images" className="mt-4">
+          <MarketingImagesManager unitName={unitName} />
+        </TabsContent>
+
 
         <TabsContent value="voice" className="mt-4">
           <Card>
