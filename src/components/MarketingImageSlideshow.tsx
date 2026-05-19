@@ -163,14 +163,14 @@ export function MarketingImageSlideshow({
           key={`prev-${prevImg.id}`}
           src={prevImg.image_url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       )}
       <img
         key={`cur-${currentImg.id}`}
         src={currentImg.image_url}
         alt=""
-        className="absolute inset-0 w-full h-full object-cover animate-fade-in"
+        className="absolute inset-0 w-full h-full object-contain animate-fade-in"
       />
     </div>
   );
