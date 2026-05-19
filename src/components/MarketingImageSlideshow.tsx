@@ -48,6 +48,9 @@ export function MarketingImageSlideshow({
         console.error('[MarketingImageSlideshow] load error:', error);
         return;
       }
+      console.log('[MarketingImageSlideshow] loaded', {
+        unitName, month, count: data?.length || 0,
+      });
       setImages(data || []);
       setCurrentIndex(0);
     };
