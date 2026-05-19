@@ -34,12 +34,15 @@ export function MarketingImageSlideshow({
   useEffect(() => {
     if (!unitName) return;
 
-    const loadImages = async () => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    const loadImages = async (uName: string) => {
       const month = new Date().getMonth() + 1; // 1-12
       const { data, error } = await supabase
         .from('marketing_images')
         .select('id, image_url, display_order')
-        .eq('unit_name', unitName)
+        .eq('unit_name', uName)
         .eq('month', month)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
@@ -49,31 +52,50 @@ export function MarketingImageSlideshow({
         return;
       }
       console.log('[MarketingImageSlideshow] loaded', {
-        unitName, month, count: data?.length || 0,
+        unitName: uName, month, count: data?.length || 0,
       });
+      if (cancelled) return;
       setImages(data || []);
       setCurrentIndex(0);
     };
 
-    loadImages();
+    const init = async () => {
+      // O painel pode passar o display_name (ex: "Pronto Atendimento...") mas
+      // o DB armazena o slug (ex: "pa_pedro_jose"). Resolvemos via units.
+      let resolvedUnitName = unitName;
+      const { data: unitRow } = await supabase
+        .from('units')
+        .select('name')
+        .or(`name.eq.${unitName},display_name.eq.${unitName}`)
+        .maybeSingle();
 
-    // Realtime: atualiza ao mudar imagens no admin
-    const channel = supabase
-      .channel(`marketing-images-${unitName}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'marketing_images',
-          filter: `unit_name=eq.${unitName}`,
-        },
-        () => loadImages()
-      )
-      .subscribe();
+      if (unitRow?.name) resolvedUnitName = unitRow.name;
+      console.log('[MarketingImageSlideshow] resolved unit', {
+        input: unitName, resolved: resolvedUnitName,
+      });
+
+      await loadImages(resolvedUnitName);
+
+      channel = supabase
+        .channel(`marketing-images-${resolvedUnitName}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'marketing_images',
+            filter: `unit_name=eq.${resolvedUnitName}`,
+          },
+          () => loadImages(resolvedUnitName)
+        )
+        .subscribe();
+    };
+
+    init();
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [unitName]);
 
