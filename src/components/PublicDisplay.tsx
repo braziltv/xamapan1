@@ -2429,6 +2429,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         if (isSpeakingRef.current) {
           console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
           isSpeakingRef.current = false;
+          setAnnouncingType(null);
+          setCurrentTriageCall(null);
+          setCurrentDoctorCall(null);
+          resetMarketingIdle();
         }
       }, 30000);
 
@@ -2479,9 +2483,16 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         clearTimeout(safetyTimeout);
         isSpeakingRef.current = false;
         console.log('🎤 isSpeakingRef set to FALSE');
+        setAnnouncingType(null);
+        if (caller === 'triage') {
+          setCurrentTriageCall(null);
+        } else {
+          setCurrentDoctorCall(null);
+        }
+        resetMarketingIdle();
       }
     },
-    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio]
+    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio, resetMarketingIdle]
   );
 
   const processAnnouncementQueue = useCallback(() => {
