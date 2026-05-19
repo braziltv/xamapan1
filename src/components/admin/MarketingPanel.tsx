@@ -10,9 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Volume2, Type, Play, Loader2, RefreshCw, Tv, Send, ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { MarketingImagesManager } from './MarketingImagesManager';
 
 interface MarketingPanelProps {
   unitName: string;
