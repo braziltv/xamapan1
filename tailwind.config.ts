@@ -321,6 +321,9 @@ export default {
         "raindrop-fall": "raindrop-fall 1s ease-in infinite",
         "snowflake-fall": "snowflake-fall 2s ease-in-out infinite",
         "lightning-flash": "lightning-flash 3s ease-in-out infinite",
+        // Slideshow crossfade
+        "slideshow-fade-in": "slideshow-fade-in 1.2s ease-in-out forwards",
+        "slideshow-fade-out": "slideshow-fade-out 1.2s ease-in-out forwards",
       },
     },
   },
