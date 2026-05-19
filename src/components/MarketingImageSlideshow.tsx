@@ -23,7 +23,7 @@ interface MarketingImageSlideshowProps {
 export function MarketingImageSlideshow({
   unitName,
   isIdle,
-  imageDurationMs = 15000,
+  imageDurationMs = 22000,
 }: MarketingImageSlideshowProps) {
   const [images, setImages] = useState<MarketingImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
