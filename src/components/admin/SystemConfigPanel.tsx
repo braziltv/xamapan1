@@ -25,10 +25,17 @@ export function SystemConfigPanel() {
   const [selectedUnitId, setSelectedUnitId] = useState<string>('');
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Selecionar a primeira unidade automaticamente
+  // Selecionar automaticamente a unidade do operador logado (ou a primeira como fallback)
   useEffect(() => {
     if (units.length > 0 && !selectedUnitId) {
-      setSelectedUnitId(units[0].id);
+      const currentUnitName =
+        localStorage.getItem('selectedUnitName') ||
+        localStorage.getItem('tv_permanent_unit_name') ||
+        '';
+      const match = units.find(
+        (u) => u.name === currentUnitName || u.display_name === currentUnitName
+      );
+      setSelectedUnitId(match?.id || units[0].id);
     }
   }, [units, selectedUnitId]);
 
