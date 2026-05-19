@@ -2900,7 +2900,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       {/* ========== COLOR CYCLE BACKGROUND OVERLAY ========== */}
       <ColorCycleOverlay active={!announcingType} intervalSeconds={15} />
 
-      {/* ========== MARKETING IMAGE SLIDESHOW (idle 30s) ========== */}
+      {/* ========== MARKETING IMAGE SLIDESHOW (idle 50s) ========== */}
       <MarketingImageSlideshow
         unitName={unitName}
         isIdle={isMarketingIdle && !announcingType && !currentTriageCall && !currentDoctorCall}
