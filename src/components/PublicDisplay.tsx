@@ -161,33 +161,42 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
   }, [resetMarketingIdle]);
 
+  // Espelha isSpeakingRef (anúncios de voz de marketing/hora) em state,
+  // para que o slideshow também esconda durante esses anúncios e reapareça depois.
+  const [isVoiceSpeaking, setIsVoiceSpeaking] = useState(false);
+  useEffect(() => {
+    const id = setInterval(() => {
+      const cur = isSpeakingRef.current;
+      setIsVoiceSpeaking((prev) => (prev !== cur ? cur : prev));
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
+
   // Detecta INÍCIO de chamada/anúncio: esconde slideshow imediatamente
   useEffect(() => {
-    if (announcingType || currentTriageCall || currentDoctorCall) {
+    if (announcingType || currentTriageCall || currentDoctorCall || isVoiceSpeaking) {
       setIsMarketingIdle(false);
       if (marketingIdleTimerRef.current) clearTimeout(marketingIdleTimerRef.current);
     }
-  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination]);
+  }, [announcingType, currentTriageCall?.name, currentTriageCall?.destination, currentDoctorCall?.name, currentDoctorCall?.destination, isVoiceSpeaking]);
 
-  // Detecta FIM de qualquer chamada (triagem, médico ou anúncio):
+  // Detecta FIM de qualquer chamada (triagem, médico, anúncio ou voz marketing):
   // quando passa de ativo -> inativo, re-arma timer de 50s.
-  // Watchdog adicional: se nenhum estado ativo persistir, garante o re-arme.
   const prevActiveRef = useRef<boolean>(false);
   useEffect(() => {
-    const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall);
+    const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall || isVoiceSpeaking);
     const wasActive = prevActiveRef.current;
     if (wasActive && !isActive) {
       console.log('🎬 Chamada/anúncio encerrados. Slideshow voltará em 50s.');
       resetMarketingIdle();
     }
     prevActiveRef.current = isActive;
-  }, [announcingType, currentTriageCall, currentDoctorCall, resetMarketingIdle]);
+  }, [announcingType, currentTriageCall, currentDoctorCall, isVoiceSpeaking, resetMarketingIdle]);
 
   // Watchdog: a cada 5s verifica se está tudo ocioso e o timer não está armado.
-  // Evita ficar preso em isMarketingIdle=false caso algum reset tenha sido perdido.
   useEffect(() => {
     const interval = setInterval(() => {
-      const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall);
+      const isActive = Boolean(announcingType || currentTriageCall || currentDoctorCall || isSpeakingRef.current);
       if (!isActive && !isMarketingIdle && !marketingIdleTimerRef.current) {
         console.log('🛡️ Watchdog: re-armando timer do slideshow.');
         resetMarketingIdle();
@@ -195,6 +204,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }, 5000);
     return () => clearInterval(interval);
   }, [announcingType, currentTriageCall, currentDoctorCall, isMarketingIdle, resetMarketingIdle]);
+
 
 
 
