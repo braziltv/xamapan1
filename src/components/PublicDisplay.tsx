@@ -2377,10 +2377,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (e) {
         console.error('Custom TTS failed:', e);
       } finally {
-        isSpeakingRef.current = false;
+        releaseVoiceAnnouncementState('aviso personalizado');
       }
     },
-    [playNotificationSound, speakWithGoogleTTS]
+    [playNotificationSound, speakWithGoogleTTS, releaseVoiceAnnouncementState]
   );
 
   const speakName = useCallback(
