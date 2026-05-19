@@ -140,11 +140,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     localStorage.getItem('selectedUnitId') || localStorage.getItem('tv_permanent_unit_id') || ''
   );
 
-  // Idle state para slideshow de marketing (50s sem chamadas/anúncios)
+  // Idle state para slideshow de marketing (30s sem chamadas/anúncios)
   const [isMarketingIdle, setIsMarketingIdle] = useState(false);
   const marketingIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSpeakingRef = useRef<boolean>(false);
   const lastSpeakCallRef = useRef<number>(0);
+  const MARKETING_IDLE_DELAY_MS = 30000;
 
   const clearMarketingIdleTimer = useCallback(() => {
     if (marketingIdleTimerRef.current) {
@@ -159,8 +160,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     marketingIdleTimerRef.current = setTimeout(() => {
       setIsMarketingIdle(true);
       marketingIdleTimerRef.current = null;
-    }, 50000);
+    }, MARKETING_IDLE_DELAY_MS);
   }, [clearMarketingIdleTimer]);
+
+  const releaseVoiceAnnouncementState = useCallback((reason: string) => {
+    console.log(`🎬 Liberando slideshow após anúncio de voz: ${reason}`);
+    isSpeakingRef.current = false;
+    setAnnouncingType(null);
+    setCurrentTriageCall(null);
+    setCurrentDoctorCall(null);
+    resetMarketingIdle();
+  }, [resetMarketingIdle]);
 
   // Inicia o timer e reseta sempre que há chamada/anúncio em andamento
   useEffect(() => {
@@ -1941,8 +1951,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (error) {
         console.error('❌ Erro ao reproduzir anúncio:', error);
       } finally {
-        isSpeakingRef.current = false;
-        setAnnouncingType(null);
+        releaseVoiceAnnouncementState('teste manual');
       }
     };
     
@@ -1953,7 +1962,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       delete (window as any).testarHora;
       delete (window as any).testarAnuncioVoz;
     };
-  }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
+  }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   // Announce time once per hour at minute 0 (quiet hours: 22h-06h)
   useEffect(() => {
@@ -2124,15 +2133,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         } catch (error) {
           console.error('Error playing scheduled announcement:', error);
         } finally {
-          isSpeakingRef.current = false;
-          setAnnouncingType(null);
+          releaseVoiceAnnouncementState(`anúncio programado ${announcement.title}`);
         }
       }, 1500);
 
       // Only play one announcement at a time
       break;
     }
-  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio]);
+  }, [currentTime, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, speakWithGoogleTTS, playCachedAudio, releaseVoiceAnnouncementState]);
 
   // Process immediate announcement triggered via realtime
   useEffect(() => {
@@ -2189,13 +2197,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (error) {
         console.error('Error playing immediate announcement:', error);
       } finally {
-        isSpeakingRef.current = false;
-        setAnnouncingType(null);
+        releaseVoiceAnnouncementState(`anúncio imediato ${announcement.title}`);
       }
     };
 
     playImmediateAnnouncement();
-  }, [pendingImmediateAnnouncement, audioUnlocked, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS]);
+  }, [pendingImmediateAnnouncement, audioUnlocked, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   const playCommercialPhraseNow = useCallback(async () => {
     try {
@@ -2242,10 +2249,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         timestamp: new Date(),
       });
     } finally {
-      isSpeakingRef.current = false;
-      setAnnouncingType(null);
+      releaseVoiceAnnouncementState('frase comercial manual');
     }
-  }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS]);
+  }, [audioUnlocked, currentTime, commercialPhrases, announcingType, playNotificationSound, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -2371,10 +2377,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       } catch (e) {
         console.error('Custom TTS failed:', e);
       } finally {
-        isSpeakingRef.current = false;
+        releaseVoiceAnnouncementState('aviso personalizado');
       }
     },
-    [playNotificationSound, speakWithGoogleTTS]
+    [playNotificationSound, speakWithGoogleTTS, releaseVoiceAnnouncementState]
   );
 
   const speakName = useCallback(
@@ -2469,12 +2475,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Safety timeout: reset isSpeakingRef after 30 seconds max (in case of errors)
       const safetyTimeout = setTimeout(() => {
         if (isSpeakingRef.current) {
-          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
-          isSpeakingRef.current = false;
-          setAnnouncingType(null);
-          setCurrentTriageCall(null);
-          setCurrentDoctorCall(null);
-          resetMarketingIdle();
+          releaseVoiceAnnouncementState('timeout de chamada de paciente');
         }
       }, 30000);
 
@@ -2523,18 +2524,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         });
       } finally {
         clearTimeout(safetyTimeout);
-        isSpeakingRef.current = false;
-        console.log('🎤 isSpeakingRef set to FALSE');
-        setAnnouncingType(null);
-        if (caller === 'triage') {
-          setCurrentTriageCall(null);
-        } else {
-          setCurrentDoctorCall(null);
-        }
-        resetMarketingIdle();
+        releaseVoiceAnnouncementState(`chamada de paciente ${caller}`);
       }
     },
-    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio, resetMarketingIdle]
+    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio, releaseVoiceAnnouncementState]
   );
 
   const processAnnouncementQueue = useCallback(() => {
