@@ -11,7 +11,7 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
-const MAX_IMAGES_PER_MONTH = 20;
+const MAX_IMAGES_PER_MONTH = 30;
 const MAX_FILE_SIZE_MB = 5;
 
 interface MarketingImage {
