@@ -2475,12 +2475,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       // Safety timeout: reset isSpeakingRef after 30 seconds max (in case of errors)
       const safetyTimeout = setTimeout(() => {
         if (isSpeakingRef.current) {
-          console.warn('⚠️ Safety timeout: resetting isSpeakingRef after 30s');
-          isSpeakingRef.current = false;
-          setAnnouncingType(null);
-          setCurrentTriageCall(null);
-          setCurrentDoctorCall(null);
-          resetMarketingIdle();
+          releaseVoiceAnnouncementState('timeout de chamada de paciente');
         }
       }, 30000);
 
@@ -2529,18 +2524,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         });
       } finally {
         clearTimeout(safetyTimeout);
-        isSpeakingRef.current = false;
-        console.log('🎤 isSpeakingRef set to FALSE');
-        setAnnouncingType(null);
-        if (caller === 'triage') {
-          setCurrentTriageCall(null);
-        } else {
-          setCurrentDoctorCall(null);
-        }
-        resetMarketingIdle();
+        releaseVoiceAnnouncementState(`chamada de paciente ${caller}`);
       }
     },
-    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio, resetMarketingIdle]
+    [playNotificationSound, getDestinationPhrase, audioUnlocked, fetchConcatenatedTTSBuffer, playSimpleAudio, releaseVoiceAnnouncementState]
   );
 
   const processAnnouncementQueue = useCallback(() => {
