@@ -1791,14 +1791,14 @@
 }
 
 .slideshow-current {
-  animation: slideshowFadeIn 1.2s ease-in-out both;
+  animation: slideshowFadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) both;
   will-change: opacity, transform;
 }
 .slideshow-previous {
-  animation: slideshowFadeOut 1.2s ease-in-out both;
+  animation: slideshowFadeOut 2.5s cubic-bezier(0.4, 0, 0.2, 1) both;
   will-change: opacity;
 }
-.slideshow-kb-1 { animation: slideshowFadeIn 1.2s ease-in-out both, kenBurnsZoomIn 16s ease-out both; }
-.slideshow-kb-2 { animation: slideshowFadeIn 1.2s ease-in-out both, kenBurnsZoomOut 16s ease-out both; }
-.slideshow-kb-3 { animation: slideshowFadeIn 1.2s ease-in-out both, kenBurnsPanRight 16s ease-out both; }
-.slideshow-kb-4 { animation: slideshowFadeIn 1.2s ease-in-out both, kenBurnsPanLeft 16s ease-out both; }
+.slideshow-kb-1 { animation: slideshowFadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) both, kenBurnsZoomIn 18s ease-out both; }
+.slideshow-kb-2 { animation: slideshowFadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) both, kenBurnsZoomOut 18s ease-out both; }
+.slideshow-kb-3 { animation: slideshowFadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) both, kenBurnsPanRight 18s ease-out both; }
+.slideshow-kb-4 { animation: slideshowFadeIn 2.5s cubic-bezier(0.4, 0, 0.2, 1) both, kenBurnsPanLeft 18s ease-out both; }
