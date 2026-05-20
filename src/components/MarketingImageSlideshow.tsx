@@ -31,6 +31,20 @@ export function MarketingImageSlideshow({
   const [fadeProgress, setFadeProgress] = useState(1); // 0 = recém-trocado, 1 = totalmente exibido
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const preloadImage = (image: MarketingImage) => new Promise<MarketingImage | null>((resolve) => {
+    const img = new Image();
+    img.onload = async () => {
+      try {
+        if (img.decode) await img.decode();
+      } catch {
+        // Alguns navegadores antigos podem falhar no decode mesmo com a imagem carregada.
+      }
+      resolve(image);
+    };
+    img.onerror = () => resolve(null);
+    img.src = image.image_url;
+  });
+
   // Carrega as imagens do mês atual da unidade
   useEffect(() => {
     if (!unitName) return;
@@ -61,8 +75,14 @@ export function MarketingImageSlideshow({
       });
       if (cancelled) return;
       const ordered = applyShuffle(data || []);
-      setImages(ordered);
+      const loaded = (await Promise.all(ordered.map(preloadImage))).filter(
+        (image): image is MarketingImage => image !== null
+      );
+      if (cancelled) return;
+      setImages(loaded);
       setCurrentIndex(0);
+      setPreviousIndex(null);
+      setFadeProgress(1);
     };
 
     const init = async () => {
@@ -136,6 +156,20 @@ export function MarketingImageSlideshow({
     return () => cancelAnimationFrame(raf);
   }, [currentIndex, previousIndex]);
 
+  const handleImageError = (failedId: string) => {
+    setImages((currentImages) => {
+      if (currentImages.length <= 1) return currentImages;
+      const failedIndex = currentImages.findIndex((image) => image.id === failedId);
+      const nextImages = currentImages.filter((image) => image.id !== failedId);
+      if (failedIndex >= 0 && failedIndex <= currentIndex) {
+        setCurrentIndex((index) => Math.max(0, Math.min(index - 1, nextImages.length - 1)));
+      }
+      setPreviousIndex(null);
+      setFadeProgress(1);
+      return nextImages;
+    });
+  };
+
   if (!isIdle || images.length === 0) {
     if (import.meta.env.DEV) {
       console.log('[MarketingImageSlideshow] hidden', { isIdle, count: images.length, unitName });
@@ -160,6 +194,7 @@ export function MarketingImageSlideshow({
           alt=""
           className="absolute inset-0 w-full h-full object-contain"
           style={{ ...transitionStyle, opacity: 1 - fadeProgress }}
+          onError={() => handleImageError(prevImg.id)}
         />
       )}
       <img
@@ -168,6 +203,7 @@ export function MarketingImageSlideshow({
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
         style={{ ...transitionStyle, opacity: fadeProgress }}
+        onError={() => handleImageError(currentImg.id)}
       />
     </div>
   );
