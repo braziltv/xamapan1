@@ -125,8 +125,9 @@ export function MarketingImageSlideshow({
   }, [isIdle, images.length, imageDurationMs]);
 
   // Dispara o crossfade apenas quando o índice realmente muda.
-  // Resize/re-render não reinicia a animação (transition baseada em estado).
-  useEffect(() => {
+  // useLayoutEffect garante que opacity=0 é aplicada ANTES da pintura,
+  // evitando o flash/escurecimento entre imagens.
+  useLayoutEffect(() => {
     if (previousIndex === null) return;
     setFadeProgress(0);
     const raf = requestAnimationFrame(() => {
