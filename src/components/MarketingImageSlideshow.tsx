@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface MarketingImage {
