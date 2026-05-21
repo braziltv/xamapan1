@@ -134,7 +134,6 @@ function formatDailyStatistics(payload: AlertPayload): string {
 function getInstitutionalHeader(): string {
   return `⚠️ <b>Aviso Institucional</b>
 🗂️ Os relatórios a seguir foram elaborados pelo Aplicativo Xama Pan.
-💻 Programa criado por Kalebe Gomes.
 ⏱️ As informações apresentadas correspondem aos dados disponíveis no momento da apuração.
 
 ━━━━━━━━━━━━━━━━━━━━━
