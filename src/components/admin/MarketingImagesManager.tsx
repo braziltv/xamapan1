@@ -70,17 +70,23 @@ export function MarketingImagesManager({ unitName }: Props) {
     let uploaded = 0;
     let nextOrder = images.length > 0 ? Math.max(...images.map(i => i.display_order)) + 1 : 0;
 
-    for (const file of toUpload) {
-      if (!file.type.startsWith('image/')) {
-        toast({ title: 'Arquivo ignorado', description: `${file.name} não é uma imagem.`, variant: 'destructive' });
-        continue;
-      }
-      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        toast({ title: 'Arquivo muito grande', description: `${file.name} excede ${MAX_FILE_SIZE_MB}MB.`, variant: 'destructive' });
+    for (const original of toUpload) {
+      if (!original.type.startsWith('image/')) {
+        toast({ title: 'Arquivo ignorado', description: `${original.name} não é uma imagem.`, variant: 'destructive' });
         continue;
       }
 
-      const ext = file.name.split('.').pop() || 'jpg';
+      // Compacta antes de validar tamanho: redimensiona para no máx. 1920px no maior lado
+      // e re-encoda em JPEG 0.9 (ou mantém PNG para preservar transparência). Sem perda
+      // visível, mas reduz drasticamente o tamanho de fotos de celular.
+      const file = await compressImage(original);
+
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast({ title: 'Arquivo muito grande', description: `${original.name} excede ${MAX_FILE_SIZE_MB}MB mesmo após compactação.`, variant: 'destructive' });
+        continue;
+      }
+
+      const ext = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : (file.name.split('.').pop() || 'jpg');
       const path = `${unitName}/${selectedMonth}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
       const { error: upErr } = await supabase.storage
