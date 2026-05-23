@@ -54,6 +54,50 @@ export function MarketingImagesManager({ unitName }: Props) {
 
   useEffect(() => { load(); }, [unitName, selectedMonth]);
 
+  // Compacta a imagem sem perda perceptível: redimensiona para no máximo
+  // 1920px no maior lado e re-encoda em JPEG 0.9. PNGs são preservados
+  // (mantém transparência). GIF/SVG passam intactos. Se a compactação
+  // não reduzir o tamanho, mantém o arquivo original.
+  const compressImage = (file: File): Promise<File> => new Promise((resolve) => {
+    if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
+      resolve(file);
+      return;
+    }
+    const MAX_DIM = 1920;
+    const QUALITY = 0.9;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, MAX_DIM / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { URL.revokeObjectURL(url); resolve(file); return; }
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+        const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          if (!blob || blob.size >= file.size) { resolve(file); return; }
+          const newName = file.name.replace(/\.(jpe?g|png|webp|bmp|tiff?)$/i, outType === 'image/png' ? '.png' : '.jpg');
+          resolve(new File([blob], newName, { type: outType, lastModified: Date.now() }));
+        }, outType, QUALITY);
+      } catch {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+
+
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
