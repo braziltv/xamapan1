@@ -54,6 +54,37 @@ export function MarketingImagesManager({ unitName }: Props) {
 
   useEffect(() => { load(); }, [unitName, selectedMonth]);
 
+  // Recomprime mantendo resolução original. Converte para JPEG q=0.82
+  // (economia ~65-70% vs PNG original sem perda visual perceptível).
+  const compressImage = async (file: File): Promise<Blob> => {
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+    const img: HTMLImageElement = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = dataUrl;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('canvas ctx null');
+    // Fundo branco para evitar áreas pretas vindas de PNG transparente
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    const blob: Blob = await new Promise((resolve, reject) =>
+      canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob null'))), 'image/jpeg', 0.82)
+    );
+    // Se compressão deixou maior, mantém original
+    return blob.size < file.size ? blob : file;
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -80,12 +111,25 @@ export function MarketingImagesManager({ unitName }: Props) {
         continue;
       }
 
-      const ext = file.name.split('.').pop() || 'jpg';
+      let payload: Blob = file;
+      let contentType = file.type;
+      let ext = file.name.split('.').pop() || 'jpg';
+      try {
+        const compressed = await compressImage(file);
+        if (compressed !== file) {
+          payload = compressed;
+          contentType = 'image/jpeg';
+          ext = 'jpg';
+        }
+      } catch (err) {
+        console.warn('Falha ao comprimir, usando original:', err);
+      }
+
       const path = `${unitName}/${selectedMonth}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
       const { error: upErr } = await supabase.storage
         .from('marketing-images')
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, payload, { contentType, upsert: false });
 
       if (upErr) {
         toast({ title: 'Falha no upload', description: upErr.message, variant: 'destructive' });
