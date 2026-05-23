@@ -113,13 +113,13 @@ export function MarketingImagesManager({ unitName }: Props) {
 
       let payload: Blob = file;
       let contentType = file.type;
-      let ext = file.name.split('.').pop() || 'jpg';
+      let ext = file.name.split('.').pop() || 'webp';
       try {
         const compressed = await compressImage(file);
         if (compressed !== file) {
           payload = compressed;
-          contentType = 'image/jpeg';
-          ext = 'jpg';
+          contentType = 'image/webp';
+          ext = 'webp';
         }
       } catch (err) {
         console.warn('Falha ao comprimir, usando original:', err);
