@@ -54,8 +54,8 @@ export function MarketingImagesManager({ unitName }: Props) {
 
   useEffect(() => { load(); }, [unitName, selectedMonth]);
 
-  // Recomprime mantendo resolução original. Converte para JPEG q=0.82
-  // (economia ~65-70% vs PNG original sem perda visual perceptível).
+  // Converte para WebP q=0.90 mantendo resolução original.
+  // WebP oferece ~25-35% melhor compressão que JPEG na mesma qualidade visual.
   const compressImage = async (file: File): Promise<Blob> => {
     const dataUrl: string = await new Promise((resolve, reject) => {
       const r = new FileReader();
@@ -79,7 +79,7 @@ export function MarketingImagesManager({ unitName }: Props) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
     const blob: Blob = await new Promise((resolve, reject) =>
-      canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob null'))), 'image/jpeg', 0.82)
+      canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob null'))), 'image/webp', 0.90)
     );
     // Se compressão deixou maior, mantém original
     return blob.size < file.size ? blob : file;
