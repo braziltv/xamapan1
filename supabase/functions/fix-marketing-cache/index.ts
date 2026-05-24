@@ -1,5 +1,4 @@
-// Re-uploads existing marketing images with cacheControl=604800 (7d)
-// to set proper HTTP Cache-Control header at the storage backend.
+// Re-uploads existing marketing images with cacheControl=2592000 (30d)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -30,7 +29,7 @@ Deno.serve(async (req) => {
       if (dl.error || !dl.data) throw new Error(dl.error?.message || "download null");
       const up = await supabase.storage.from("marketing-images").update(path, dl.data, {
         contentType: dl.data.type || "image/webp",
-        cacheControl: "604800",
+        cacheControl: "2592000",
         upsert: true,
       });
       if (up.error) throw new Error(up.error.message);
