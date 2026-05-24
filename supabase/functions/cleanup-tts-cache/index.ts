@@ -204,6 +204,12 @@ Deno.serve(async (req) => {
       .delete()
       .lt('used_at', thirtyDaysAgo.toISOString())
 
+    // Clean up old api_key_usage entries (older than 30 days)
+    await supabase_client
+      .from('api_key_usage')
+      .delete()
+      .lt('created_at', thirtyDaysAgo.toISOString())
+
     console.log(`✅ Cleanup complete: ${totalDeleted} files removed (names: ${namesDeleted}, announcements: ${announcementsDeleted}, legacy: ${legacyDeleted})`)
 
     return new Response(
