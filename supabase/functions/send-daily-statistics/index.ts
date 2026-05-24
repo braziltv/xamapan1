@@ -238,17 +238,19 @@ serve(async (req) => {
     };
 
     const callsByDay: Record<string, number> = {};
-    weeklyHistory.forEach(call => {
-      const dayOfWeek = new Date(call.created_at).getDay();
+    dailyRows.forEach(row => {
+      const dayOfWeek = new Date(`${row.date}T12:00:00-03:00`).getDay();
       const dayName = dayNames[dayOfWeek];
-      callsByDay[dayName] = (callsByDay[dayName] || 0) + 1;
+      callsByDay[dayName] = (callsByDay[dayName] || 0) + (row.total_calls || 0);
     });
 
-    // Weekly calls by destination
+    // Weekly calls by destination (merge from each day's calls_by_destination jsonb)
     const weeklyCallsByDestination: Record<string, number> = {};
-    weeklyHistory.forEach(call => {
-      const dest = call.destination || 'Padrão';
-      weeklyCallsByDestination[dest] = (weeklyCallsByDestination[dest] || 0) + 1;
+    dailyRows.forEach(row => {
+      const dests = (row.calls_by_destination || {}) as Record<string, number>;
+      Object.entries(dests).forEach(([dest, count]) => {
+        weeklyCallsByDestination[dest] = (weeklyCallsByDestination[dest] || 0) + (count || 0);
+      });
     });
 
     // Busiest day
@@ -275,8 +277,8 @@ serve(async (req) => {
       averageCallsPerDay,
       busiestDay,
       busiestDayCalls,
-      totalSessions: weeklySessions?.length || 0,
-      totalCompletedPatients: weeklyCompleted?.length || 0,
+      totalSessions: weeklySessionsCount || 0,
+      totalCompletedPatients: weeklyCompletedCount || 0,
     };
 
     console.log('Weekly statistics calculated:', weeklyStatistics);
