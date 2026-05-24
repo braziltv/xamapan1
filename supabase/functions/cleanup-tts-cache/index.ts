@@ -93,8 +93,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    const NAME_MAX_AGE_DAYS = 30
-    const ANNOUNCEMENT_MAX_AGE_DAYS = 30
+    const NAME_MAX_AGE_DAYS = 90
+    const ANNOUNCEMENT_MAX_AGE_DAYS = 90
 
     console.log(`Starting TTS cache cleanup...`)
     console.log(`Names: removing unused files older than ${NAME_MAX_AGE_DAYS} days`)
