@@ -194,7 +194,36 @@ serve(async (req) => {
     console.log('Daily report sent:', dailyReportResponse.data);
 
     // ========== WEEKLY DATA (uses statistics_daily aggregates for Cloud cost savings) ==========
-    
+
+    // Backfill: ensure statistics_daily is populated for the last 7 days for every unit
+    // that had activity. Runs once per day (from the cron); cheap and keeps the weekly
+    // read against the aggregated table only.
+    const { data: unitsRows } = await supabase
+      .from('call_history')
+      .select('unit_name')
+      .gte('created_at', `${sevenDaysAgo}T00:00:00-03:00`)
+      .lte('created_at', endOfDay);
+
+    const unitNames = Array.from(new Set((unitsRows || []).map((r: any) => r.unit_name).filter(Boolean)));
+
+    // Build list of dates from sevenDaysAgo through today (inclusive)
+    const dates: string[] = [];
+    {
+      const start = new Date(`${sevenDaysAgo}T12:00:00-03:00`);
+      const end = new Date(`${today}T12:00:00-03:00`);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    }
+
+    await Promise.all(
+      unitNames.flatMap((u) =>
+        dates.map((d) =>
+          supabase.rpc('aggregate_daily_statistics', { target_date: d, target_unit: u })
+        )
+      )
+    );
+
     const { data: weeklyDaily, error: weeklyDailyError } = await supabase
       .from('statistics_daily')
       .select('*')
@@ -206,6 +235,7 @@ serve(async (req) => {
     }
 
     const dailyRows = weeklyDaily || [];
+
 
     // Get weekly sessions (count only)
     const { count: weeklySessionsCount } = await supabase
