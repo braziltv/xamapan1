@@ -129,7 +129,7 @@ export function MarketingImagesManager({ unitName }: Props) {
 
       const { error: upErr } = await supabase.storage
         .from('marketing-images')
-        .upload(path, payload, { contentType, upsert: false });
+        .upload(path, payload, { contentType, upsert: false, cacheControl: '604800' });
 
       if (upErr) {
         toast({ title: 'Falha no upload', description: upErr.message, variant: 'destructive' });

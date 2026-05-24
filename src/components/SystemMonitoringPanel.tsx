@@ -428,7 +428,7 @@ export function SystemMonitoringPanel() {
     refreshStatus();
     
     if (autoRefresh) {
-      const interval = setInterval(refreshStatus, 60000); // Every minute
+      const interval = setInterval(refreshStatus, 300000); // Every 5 minutes (Cloud optimization)
       return () => clearInterval(interval);
     }
   }, [refreshStatus, autoRefresh]);

@@ -193,46 +193,37 @@ serve(async (req) => {
 
     console.log('Daily report sent:', dailyReportResponse.data);
 
-    // ========== WEEKLY DATA ==========
+    // ========== WEEKLY DATA (uses statistics_daily aggregates for Cloud cost savings) ==========
     
-    // Get call history for last 7 days
-    const { data: weeklyCallHistory, error: weeklyCallError } = await supabase
-      .from('call_history')
+    const { data: weeklyDaily, error: weeklyDailyError } = await supabase
+      .from('statistics_daily')
       .select('*')
-      .gte('created_at', `${sevenDaysAgo}T00:00:00-03:00`)
-      .lte('created_at', endOfDay);
+      .gte('date', sevenDaysAgo)
+      .lte('date', today);
 
-    if (weeklyCallError) {
-      console.error('Error fetching weekly call history:', weeklyCallError);
+    if (weeklyDailyError) {
+      console.error('Error fetching weekly daily statistics:', weeklyDailyError);
     }
 
-    const weeklyHistory: CallHistoryRecord[] = weeklyCallHistory || [];
+    const dailyRows = weeklyDaily || [];
 
-    // Get weekly sessions
-    const { data: weeklySessions, error: weeklySessionsError } = await supabase
+    // Get weekly sessions (count only)
+    const { count: weeklySessionsCount } = await supabase
       .from('user_sessions')
-      .select('*')
+      .select('*', { count: 'exact', head: true })
       .gte('login_at', `${sevenDaysAgo}T00:00:00-03:00`);
 
-    if (weeklySessionsError) {
-      console.error('Error fetching weekly sessions:', weeklySessionsError);
-    }
-
-    // Get weekly completed patients
-    const { data: weeklyCompleted, error: weeklyCompletedError } = await supabase
+    // Get weekly completed patients (count only)
+    const { count: weeklyCompletedCount } = await supabase
       .from('patient_calls')
-      .select('*')
+      .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
       .gte('completed_at', `${sevenDaysAgo}T00:00:00-03:00`);
 
-    if (weeklyCompletedError) {
-      console.error('Error fetching weekly completed:', weeklyCompletedError);
-    }
-
-    // Calculate weekly statistics
-    const weeklyTotalCalls = weeklyHistory.length;
-    const weeklyTriageCalls = weeklyHistory.filter(c => c.call_type === 'triage').length;
-    const weeklyDoctorCalls = weeklyHistory.filter(c => c.call_type === 'doctor').length;
+    // Calculate weekly statistics from aggregated daily rows
+    const weeklyTotalCalls = dailyRows.reduce((s, r) => s + (r.total_calls || 0), 0);
+    const weeklyTriageCalls = dailyRows.reduce((s, r) => s + (r.triage_calls || 0), 0);
+    const weeklyDoctorCalls = dailyRows.reduce((s, r) => s + (r.doctor_calls || 0), 0);
     const weeklyOtherCalls = weeklyTotalCalls - weeklyTriageCalls - weeklyDoctorCalls;
 
     // Calls by day of week
@@ -247,17 +238,19 @@ serve(async (req) => {
     };
 
     const callsByDay: Record<string, number> = {};
-    weeklyHistory.forEach(call => {
-      const dayOfWeek = new Date(call.created_at).getDay();
+    dailyRows.forEach(row => {
+      const dayOfWeek = new Date(`${row.date}T12:00:00-03:00`).getDay();
       const dayName = dayNames[dayOfWeek];
-      callsByDay[dayName] = (callsByDay[dayName] || 0) + 1;
+      callsByDay[dayName] = (callsByDay[dayName] || 0) + (row.total_calls || 0);
     });
 
-    // Weekly calls by destination
+    // Weekly calls by destination (merge from each day's calls_by_destination jsonb)
     const weeklyCallsByDestination: Record<string, number> = {};
-    weeklyHistory.forEach(call => {
-      const dest = call.destination || 'Padrão';
-      weeklyCallsByDestination[dest] = (weeklyCallsByDestination[dest] || 0) + 1;
+    dailyRows.forEach(row => {
+      const dests = (row.calls_by_destination || {}) as Record<string, number>;
+      Object.entries(dests).forEach(([dest, count]) => {
+        weeklyCallsByDestination[dest] = (weeklyCallsByDestination[dest] || 0) + (count || 0);
+      });
     });
 
     // Busiest day
@@ -284,8 +277,8 @@ serve(async (req) => {
       averageCallsPerDay,
       busiestDay,
       busiestDayCalls,
-      totalSessions: weeklySessions?.length || 0,
-      totalCompletedPatients: weeklyCompleted?.length || 0,
+      totalSessions: weeklySessionsCount || 0,
+      totalCompletedPatients: weeklyCompletedCount || 0,
     };
 
     console.log('Weekly statistics calculated:', weeklyStatistics);
