@@ -127,15 +127,12 @@ export function MarketingImagesManager({ unitName }: Props) {
 
       const path = `${unitName}/${selectedMonth}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-      // Cache até o final do mês da imagem (dia 1 -> último dia 23:59:59)
-      const now = new Date();
-      const year = now.getFullYear();
-      const endOfMonth = new Date(year, selectedMonth, 1, 0, 0, 0); // primeiro dia do mês seguinte
-      const secondsUntilEnd = Math.max(3600, Math.floor((endOfMonth.getTime() - now.getTime()) / 1000));
+      // Cache CDN de 1 ano: depois que a TV baixa, não baixa de novo por 12 meses
+      const ONE_YEAR = '31536000';
 
       const { error: upErr } = await supabase.storage
         .from('marketing-images')
-        .upload(path, payload, { contentType, upsert: false, cacheControl: String(secondsUntilEnd) });
+        .upload(path, payload, { contentType, upsert: false, cacheControl: ONE_YEAR });
 
       if (upErr) {
         toast({ title: 'Falha no upload', description: upErr.message, variant: 'destructive' });
