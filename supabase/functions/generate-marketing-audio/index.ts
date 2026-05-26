@@ -349,7 +349,7 @@ serve(async (req) => {
         .from('tts-cache')
         .upload(cacheFileName, audioBuffer, {
           contentType: 'audio/mpeg',
-          upsert: true
+          upsert: true, cacheControl: '31536000'
         });
 
       if (uploadError) {
@@ -433,7 +433,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(cacheFileName, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true
+              upsert: true, cacheControl: '31536000'
             });
 
           if (uploadError) {

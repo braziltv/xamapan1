@@ -204,7 +204,7 @@ async function saveToCache(
       .from('tts-cache')
       .upload(filePath, audioBytes, {
         contentType: 'audio/mpeg',
-        upsert: true,
+        upsert: true, cacheControl: '31536000',
       });
     
     if (error) {

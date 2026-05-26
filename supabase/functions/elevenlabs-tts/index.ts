@@ -223,7 +223,7 @@ async function checkAndPromoteFrequentPart(
             .from('tts-cache')
             .upload(permanentKey, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
           console.log(`Promoted "${partText}" to permanent cache: ${permanentKey}`);
         }
@@ -359,7 +359,7 @@ async function getOrGenerateAudio(
       .from('tts-cache')
       .upload(cacheKey, audioBuffer, {
         contentType: 'audio/mpeg',
-        upsert: true,
+        upsert: true, cacheControl: '31536000',
       });
     console.log(`Cached: "${text}" as ${cacheKey}`);
   }
@@ -849,7 +849,7 @@ serve(async (req) => {
         .from('tts-cache')
         .upload(cacheKey, audioBuffer, {
           contentType: 'audio/mpeg',
-          upsert: true,
+          upsert: true, cacheControl: '31536000',
         });
       
       if (uploadError) {
