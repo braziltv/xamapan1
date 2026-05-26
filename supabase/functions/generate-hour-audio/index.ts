@@ -284,7 +284,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           if (uploadError) {
@@ -312,7 +312,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           if (uploadError) {
@@ -336,7 +336,7 @@ serve(async (req) => {
           .from('tts-cache')
           .upload('time/minutos.mp3', audioBuffer, {
             contentType: 'audio/mpeg',
-            upsert: true,
+            upsert: true, cacheControl: '31536000',
           });
         console.log('Generated minutos word');
         genResults.minutos_word = true;
@@ -382,7 +382,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           if (uploadError) {
@@ -431,7 +431,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           if (uploadError) {
@@ -476,7 +476,7 @@ serve(async (req) => {
           .from('tts-cache')
           .upload(`time/${cacheKey}`, audioBuffer, {
             contentType: 'audio/mpeg',
-            upsert: true,
+            upsert: true, cacheControl: '31536000',
           });
 
         if (uploadError) {
@@ -525,7 +525,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           console.log(`Generated hour ${h}: "${text}"`);
@@ -560,7 +560,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${cacheKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
 
           console.log(`Generated minute ${m}: "${text}"`);
@@ -588,7 +588,7 @@ serve(async (req) => {
               .from('tts-cache')
               .upload(`time/${minutosKey}`, audioBuffer, {
                 contentType: 'audio/mpeg',
-                upsert: true,
+                upsert: true, cacheControl: '31536000',
               });
             console.log('Generated minutos word');
             results.minutos_word = true;
@@ -604,7 +604,7 @@ serve(async (req) => {
             .from('tts-cache')
             .upload(`time/${minutosKey}`, audioBuffer, {
               contentType: 'audio/mpeg',
-              upsert: true,
+              upsert: true, cacheControl: '31536000',
             });
           console.log('Generated minutos word');
           results.minutos_word = true;
@@ -648,7 +648,7 @@ serve(async (req) => {
         const audioBuffer = await generate();
         await supabase.storage.from('tts-cache').upload(filePath, audioBuffer, { 
           contentType: 'audio/mpeg', 
-          upsert: true 
+          upsert: true, cacheControl: '31536000' 
         });
 
         const second = await supabase.storage.from('tts-cache').createSignedUrl(filePath, expiresIn);
