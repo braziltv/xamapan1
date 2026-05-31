@@ -5,100 +5,108 @@ interface MarketingImage {
   id: string;
   image_url: string;
   display_order: number;
+  is_fixed: boolean;
+  month: number;
 }
 
 interface MarketingImageSlideshowProps {
   unitName: string;
-  isIdle: boolean; // true quando deve aparecer (sem chamadas há 30s)
+  isIdle: boolean;
   imageDurationMs?: number;
 }
 
 /**
- * Slideshow de imagens de marketing exibido em tela cheia
- * sobreposto ao painel da TV quando ocioso. Ao iniciar uma
- * chamada, o componente pai define isIdle=false e o slideshow
- * desaparece imediatamente. Após 30s sem chamadas, isIdle=true
- * e o slideshow retorna.
+ * Slideshow de imagens de marketing (TV).
+ *
+ * Regras:
+ * - Exibe simultaneamente imagens FIXAS (is_fixed=true) e as do MÊS atual.
+ * - Embaralha ao carregar.
+ * - Avança alternando fixa <-> mensal sempre que possível, para não repetir
+ *   o mesmo tipo seguidamente.
+ * - Pré-carrega apenas a próxima imagem (TVs fracas tipo Mi Stick).
+ * - Crossfade de 1200ms.
  */
 export function MarketingImageSlideshow({
   unitName,
   isIdle,
-  imageDurationMs = 22000,
+  imageDurationMs = 30000,
 }: MarketingImageSlideshowProps) {
   const [images, setImages] = useState<MarketingImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [previousIndex, setPreviousIndex] = useState<number | null>(null);
-  const [fadeProgress, setFadeProgress] = useState(1); // 0 = recém-trocado, 1 = totalmente exibido
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [fadeProgress, setFadeProgress] = useState(1);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const imagesRef = useRef<MarketingImage[]>([]);
+  const currentIndexRef = useRef(0);
+
+  useEffect(() => { imagesRef.current = images; }, [images]);
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
 
   const preloadImage = (image: MarketingImage) => new Promise<MarketingImage | null>((resolve) => {
     const img = new Image();
     img.onload = async () => {
-      try {
-        if (img.decode) await img.decode();
-      } catch {
-        // Alguns navegadores antigos podem falhar no decode mesmo com a imagem carregada.
-      }
+      try { if (img.decode) await img.decode(); } catch {}
       resolve(image);
     };
     img.onerror = () => resolve(null);
     img.src = image.image_url;
   });
 
-  // Carrega as imagens do mês atual da unidade
+  // Carrega imagens (fixas + mês atual) da unidade
   useEffect(() => {
     if (!unitName) return;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
 
-    const applyShuffle = (data: MarketingImage[]) => {
-      // Sempre embaralha aleatoriamente a cada carregamento
-      return [...data].sort(() => Math.random() - 0.5);
-    };
+    const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
     const loadImages = async (uName: string) => {
-      const month = new Date().getMonth() + 1; // 1-12
+      const month = new Date().getMonth() + 1;
       const { data, error } = await supabase
         .from('marketing_images')
-        .select('id, image_url, display_order')
+        .select('id, image_url, display_order, is_fixed, month')
         .eq('unit_name', uName)
-        .eq('month', month)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .or(`is_fixed.eq.true,month.eq.${month}`);
 
       if (error) {
         console.error('[MarketingImageSlideshow] load error:', error);
         return;
       }
+      if (cancelled) return;
+
+      const raw = (data || []) as MarketingImage[];
+      // Filtra: fixas OU (não-fixa do mês atual)
+      const filtered = raw.filter(i => i.is_fixed || i.month === month);
+      const ordered = shuffle(filtered);
+
+      // Pré-carrega só a primeira; demais carregam sob demanda
+      const first = ordered[0] ? await preloadImage(ordered[0]) : null;
+      if (cancelled) return;
+
+      // Remove imagens que falharam no preload inicial
+      const valid = first ? ordered : ordered.slice(1);
       console.log('[MarketingImageSlideshow] loaded', {
-        unitName: uName, month, count: data?.length || 0,
+        unitName: uName, month, count: valid.length,
+        fixed: valid.filter(i => i.is_fixed).length,
+        monthly: valid.filter(i => !i.is_fixed).length,
       });
-      if (cancelled) return;
-      const ordered = applyShuffle(data || []);
-      const loaded = (await Promise.all(ordered.map(preloadImage))).filter(
-        (image): image is MarketingImage => image !== null
-      );
-      if (cancelled) return;
-      setImages(loaded);
+
+      setImages(valid);
       setCurrentIndex(0);
       setPreviousIndex(null);
       setFadeProgress(1);
     };
 
     const init = async () => {
-      // O painel pode passar o display_name (ex: "Pronto Atendimento...") mas
-      // o DB armazena o slug (ex: "pa_pedro_jose"). Resolvemos via units.
       let resolvedUnitName = unitName;
       const { data: unitRow } = await supabase
         .from('units')
         .select('name')
         .or(`name.eq.${unitName},display_name.eq.${unitName}`)
         .maybeSingle();
-
       if (unitRow?.name) resolvedUnitName = unitRow.name;
-      console.log('[MarketingImageSlideshow] resolved unit', {
-        input: unitName, resolved: resolvedUnitName,
-      });
 
       await loadImages(resolvedUnitName);
 
@@ -118,35 +126,50 @@ export function MarketingImageSlideshow({
     };
 
     init();
-
     return () => {
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
   }, [unitName]);
 
-  // Avança a imagem em intervalos
-  useEffect(() => {
-    if (!isIdle || images.length <= 1) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
+  // Escolhe próximo índice alternando fixa<->mensal quando ambos existem
+  const pickNextIndex = (curr: number): number => {
+    const list = imagesRef.current;
+    if (list.length <= 1) return 0;
+    const hasFixed = list.some(i => i.is_fixed);
+    const hasMonthly = list.some(i => !i.is_fixed);
+    if (!hasFixed || !hasMonthly) {
+      return (curr + 1) % list.length;
     }
+    const currentIsFixed = list[curr]?.is_fixed;
+    // Procura próximo do tipo oposto, começando após curr
+    for (let off = 1; off <= list.length; off++) {
+      const idx = (curr + off) % list.length;
+      if (list[idx].is_fixed !== currentIsFixed) return idx;
+    }
+    return (curr + 1) % list.length;
+  };
 
-    timerRef.current = setInterval(() => {
+  // Avança em intervalos, pré-carregando a próxima
+  useEffect(() => {
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+    if (!isIdle || images.length <= 1) return;
+
+    const tick = async () => {
+      const next = pickNextIndex(currentIndexRef.current);
+      const nextImg = imagesRef.current[next];
+      if (nextImg) await preloadImage(nextImg);
       setCurrentIndex((prev) => {
         setPreviousIndex(prev);
-        return (prev + 1) % images.length;
+        return next;
       });
-    }, imageDurationMs);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setTimeout(tick, imageDurationMs);
     };
+
+    timerRef.current = setTimeout(tick, imageDurationMs);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [isIdle, images.length, imageDurationMs]);
 
-  // Dispara o crossfade apenas quando o índice realmente muda.
-  // useLayoutEffect garante que opacity=0 é aplicada ANTES da pintura,
-  // evitando o flash/escurecimento entre imagens.
   useLayoutEffect(() => {
     if (previousIndex === null) return;
     setFadeProgress(0);
@@ -157,25 +180,20 @@ export function MarketingImageSlideshow({
   }, [currentIndex, previousIndex]);
 
   const handleImageError = (failedId: string) => {
-    setImages((currentImages) => {
-      if (currentImages.length <= 1) return currentImages;
-      const failedIndex = currentImages.findIndex((image) => image.id === failedId);
-      const nextImages = currentImages.filter((image) => image.id !== failedId);
+    setImages((curr) => {
+      if (curr.length <= 1) return curr;
+      const failedIndex = curr.findIndex((image) => image.id === failedId);
+      const next = curr.filter((image) => image.id !== failedId);
       if (failedIndex >= 0 && failedIndex <= currentIndex) {
-        setCurrentIndex((index) => Math.max(0, Math.min(index - 1, nextImages.length - 1)));
+        setCurrentIndex((index) => Math.max(0, Math.min(index - 1, next.length - 1)));
       }
       setPreviousIndex(null);
       setFadeProgress(1);
-      return nextImages;
+      return next;
     });
   };
 
-  if (!isIdle || images.length === 0) {
-    if (import.meta.env.DEV) {
-      console.log('[MarketingImageSlideshow] hidden', { isIdle, count: images.length, unitName });
-    }
-    return null;
-  }
+  if (!isIdle || images.length === 0) return null;
 
   const currentImg = images[currentIndex];
   const prevImg = previousIndex !== null ? images[previousIndex] : null;
