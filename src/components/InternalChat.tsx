@@ -220,7 +220,7 @@ export function InternalChat({ station }: InternalChatProps) {
     return () => {
       supabase.removeChannel(presenceChannel);
     };
-  }, [unitName, station]);
+  }, [unitName, station, hasEverOpened]);
 
   const playNotificationSound = (senderStation: string) => {
     try {
