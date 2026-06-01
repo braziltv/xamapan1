@@ -1879,18 +1879,34 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
 
-  // Generate 3 random announcements per hour (spread across the hour)
+  // Programação FIXA de anúncios horários (3 horários exatos por hora, 06h-21h).
+  // Cada slot dispara `playHourAnnouncement(hour, minute)`, que fala a hora cheia
+  // + os minutos exatos via áudios cacheados (h_XX.mp3 + m_XX.mp3 + minutos.mp3).
+  const FIXED_HOUR_SCHEDULE: Record<number, number[]> = {
+    6:  [2, 21, 43],
+    7:  [5, 24, 46],
+    8:  [8, 27, 49],
+    9:  [11, 30, 52],
+    10: [14, 33, 55],
+    11: [17, 36, 58],
+    12: [1, 20, 42],
+    13: [4, 23, 45],
+    14: [7, 26, 48],
+    15: [10, 29, 51],
+    16: [13, 32, 54],
+    17: [16, 35, 57],
+    18: [19, 38, 50],
+    19: [3, 22, 44],
+    20: [6, 25, 47],
+    21: [9, 28, 53],
+  };
+
   const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    // Dividir a hora em 3 blocos de 20 minutos e escolher 1 minuto aleatório em cada bloco
-    // Bloco 1: minutos 0-19, Bloco 2: minutos 20-39, Bloco 3: minutos 40-59
-    const block1 = Math.floor(Math.random() * 20);        // 0-19
-    const block2 = 20 + Math.floor(Math.random() * 20);   // 20-39
-    const block3 = 40 + Math.floor(Math.random() * 20);   // 40-59
-    
-    const announcements = [block1, block2, block3].sort((a, b) => a - b);
-    console.log(`Hora ${hour}: anúncios agendados nos minutos ${announcements.join(', ')}`);
-    return announcements;
+    const slots = FIXED_HOUR_SCHEDULE[hour] || [];
+    console.log(`Hora ${hour}: anúncios fixos nos minutos ${slots.join(', ')}`);
+    return [...slots];
   }, []);
+
 
   // Expose test functions on window for manual testing
   useEffect(() => {
