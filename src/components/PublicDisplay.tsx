@@ -1901,50 +1901,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     21: [9, 28, 53],
   };
 
-  // Persistência dos slots já tocados (por unidade, por dia) para sobreviver a refresh.
-  const playedSlotsStorageKey = useCallback((date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `hourAnnouncements:${unitName || 'default'}:${y}-${m}-${d}`;
-  }, [unitName]);
-
-  const loadPlayedSlots = useCallback((date: Date): Set<string> => {
-    try {
-      const raw = localStorage.getItem(playedSlotsStorageKey(date));
-      if (!raw) return new Set();
-      const arr = JSON.parse(raw);
-      return new Set(Array.isArray(arr) ? arr : []);
-    } catch {
-      return new Set();
-    }
-  }, [playedSlotsStorageKey]);
-
-  const savePlayedSlot = useCallback((date: Date, hour: number, minute: number) => {
-    try {
-      const key = playedSlotsStorageKey(date);
-      const current = loadPlayedSlots(date);
-      current.add(`${hour}:${minute}`);
-      localStorage.setItem(key, JSON.stringify([...current]));
-      // Limpeza: remover chaves de dias anteriores desta unidade
-      const prefix = `hourAnnouncements:${unitName || 'default'}:`;
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith(prefix) && k !== key) localStorage.removeItem(k);
-      }
-    } catch {
-      // ignore
-    }
-  }, [playedSlotsStorageKey, loadPlayedSlots, unitName]);
-
-  const generateRandomAnnouncements = useCallback((hour: number, date?: Date): number[] => {
+  const generateRandomAnnouncements = useCallback((hour: number): number[] => {
     const slots = FIXED_HOUR_SCHEDULE[hour] || [];
-    const played = loadPlayedSlots(date || new Date());
-    const remaining = slots.filter((m) => !played.has(`${hour}:${m}`));
-    const playedNow = slots.filter((m) => played.has(`${hour}:${m}`));
-    console.log(`Hora ${hour}: slots ${slots.join(', ')} | já tocados: ${playedNow.join(', ') || 'nenhum'} | restantes: ${remaining.join(', ') || 'nenhum'}`);
-    return remaining;
-  }, [loadPlayedSlots]);
+    console.log(`Hora ${hour}: anúncios fixos nos minutos ${slots.join(', ')}`);
+    return [...slots];
+  }, []);
 
 
   // Expose test functions on window for manual testing
@@ -2039,10 +2000,10 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return; // Não anunciar durante horário de silêncio
     }
 
-    // Regenerar agendamento quando mudar de hora (filtrando slots já tocados hoje)
+    // Regenerar agendamento quando mudar de hora
     if (currentScheduleHourRef.current !== hour) {
       currentScheduleHourRef.current = hour;
-      scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour, currentTime);
+      scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour);
     }
 
     // Verificar se é momento de anunciar
@@ -2053,9 +2014,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
       lastTimeAnnouncementRef.current = now;
 
-      // Remover este minuto do agendamento e persistir como tocado (sobrevive a refresh)
+      // Remover este minuto do agendamento para não repetir
       scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter((m) => m !== minute);
-      savePlayedSlot(currentTime, hour, minute);
 
       // Pequeno delay para evitar conflitos com outros áudios
       setTimeout(() => {
@@ -2064,7 +2024,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements, announcingType, savePlayedSlot]);
+  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {
