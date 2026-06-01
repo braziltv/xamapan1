@@ -66,6 +66,9 @@ const COMMON_EMOJIS = [
 
 export function InternalChat({ station }: InternalChatProps) {
   const [isOpen, setIsOpen] = useState(false);
+  // Lazy: only subscribe to Realtime channels after the user opens the chat
+  // at least once. Stations that never open keep zero idle Realtime traffic.
+  const [hasEverOpened, setHasEverOpened] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [recipient, setRecipient] = useState('todos');
@@ -78,6 +81,12 @@ export function InternalChat({ station }: InternalChatProps) {
   const presenceChannelRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';
+
+  const openChat = () => {
+    setHasEverOpened(true);
+    setIsOpen(true);
+    setUnreadCount(0);
+  };
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
