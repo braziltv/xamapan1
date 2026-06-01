@@ -30,7 +30,8 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
       if (error) throw error;
 
       // RPC returns a single-row table
-      const row: any = Array.isArray(data) ? data[0] : data;
+      const rows = (data ?? []) as any;
+      const row: any = Array.isArray(rows) ? rows[0] : rows;
       setStats({
         waitingCount: row?.waiting_count ?? 0,
         todayCalls: row?.today_calls ?? 0,
