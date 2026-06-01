@@ -531,8 +531,11 @@ export function InternalChat({ station }: InternalChatProps) {
       {/* Toggle Button */}
       <Button
         onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) setUnreadCount(0);
+          if (isOpen) {
+            setIsOpen(false);
+          } else {
+            openChat();
+          }
         }}
         className={`rounded-full w-12 h-12 shadow-lg ${STATION_COLORS[station]} hover:opacity-90`}
       >
