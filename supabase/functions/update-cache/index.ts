@@ -276,7 +276,27 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
+
+    // TTL throttle: skip refresh if both caches were updated < 30 min ago (unless force=true)
+    const TTL_MINUTES = 30;
+    const force = body.force === true;
+    if (!force) {
+      const cutoff = new Date(Date.now() - TTL_MINUTES * 60 * 1000).toISOString();
+      const [weatherFresh, newsFresh] = await Promise.all([
+        supabase.from('weather_cache').select('updated_at').gte('updated_at', cutoff).limit(1),
+        supabase.from('news_cache').select('created_at').gte('created_at', cutoff).limit(1),
+      ]);
+      const hasFreshWeather = (weatherFresh.data?.length ?? 0) > 0;
+      const hasFreshNews = (newsFresh.data?.length ?? 0) > 0;
+      if (hasFreshWeather && hasFreshNews) {
+        console.log(`Cache fresh (<${TTL_MINUTES}min). Skipping refresh.`);
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, reason: 'cache_fresh', ttl_minutes: TTL_MINUTES }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     console.log('Starting cache update...');
     console.log(`Total cities to process: ${cities.length}`);
     
