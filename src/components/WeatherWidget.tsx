@@ -328,6 +328,8 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const availableCities = Object.keys(weatherCache);
   const currentWeather = weatherCache[displayCity];
 
+  const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+
   const loadWeatherFromDB = useCallback(async () => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
@@ -335,7 +337,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     try {
       const { data, error } = await supabase
         .from('weather_cache')
-        .select('*');
+        .select('city_name, weather_data, updated_at');
 
       if (error) {
         console.error('Error loading weather cache:', error);
@@ -344,12 +346,25 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
 
       if (data && data.length > 0) {
         const newCache: Record<string, WeatherData> = {};
-        data.forEach((item: { city_name: string; weather_data: unknown }) => {
+        let newestUpdate = 0;
+        data.forEach((item: { city_name: string; weather_data: unknown; updated_at: string }) => {
           newCache[item.city_name] = item.weather_data as WeatherData;
+          const t = new Date(item.updated_at).getTime();
+          if (t > newestUpdate) newestUpdate = t;
         });
         setWeatherCache(newCache);
         setInitialLoading(false);
+
+        // Only trigger refresh if cache is older than TTL. Server also enforces a 2h throttle,
+        // so multiple TVs calling at the same time will be deduplicated server-side.
+        const ageMs = Date.now() - newestUpdate;
+        if (ageMs > CACHE_TTL_MS) {
+          supabase.functions.invoke('update-cache').catch(err =>
+            console.warn('update-cache invocation failed:', err)
+          );
+        }
       } else {
+        // Empty cache: trigger initial population and retry
         await supabase.functions.invoke('update-cache');
         setTimeout(() => {
           fetchingRef.current = false;
@@ -362,13 +377,14 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
     }
 
     fetchingRef.current = false;
-  }, []);
+  }, [CACHE_TTL_MS]);
 
   useEffect(() => {
     loadWeatherFromDB();
-    const interval = setInterval(loadWeatherFromDB, 5 * 60 * 1000);
+    // Re-check every 2h (server throttle aligned — redundant calls are no-ops)
+    const interval = setInterval(loadWeatherFromDB, CACHE_TTL_MS);
     return () => clearInterval(interval);
-  }, [loadWeatherFromDB]);
+  }, [loadWeatherFromDB, CACHE_TTL_MS]);
 
   const changeCityWithTransition = useCallback((newCity: string) => {
     setIsTransitioning(true);
