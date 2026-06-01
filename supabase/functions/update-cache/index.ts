@@ -277,8 +277,8 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // TTL throttle: skip refresh if both caches were updated < 30 min ago (unless force=true)
-    const TTL_MINUTES = 30;
+    // TTL throttle: skip refresh if both caches were updated < 2h ago (unless force=true)
+    const TTL_MINUTES = 120;
     const force = body.force === true;
     if (!force) {
       const cutoff = new Date(Date.now() - TTL_MINUTES * 60 * 1000).toISOString();
