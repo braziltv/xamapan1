@@ -1,17 +1,13 @@
 import { useCallback, useRef } from 'react';
 
-// Lista de todas as frases de destino que devem ser pré-cacheadas permanentemente
+// Apenas frases essenciais são pré-cacheadas no boot.
+// As demais são cacheadas sob demanda na 1ª chamada real (~60% menos requests no 1º login).
 const DESTINATION_PHRASES = [
   'Por favor, dirija-se à Triagem',
-  'Por favor, dirija-se à Sala de Eletrocardiograma',
-  'Por favor, dirija-se à Sala de Curativos',
-  'Por favor, dirija-se ao Raio X',
-  'Por favor, dirija-se à Enfermaria',
-  'Por favor, dirija-se ao Consultório 1',
-  'Por favor, dirija-se ao Consultório 2',
-  'Por favor, dirija-se ao Consultório Médico',
   'Por favor, dirija-se ao Consultório Médico 1',
   'Por favor, dirija-se ao Consultório Médico 2',
+  'Por favor, dirija-se à Sala de Medicação',
+  'Por favor, dirija-se ao Raio X',
 ];
 
 const PRECACHE_KEY = 'tts_phrases_precached_google';
