@@ -23,43 +23,18 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
 
   const fetchStats = async () => {
     try {
-      // Get waiting patients count
-      const { count: waitingCount } = await supabase
-        .from('patient_calls')
-        .select('*', { count: 'exact', head: true })
-        .eq('unit_name', unitName)
-        .eq('status', 'waiting');
+      const { data, error } = await supabase.rpc('get_header_stats' as never, {
+        target_unit: unitName,
+      } as never);
 
-      // Get today's calls count
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const { count: todayCalls } = await supabase
-        .from('call_history')
-        .select('*', { count: 'exact', head: true })
-        .eq('unit_name', unitName)
-        .gte('created_at', today.toISOString());
+      if (error) throw error;
 
-      // Calculate average wait time (simplified - based on waiting patients)
-      const { data: waitingPatients } = await supabase
-        .from('patient_calls')
-        .select('created_at')
-        .eq('unit_name', unitName)
-        .eq('status', 'waiting');
-
-      let avgWaitTime = 0;
-      if (waitingPatients && waitingPatients.length > 0) {
-        const now = new Date();
-        const totalMinutes = waitingPatients.reduce((acc, p) => {
-          const created = new Date(p.created_at);
-          return acc + Math.floor((now.getTime() - created.getTime()) / 60000);
-        }, 0);
-        avgWaitTime = Math.round(totalMinutes / waitingPatients.length);
-      }
-
+      // RPC returns a single-row table
+      const row = Array.isArray(data) ? data[0] : data;
       setStats({
-        waitingCount: waitingCount || 0,
-        todayCalls: todayCalls || 0,
-        avgWaitTime
+        waitingCount: row?.waiting_count ?? 0,
+        todayCalls: row?.today_calls ?? 0,
+        avgWaitTime: row?.avg_wait_time ?? 0,
       });
     } catch (error) {
       console.error('Error fetching header stats:', error);
@@ -70,19 +45,26 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
 
   useEffect(() => {
     fetchStats();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchStats, 30000);
-    
-    // Subscribe to realtime updates
+
+    // Refresh every 2 minutes (was 30s)
+    const interval = setInterval(fetchStats, 120000);
+
+    // Debounce realtime triggers so bursts collapse into a single RPC call
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const triggerFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetchStats, 1500);
+    };
+
     const channel = supabase
       .channel('header-stats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_calls' }, fetchStats)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_history' }, fetchStats)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_calls' }, triggerFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_history' }, triggerFetch)
       .subscribe();
 
     return () => {
       clearInterval(interval);
+      if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, [unitName]);
