@@ -426,38 +426,34 @@ export function useCallPanel() {
     };
   }, [unitName, refreshPatientsFromDB]);
 
-  // Save to localStorage whenever state changes
+  // Persist state to localStorage — consolidated + debounced (500ms).
+  // Bursts of state updates flush once, reducing synchronous I/O and jank.
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
-  }, [patients]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_TRIAGE, JSON.stringify(currentTriageCall));
-  }, [currentTriageCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_DOCTOR, JSON.stringify(currentDoctorCall));
-  }, [currentDoctorCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_ECG, JSON.stringify(currentEcgCall));
-  }, [currentEcgCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_CURATIVOS, JSON.stringify(currentCurativosCall));
-  }, [currentCurativosCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_RAIOX, JSON.stringify(currentRaioxCall));
-  }, [currentRaioxCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_ENFERMARIA, JSON.stringify(currentEnfermariaCall));
-  }, [currentEnfermariaCall]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
-  }, [history]);
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_TRIAGE, JSON.stringify(currentTriageCall));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_DOCTOR, JSON.stringify(currentDoctorCall));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_ECG, JSON.stringify(currentEcgCall));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_CURATIVOS, JSON.stringify(currentCurativosCall));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_RAIOX, JSON.stringify(currentRaioxCall));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_ENFERMARIA, JSON.stringify(currentEnfermariaCall));
+        localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+      } catch (err) {
+        console.error('Error persisting call panel state:', err);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [
+    patients,
+    currentTriageCall,
+    currentDoctorCall,
+    currentEcgCall,
+    currentCurativosCall,
+    currentRaioxCall,
+    currentEnfermariaCall,
+    history,
+  ]);
 
   const triggerCallEvent = useCallback((patient: Patient | { name: string }, caller: 'triage' | 'doctor' | 'ecg' | 'curativos' | 'raiox' | 'enfermaria', destination?: string) => {
     const callEvent = {

@@ -66,6 +66,9 @@ const COMMON_EMOJIS = [
 
 export function InternalChat({ station }: InternalChatProps) {
   const [isOpen, setIsOpen] = useState(false);
+  // Lazy: only subscribe to Realtime channels after the user opens the chat
+  // at least once. Stations that never open keep zero idle Realtime traffic.
+  const [hasEverOpened, setHasEverOpened] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [recipient, setRecipient] = useState('todos');
@@ -78,6 +81,12 @@ export function InternalChat({ station }: InternalChatProps) {
   const presenceChannelRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const unitName = localStorage.getItem('selectedUnitName') || '';
+
+  const openChat = () => {
+    setHasEverOpened(true);
+    setIsOpen(true);
+    setUnreadCount(0);
+  };
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -99,9 +108,9 @@ export function InternalChat({ station }: InternalChatProps) {
     }, 4000); // Disappears after 4 seconds
   };
 
-  // Load initial messages
+  // Load initial messages + realtime subscription — LAZY (only after first open)
   useEffect(() => {
-    if (!unitName) return;
+    if (!unitName || !hasEverOpened) return;
 
     const loadMessages = async () => {
       const { data, error } = await supabase
@@ -180,11 +189,11 @@ export function InternalChat({ station }: InternalChatProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [unitName, station]);
+  }, [unitName, station, hasEverOpened]);
 
-  // Presence channel for typing indicators
+  // Presence channel for typing indicators — LAZY (only after first open)
   useEffect(() => {
-    if (!unitName) return;
+    if (!unitName || !hasEverOpened) return;
 
     const presenceChannel = supabase.channel(`typing-${unitName}`);
     presenceChannelRef.current = presenceChannel;
@@ -211,7 +220,7 @@ export function InternalChat({ station }: InternalChatProps) {
     return () => {
       supabase.removeChannel(presenceChannel);
     };
-  }, [unitName, station]);
+  }, [unitName, station, hasEverOpened]);
 
   const playNotificationSound = (senderStation: string) => {
     try {
@@ -522,8 +531,11 @@ export function InternalChat({ station }: InternalChatProps) {
       {/* Toggle Button */}
       <Button
         onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) setUnreadCount(0);
+          if (isOpen) {
+            setIsOpen(false);
+          } else {
+            openChat();
+          }
         }}
         className={`rounded-full w-12 h-12 shadow-lg ${STATION_COLORS[station]} hover:opacity-90`}
       >

@@ -83,17 +83,11 @@ export function useInactivePatientCleanup(unitName: string) {
     }
   }, [unitName]);
 
-  // Run cleanup on mount and periodically
+  // Run cleanup ONCE on mount. Ongoing maintenance is handled by the
+  // `daily_retention_cleanup` cron, which eliminates the per-station 2-min DELETE loop.
   useEffect(() => {
     if (!unitName) return;
-
-    // Run immediately on mount
     cleanupInactivePatients();
-
-    // Set up periodic cleanup
-    const interval = setInterval(cleanupInactivePatients, CLEANUP_INTERVAL_MS);
-
-    return () => clearInterval(interval);
   }, [unitName, cleanupInactivePatients]);
 
   return { cleanupInactivePatients };
