@@ -189,11 +189,11 @@ export function InternalChat({ station }: InternalChatProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [unitName, station]);
+  }, [unitName, station, hasEverOpened]);
 
-  // Presence channel for typing indicators
+  // Presence channel for typing indicators — LAZY (only after first open)
   useEffect(() => {
-    if (!unitName) return;
+    if (!unitName || !hasEverOpened) return;
 
     const presenceChannel = supabase.channel(`typing-${unitName}`);
     presenceChannelRef.current = presenceChannel;
