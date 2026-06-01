@@ -1167,6 +1167,15 @@ export type Database = {
         Args: { days_to_keep?: number }
         Returns: number
       }
+      get_header_stats: {
+        Args: { target_unit: string }
+        Returns: {
+          avg_wait_time: number
+          today_calls: number
+          waiting_count: number
+          yesterday_calls: number
+        }[]
+      }
       get_user_unit_id: { Args: never; Returns: string }
       get_user_unit_name: { Args: never; Returns: string }
       has_operator_role: {
