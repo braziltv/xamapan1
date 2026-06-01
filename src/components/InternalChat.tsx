@@ -108,9 +108,9 @@ export function InternalChat({ station }: InternalChatProps) {
     }, 4000); // Disappears after 4 seconds
   };
 
-  // Load initial messages
+  // Load initial messages + realtime subscription — LAZY (only after first open)
   useEffect(() => {
-    if (!unitName) return;
+    if (!unitName || !hasEverOpened) return;
 
     const loadMessages = async () => {
       const { data, error } = await supabase
