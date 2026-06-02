@@ -2895,9 +2895,11 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       .subscribe((status) => {
         console.log('📡 Realtime subscription status:', status);
         if (status === 'SUBSCRIBED') {
+          realtimeHealthyRef.current = true;
           console.log('✅ Successfully subscribed to realtime updates for unit:', unitName);
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Channel error - will retry...');
+        } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED' || status === 'TIMED_OUT') {
+          realtimeHealthyRef.current = false;
+          console.error('❌ Realtime unhealthy (', status, ') - falling back to fast polling');
         }
       });
 
