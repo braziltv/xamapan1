@@ -2895,14 +2895,17 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       .subscribe((status) => {
         console.log('📡 Realtime subscription status:', status);
         if (status === 'SUBSCRIBED') {
+          realtimeHealthyRef.current = true;
           console.log('✅ Successfully subscribed to realtime updates for unit:', unitName);
         } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED' || status === 'TIMED_OUT') {
-          console.error('❌ Realtime unhealthy (', status, ')');
+          realtimeHealthyRef.current = false;
+          console.error('❌ Realtime unhealthy (', status, ') — polling will fallback to 3s');
         }
       });
 
     return () => {
       console.log('🔌 Cleaning up realtime subscription');
+      realtimeHealthyRef.current = false;
       supabase.removeChannel(channel);
     };
    }, [unitName]);
