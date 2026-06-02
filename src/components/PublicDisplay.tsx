@@ -2974,15 +2974,28 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     // kick once
     void poll();
 
-    // Poll every 5 seconds (increased from 2s to reduce load on TV browsers)
-    const interval = window.setInterval(() => {
-      if (isSpeakingRef.current) return;
-      void poll();
-    }, 5000);
+    // Adaptive cadence: 60s when realtime is SUBSCRIBED, 3s otherwise.
+    const HEALTHY_INTERVAL = 60000;
+    const FALLBACK_INTERVAL = 3000;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleNext = () => {
+      if (disposed) return;
+      const delay = realtimeHealthyRef.current ? HEALTHY_INTERVAL : FALLBACK_INTERVAL;
+      timeoutId = setTimeout(async () => {
+        if (disposed) return;
+        if (!isSpeakingRef.current) {
+          await poll();
+        }
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
 
     return () => {
       disposed = true;
-      window.clearInterval(interval);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [unitName, audioUnlocked, enqueueAnnouncement]);
 
