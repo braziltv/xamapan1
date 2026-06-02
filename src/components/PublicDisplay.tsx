@@ -2904,7 +2904,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     };
    }, [unitName]);
 
-  // Adaptive fallback polling: 60s when realtime is healthy, 3s when websocket dies.
+  // Fixed 3s polling for patient_calls (stable original behavior)
   useEffect(() => {
     if (!unitName || !audioUnlocked) return;
 
@@ -2965,31 +2965,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
-    // kick once
+    // kick once immediately
     void poll();
 
-    // Adaptive cadence: 60s when realtime is SUBSCRIBED, 3s otherwise.
-    const HEALTHY_INTERVAL = 60000;
-    const FALLBACK_INTERVAL = 3000;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleNext = () => {
-      if (disposed) return;
-      const delay = realtimeHealthyRef.current ? HEALTHY_INTERVAL : FALLBACK_INTERVAL;
-      timeoutId = setTimeout(async () => {
-        if (disposed) return;
-        if (!isSpeakingRef.current) {
-          await poll();
-        }
-        scheduleNext();
-      }, delay);
-    };
-
-    scheduleNext();
+    const intervalId = setInterval(() => {
+      if (!isSpeakingRef.current) {
+        void poll();
+      }
+    }, 3000);
 
     return () => {
       disposed = true;
-      if (timeoutId) clearTimeout(timeoutId);
+      clearInterval(intervalId);
     };
   }, [unitName, audioUnlocked, enqueueAnnouncement]);
 
