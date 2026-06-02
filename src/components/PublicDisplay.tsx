@@ -119,6 +119,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
+  // Adaptive polling: when Realtime is healthy, throttle GETs (~60s);
+  // when unhealthy (CHANNEL_ERROR/CLOSED/TIMED_OUT) fall back to 3s.
+  const realtimeHealthyRef = useRef(false);
 
   // Background color animation enabled, but dramatic overlays/flash effects disabled
   const ENABLE_BACKGROUND_ANIMATION = true;
