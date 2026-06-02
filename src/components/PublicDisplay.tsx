@@ -119,6 +119,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
+  // Adaptive polling: when Realtime is healthy, throttle GETs (~60s);
+  // when unhealthy (CHANNEL_ERROR/CLOSED/TIMED_OUT) fall back to 3s.
+  const realtimeHealthyRef = useRef(false);
 
   // Background color animation enabled, but dramatic overlays/flash effects disabled
   const ENABLE_BACKGROUND_ANIMATION = true;
@@ -2892,19 +2895,25 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       .subscribe((status) => {
         console.log('📡 Realtime subscription status:', status);
         if (status === 'SUBSCRIBED') {
+          realtimeHealthyRef.current = true;
           console.log('✅ Successfully subscribed to realtime updates for unit:', unitName);
         } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED' || status === 'TIMED_OUT') {
-          console.error('❌ Realtime unhealthy (', status, ')');
+          realtimeHealthyRef.current = false;
+          console.error('❌ Realtime unhealthy (', status, ') — polling will fallback to 3s');
         }
       });
 
     return () => {
       console.log('🔌 Cleaning up realtime subscription');
+      realtimeHealthyRef.current = false;
       supabase.removeChannel(channel);
     };
    }, [unitName]);
 
-  // Fixed 3s polling for patient_calls (stable original behavior)
+  // Adaptive polling for patient_calls (safe: fixed-interval scheduler, no
+  // setTimeout recursion). When Realtime is healthy we only GET every ~60s
+  // (safety net). When Realtime is unhealthy we fall back to 3s. The render
+  // path is unaffected — this effect never touches state on idle ticks.
   useEffect(() => {
     if (!unitName || !audioUnlocked) return;
 
@@ -2912,11 +2921,14 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     pollInitializedRef.current = false;
 
     let disposed = false;
+    const TICK_MS = 3000;
+    const HEALTHY_EVERY_N_TICKS = 20; // 20 * 3s = 60s safety net
+    let tickCount = 0;
 
     const poll = async () => {
       try {
-        console.log('🛰️ Polling patient_calls...', { unitName, pollInitialized: pollInitializedRef.current, processedCount: processedCallsRef.current.size });
-        
+        console.log('🛰️ Polling patient_calls...', { unitName, healthy: realtimeHealthyRef.current, pollInitialized: pollInitializedRef.current });
+
         const { data, error } = await supabase
           .from('patient_calls')
           .select('id, unit_name, call_type, patient_name, destination, status, created_at')
@@ -2932,25 +2944,20 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           return;
         }
 
-        console.log('🛰️ Poll result:', { count: data?.length || 0, calls: data?.map(c => ({ id: c.id.substring(0,8), name: c.patient_name, type: c.call_type })) });
-
         if (!data) return;
 
         // First run: track current actives without speaking (avoid replay after reload)
         if (!pollInitializedRef.current) {
           data.forEach((c) => processedCallsRef.current.add(c.id));
           pollInitializedRef.current = true;
-          console.log('🛰️ Poll initialized. Active calls tracked:', data.length, 'IDs:', data.map(c => c.id.substring(0,8)));
+          console.log('🛰️ Poll initialized. Active calls tracked:', data.length);
           return;
         }
 
         for (const call of data) {
-          const isProcessed = processedCallsRef.current.has(call.id);
-          if (isProcessed) continue;
+          if (processedCallsRef.current.has(call.id)) continue;
 
           console.log('🛰️ Poll detected NEW active call - ENQUEUE:', call.patient_name, call.call_type);
-
-          // Reset idle timer (anti-standby)
           window.dispatchEvent(new CustomEvent('patientCallActivity'));
 
           enqueueAnnouncement({
@@ -2965,14 +2972,15 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
-    // kick once immediately
+    // Always kick once immediately to seed pollInitializedRef and the queue
     void poll();
 
     const intervalId = setInterval(() => {
-      if (!isSpeakingRef.current) {
-        void poll();
-      }
-    }, 3000);
+      tickCount++;
+      if (isSpeakingRef.current) return;
+      const shouldPoll = !realtimeHealthyRef.current || tickCount % HEALTHY_EVERY_N_TICKS === 0;
+      if (shouldPoll) void poll();
+    }, TICK_MS);
 
     return () => {
       disposed = true;
