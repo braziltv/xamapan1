@@ -119,9 +119,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [historyItems, setHistoryItems] = useState<Array<{ id: string; name: string; type: string; time: Date }>>([]);
   const processedCallsRef = useRef<Set<string>>(new Set());
   const pollInitializedRef = useRef(false);
-  // Adaptive polling: if realtime is healthy we poll every 60s (safety net),
-  // otherwise fall back to 3s (TVs on Mi Stick / flaky websockets stay protected).
-  const realtimeHealthyRef = useRef(false);
 
   // Background color animation enabled, but dramatic overlays/flash effects disabled
   const ENABLE_BACKGROUND_ANIMATION = true;
@@ -2895,22 +2892,19 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       .subscribe((status) => {
         console.log('📡 Realtime subscription status:', status);
         if (status === 'SUBSCRIBED') {
-          realtimeHealthyRef.current = true;
           console.log('✅ Successfully subscribed to realtime updates for unit:', unitName);
         } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED' || status === 'TIMED_OUT') {
-          realtimeHealthyRef.current = false;
-          console.error('❌ Realtime unhealthy (', status, ') - falling back to fast polling');
+          console.error('❌ Realtime unhealthy (', status, ')');
         }
       });
 
     return () => {
       console.log('🔌 Cleaning up realtime subscription');
-      realtimeHealthyRef.current = false;
       supabase.removeChannel(channel);
     };
    }, [unitName]);
 
-  // Adaptive fallback polling: 60s when realtime is healthy, 3s when websocket dies.
+  // Fixed 3s polling for patient_calls (stable original behavior)
   useEffect(() => {
     if (!unitName || !audioUnlocked) return;
 
@@ -2971,31 +2965,18 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       }
     };
 
-    // kick once
+    // kick once immediately
     void poll();
 
-    // Adaptive cadence: 60s when realtime is SUBSCRIBED, 3s otherwise.
-    const HEALTHY_INTERVAL = 60000;
-    const FALLBACK_INTERVAL = 3000;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleNext = () => {
-      if (disposed) return;
-      const delay = realtimeHealthyRef.current ? HEALTHY_INTERVAL : FALLBACK_INTERVAL;
-      timeoutId = setTimeout(async () => {
-        if (disposed) return;
-        if (!isSpeakingRef.current) {
-          await poll();
-        }
-        scheduleNext();
-      }, delay);
-    };
-
-    scheduleNext();
+    const intervalId = setInterval(() => {
+      if (!isSpeakingRef.current) {
+        void poll();
+      }
+    }, 3000);
 
     return () => {
       disposed = true;
-      if (timeoutId) clearTimeout(timeoutId);
+      clearInterval(intervalId);
     };
   }, [unitName, audioUnlocked, enqueueAnnouncement]);
 
