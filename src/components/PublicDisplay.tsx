@@ -2905,11 +2905,12 @@ export function PublicDisplay(_props: PublicDisplayProps) {
 
     return () => {
       console.log('🔌 Cleaning up realtime subscription');
+      realtimeHealthyRef.current = false;
       supabase.removeChannel(channel);
     };
    }, [unitName]);
 
-  // Fallback polling: algumas TVs não mantêm realtime/websocket ativo; então buscamos chamadas ativas periodicamente
+  // Adaptive fallback polling: 60s when realtime is healthy, 3s when websocket dies.
   useEffect(() => {
     if (!unitName || !audioUnlocked) return;
 
