@@ -2013,8 +2013,9 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   }, [currentTime, playHourAnnouncement, audioUnlocked, scheduledAnnouncements, announcingType, playNotificationSound, playCachedAudio, speakWithGoogleTTS, releaseVoiceAnnouncementState]);
 
   // Announce time once per hour at minute 0 (quiet hours: 22h-06h)
+  // Não exige isSynced: relógio local é suficiente; sync via internet é melhoria opcional
   useEffect(() => {
-    if (!currentTime || !audioUnlocked || !isSynced) return;
+    if (!currentTime || !audioUnlocked) return;
 
     // Never overlap hour announcements with patient calls
     if (announcingType || isSpeakingRef.current) {
@@ -2056,7 +2057,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, isSynced, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
+  }, [currentTime, audioUnlocked, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {

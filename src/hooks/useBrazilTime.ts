@@ -50,8 +50,14 @@ export function useBrazilTime(updateInterval: number = 1000) {
         lastSyncTime = Date.now();
         setIsSynced(true);
         console.log(`Time synced from internet. Offset: ${offset}ms`);
+      } else {
+        // Falha de rede/CORS: usa relógio local mesmo assim para não bloquear
+        // funcionalidades que dependem de isSynced (ex.: anúncios de hora).
+        lastSyncTime = Date.now();
+        setIsSynced(true);
+        console.warn('Time sync failed; falling back to local clock.');
       }
-      
+
       syncInProgressRef.current = false;
     };
 
