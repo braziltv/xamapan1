@@ -1825,7 +1825,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     });
   }, []);
 
-  // Play hour announcement using pre-cached audio (concatenating hour + minute) - repeats 2x with notification before each
+  // Play hour announcement using pre-cached audio exactly once.
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
       console.log('Audio not unlocked, skipping hour announcement');
@@ -1839,45 +1839,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
 
     try {
-      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
+      isSpeakingRef.current = true;
+      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
 
-      // Repeat the announcement 2 times, each with notification sound before
-      for (let i = 0; i < 2; i++) {
-        // Abort if a patient call starts mid-way
-        if (announcingType || isSpeakingRef.current) {
-          console.log('Patient announcement started, aborting hour announcement');
-          return;
-        }
-
-        console.log(`Hour announcement iteration ${i + 1}/2`);
-
-        // Play distinct notification sound before hour announcement
-        await playTimeNotificationSound();
-
-        // Abort again after notification
-        if (announcingType || isSpeakingRef.current) {
-          console.log('Patient announcement started, aborting hour announcement after notification');
-          return;
-        }
-
-        const success = await playHourAudio(hour, minute);
-        if (success) {
-          console.log(`Hour announcement iteration ${i + 1} completed`);
-        } else {
-          console.warn(`Hour announcement iteration ${i + 1} failed`);
-        }
-
-        // Small pause between repetitions (only if not the last iteration)
-        if (i < 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
+      const success = await playHourAudio(hour, minute);
+      if (success) {
+        console.log('Hour announcement completed');
+      } else {
+        console.warn('Hour announcement failed');
       }
-
-      console.log('Hour announcement fully completed (2x)');
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
+    } finally {
+      isSpeakingRef.current = false;
     }
-  }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
+  }, [audioUnlocked, playHourAudio, announcingType]);
 
   // Programação DIÁRIA de anúncios horários (3 minutos por hora, 06h-21h).
   // Regenerada automaticamente à meia-noite, evitando repetir os minutos do dia anterior
