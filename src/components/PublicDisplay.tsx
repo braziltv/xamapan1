@@ -286,8 +286,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const lastTimeAnnouncementRef = useRef<number>(0);
-  const scheduledAnnouncementsRef = useRef<number[]>([]);
-  const currentScheduleHourRef = useRef<number>(-1);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
@@ -1775,55 +1773,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       console.error('Audio test failed:', error);
     }
   }, [playNotificationSound, speakWithGoogleTTS]);
-
-  // Play time notification sound (different from patient call notification - softer tone)
-  const playTimeNotificationSound = useCallback(() => {
-    console.log('playTimeNotificationSound called');
-    
-    return new Promise<void>((resolve) => {
-      try {
-        // Get volume from localStorage
-        const timeNotificationVolume = parseFloat(localStorage.getItem('volume-time-notification') || '1');
-        
-        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (!audioContextRef.current) audioContextRef.current = audioContext;
-        
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-        
-        // Create a softer, distinct chime for time announcements (two ascending tones)
-        const playTone = (frequency: number, startTime: number, duration: number) => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.type = 'sine'; // Softer sine wave instead of triangle
-          oscillator.frequency.value = frequency;
-          
-          // Gentle envelope with volume control
-          const maxGain = 0.3 * timeNotificationVolume;
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-          gainNode.gain.linearRampToValueAtTime(maxGain, audioContext.currentTime + startTime + 0.05);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.start(audioContext.currentTime + startTime);
-          oscillator.stop(audioContext.currentTime + startTime + duration);
-        };
-        
-        // Two soft ascending tones (G5 -> C6) - different from patient notification
-        playTone(784, 0, 0.3);      // G5
-        playTone(1047, 0.25, 0.4);  // C6
-        
-        setTimeout(resolve, 700);
-      } catch (e) {
-        console.warn('Failed to play time notification:', e);
-        resolve();
-      }
-    });
-  }, []);
 
   // Play hour announcement using pre-cached audio exactly once.
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
