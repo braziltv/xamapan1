@@ -1897,8 +1897,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return; // Não anunciar durante horário de silêncio
     }
 
-    // Verificar se é exatamente o início da hora
-    const shouldAnnounce = minute === 0 && second < 5;
+    // Verificar o início da hora com margem para TVs lentas ou chamada em andamento.
+    const shouldAnnounce = minute === 0 && second < 30;
     const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
     const minGapMs = 50 * 60 * 1000; // Garante 1 anúncio por hora
 
