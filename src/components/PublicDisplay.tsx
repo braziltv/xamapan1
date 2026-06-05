@@ -1855,67 +1855,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [audioUnlocked, playHourAudio, announcingType]);
 
-  // Programação DIÁRIA de anúncios horários (3 minutos por hora, 06h-21h).
-  // Regenerada automaticamente à meia-noite, evitando repetir os minutos do dia anterior
-  // (mesma hora). Persistida em localStorage para sobreviver a reloads.
-  const STORAGE_KEY = 'hour-schedule-daily';
-
-  const buildDailySchedule = useCallback((prev: Record<number, number[]> | null): Record<number, number[]> => {
-    const schedule: Record<number, number[]> = {};
-    // Divide cada hora em 3 janelas (0-19, 20-39, 40-59) para distribuir bem os anúncios.
-    const windows: Array<[number, number]> = [[0, 19], [20, 39], [40, 59]];
-    for (let h = 6; h <= 21; h++) {
-      const forbidden = new Set(prev?.[h] ?? []);
-      const picks: number[] = [];
-      for (const [lo, hi] of windows) {
-        const candidates: number[] = [];
-        for (let m = lo; m <= hi; m++) {
-          if (!forbidden.has(m) && !picks.includes(m)) candidates.push(m);
-        }
-        // Fallback caso (improvável) tudo esteja bloqueado nesta janela
-        const pool = candidates.length > 0
-          ? candidates
-          : Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).filter((m) => !picks.includes(m));
-        picks.push(pool[Math.floor(Math.random() * pool.length)]);
-      }
-      schedule[h] = picks.sort((a, b) => a - b);
-    }
-    return schedule;
-  }, []);
-
-  const getDailySchedule = useCallback((): Record<number, number[]> => {
-    const today = (currentTime ?? new Date()).toISOString().slice(0, 10);
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { date: string; schedule: Record<number, number[]>; previous?: Record<number, number[]> };
-        if (parsed.date === today && parsed.schedule) return parsed.schedule;
-        // Novo dia: gera evitando os minutos de ontem
-        const next = buildDailySchedule(parsed.schedule ?? null);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, schedule: next, previous: parsed.schedule }));
-        console.log(`[HourSchedule] Novo conjunto gerado para ${today}`, next);
-        return next;
-      }
-    } catch (e) {
-      console.error('[HourSchedule] Erro ao ler localStorage:', e);
-    }
-    const fresh = buildDailySchedule(null);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, schedule: fresh }));
-    } catch {}
-    console.log(`[HourSchedule] Conjunto inicial gerado para ${today}`, fresh);
-    return fresh;
-  }, [currentTime, buildDailySchedule]);
-
-  const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    const schedule = getDailySchedule();
-    const slots = schedule[hour] || [];
-    console.log(`Hora ${hour}: anúncios nos minutos ${slots.join(', ')}`);
-    return [...slots];
-  }, [getDailySchedule]);
-
-
-
   // Expose test functions on window for manual testing
   useEffect(() => {
     // Test hour announcement
