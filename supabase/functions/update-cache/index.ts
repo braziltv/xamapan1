@@ -277,25 +277,32 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // TTL throttle: skip refresh if both caches were updated < 2h ago (unless force=true)
-    const TTL_MINUTES = 120;
+    // TTL throttle separado (otimização):
+    //  - weather: 3h (clima muda devagar)
+    //  - news:    10min (manchetes frequentes)
+    const WEATHER_TTL_MIN = 180;
+    const NEWS_TTL_MIN = 10;
     const force = body.force === true;
+    let skipWeather = false;
+    let skipNews = false;
     if (!force) {
-      const cutoff = new Date(Date.now() - TTL_MINUTES * 60 * 1000).toISOString();
+      const weatherCutoff = new Date(Date.now() - WEATHER_TTL_MIN * 60 * 1000).toISOString();
+      const newsCutoff = new Date(Date.now() - NEWS_TTL_MIN * 60 * 1000).toISOString();
       const [weatherFresh, newsFresh] = await Promise.all([
-        supabase.from('weather_cache').select('updated_at').gte('updated_at', cutoff).limit(1),
-        supabase.from('news_cache').select('created_at').gte('created_at', cutoff).limit(1),
+        supabase.from('weather_cache').select('updated_at').gte('updated_at', weatherCutoff).limit(1),
+        supabase.from('news_cache').select('created_at').gte('created_at', newsCutoff).limit(1),
       ]);
-      const hasFreshWeather = (weatherFresh.data?.length ?? 0) > 0;
-      const hasFreshNews = (newsFresh.data?.length ?? 0) > 0;
-      if (hasFreshWeather && hasFreshNews) {
-        console.log(`Cache fresh (<${TTL_MINUTES}min). Skipping refresh.`);
+      skipWeather = (weatherFresh.data?.length ?? 0) > 0;
+      skipNews = (newsFresh.data?.length ?? 0) > 0;
+      if (skipWeather && skipNews) {
+        console.log(`Both caches fresh (weather<${WEATHER_TTL_MIN}min, news<${NEWS_TTL_MIN}min). Skipping.`);
         return new Response(
-          JSON.stringify({ success: true, skipped: true, reason: 'cache_fresh', ttl_minutes: TTL_MINUTES }),
+          JSON.stringify({ success: true, skipped: true, reason: 'cache_fresh' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
+
 
     console.log('Starting cache update...');
     console.log(`Total cities to process: ${cities.length}`);
