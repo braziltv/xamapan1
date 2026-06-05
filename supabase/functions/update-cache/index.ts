@@ -304,13 +304,15 @@ serve(async (req) => {
     }
 
 
-    console.log('Starting cache update...');
+    console.log(`Starting cache update... (skipWeather=${skipWeather}, skipNews=${skipNews})`);
     console.log(`Total cities to process: ${cities.length}`);
-    
+
     // Processar cidades em lotes menores para evitar timeout e rate limiting
     const BATCH_SIZE = 5;
     const DELAY_BETWEEN_BATCHES = 500; // 500ms entre lotes
     const allWeatherResults: Array<{ city_name: string; weather_data: any }> = [];
+
+    if (!skipWeather) {
     
     for (let i = 0; i < cities.length; i += BATCH_SIZE) {
       const batch = cities.slice(i, i + BATCH_SIZE);
