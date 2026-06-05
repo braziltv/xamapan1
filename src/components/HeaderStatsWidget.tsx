@@ -47,8 +47,8 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
   useEffect(() => {
     fetchStats();
 
-    // Refresh every 2 minutes (was 30s)
-    const interval = setInterval(fetchStats, 120000);
+    // Refresh every 5 minutes (otimização: era 2min). Realtime ainda atualiza ao receber eventos.
+    const interval = setInterval(fetchStats, 300000);
 
     // Debounce realtime triggers so bursts collapse into a single RPC call
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
