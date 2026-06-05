@@ -374,7 +374,11 @@ serve(async (req) => {
         console.error('Error cleaning up old cities:', cleanupError);
       }
     }
-    
+    } else {
+      console.log('Weather cache still fresh — skipping weather fetch.');
+    }
+
+    if (!skipNews) {
     // Buscar notícias de TODOS os feeds (não apenas alguns aleatórios)
     console.log(`Fetching news from all ${feeds.length} feeds...`);
     const newsPromises = feeds.map(feed => fetchNewsFromFeed(feed));
@@ -426,6 +430,9 @@ serve(async (req) => {
       } else {
         console.log(`News cache updated with ${shuffledNews.length} unique items from ${feeds.length} feeds`);
       }
+    }
+    } else {
+      console.log('News cache still fresh — skipping news fetch.');
     }
     
     return new Response(
