@@ -2809,8 +2809,8 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
               <p className="text-sm text-amber-600 font-medium mb-2">📋 Regras de Anúncio:</p>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• 3 anúncios por hora em horários aleatórios (mínimo 10 min entre eles)</li>
-                <li>• Cada anúncio repete 2x com som de notificação antes</li>
+                <li>• 1 anúncio por hora, exatamente no minuto 00</li>
+                <li>• Cada anúncio toca uma única vez com som de notificação antes</li>
                 <li>• Silêncio entre 22h e 6h (horário de descanso)</li>
                 <li>• Não fala "minutos" em hora cheia ou meia-hora</li>
               </ul>

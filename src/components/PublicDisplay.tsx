@@ -286,8 +286,6 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const lastTimeAnnouncementRef = useRef<number>(0);
-  const scheduledAnnouncementsRef = useRef<number[]>([]);
-  const currentScheduleHourRef = useRef<number>(-1);
   const [ttsError, setTtsError] = useState<TTSError | null>(null);
   const [pendingImmediateAnnouncement, setPendingImmediateAnnouncement] = useState<ScheduledAnnouncement | null>(null);
   const [showAnalogClock, setShowAnalogClock] = useState(false);
@@ -1776,56 +1774,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
   }, [playNotificationSound, speakWithGoogleTTS]);
 
-  // Play time notification sound (different from patient call notification - softer tone)
-  const playTimeNotificationSound = useCallback(() => {
-    console.log('playTimeNotificationSound called');
-    
-    return new Promise<void>((resolve) => {
-      try {
-        // Get volume from localStorage
-        const timeNotificationVolume = parseFloat(localStorage.getItem('volume-time-notification') || '1');
-        
-        const audioContext = audioContextRef.current || new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (!audioContextRef.current) audioContextRef.current = audioContext;
-        
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-        
-        // Create a softer, distinct chime for time announcements (two ascending tones)
-        const playTone = (frequency: number, startTime: number, duration: number) => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.type = 'sine'; // Softer sine wave instead of triangle
-          oscillator.frequency.value = frequency;
-          
-          // Gentle envelope with volume control
-          const maxGain = 0.3 * timeNotificationVolume;
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-          gainNode.gain.linearRampToValueAtTime(maxGain, audioContext.currentTime + startTime + 0.05);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.start(audioContext.currentTime + startTime);
-          oscillator.stop(audioContext.currentTime + startTime + duration);
-        };
-        
-        // Two soft ascending tones (G5 -> C6) - different from patient notification
-        playTone(784, 0, 0.3);      // G5
-        playTone(1047, 0.25, 0.4);  // C6
-        
-        setTimeout(resolve, 700);
-      } catch (e) {
-        console.warn('Failed to play time notification:', e);
-        resolve();
-      }
-    });
-  }, []);
-
-  // Play hour announcement using pre-cached audio (concatenating hour + minute) - repeats 2x with notification before each
+  // Play hour announcement using pre-cached audio exactly once.
   const playHourAnnouncement = useCallback(async (hour: number, minute: number) => {
     if (!audioUnlocked) {
       console.log('Audio not unlocked, skipping hour announcement');
@@ -1839,106 +1788,21 @@ export function PublicDisplay(_props: PublicDisplayProps) {
     }
 
     try {
-      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')} (will repeat 2x)`);
+      isSpeakingRef.current = true;
+      console.log(`Playing hour announcement for ${hour}:${minute.toString().padStart(2, '0')}`);
 
-      // Repeat the announcement 2 times, each with notification sound before
-      for (let i = 0; i < 2; i++) {
-        // Abort if a patient call starts mid-way
-        if (announcingType || isSpeakingRef.current) {
-          console.log('Patient announcement started, aborting hour announcement');
-          return;
-        }
-
-        console.log(`Hour announcement iteration ${i + 1}/2`);
-
-        // Play distinct notification sound before hour announcement
-        await playTimeNotificationSound();
-
-        // Abort again after notification
-        if (announcingType || isSpeakingRef.current) {
-          console.log('Patient announcement started, aborting hour announcement after notification');
-          return;
-        }
-
-        const success = await playHourAudio(hour, minute);
-        if (success) {
-          console.log(`Hour announcement iteration ${i + 1} completed`);
-        } else {
-          console.warn(`Hour announcement iteration ${i + 1} failed`);
-        }
-
-        // Small pause between repetitions (only if not the last iteration)
-        if (i < 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
+      const success = await playHourAudio(hour, minute);
+      if (success) {
+        console.log('Hour announcement completed');
+      } else {
+        console.warn('Hour announcement failed');
       }
-
-      console.log('Hour announcement fully completed (2x)');
     } catch (error) {
       console.error('Failed to play hour announcement:', error);
+    } finally {
+      isSpeakingRef.current = false;
     }
-  }, [audioUnlocked, playHourAudio, playTimeNotificationSound, announcingType]);
-
-  // Programação DIÁRIA de anúncios horários (3 minutos por hora, 06h-21h).
-  // Regenerada automaticamente à meia-noite, evitando repetir os minutos do dia anterior
-  // (mesma hora). Persistida em localStorage para sobreviver a reloads.
-  const STORAGE_KEY = 'hour-schedule-daily';
-
-  const buildDailySchedule = useCallback((prev: Record<number, number[]> | null): Record<number, number[]> => {
-    const schedule: Record<number, number[]> = {};
-    // Divide cada hora em 3 janelas (0-19, 20-39, 40-59) para distribuir bem os anúncios.
-    const windows: Array<[number, number]> = [[0, 19], [20, 39], [40, 59]];
-    for (let h = 6; h <= 21; h++) {
-      const forbidden = new Set(prev?.[h] ?? []);
-      const picks: number[] = [];
-      for (const [lo, hi] of windows) {
-        const candidates: number[] = [];
-        for (let m = lo; m <= hi; m++) {
-          if (!forbidden.has(m) && !picks.includes(m)) candidates.push(m);
-        }
-        // Fallback caso (improvável) tudo esteja bloqueado nesta janela
-        const pool = candidates.length > 0
-          ? candidates
-          : Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).filter((m) => !picks.includes(m));
-        picks.push(pool[Math.floor(Math.random() * pool.length)]);
-      }
-      schedule[h] = picks.sort((a, b) => a - b);
-    }
-    return schedule;
-  }, []);
-
-  const getDailySchedule = useCallback((): Record<number, number[]> => {
-    const today = (currentTime ?? new Date()).toISOString().slice(0, 10);
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { date: string; schedule: Record<number, number[]>; previous?: Record<number, number[]> };
-        if (parsed.date === today && parsed.schedule) return parsed.schedule;
-        // Novo dia: gera evitando os minutos de ontem
-        const next = buildDailySchedule(parsed.schedule ?? null);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, schedule: next, previous: parsed.schedule }));
-        console.log(`[HourSchedule] Novo conjunto gerado para ${today}`, next);
-        return next;
-      }
-    } catch (e) {
-      console.error('[HourSchedule] Erro ao ler localStorage:', e);
-    }
-    const fresh = buildDailySchedule(null);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, schedule: fresh }));
-    } catch {}
-    console.log(`[HourSchedule] Conjunto inicial gerado para ${today}`, fresh);
-    return fresh;
-  }, [currentTime, buildDailySchedule]);
-
-  const generateRandomAnnouncements = useCallback((hour: number): number[] => {
-    const schedule = getDailySchedule();
-    const slots = schedule[hour] || [];
-    console.log(`Hora ${hour}: anúncios nos minutos ${slots.join(', ')}`);
-    return [...slots];
-  }, [getDailySchedule]);
-
-
+  }, [audioUnlocked, playHourAudio, announcingType]);
 
   // Expose test functions on window for manual testing
   useEffect(() => {
@@ -2033,22 +1897,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return; // Não anunciar durante horário de silêncio
     }
 
-    // Regenerar agendamento quando mudar de hora
-    if (currentScheduleHourRef.current !== hour) {
-      currentScheduleHourRef.current = hour;
-      scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour);
-    }
-
-    // Verificar se é momento de anunciar
-    const shouldAnnounce = scheduledAnnouncementsRef.current.includes(minute) && second < 5;
+    // Verificar o início da hora com margem para TVs lentas ou chamada em andamento.
+    const shouldAnnounce = minute === 0 && second < 30;
     const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
-    const minGapMs = 5 * 60 * 1000; // 5 minutos em ms (permite 3 anúncios por hora)
+    const minGapMs = 50 * 60 * 1000; // Garante 1 anúncio por hora
 
     if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
       lastTimeAnnouncementRef.current = now;
-
-      // Remover este minuto do agendamento para não repetir
-      scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter((m) => m !== minute);
 
       // Pequeno delay para evitar conflitos com outros áudios
       setTimeout(() => {
@@ -2057,7 +1912,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
+  }, [currentTime, audioUnlocked, playHourAnnouncement, announcingType]);
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {
