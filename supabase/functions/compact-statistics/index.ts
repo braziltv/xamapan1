@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     // Call the compact function with 60 days retention
     const { data, error } = await supabase.rpc('compact_old_statistics', { 
-      days_to_keep: 60 
+      days_to_keep: 30 
     })
 
     if (error) {

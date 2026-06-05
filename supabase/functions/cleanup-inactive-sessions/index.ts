@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     }
 
     // Also mark very old sessions as inactive instead of deleting (for history)
-    const historyRetentionDays = 7
+    const historyRetentionDays = 3
     const historyCutoff = new Date(now.getTime() - historyRetentionDays * 24 * 60 * 60 * 1000)
     
     const { data: archivedSessions, error: archiveError } = await supabase

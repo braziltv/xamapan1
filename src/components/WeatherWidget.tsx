@@ -328,7 +328,7 @@ export function WeatherWidget({ currentTime: propTime, formatTime: propFormatTim
   const availableCities = Object.keys(weatherCache);
   const currentWeather = weatherCache[displayCity];
 
-  const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+  const CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 hours (otimização: era 2h)
 
   const loadWeatherFromDB = useCallback(async () => {
     if (fetchingRef.current) return;
