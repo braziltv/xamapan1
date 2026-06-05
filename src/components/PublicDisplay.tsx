@@ -1948,22 +1948,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       return; // Não anunciar durante horário de silêncio
     }
 
-    // Regenerar agendamento quando mudar de hora
-    if (currentScheduleHourRef.current !== hour) {
-      currentScheduleHourRef.current = hour;
-      scheduledAnnouncementsRef.current = generateRandomAnnouncements(hour);
-    }
-
-    // Verificar se é momento de anunciar
-    const shouldAnnounce = scheduledAnnouncementsRef.current.includes(minute) && second < 5;
+    // Verificar se é exatamente o início da hora
+    const shouldAnnounce = minute === 0 && second < 5;
     const timeSinceLastAnnouncement = now - lastTimeAnnouncementRef.current;
-    const minGapMs = 5 * 60 * 1000; // 5 minutos em ms (permite 3 anúncios por hora)
+    const minGapMs = 50 * 60 * 1000; // Garante 1 anúncio por hora
 
     if (shouldAnnounce && timeSinceLastAnnouncement >= minGapMs) {
       lastTimeAnnouncementRef.current = now;
-
-      // Remover este minuto do agendamento para não repetir
-      scheduledAnnouncementsRef.current = scheduledAnnouncementsRef.current.filter((m) => m !== minute);
 
       // Pequeno delay para evitar conflitos com outros áudios
       setTimeout(() => {
@@ -1972,7 +1963,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         playHourAnnouncement(hour, minute);
       }, 1000);
     }
-  }, [currentTime, audioUnlocked, playHourAnnouncement, generateRandomAnnouncements, announcingType]);
+  }, [currentTime, audioUnlocked, playHourAnnouncement, announcingType]);
 
   // Play scheduled voice announcements (from Marketing panel)
   useEffect(() => {
