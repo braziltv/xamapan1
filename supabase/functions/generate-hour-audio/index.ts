@@ -682,10 +682,48 @@ serve(async (req) => {
       }
     }
 
+    // Gerar áudios de saudação (bom dia / boa tarde / boa noite)
+    if (action === 'generate-greetings') {
+      const greetings: Array<{ key: string; text: string }> = [
+        { key: 'greeting_morning.mp3',   text: 'Bom dia.' },
+        { key: 'greeting_afternoon.mp3', text: 'Boa tarde.' },
+        { key: 'greeting_night.mp3',     text: 'Boa noite.' },
+      ];
+      const results = { success: 0, failed: 0, errors: [] as string[] };
+
+      for (const g of greetings) {
+        try {
+          const audioBuffer = await generateAudioWithGoogle(g.text);
+          const { error: uploadError } = await supabase.storage
+            .from('tts-cache')
+            .upload(`time/${g.key}`, audioBuffer, {
+              contentType: 'audio/mpeg',
+              upsert: true, cacheControl: '31536000',
+            });
+          if (uploadError) {
+            results.failed++;
+            results.errors.push(`${g.key}: ${uploadError.message}`);
+          } else {
+            console.log(`Generated greeting: "${g.text}" -> ${g.key}`);
+            results.success++;
+          }
+          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          results.failed++;
+          results.errors.push(`${g.key}: ${error}`);
+        }
+      }
+
+      return new Response(JSON.stringify({ type: 'greetings', ...results }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: 'Invalid action' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
 
   } catch (error) {
     console.error('Error in generate-hour-audio:', error);
