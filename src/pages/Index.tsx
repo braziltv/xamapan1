@@ -19,7 +19,7 @@ import { AdminPasswordDialog, useAdminAuth } from '@/components/AdminPasswordDia
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble, Settings2 } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
-const SystemConfigPanel = lazy(() => import('@/components/admin/SystemConfigPanel'));
+const SystemConfigPanel = lazy(() => import('@/components/admin/SystemConfigPanel').then(m => ({ default: m.SystemConfigPanel })));
 import { QuickHelpPanel, QuickHelpPanelRef } from '@/components/QuickHelpPanel';
 
 const Index = () => {
