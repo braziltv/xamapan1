@@ -162,9 +162,18 @@ export const useHourAudio = () => {
       
       console.log(`[useHourAudio] Iniciando anúncio de hora via cache: ${hour}h${minute.toString().padStart(2, '0')}min`);
 
-      // Buscar áudios do cache em paralelo (nomes: h_XX.mp3, m_XX.mp3)
+      // Determinar saudação baseada na hora
+      const greetingFile =
+        hour >= 6 && hour < 12 ? 'greeting_morning.mp3' :
+        hour >= 12 && hour < 18 ? 'greeting_afternoon.mp3' :
+        'greeting_night.mp3';
+
+      // Buscar áudios do cache em paralelo
       const hourFileName = `h_${hour.toString().padStart(2, '0')}.mp3`;
-      const fetchPromises: Promise<ArrayBuffer>[] = [fetchCachedAudio(hourFileName)];
+      const fetchPromises: Promise<ArrayBuffer>[] = [
+        fetchCachedAudio(greetingFile),
+        fetchCachedAudio(hourFileName),
+      ];
       
       if (minute > 0) {
         const minuteFileName = `m_${minute.toString().padStart(2, '0')}.mp3`;
@@ -173,25 +182,31 @@ export const useHourAudio = () => {
       }
       
       const audioBuffers = await Promise.all(fetchPromises);
-      const hourBuffer = audioBuffers[0];
-      const minuteBuffer = minute > 0 ? audioBuffers[1] : null;
-      const minutosBuffer = minute > 0 ? audioBuffers[2] : null;
+      const greetingBuffer = audioBuffers[0];
+      const hourBuffer = audioBuffers[1];
+      const minuteBuffer = minute > 0 ? audioBuffers[2] : null;
+      const minutosBuffer = minute > 0 ? audioBuffers[3] : null;
 
       // 1. Som de notificação
       console.log('[useHourAudio] Passo 1: Som de notificação');
       await playHourNotificationSound(timeAnnouncementVolume);
       
-      // Pequena pausa após notificação
-      await wait(300);
+      // Pausa de 500ms conforme solicitado
+      await wait(500);
 
-      // 2. Áudio da hora
-      console.log('[useHourAudio] Passo 2: Áudio da hora');
+      // 2. Saudação (bom dia / boa tarde / boa noite)
+      console.log('[useHourAudio] Passo 2: Saudação');
+      await playAudioBuffer(greetingBuffer, timeAnnouncementVolume);
+      await wait(250);
+
+      // 3. Áudio da hora
+      console.log('[useHourAudio] Passo 3: Áudio da hora');
       await playAudioBuffer(hourBuffer, timeAnnouncementVolume);
       
-      // 3. Áudio do minuto (se necessário)
+      // 4. Áudio do minuto (se necessário)
       if (minuteBuffer && minutosBuffer && minute > 0) {
         await wait(200);
-        console.log('[useHourAudio] Passo 3: Áudio do minuto');
+        console.log('[useHourAudio] Passo 4: Áudio do minuto');
         await playAudioBuffer(minuteBuffer, timeAnnouncementVolume);
         
         // Palavra "minutos" (exceto para minute=30 que é "e meia")
@@ -203,6 +218,7 @@ export const useHourAudio = () => {
 
       console.log('[useHourAudio] Anúncio finalizado via cache');
       return true;
+
     } catch (error) {
       console.error('[useHourAudio] Erro ao reproduzir anúncio de hora:', error);
       
