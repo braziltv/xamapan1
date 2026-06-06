@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.cleanup-inactive-sessions]
 verify_jwt = false
+
+[functions.daily-cleanup-all]
+verify_jwt = false
