@@ -35,11 +35,7 @@ Deno.serve(async (req) => {
     const regularCutoff = new Date(now.getTime() - inactiveHours * 60 * 60 * 1000)
     const patientInactiveCutoff = new Date(now.getTime() - patientInactiveMinutes * 60 * 1000)
 
-    console.log(`Cleaning up sessions inactive since:`)
-    console.log(`- TV sessions: ${tvCutoff.toISOString()} (${inactiveMinutes} min)`)
-    console.log(`- Regular sessions: ${regularCutoff.toISOString()} (${inactiveHours} hours)`)
-    console.log(`- Inactive patients: ${patientInactiveCutoff.toISOString()} (${patientInactiveMinutes} min)`)
-    console.log(`- Today start (Brazil): ${todayStart.toISOString()}`)
+    // Verbose threshold logs removed to reduce edge log volume (otimização cloud)
 
     // ========== PATIENT CALLS CLEANUP ==========
     
@@ -56,7 +52,6 @@ Deno.serve(async (req) => {
     }
 
     const oldPatientsDeleted = deletedOldPatients?.length || 0
-    console.log(`Deleted ${oldPatientsDeleted} patient calls from previous days`)
 
     // 2. Delete inactive 'active' patient calls (>10 min without update)
     const { data: deletedInactiveActivePatients, error: inactiveActivePatientsError } = await supabase
@@ -71,7 +66,6 @@ Deno.serve(async (req) => {
     }
 
     const inactiveActivePatientsDeleted = deletedInactiveActivePatients?.length || 0
-    console.log(`Deleted ${inactiveActivePatientsDeleted} inactive 'active' patient calls (>10 min)`)
 
     // 3. Delete inactive 'waiting' patient calls (>10 min without being called)
     const { data: deletedInactiveWaitingPatients, error: inactiveWaitingPatientsError } = await supabase
@@ -86,7 +80,6 @@ Deno.serve(async (req) => {
     }
 
     const inactiveWaitingPatientsDeleted = deletedInactiveWaitingPatients?.length || 0
-    console.log(`Deleted ${inactiveWaitingPatientsDeleted} inactive 'waiting' patient calls (>10 min)`)
 
     const inactivePatientsDeleted = inactiveActivePatientsDeleted + inactiveWaitingPatientsDeleted
 

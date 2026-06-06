@@ -376,51 +376,39 @@ export function useCallPanel() {
       refreshPatientsFromDB();
     };
 
+    // Server-side filter por unit_name reduz egress (otimização cloud).
+    const unitFilter = `unit_name=eq.${unitName}`;
     const channel = supabase
       .channel(channelName)
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'patient_calls',
-        },
+        { event: 'INSERT', schema: 'public', table: 'patient_calls', filter: unitFilter },
         handleInsert
       )
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'patient_calls',
-        },
+        { event: 'UPDATE', schema: 'public', table: 'patient_calls', filter: unitFilter },
         handleUpdate
       )
       .on(
         'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'patient_calls',
-        },
+        { event: 'DELETE', schema: 'public', table: 'patient_calls', filter: unitFilter },
         handleDelete
       )
       .subscribe((status) => {
-        console.log('📡 Patient sync subscription status:', status);
         if (status === 'SUBSCRIBED') {
           console.log('✅ Patient sync subscription active for:', unitName);
-          // Refresh from database when subscription is active to ensure sync
           refreshPatientsFromDB();
         }
       });
 
-    // Periodic refresh every 800ms for faster real-time sync across modules
+    // Safety-net refresh a cada 30s (Realtime já dispara em mudanças reais).
+    // Antes era 800ms (4.500 queries/h/estação) — agora 120 queries/h/estação.
     const refreshInterval = setInterval(() => {
       refreshPatientsFromDB();
-    }, 800);
+    }, 30000);
 
     return () => {
-      console.log('🔌 Cleaning up patient sync subscription');
       supabase.removeChannel(channel);
       clearInterval(refreshInterval);
     };

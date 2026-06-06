@@ -2526,7 +2526,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .select('*')
         .gte('created_at', todayStartISO)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(20);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
@@ -2580,6 +2580,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const call = payload.new as any;
@@ -2701,6 +2702,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const historyItem = payload.new as any;
@@ -2726,6 +2728,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'DELETE',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const deletedItem = payload.old as any;

@@ -47,8 +47,7 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
   useEffect(() => {
     fetchStats();
 
-    // Refresh every 5 minutes (otimização: era 2min). Realtime ainda atualiza ao receber eventos.
-    const interval = setInterval(fetchStats, 300000);
+    // Polling removido — Realtime já dispara refresh em mudanças reais.
 
     // Debounce realtime triggers so bursts collapse into a single RPC call
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -58,13 +57,12 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
     };
 
     const channel = supabase
-      .channel('header-stats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_calls' }, triggerFetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_history' }, triggerFetch)
+      .channel(`header-stats-${unitName}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_calls', filter: `unit_name=eq.${unitName}` }, triggerFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_history', filter: `unit_name=eq.${unitName}` }, triggerFetch)
       .subscribe();
 
     return () => {
-      clearInterval(interval);
       if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };

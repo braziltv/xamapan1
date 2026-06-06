@@ -21,8 +21,8 @@ interface SessionMetrics {
 const SESSION_KEY = 'user_session_id';
 const METRICS_KEY = 'session_metrics';
 const TV_MODE_KEY = 'session_is_tv_mode';
-const HEARTBEAT_INTERVAL = 15000; // 15 seconds for regular sessions
-const TV_HEARTBEAT_INTERVAL = 60000; // 60 seconds for TV mode
+const HEARTBEAT_INTERVAL = 60000; // 60s (otimização: era 15s — reduz 75% writes em user_sessions)
+const TV_HEARTBEAT_INTERVAL = 120000; // 120s para TV mode
 const IDLE_THRESHOLD = 60000; // 1 minute
 const ACTIVITY_THROTTLE = 5000; // 5 seconds
 
