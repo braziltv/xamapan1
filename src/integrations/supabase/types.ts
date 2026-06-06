@@ -74,6 +74,30 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          unit_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          unit_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          unit_name?: string | null
+        }
+        Relationships: []
+      }
       auth_operator_profiles: {
         Row: {
           created_at: string
@@ -1000,6 +1024,30 @@ export type Database = {
           },
         ]
       }
+      unit_counters: {
+        Row: {
+          today_calls: number
+          today_date: string
+          unit_name: string
+          updated_at: string
+          waiting_count: number
+        }
+        Insert: {
+          today_calls?: number
+          today_date?: string
+          unit_name: string
+          updated_at?: string
+          waiting_count?: number
+        }
+        Update: {
+          today_calls?: number
+          today_date?: string
+          unit_name?: string
+          updated_at?: string
+          waiting_count?: number
+        }
+        Relationships: []
+      }
       unit_settings: {
         Row: {
           commercial_phrase_1: string | null
@@ -1162,11 +1210,13 @@ export type Database = {
         Args: { target_date: string; target_unit: string }
         Returns: undefined
       }
+      cleanup_audit_events: { Args: never; Returns: number }
       cleanup_duplicate_patients: { Args: never; Returns: number }
       compact_old_statistics: {
         Args: { days_to_keep?: number }
         Returns: number
       }
+      ensure_unit_counter: { Args: { p_unit_name: string }; Returns: undefined }
       get_header_stats: {
         Args: { target_unit: string }
         Returns: {
