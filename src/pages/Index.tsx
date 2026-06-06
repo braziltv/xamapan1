@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
 import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { useAutoLogout } from '@/hooks/useAutoLogout';
@@ -19,7 +19,7 @@ import { AdminPasswordDialog, useAdminAuth } from '@/components/AdminPasswordDia
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Monitor, UserPlus, Activity, Stethoscope, BarChart3, LogOut, Heart, Bandage, Scan, BedDouble, Settings2 } from 'lucide-react';
 import { CustomAnnouncementButton } from '@/components/CustomAnnouncementButton';
-import { SystemConfigPanel } from '@/components/admin/SystemConfigPanel';
+const SystemConfigPanel = lazy(() => import('@/components/admin/SystemConfigPanel').then(m => ({ default: m.SystemConfigPanel })));
 import { QuickHelpPanel, QuickHelpPanelRef } from '@/components/QuickHelpPanel';
 
 const Index = () => {
@@ -584,7 +584,9 @@ const Index = () => {
         {/* Administrativo */}
         <TabsContent value="administrativo" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="container-responsive py-4 sm:py-6 lg:py-8">
-            <SystemConfigPanel />
+            <Suspense fallback={<div className="text-center py-12 text-muted-foreground">Carregando painel administrativo...</div>}>
+              <SystemConfigPanel />
+            </Suspense>
           </main>
         </TabsContent>
       </Tabs>

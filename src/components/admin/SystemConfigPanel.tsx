@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -11,10 +11,11 @@ import { DestinationsManager } from './DestinationsManager';
 import { OperatorsManager } from './OperatorsManager';
 import { TTSPhrasesManager } from './TTSPhrasesManager';
 import { StatisticsDashboard } from './StatisticsDashboard';
-import { SystemTestPanel } from './SystemTestPanel';
 import { TelegramManager } from './TelegramManager';
 import { DataStoragePanel } from './DataStoragePanel';
-import { MarketingPanel } from './MarketingPanel';
+
+const SystemTestPanel = lazy(() => import('./SystemTestPanel').then(m => ({ default: m.SystemTestPanel })));
+const MarketingPanel = lazy(() => import('./MarketingPanel').then(m => ({ default: m.MarketingPanel })));
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
@@ -207,7 +208,9 @@ export function SystemConfigPanel() {
 
         <TabsContent value="marketing">
           {selectedUnitId ? (
-            <MarketingPanel unitName={units.find(u => u.id === selectedUnitId)?.name || ''} />
+            <Suspense fallback={<Card><CardContent className="py-8 text-center text-muted-foreground">Carregando painel de marketing...</CardContent></Card>}>
+              <MarketingPanel unitName={units.find(u => u.id === selectedUnitId)?.name || ''} />
+            </Suspense>
           ) : (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
@@ -230,7 +233,9 @@ export function SystemConfigPanel() {
         </TabsContent>
 
         <TabsContent value="tests">
-          <SystemTestPanel />
+          <Suspense fallback={<Card><CardContent className="py-8 text-center text-muted-foreground">Carregando testes do sistema...</CardContent></Card>}>
+            <SystemTestPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

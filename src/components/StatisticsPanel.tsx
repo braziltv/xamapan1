@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Patient, CallHistory } from '@/types/patient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,12 +70,13 @@ import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
-import { MarketingPanel } from './MarketingPanel';
 import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 import { ActiveUsersPanel } from './ActiveUsersPanel';
 import { ErrorHistoryPanel } from './ErrorHistoryPanel';
 import { UptimeHistoryPanel } from './UptimeHistoryPanel';
-import { SystemConfigPanel } from './admin/SystemConfigPanel';
+
+const MarketingPanel = lazy(() => import('./MarketingPanel').then(m => ({ default: m.MarketingPanel })));
+const SystemConfigPanel = lazy(() => import('./admin/SystemConfigPanel').then(m => ({ default: m.SystemConfigPanel })));
 
 interface StatisticsPanelProps {
   patients: Patient[];
@@ -2717,7 +2718,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       </Card>
 
       {/* Marketing Panel */}
-      <MarketingPanel />
+      <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Carregando painel de marketing...</div>}>
+        <MarketingPanel />
+      </Suspense>
 
       {/* Dialog para Ver Todos os Nomes */}
       <Dialog open={showNamesDialog} onOpenChange={setShowNamesDialog}>
