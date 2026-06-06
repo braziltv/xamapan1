@@ -2526,7 +2526,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         .select('*')
         .gte('created_at', todayStartISO)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(20);
 
       if (unitName) {
         historyQuery = historyQuery.eq('unit_name', unitName);
