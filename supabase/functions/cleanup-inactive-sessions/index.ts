@@ -52,7 +52,6 @@ Deno.serve(async (req) => {
     }
 
     const oldPatientsDeleted = deletedOldPatients?.length || 0
-    console.log(`Deleted ${oldPatientsDeleted} patient calls from previous days`)
 
     // 2. Delete inactive 'active' patient calls (>10 min without update)
     const { data: deletedInactiveActivePatients, error: inactiveActivePatientsError } = await supabase
