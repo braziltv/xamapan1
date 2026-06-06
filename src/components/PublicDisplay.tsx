@@ -2580,6 +2580,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'patient_calls',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const call = payload.new as any;
