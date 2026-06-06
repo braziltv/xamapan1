@@ -2728,6 +2728,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'DELETE',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const deletedItem = payload.old as any;
