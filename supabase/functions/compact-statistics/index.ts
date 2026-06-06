@@ -29,11 +29,11 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('Starting automatic data compaction (keeping last 60 days)...')
+    console.log('Compacting data (retention: 14 days for call_history)...')
 
-    // Call the compact function with 60 days retention
+    // Reduced from 30 → 14 days (otimização cloud — statistics_daily preserva o agregado)
     const { data, error } = await supabase.rpc('compact_old_statistics', { 
-      days_to_keep: 30 
+      days_to_keep: 14 
     })
 
     if (error) {
