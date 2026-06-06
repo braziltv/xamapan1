@@ -80,7 +80,6 @@ Deno.serve(async (req) => {
     }
 
     const inactiveWaitingPatientsDeleted = deletedInactiveWaitingPatients?.length || 0
-    console.log(`Deleted ${inactiveWaitingPatientsDeleted} inactive 'waiting' patient calls (>10 min)`)
 
     const inactivePatientsDeleted = inactiveActivePatientsDeleted + inactiveWaitingPatientsDeleted
 
