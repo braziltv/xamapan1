@@ -208,7 +208,9 @@ export function SystemConfigPanel() {
 
         <TabsContent value="marketing">
           {selectedUnitId ? (
-            <MarketingPanel unitName={units.find(u => u.id === selectedUnitId)?.name || ''} />
+            <Suspense fallback={<Card><CardContent className="py-8 text-center text-muted-foreground">Carregando painel de marketing...</CardContent></Card>}>
+              <MarketingPanel unitName={units.find(u => u.id === selectedUnitId)?.name || ''} />
+            </Suspense>
           ) : (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
@@ -231,7 +233,9 @@ export function SystemConfigPanel() {
         </TabsContent>
 
         <TabsContent value="tests">
-          <SystemTestPanel />
+          <Suspense fallback={<Card><CardContent className="py-8 text-center text-muted-foreground">Carregando testes do sistema...</CardContent></Card>}>
+            <SystemTestPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>

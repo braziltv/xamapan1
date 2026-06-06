@@ -2718,7 +2718,9 @@ export function StatisticsPanel({ patients, history }: StatisticsPanelProps) {
       </Card>
 
       {/* Marketing Panel */}
-      <MarketingPanel />
+      <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Carregando painel de marketing...</div>}>
+        <MarketingPanel />
+      </Suspense>
 
       {/* Dialog para Ver Todos os Nomes */}
       <Dialog open={showNamesDialog} onOpenChange={setShowNamesDialog}>
