@@ -584,7 +584,9 @@ const Index = () => {
         {/* Administrativo */}
         <TabsContent value="administrativo" className="mt-0 flex-1 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
           <main className="container-responsive py-4 sm:py-6 lg:py-8">
-            <SystemConfigPanel />
+            <Suspense fallback={<div className="text-center py-12 text-muted-foreground">Carregando painel administrativo...</div>}>
+              <SystemConfigPanel />
+            </Suspense>
           </main>
         </TabsContent>
       </Tabs>
