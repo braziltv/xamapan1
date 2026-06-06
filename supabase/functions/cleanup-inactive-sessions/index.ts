@@ -35,11 +35,7 @@ Deno.serve(async (req) => {
     const regularCutoff = new Date(now.getTime() - inactiveHours * 60 * 60 * 1000)
     const patientInactiveCutoff = new Date(now.getTime() - patientInactiveMinutes * 60 * 1000)
 
-    console.log(`Cleaning up sessions inactive since:`)
-    console.log(`- TV sessions: ${tvCutoff.toISOString()} (${inactiveMinutes} min)`)
-    console.log(`- Regular sessions: ${regularCutoff.toISOString()} (${inactiveHours} hours)`)
-    console.log(`- Inactive patients: ${patientInactiveCutoff.toISOString()} (${patientInactiveMinutes} min)`)
-    console.log(`- Today start (Brazil): ${todayStart.toISOString()}`)
+    // Verbose threshold logs removed to reduce edge log volume (otimização cloud)
 
     // ========== PATIENT CALLS CLEANUP ==========
     
