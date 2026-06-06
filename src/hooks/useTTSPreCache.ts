@@ -12,6 +12,23 @@ const DESTINATION_PHRASES = [
 
 const PRECACHE_KEY = 'tts_phrases_precached_google';
 
+// Pré-cache só roda em horário comercial (07h-19h BRT) para economizar
+// quota TTS fora do expediente (TVs e estações ficam ligadas 24h).
+function isCommercialHourBRT(): boolean {
+  try {
+    const fmt = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      hour12: false,
+    });
+    const hour = parseInt(fmt.format(new Date()), 10);
+    return hour >= 7 && hour < 19;
+  } catch {
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19;
+  }
+}
+
 export function useTTSPreCache() {
   const isPreCachingRef = useRef(false);
 
@@ -94,6 +111,11 @@ export function useTTSPreCache() {
     const alreadyCached = localStorage.getItem(PRECACHE_KEY);
     if (alreadyCached) {
       console.log('Destination phrases already pre-cached (Google Cloud TTS)');
+      return;
+    }
+
+    if (!isCommercialHourBRT()) {
+      console.log('Pre-cache skipped: fora do horário comercial (07h-19h BRT)');
       return;
     }
 

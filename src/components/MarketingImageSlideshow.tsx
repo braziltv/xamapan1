@@ -203,12 +203,33 @@ export function MarketingImageSlideshow({
     willChange: 'opacity' as const,
   };
 
+  // #12 — srcset: usa Supabase Storage Image Transform para servir 720p/1080p/1440p.
+  // TVs antigas pegam só a resolução que cabe (egress até 70% menor).
+  const buildSrcSet = (url: string): { src: string; srcSet?: string; sizes?: string } => {
+    // Só transforma URLs do Supabase Storage (/object/public/)
+    const match = url.match(/^(https?:\/\/[^/]+)\/storage\/v1\/object\/public\/(.+)$/);
+    if (!match) return { src: url };
+    const [, origin, path] = match;
+    const make = (w: number) =>
+      `${origin}/storage/v1/render/image/public/${path}?width=${w}&resize=contain&quality=80`;
+    return {
+      src: make(1080),
+      srcSet: `${make(720)} 720w, ${make(1080)} 1080w, ${make(1440)} 1440w`,
+      sizes: '100vw',
+    };
+  };
+
+  const cur = buildSrcSet(currentImg.image_url);
+  const prev = prevImg ? buildSrcSet(prevImg.image_url) : null;
+
   return (
     <div className="fixed inset-0 z-[80] bg-black">
-      {prevImg && (
+      {prevImg && prev && (
         <img
           key={`prev-${previousIndex}`}
-          src={prevImg.image_url}
+          src={prev.src}
+          srcSet={prev.srcSet}
+          sizes={prev.sizes}
           alt=""
           className="absolute inset-0 w-full h-full object-contain"
           style={{ ...transitionStyle, opacity: 1 - fadeProgress }}
@@ -217,7 +238,9 @@ export function MarketingImageSlideshow({
       )}
       <img
         key={`cur-${currentIndex}`}
-        src={currentImg.image_url}
+        src={cur.src}
+        srcSet={cur.srcSet}
+        sizes={cur.sizes}
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
         style={{ ...transitionStyle, opacity: fadeProgress }}

@@ -50,6 +50,24 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Stage 6: cleanup audit_events (api_key_usage + system_test TTL)
+    try {
+      const stageStart = Date.now();
+      const res = await fetch(`${supabaseUrl}/rest/v1/rpc/cleanup_audit_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceKey}`,
+          'apikey': serviceKey,
+        },
+        body: '{}',
+      });
+      const data = await res.json().catch(() => null);
+      results['cleanup-audit-events'] = { ok: res.ok, status: res.status, ms: Date.now() - stageStart, deleted: data };
+    } catch (e) {
+      results['cleanup-audit-events'] = { ok: false, error: String(e) };
+    }
+
     return new Response(
       JSON.stringify({ success: true, totalMs: Date.now() - startedAt, stages: results, timestamp: new Date().toISOString() }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

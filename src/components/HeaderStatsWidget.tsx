@@ -47,23 +47,26 @@ export function HeaderStatsWidget({ unitName }: HeaderStatsWidgetProps) {
   useEffect(() => {
     fetchStats();
 
-    // Polling removido — Realtime já dispara refresh em mudanças reais.
-
-    // Debounce realtime triggers so bursts collapse into a single RPC call
+    // Realtime: assinar APENAS unit_counters (atualizada por triggers a partir
+    // de patient_calls/call_history). Reduz drasticamente o tráfego de eventos
+    // e evita recalcular count(*) em cada mudança.
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     const triggerFetch = () => {
       if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(fetchStats, 1500);
+      debounceTimer = setTimeout(fetchStats, 800);
     };
 
     const channel = supabase
       .channel(`header-stats-${unitName}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'patient_calls', filter: `unit_name=eq.${unitName}` }, triggerFetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'call_history', filter: `unit_name=eq.${unitName}` }, triggerFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'unit_counters', filter: `unit_name=eq.${unitName}` }, triggerFetch)
       .subscribe();
+
+    // Refresh leve a cada 60s para o avg_wait_time (ainda calculado on-the-fly)
+    const interval = setInterval(fetchStats, 60_000);
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [unitName]);
