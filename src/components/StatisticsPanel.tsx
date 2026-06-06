@@ -70,12 +70,13 @@ import autoTable from 'jspdf-autotable';
 import { useToast } from '@/hooks/use-toast';
 import { useHourAudio } from '@/hooks/useHourAudio';
 import { useBrazilTime } from '@/hooks/useBrazilTime';
-import { MarketingPanel } from './MarketingPanel';
 import { SystemMonitoringPanel } from './SystemMonitoringPanel';
 import { ActiveUsersPanel } from './ActiveUsersPanel';
 import { ErrorHistoryPanel } from './ErrorHistoryPanel';
 import { UptimeHistoryPanel } from './UptimeHistoryPanel';
-import { SystemConfigPanel } from './admin/SystemConfigPanel';
+
+const MarketingPanel = lazy(() => import('./MarketingPanel').then(m => ({ default: m.MarketingPanel })));
+const SystemConfigPanel = lazy(() => import('./admin/SystemConfigPanel').then(m => ({ default: m.SystemConfigPanel })));
 
 interface StatisticsPanelProps {
   patients: Patient[];

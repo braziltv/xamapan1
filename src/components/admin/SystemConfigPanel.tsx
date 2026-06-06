@@ -11,10 +11,11 @@ import { DestinationsManager } from './DestinationsManager';
 import { OperatorsManager } from './OperatorsManager';
 import { TTSPhrasesManager } from './TTSPhrasesManager';
 import { StatisticsDashboard } from './StatisticsDashboard';
-import { SystemTestPanel } from './SystemTestPanel';
 import { TelegramManager } from './TelegramManager';
 import { DataStoragePanel } from './DataStoragePanel';
-import { MarketingPanel } from './MarketingPanel';
+
+const SystemTestPanel = lazy(() => import('./SystemTestPanel').then(m => ({ default: m.SystemTestPanel })));
+const MarketingPanel = lazy(() => import('./MarketingPanel').then(m => ({ default: m.MarketingPanel })));
 import { ActiveUsersPanel } from '../ActiveUsersPanel';
 import { useUnits } from '@/hooks/useAdminData';
 import { useNavigate } from 'react-router-dom';
