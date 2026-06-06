@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useCallPanel } from '@/hooks/useCallPanel';
-import { useTTSPreCache } from '@/hooks/useTTSPreCache';
 import { useAutoLogout } from '@/hooks/useAutoLogout';
 import { useUserSession } from '@/hooks/useUserSession';
 import { useAutoHideCursor } from '@/hooks/useAutoHideCursor';
@@ -200,26 +199,11 @@ const Index = () => {
     updatePatientObservations,
   } = useCallPanel();
 
-  const { preCacheAllDestinationPhrases, preCachePatientName } = useTTSPreCache();
 
-  // Pré-cachear todas as frases de destino ao fazer login
-  useEffect(() => {
-    if (isLoggedIn) {
-      // Delay para não interferir com o carregamento da página
-      const timer = setTimeout(() => {
-        preCacheAllDestinationPhrases();
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoggedIn, preCacheAllDestinationPhrases]);
-
-  // Wrapper para addPatient que também pré-cacheia o nome
+  // Wrapper para addPatient que rastreia sessão
   const handleAddPatient = async (name: string, priority?: 'normal' | 'priority' | 'emergency'): Promise<{ isDuplicate: boolean }> => {
     const result = await addPatient(name, priority);
-    // Pré-cachear o nome em background (não bloqueia)
     if (!result.isDuplicate) {
-      preCachePatientName(name);
-      // Track registration in session
       incrementCounter('registrations_count');
     }
     return { isDuplicate: result.isDuplicate };
