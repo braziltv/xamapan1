@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(), 
+    react(),
     mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
@@ -18,4 +18,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  esbuild: mode === "production" ? { drop: ["console", "debugger"] } : undefined,
 }));
