@@ -2702,6 +2702,7 @@ export function PublicDisplay(_props: PublicDisplayProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'call_history',
+          filter: `unit_name=eq.${unitName}`,
         },
         (payload) => {
           const historyItem = payload.new as any;
