@@ -2476,10 +2476,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (processedCallsRef.current.has(item.id)) return;
       processedCallsRef.current.add(item.id);
 
+      // Reseta o timer de auto-reload a cada nova chamada anunciada
+      onCallMade();
+
       announcementQueueRef.current.push(item);
       processAnnouncementQueue();
     },
-    [processAnnouncementQueue]
+    [processAnnouncementQueue, onCallMade]
   );
 
   // Stop the flashing alert after exactly 10 seconds
