@@ -124,8 +124,8 @@ export function DoctorPanel({
   const [successAnimationData, setSuccessAnimationData] = useState<{ message: string; type: 'consultation' | 'withdrawal' | 'default' }>({ message: '', type: 'default' });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-reload desabilitado
-  // useInactivityReload();
+  // Recarrega após 15 min de inatividade do usuário
+  useInactivityReload();
   
   // Filter currentCall to only show if it belongs to this consultório
   const myCurrentCall = currentCall && currentCall.destination === currentConsultorioLabel ? currentCall : null;

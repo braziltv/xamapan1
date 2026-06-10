@@ -155,8 +155,8 @@ export function PatientRegistration({
   const [editingObservation, setEditingObservation] = useState<{ id: string; value: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-reload desabilitado
-  // useInactivityReload();
+  // Recarrega após 15 min de inatividade do usuário
+  useInactivityReload();
   const { playAddedSound } = usePatientAddedSound();
 
   const ACCENT_TIPS = [
