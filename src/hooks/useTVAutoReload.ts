@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const AUTO_RELOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
 
 /**
  * Hook para recarregar a TV automaticamente a cada 10 minutos de ociosidade
