@@ -2390,7 +2390,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
         setCurrentDoctorCall({ name, destination: location });
       }
       
-      // Auto-reload desabilitado
+      // Reseta timer de auto-reload da TV a cada chamada
+      onCallMade();
 
       const callType = caller === 'triage' ? 'triage' : 'doctor';
       setAnnouncingType(callType);
