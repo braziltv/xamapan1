@@ -54,7 +54,7 @@ export function HealthCrossIcon({ size = 48, className = '', style }: HealthCros
         <animate
           attributeName="stroke-dasharray"
           values="0,200;200,0"
-          dur="2s"
+          dur="1s"
           repeatCount="indefinite"
         />
       </path>
