@@ -11,7 +11,6 @@ export const FuturisticClock = memo(function FuturisticClock({ time, className =
 
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');
-  const seconds = time.getSeconds().toString().padStart(2, '0');
 
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
@@ -28,15 +27,6 @@ export const FuturisticClock = memo(function FuturisticClock({ time, className =
           }}
         >
           {hours}:{minutes}
-          <span 
-            className="text-amber-400"
-            style={{
-              fontWeight: 900,
-              textShadow: '0 0 15px rgba(251, 146, 60, 0.8), 0 0 30px rgba(251, 146, 60, 0.5)',
-            }}
-          >
-            :{seconds}
-          </span>
         </span>
       </div>
     </div>
