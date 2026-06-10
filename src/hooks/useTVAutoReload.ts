@@ -31,7 +31,7 @@ export function useTVAutoReload(enabled: boolean = true) {
     
     // Only reload if no calls for 10 minutes
     if (timeSinceLastCall >= AUTO_RELOAD_INTERVAL) {
-      console.log('⏰ 10 minutos sem chamadas. Recarregando TV...');
+      console.log('⏰ 15 minutos sem chamadas. Recarregando TV...');
       
       // Show notification before reload
       const notification = document.createElement('div');
