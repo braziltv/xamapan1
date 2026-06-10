@@ -102,8 +102,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
-  // Auto-reload desabilitado
-  // const { onCallMade } = useTVAutoReload(true);
+  // Auto-reload da TV após 15 min sem chamadas
+  const { onCallMade } = useTVAutoReload(true);
   
   // Get unit name for cleanup
   const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
