@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const AUTO_RELOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
+const AUTO_RELOAD_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 /**
  * Hook para recarregar a TV automaticamente a cada 10 minutos de ociosidade
@@ -31,7 +31,7 @@ export function useTVAutoReload(enabled: boolean = true) {
     
     // Only reload if no calls for 10 minutes
     if (timeSinceLastCall >= AUTO_RELOAD_INTERVAL) {
-      console.log('⏰ 10 minutos sem chamadas. Recarregando TV...');
+      console.log('⏰ 15 minutos sem chamadas. Recarregando TV...');
       
       // Show notification before reload
       const notification = document.createElement('div');
@@ -108,7 +108,7 @@ export function useTVAutoReload(enabled: boolean = true) {
   useEffect(() => {
     if (!enabled) return;
 
-    console.log('⏰ Auto-reload da TV configurado: recarrega após 10 minutos sem chamadas');
+    console.log('⏰ Auto-reload da TV configurado: recarrega após 15 minutos sem chamadas');
     lastCallTimeRef.current = new Date();
 
     // Start initial timeout

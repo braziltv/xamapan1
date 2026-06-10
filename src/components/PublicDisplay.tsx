@@ -102,8 +102,8 @@ export function PublicDisplay(_props: PublicDisplayProps) {
   // Previne modo de espera da TV Android
   usePreventSleep(true);
   
-  // Auto-reload desabilitado
-  // const { onCallMade } = useTVAutoReload(true);
+  // Auto-reload da TV após 15 min sem chamadas (apenas TV/PublicDisplay)
+  const { onCallMade } = useTVAutoReload(true);
   
   // Get unit name for cleanup
   const cleanupUnitName = localStorage.getItem('selectedUnitName') || localStorage.getItem('tv_permanent_unit_name') || '';
@@ -2476,10 +2476,13 @@ export function PublicDisplay(_props: PublicDisplayProps) {
       if (processedCallsRef.current.has(item.id)) return;
       processedCallsRef.current.add(item.id);
 
+      // Reseta o timer de auto-reload a cada nova chamada anunciada
+      onCallMade();
+
       announcementQueueRef.current.push(item);
       processAnnouncementQueue();
     },
-    [processAnnouncementQueue]
+    [processAnnouncementQueue, onCallMade]
   );
 
   // Stop the flashing alert after exactly 10 seconds
