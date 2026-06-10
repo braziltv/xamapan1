@@ -108,7 +108,7 @@ export function useTVAutoReload(enabled: boolean = true) {
   useEffect(() => {
     if (!enabled) return;
 
-    console.log('⏰ Auto-reload da TV configurado: recarrega após 10 minutos sem chamadas');
+    console.log('⏰ Auto-reload da TV configurado: recarrega após 15 minutos sem chamadas');
     lastCallTimeRef.current = new Date();
 
     // Start initial timeout
